@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { BarChart3, Settings as SettingsIcon, Timer as TimerIcon, Clock } from 'lucide-react'
+import { BarChart3, Settings as SettingsIcon, Timer as TimerIcon } from 'lucide-react'
 import { useSettings } from './hooks/useSettings'
 import { useLocalState } from './hooks/useLocalState'
 import { useSessions } from './hooks/useSessions'
@@ -119,13 +119,6 @@ export default function App() {
           />
         )}
       </main>
-
-      <footer className="flex w-full items-center justify-center gap-4 pb-2 text-xs text-muted">
-        <span className="flex items-center gap-1">
-          <Clock size={12} /> 100% offline
-        </span>
-        <span>Daten lokal auf diesem Gerät</span>
-      </footer>
 
       {updateAvailable && (
         <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-sm shadow-lg">

@@ -140,10 +140,10 @@ export function Timer({
         <button
           type="button"
           onClick={onToggle}
-          className="h-16 w-16 rounded-full bg-accent text-on-accent shadow-lg shadow-accent/25 transition-all hover:bg-accent-strong active:scale-95"
+          className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-on-accent shadow-lg shadow-accent/25 transition-all hover:bg-accent-strong active:scale-95"
           title={running ? 'Pause (Leertaste)' : 'Start (Leertaste)'}
         >
-          {running ? <Pause size={26} /> : <Play size={26} className="ml-1" />}
+          {running ? <Pause size={26} /> : <Play size={26} className="translate-x-0.5" />}
         </button>
         <button type="button" onClick={onReset} title="Reset (R)" className="btn-ghost">
           <RotateCcw size={18} />
