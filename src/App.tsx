@@ -11,6 +11,8 @@ import { useTheme } from './hooks/useTheme'
 import { useServiceWorker } from './hooks/useServiceWorker'
 import { usePictureInPicture } from './hooks/usePictureInPicture'
 import { useTodos } from './hooks/useTodos'
+import { useAuth } from './hooks/useAuth'
+import { useSync } from './hooks/useSync'
 import { useTranslation } from './hooks/useTranslation'
 import { addSession, updateSessionNotes } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
@@ -46,15 +48,17 @@ export default function App() {
   const [task, setTask] = useLocalState(STORAGE_KEYS.task, '')
   const [tag, setTag] = useLocalState(STORAGE_KEYS.tag, '')
   const [tab, setTab] = useState<Tab>('timer')
-  const [pendingSessionId, setPendingSessionId] = useState<number | null>(null)
+  const [pendingSessionId, setPendingSessionId] = useState<string | null>(null)
   const [mode, setMode] = useLocalState<TimerMode>(STORAGE_KEYS.mode, 'pomodoro')
   const [activeTodoId, setActiveTodoId] = useState<string | null>(null)
   const sessions = useSessions()
   const todosApi = useTodos()
+  const auth = useAuth()
+  const sync = useSync({ user: auth.user, mergeRemoteTodos: todosApi.mergeRemote })
   const flow = useFlowTimer()
 
   const handleFocusComplete = useCallback(
-    (s: Session) => {
+    (s: Omit<Session, 'id' | 'notes'>) => {
       void addSession(s).then((id) => setPendingSessionId(id))
       todosApi.incrementPomodoros(activeTodoId)
     },
@@ -236,6 +240,15 @@ export default function App() {
             update={updateSettings}
             themeId={themeId}
             onThemeChange={setTheme}
+            syncStatus={sync.status}
+            syncPending={sync.pending}
+            syncLastSyncAt={sync.lastSyncAt}
+            syncProfile={auth.profile}
+            syncAvailable={auth.available}
+            syncLoading={auth.loading}
+            onSyncLogin={auth.login}
+            onSyncLogout={auth.logout}
+            onSyncNow={() => void sync.sync(true)}
           />
         )}
       </main>

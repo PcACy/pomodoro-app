@@ -16,7 +16,7 @@ export interface Settings {
 }
 
 export interface Session {
-  id?: number
+  id: string
   start: number
   end: number
   durationMs: number
@@ -41,6 +41,7 @@ export interface TodoItem {
   pomodoros: number
   createdAt: number
   completedAt?: number
+  updatedAt?: number
 }
 
 export const PHASE_LABELS: Record<PhaseId, string> = {

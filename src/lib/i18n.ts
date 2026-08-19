@@ -94,6 +94,20 @@ export interface Messages {
     clearSessions: string
     language: string
   }
+  sync: {
+    title: string
+    hint: string
+    notConfigured: string
+    login: string
+    logout: string
+    syncing: string
+    synced: string
+    pending: string
+    offline: string
+    retry: string
+    syncNow: string
+    lastSync: (d: Date) => string
+  }
   heatmap: { less: string; more: string }
   notify: {
     focusDoneTitle: string
@@ -205,6 +219,22 @@ const de: Messages = {
     clearSessions: 'Sessions löschen',
     language: 'Sprache',
   },
+  sync: {
+    title: 'Cloud-Sync',
+    hint: 'Spiegle deine Sessions und Aufgaben sicher über GitHub in die Cloud.',
+    notConfigured:
+      'Cloud-Sync ist nicht konfiguriert. Ergänze VITE_SUPABASE_URL und VITE_SUPABASE_ANON_KEY – die App bleibt vollständig lokal.',
+    login: 'Mit GitHub synchronisieren',
+    logout: 'Abmelden',
+    syncing: 'Synchronisiere …',
+    synced: 'Synchronisiert',
+    pending: 'Änderungen ausstehend',
+    offline: 'Offline – lokal gespeichert',
+    retry: 'Erneut versuchen',
+    syncNow: 'Jetzt synchronisieren',
+    lastSync: (d) =>
+      `Zuletzt synchronisiert: ${d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`,
+  },
   heatmap: { less: 'Weniger', more: 'Mehr' },
   notify: {
     focusDoneTitle: 'Fokus abgeschlossen',
@@ -314,6 +344,22 @@ const en: Messages = {
     confirmClear: 'Really delete ALL sessions?',
     clearSessions: 'Delete sessions',
     language: 'Language',
+  },
+  sync: {
+    title: 'Cloud Sync',
+    hint: 'Mirror your sessions and tasks securely to the cloud via GitHub.',
+    notConfigured:
+      'Cloud sync is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY – the app keeps working fully local.',
+    login: 'Sync with GitHub',
+    logout: 'Log out',
+    syncing: 'Syncing …',
+    synced: 'Synced',
+    pending: 'Changes pending',
+    offline: 'Offline – saved locally',
+    retry: 'Retry',
+    syncNow: 'Sync now',
+    lastSync: (d) =>
+      `Last synced: ${d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`,
   },
   heatmap: { less: 'Less', more: 'More' },
   notify: {

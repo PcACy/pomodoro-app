@@ -1,15 +1,26 @@
 import { useState } from 'react'
-import { Check, Plus, Trash2, X } from 'lucide-react'
+import { Check, Github, Loader2, LogOut, Plus, RefreshCw, Trash2, X } from 'lucide-react'
 import type { Settings } from '../types'
 import { THEMES, type ThemeId } from '../themes'
 import { clearSessions } from '../lib/db'
 import { useTranslation } from '../hooks/useTranslation'
+import type { SyncStatus } from '../hooks/useSync'
+import type { GitHubProfile } from '../hooks/useAuth'
 
 interface Props {
   settings: Settings
   update: (updater: (s: Settings) => Settings) => void
   themeId: ThemeId
   onThemeChange: (id: ThemeId) => void
+  syncStatus: SyncStatus
+  syncPending: boolean
+  syncLastSyncAt: number | null
+  syncProfile: GitHubProfile | null
+  syncAvailable: boolean
+  syncLoading: boolean
+  onSyncLogin: () => void
+  onSyncLogout: () => void
+  onSyncNow: () => void
 }
 
 const PHASE_KEYS: Array<keyof Pick<Settings['phases'], 'focus' | 'shortBreak' | 'longBreak'>> = [
@@ -18,7 +29,21 @@ const PHASE_KEYS: Array<keyof Pick<Settings['phases'], 'focus' | 'shortBreak' | 
   'longBreak',
 ]
 
-export function SettingsPanel({ settings, update, themeId, onThemeChange }: Props) {
+export function SettingsPanel({
+  settings,
+  update,
+  themeId,
+  onThemeChange,
+  syncStatus,
+  syncPending,
+  syncLastSyncAt,
+  syncProfile,
+  syncAvailable,
+  syncLoading,
+  onSyncLogin,
+  onSyncLogout,
+  onSyncNow,
+}: Props) {
   const { t, lang, setLang } = useTranslation()
   const [newTag, setNewTag] = useState('')
 
@@ -40,6 +65,69 @@ export function SettingsPanel({ settings, update, themeId, onThemeChange }: Prop
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-5">
+      <div className="card p-6">
+        <h3 className="mb-1 text-sm font-semibold text-fg">{t.sync.title}</h3>
+        <p className="mb-4 text-xs text-muted">{t.sync.hint}</p>
+
+        {!syncAvailable ? (
+          <p className="text-xs text-muted">{t.sync.notConfigured}</p>
+        ) : syncStatus === 'signed-out' ? (
+          <button type="button" onClick={onSyncLogin} className="btn-primary">
+            <Github size={15} /> {t.sync.login}
+          </button>
+        ) : syncStatus === 'syncing' || syncLoading ? (
+          <div className="flex items-center gap-2 text-sm text-muted">
+            <Loader2 size={15} className="animate-spin" />
+            {t.sync.syncing}
+          </div>
+        ) : syncStatus === 'offline' || syncStatus === 'error' ? (
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="flex items-center gap-2 text-sm text-accent-strong">
+              <span className="h-2 w-2 rounded-full bg-accent-strong" />
+              {t.sync.offline}
+            </span>
+            <button type="button" onClick={onSyncNow} className="btn-ghost text-xs">
+              <RefreshCw size={14} /> {t.sync.retry}
+            </button>
+          </div>
+        ) : syncProfile ? (
+          <div className="flex flex-wrap items-center gap-3">
+            {syncProfile.avatarUrl ? (
+              <img
+                src={syncProfile.avatarUrl}
+                alt={syncProfile.name}
+                className="h-8 w-8 rounded-full border border-line"
+              />
+            ) : (
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-raised text-xs font-bold text-fg">
+                {syncProfile.name.slice(0, 1).toUpperCase()}
+              </span>
+            )}
+            <span className="text-sm font-medium text-fg">{syncProfile.name}</span>
+            {syncPending ? (
+              <span className="rounded-full bg-raised px-2.5 py-1 text-xs text-muted">{t.sync.pending}</span>
+            ) : (
+              <span className="flex items-center gap-1.5 rounded-full bg-accent/15 px-2.5 py-1 text-xs text-accent">
+                <Check size={12} /> {t.sync.synced}
+              </span>
+            )}
+            <span className="ml-auto flex items-center gap-2">
+              <button type="button" onClick={onSyncNow} className="btn-ghost text-xs" title={t.sync.syncNow}>
+                <RefreshCw size={14} /> {t.sync.syncNow}
+              </button>
+              <button type="button" onClick={onSyncLogout} className="btn-ghost text-xs">
+                <LogOut size={14} /> {t.sync.logout}
+              </button>
+            </span>
+          </div>
+        ) : null}
+        {syncStatus === 'synced' && syncLastSyncAt != null && (
+          <p className="mt-3 text-[10px] text-muted">
+            {t.sync.lastSync(new Date(syncLastSyncAt))}
+          </p>
+        )}
+      </div>
+
       <div className="card p-6">
         <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.language}</h3>
         <div className="flex gap-2">
