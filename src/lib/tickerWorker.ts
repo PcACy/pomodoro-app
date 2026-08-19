@@ -4,9 +4,10 @@ let timer = null;
 function tick() {
   var now = Date.now();
   self.postMessage({ type: 'tick', now: now });
-  if (timer === null) return;
   // Self-healing cadence: schedule the next wakeup relative to wall-clock time,
   // so throttling / system sleep does not accumulate interval drift while awake.
+  // Stopping is handled by 'stop' clearing the pending timeout below, so a tick
+  // can never fire after the worker was told to stop.
   var elapsed = Date.now() - now;
   timer = setTimeout(tick, Math.max(50, 250 - elapsed));
 }
