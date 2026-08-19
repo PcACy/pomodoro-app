@@ -27,6 +27,7 @@ export function useFlowTimer(): FlowTimerApi {
   const statusRef = useRef(status)
   const elapsedRef = useRef(elapsedMs)
   const segStartRef = useRef<number | null>(null)
+  const baseRef = useRef(0)
 
   useEffect(() => {
     statusRef.current = status
@@ -37,13 +38,14 @@ export function useFlowTimer(): FlowTimerApi {
 
   const start = useCallback(() => {
     if (statusRef.current === 'running') return
+    baseRef.current = elapsedRef.current
     segStartRef.current = Date.now()
     setStatus('running')
   }, [])
 
   const pause = useCallback(() => {
     if (statusRef.current !== 'running' || segStartRef.current == null) return
-    setElapsedMs((prev) => prev + (Date.now() - segStartRef.current!))
+    setElapsedMs(baseRef.current + (Date.now() - segStartRef.current))
     segStartRef.current = null
     setStatus('paused')
   }, [])
@@ -55,18 +57,18 @@ export function useFlowTimer(): FlowTimerApi {
 
   const stop = useCallback((): FlowStopResult | null => {
     const segStart = segStartRef.current
-    const base = elapsedRef.current
-    const extra = segStart != null ? Date.now() - segStart : 0
+    const total = segStart != null ? baseRef.current + (Date.now() - segStart) : elapsedRef.current
     segStartRef.current = null
     setElapsedMs(0)
     setStatus('idle')
-    if (base + extra <= 0) return null
+    if (total <= 0) return null
     const end = Date.now()
-    return { start: end - (base + extra), end, elapsedMs: base + extra }
+    return { start: end - total, end, elapsedMs: total }
   }, [])
 
   const reset = useCallback(() => {
     segStartRef.current = null
+    baseRef.current = 0
     setElapsedMs(0)
     setStatus('idle')
   }, [])
@@ -77,14 +79,15 @@ export function useFlowTimer(): FlowTimerApi {
     w.postMessage({ type: status === 'running' ? 'start' : 'stop' })
   }, [status])
 
-  // Count up on every tick while running.
+  // Count up on every tick while running. Idempotent: base + segment delta,
+  // so elapsed grows 1:1 with wall-clock time instead of accumulating twice.
   useEffect(() => {
     const w = getTickerWorker()
     const handler = (e: MessageEvent) => {
       if (e.data && e.data.type === 'tick') {
         const now = e.data.now as number
         if (statusRef.current === 'running' && segStartRef.current != null) {
-          setElapsedMs(elapsedRef.current + (now - segStartRef.current))
+          setElapsedMs(baseRef.current + (now - segStartRef.current))
         }
       }
     }
