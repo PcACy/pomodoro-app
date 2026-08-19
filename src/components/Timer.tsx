@@ -1,4 +1,4 @@
-import { Pause, Play, RotateCcw, SkipForward } from 'lucide-react'
+import { Pause, PictureInPicture2, Play, RotateCcw, SkipForward } from 'lucide-react'
 import type { TimerStatus, PhaseId } from '../types'
 
 interface Props {
@@ -17,6 +17,9 @@ interface Props {
   onToggle: () => void
   onSkip: () => void
   onReset: () => void
+  pipSupported: boolean
+  pipOpen: boolean
+  onPipToggle: () => void
 }
 
 const PHASE_TEXT: Record<PhaseId, string> = {
@@ -58,6 +61,9 @@ export function Timer({
   onToggle,
   onSkip,
   onReset,
+  pipSupported,
+  pipOpen,
+  onPipToggle,
 }: Props) {
   const offset = CIRC * (1 - Math.min(1, Math.max(0, progress)))
   const running = status === 'running'
@@ -166,6 +172,20 @@ export function Timer({
         <button type="button" onClick={onReset} title="Reset (R)" className="btn-ghost">
           <RotateCcw size={18} />
         </button>
+        {pipSupported && (
+          <button
+            type="button"
+            onClick={onPipToggle}
+            title={pipOpen ? 'Mini-Widget schließen' : 'In Mini-Widget anzeigen'}
+            className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition-colors ${
+              pipOpen
+                ? 'border-accent/60 bg-accent/10 text-accent'
+                : 'border-line text-muted hover:bg-raised hover:text-fg'
+            }`}
+          >
+            <PictureInPicture2 size={18} />
+          </button>
+        )}
       </div>
 
       <div

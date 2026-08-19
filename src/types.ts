@@ -53,3 +53,16 @@ export const STORAGE_KEYS = {
   task: 'pomodoro.task',
   tag: 'pomodoro.tag',
 } as const
+
+declare global {
+  interface DocumentPictureInPicture {
+    requestWindow(options?: { width?: number; height?: number }): Promise<Window>
+    window: Window | null
+  }
+
+  interface Window {
+    documentPictureInPicture?: DocumentPictureInPicture
+  }
+}
+
+export {}

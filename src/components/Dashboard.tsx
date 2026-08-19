@@ -1,6 +1,6 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { Clock, Download, Flame, Target, Upload } from 'lucide-react'
+import { Check, Clock, Copy, Download, FileDown, Flame, Target, Upload } from 'lucide-react'
 import type { Settings, Session } from '../types'
 import type { ThemeId } from '../themes'
 import { useThemeColors } from '../hooks/useTheme'
@@ -14,6 +14,7 @@ import {
   weekMinutes,
 } from '../lib/stats'
 import { fmtDuration, startOfWeek, WEEKDAY_SHORT } from '../lib/time'
+import { buildDailyMarkdown, buildDayExport, copyMarkdown, downloadMarkdown } from '../lib/markdownExport'
 import { Heatmap } from './Heatmap'
 import { SessionLog } from './SessionLog'
 import { exportAll, importSessions, clearSessions } from '../lib/db'
@@ -58,6 +59,7 @@ export function Dashboard({ sessions, settings, themeId, onImportSettings }: Pro
   const goal = settings.weeklyGoalMinutes
   const goalPct = Math.min(100, Math.round((week / goal) * 100))
   const importRef = useRef<HTMLInputElement>(null)
+  const [copied, setCopied] = useState(false)
 
   const tooltipStyle = useMemo(
     () => ({
@@ -105,6 +107,23 @@ export function Dashboard({ sessions, settings, themeId, onImportSettings }: Pro
       if (data.settings) onImportSettings(data.settings)
     } catch {
       alert('Import fehlgeschlagen: Die Datei ist kein gültiges Backup.')
+    }
+  }
+
+  const todayExport = () => buildDayExport(sessions, new Date())
+
+  const handleMdDownload = () => {
+    const exp = todayExport()
+    downloadMarkdown(buildDailyMarkdown(exp), exp.key)
+  }
+
+  const handleMdCopy = async () => {
+    try {
+      await copyMarkdown(buildDailyMarkdown(todayExport()))
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch {
+      /* Zwischenablage nicht verfügbar */
     }
   }
 
@@ -228,7 +247,13 @@ export function Dashboard({ sessions, settings, themeId, onImportSettings }: Pro
       <div className="card p-5">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-fg">Session-Log</h3>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={handleMdDownload} className="btn-ghost text-xs" title="Obsidian Markdown für heute herunterladen">
+              <FileDown size={14} /> Als .md
+            </button>
+            <button type="button" onClick={() => void handleMdCopy()} className="btn-ghost text-xs" title="Markdown für heute in die Zwischenablage kopieren">
+              {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Kopiert!' : 'Kopieren'}
+            </button>
             <button type="button" onClick={handleExport} className="btn-ghost text-xs">
               <Download size={14} /> Export
             </button>

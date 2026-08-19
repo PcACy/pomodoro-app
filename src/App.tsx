@@ -8,6 +8,7 @@ import { useKeyboard } from './hooks/useKeyboard'
 import { useDocumentChrome } from './hooks/useDocumentChrome'
 import { useTheme } from './hooks/useTheme'
 import { useServiceWorker } from './hooks/useServiceWorker'
+import { usePictureInPicture } from './hooks/usePictureInPicture'
 import { addSession } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
 import { todayMinutes } from './lib/stats'
@@ -16,6 +17,7 @@ import { STORAGE_KEYS, type Session, type Settings } from './types'
 import { Timer } from './components/Timer'
 import { Dashboard } from './components/Dashboard'
 import { SettingsPanel } from './components/Settings'
+import { PipTimer } from './components/PipTimer'
 
 type Tab = 'timer' | 'dashboard' | 'settings'
 
@@ -45,8 +47,9 @@ export default function App() {
   }, [timer])
 
   useKeyboard({ onToggle: handleToggle, onSkip: timer.skip, onReset: timer.reset })
-  useDocumentChrome(timer.phase, timer.status, timer.time)
+  useDocumentChrome(timer.phase, timer.status, timer.time, timer.progress, timer.remainingMs)
   const { updateAvailable, reload } = useServiceWorker()
+  const { pipWindow, isSupported: pipSupported, open: openPip, close: closePip } = usePictureInPicture()
   const zenRunning = tab === 'timer' && timer.status === 'running'
 
   const handleImportSettings = (s: unknown) => {
@@ -105,6 +108,12 @@ export default function App() {
             onToggle={handleToggle}
             onSkip={timer.skip}
             onReset={timer.reset}
+            pipSupported={pipSupported}
+            pipOpen={pipWindow != null}
+            onPipToggle={() => {
+              if (pipWindow) closePip()
+              else void openPip()
+            }}
           />
         )}
         {tab === 'dashboard' && (
@@ -133,6 +142,16 @@ export default function App() {
           </button>
         </div>
       )}
+
+      <PipTimer
+        pipWindow={pipWindow}
+        phase={timer.phase}
+        phaseLabel={timer.phaseLabel}
+        status={timer.status}
+        time={timer.time}
+        onToggle={handleToggle}
+        onSkip={timer.skip}
+      />
     </div>
   )
 }
