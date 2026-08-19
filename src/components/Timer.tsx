@@ -31,12 +31,10 @@ const RING: Record<PhaseId, string> = {
   longBreak: 'stroke-long',
 }
 
-const RING_GLOW: Record<PhaseId, string> = {
-  focus: 'drop-shadow(0 0 6px rgb(var(--c-accent) / 0.45)) drop-shadow(0 0 18px rgb(var(--c-accent) / 0.2))',
-  shortBreak:
-    'drop-shadow(0 0 6px rgb(var(--c-break) / 0.45)) drop-shadow(0 0 18px rgb(var(--c-break) / 0.2))',
-  longBreak:
-    'drop-shadow(0 0 6px rgb(var(--c-long) / 0.45)) drop-shadow(0 0 18px rgb(var(--c-long) / 0.2))',
+const GLOW_VAR: Record<PhaseId, string> = {
+  focus: '--c-accent',
+  shortBreak: '--c-break',
+  longBreak: '--c-long',
 }
 
 const SIZE = 300
@@ -67,7 +65,13 @@ export function Timer({
 
   return (
     <section className="card border border-[#504945] flex w-full max-w-md flex-col items-center gap-8 p-8">
-      <div className="relative" style={{ width: SIZE, height: SIZE }}>
+      <div className="relative isolate" style={{ width: SIZE, height: SIZE }}>
+        <div
+          className={`pointer-events-none absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle,var(--primary-color)_0%,transparent_70%)] blur-2xl transition-opacity duration-500 ${
+            running ? 'animate-glow' : 'opacity-10'
+          }`}
+          style={{ '--primary-color': `rgb(var(${GLOW_VAR[phase]}))` } as React.CSSProperties}
+        />
         <svg width={SIZE} height={SIZE} className="-rotate-90">
           <circle
             cx={SIZE / 2}
@@ -86,7 +90,6 @@ export function Timer({
             strokeLinecap="round"
             strokeDasharray={CIRC}
             strokeDashoffset={offset}
-            style={{ filter: RING_GLOW[phase] }}
             className={`${RING[phase]} transition-all duration-300 ease-linear`}
           />
         </svg>
