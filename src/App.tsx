@@ -6,6 +6,7 @@ import { useSessions } from './hooks/useSessions'
 import { useTimer } from './hooks/useTimer'
 import { useKeyboard } from './hooks/useKeyboard'
 import { useDocumentChrome } from './hooks/useDocumentChrome'
+import { useTheme } from './hooks/useTheme'
 import { addSession } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
 import { todayMinutes } from './lib/stats'
@@ -24,6 +25,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
 ]
 
 export default function App() {
+  const [themeId, setTheme] = useTheme()
   const [settings, updateSettings] = useSettings()
   const [task, setTask] = useLocalState(STORAGE_KEYS.task, '')
   const [tag, setTag] = useLocalState(STORAGE_KEYS.tag, '')
@@ -52,23 +54,23 @@ export default function App() {
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center gap-8 px-4 py-8">
       <header className="flex w-full items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/15">
-            <TimerIcon className="text-rose-400" size={22} />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15">
+            <TimerIcon className="text-accent" size={22} />
           </div>
           <div className="leading-tight">
-            <h1 className="text-lg font-bold text-zinc-100">Pomodoro</h1>
-            <p className="text-xs text-zinc-500">Heute: {fmtDuration(todayMinutes(sessions) * 60_000)}</p>
+            <h1 className="text-lg font-bold text-fg">Pomodoro</h1>
+            <p className="text-xs text-muted">Heute: {fmtDuration(todayMinutes(sessions) * 60_000)}</p>
           </div>
         </div>
 
-        <nav className="flex items-center gap-1 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-1">
+        <nav className="flex items-center gap-1 rounded-2xl border border-line bg-surface p-1">
           {TABS.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
               className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors ${
-                tab === t.id ? 'bg-zinc-800 text-zinc-100' : 'text-zinc-500 hover:text-zinc-300'
+                tab === t.id ? 'bg-raised text-fg' : 'text-muted hover:text-fg'
               }`}
             >
               {t.icon}
@@ -102,13 +104,21 @@ export default function App() {
           <Dashboard
             sessions={sessions}
             settings={settings}
+            themeId={themeId}
             onImportSettings={handleImportSettings}
           />
         )}
-        {tab === 'settings' && <SettingsPanel settings={settings} update={updateSettings} />}
+        {tab === 'settings' && (
+          <SettingsPanel
+            settings={settings}
+            update={updateSettings}
+            themeId={themeId}
+            onThemeChange={setTheme}
+          />
+        )}
       </main>
 
-      <footer className="flex w-full items-center justify-center gap-4 pb-2 text-xs text-zinc-600">
+      <footer className="flex w-full items-center justify-center gap-4 pb-2 text-xs text-muted">
         <span className="flex items-center gap-1">
           <Clock size={12} /> 100% offline
         </span>

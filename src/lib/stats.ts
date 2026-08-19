@@ -12,6 +12,11 @@ export interface DayStat {
   minutes: number
 }
 
+export interface HourStat {
+  hour: number
+  count: number
+}
+
 const minutesOf = (s: Session): number => Math.round(s.durationMs / 60_000)
 
 export function todayMinutes(sessions: Session[]): number {
@@ -127,6 +132,17 @@ export function totalMinutesInRange(sessions: Session[], from: Date): number {
   return sessions
     .filter((s) => new Date(s.start) >= from)
     .reduce((sum, s) => sum + minutesOf(s), 0)
+}
+
+/** Number of completed sessions per hour of day (0-23), based on the session's end time. */
+export function sessionsByHour(sessions: Session[]): HourStat[] {
+  const counts = new Array<number>(24).fill(0)
+  for (const s of sessions) {
+    const end = new Date(s.end)
+    if (Number.isNaN(end.getTime())) continue
+    counts[end.getHours()] += 1
+  }
+  return counts.map((count, hour) => ({ hour, count }))
 }
 
 export const DAYS_MS = MS_PER_DAY

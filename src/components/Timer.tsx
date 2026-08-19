@@ -20,15 +20,15 @@ interface Props {
 }
 
 const PHASE_TEXT: Record<PhaseId, string> = {
-  focus: 'text-rose-400',
-  shortBreak: 'text-emerald-400',
-  longBreak: 'text-sky-400',
+  focus: 'text-accent',
+  shortBreak: 'text-break',
+  longBreak: 'text-long',
 }
 
 const RING: Record<PhaseId, string> = {
-  focus: 'stroke-rose-500',
-  shortBreak: 'stroke-emerald-500',
-  longBreak: 'stroke-sky-500',
+  focus: 'stroke-accent',
+  shortBreak: 'stroke-break',
+  longBreak: 'stroke-long',
 }
 
 const SIZE = 300
@@ -67,7 +67,7 @@ export function Timer({
             r={R}
             fill="none"
             strokeWidth={STROKE}
-            className="stroke-zinc-800"
+            className="stroke-track"
           />
           <circle
             cx={SIZE / 2}
@@ -85,8 +85,8 @@ export function Timer({
           <span className={`text-sm font-medium uppercase tracking-widest ${PHASE_TEXT[phase]}`}>
             {phaseLabel}
           </span>
-          <span className="font-mono text-5xl font-bold tabular-nums text-zinc-100">{time}</span>
-          <span className="text-xs text-zinc-500">
+          <span className="font-mono text-5xl font-bold tabular-nums text-fg">{time}</span>
+          <span className="text-xs text-muted">
             {running ? 'läuft' : status === 'paused' ? 'pausiert' : 'bereit'}
           </span>
         </div>
@@ -97,11 +97,11 @@ export function Timer({
           <span
             key={i}
             className={`h-2.5 w-2.5 rounded-full transition-colors ${
-              i < dotsFilled ? 'bg-rose-500' : 'bg-zinc-700'
+              i < dotsFilled ? 'bg-accent' : 'bg-line'
             }`}
           />
         ))}
-        <span className="ml-1 text-xs text-zinc-500">
+        <span className="ml-1 text-xs text-muted">
           {completedFocusInCycle % roundsBeforeLongBreak}/{roundsBeforeLongBreak} Runden
         </span>
       </div>
@@ -123,8 +123,8 @@ export function Timer({
               onClick={() => onTagChange(tag === t ? '' : t)}
               className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                 tag === t
-                  ? 'border-rose-500 bg-rose-500/15 text-rose-300'
-                  : 'border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+                  ? 'border-accent bg-accent/15 text-accent'
+                  : 'border-line text-muted hover:border-muted hover:text-fg'
               }`}
             >
               {t}
@@ -140,7 +140,7 @@ export function Timer({
         <button
           type="button"
           onClick={onToggle}
-          className="h-16 w-16 rounded-full bg-rose-500 text-white shadow-lg shadow-rose-500/25 transition-all hover:bg-rose-400 hover:shadow-rose-400/30 active:scale-95"
+          className="h-16 w-16 rounded-full bg-accent text-on-accent shadow-lg shadow-accent/25 transition-all hover:bg-accent-strong active:scale-95"
           title={running ? 'Pause (Leertaste)' : 'Start (Leertaste)'}
         >
           {running ? <Pause size={26} /> : <Play size={26} className="ml-1" />}
@@ -150,7 +150,7 @@ export function Timer({
         </button>
       </div>
 
-      <div className="flex items-center gap-3 text-[11px] text-zinc-500">
+      <div className="flex items-center gap-3 text-[11px] text-muted">
         <span className="flex items-center gap-1">
           <span className="kbd">Space</span> Start / Pause
         </span>

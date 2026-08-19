@@ -3,7 +3,124 @@
 @tailwind utilities;
 
 :root {
+  /* Default = Gruvbox Dark */
   color-scheme: dark;
+  --c-canvas: 40 40 40;
+  --c-surface: 60 56 54;
+  --c-raised: 102 92 84;
+  --c-line: 80 73 69;
+  --c-fg: 235 219 178;
+  --c-muted: 168 153 132;
+  --c-accent: 254 128 25;
+  --c-accent-strong: 251 73 52;
+  --c-on-accent: 40 40 40;
+  --c-break: 184 187 38;
+  --c-long: 131 165 152;
+  --c-track: 80 73 69;
+  --c-chart-1: 254 128 25;
+  --c-chart-2: 251 73 52;
+  --c-chart-3: 250 189 47;
+  --c-chart-4: 184 187 38;
+  --c-chart-5: 131 165 152;
+  --c-chart-6: 211 134 155;
+  --c-chart-7: 142 192 124;
+  --c-chart-8: 146 131 116;
+}
+
+:root[data-theme='gruvbox-light'] {
+  color-scheme: light;
+  --c-canvas: 251 241 199;
+  --c-surface: 235 219 178;
+  --c-raised: 213 196 161;
+  --c-line: 189 174 147;
+  --c-fg: 60 56 54;
+  --c-muted: 124 111 100;
+  --c-accent: 214 93 14;
+  --c-accent-strong: 204 36 29;
+  --c-on-accent: 251 241 199;
+  --c-break: 121 116 14;
+  --c-long: 7 102 120;
+  --c-track: 213 196 161;
+  --c-chart-1: 204 36 29;
+  --c-chart-2: 214 93 14;
+  --c-chart-3: 215 153 33;
+  --c-chart-4: 152 151 26;
+  --c-chart-5: 69 133 136;
+  --c-chart-6: 177 98 134;
+  --c-chart-7: 104 157 106;
+  --c-chart-8: 124 111 100;
+}
+
+:root[data-theme='classic-dark'] {
+  color-scheme: dark;
+  --c-canvas: 9 9 11;
+  --c-surface: 24 24 27;
+  --c-raised: 39 39 42;
+  --c-line: 63 63 70;
+  --c-fg: 244 244 245;
+  --c-muted: 113 113 122;
+  --c-accent: 244 63 94;
+  --c-accent-strong: 251 113 133;
+  --c-on-accent: 255 255 255;
+  --c-break: 16 185 129;
+  --c-long: 14 165 233;
+  --c-track: 63 63 70;
+  --c-chart-1: 244 63 94;
+  --c-chart-2: 251 146 60;
+  --c-chart-3: 250 204 21;
+  --c-chart-4: 52 211 153;
+  --c-chart-5: 34 211 238;
+  --c-chart-6: 167 139 250;
+  --c-chart-7: 244 114 182;
+  --c-chart-8: 148 163 184;
+}
+
+:root[data-theme='nord'] {
+  color-scheme: dark;
+  --c-canvas: 46 52 64;
+  --c-surface: 59 66 82;
+  --c-raised: 67 76 94;
+  --c-line: 76 86 106;
+  --c-fg: 236 239 244;
+  --c-muted: 216 222 233;
+  --c-accent: 191 97 106;
+  --c-accent-strong: 208 135 112;
+  --c-on-accent: 46 52 64;
+  --c-break: 163 190 140;
+  --c-long: 129 161 193;
+  --c-track: 67 76 94;
+  --c-chart-1: 191 97 106;
+  --c-chart-2: 208 135 112;
+  --c-chart-3: 235 203 139;
+  --c-chart-4: 163 190 140;
+  --c-chart-5: 129 161 193;
+  --c-chart-6: 180 142 173;
+  --c-chart-7: 136 192 208;
+  --c-chart-8: 143 188 187;
+}
+
+:root[data-theme='catppuccin'] {
+  color-scheme: dark;
+  --c-canvas: 30 30 46;
+  --c-surface: 49 50 68;
+  --c-raised: 69 71 90;
+  --c-line: 88 91 112;
+  --c-fg: 205 214 244;
+  --c-muted: 166 173 200;
+  --c-accent: 243 139 168;
+  --c-accent-strong: 245 194 231;
+  --c-on-accent: 30 30 46;
+  --c-break: 166 227 161;
+  --c-long: 137 180 250;
+  --c-track: 69 71 90;
+  --c-chart-1: 243 139 168;
+  --c-chart-2: 250 179 135;
+  --c-chart-3: 249 226 175;
+  --c-chart-4: 166 227 161;
+  --c-chart-5: 137 180 250;
+  --c-chart-6: 203 166 247;
+  --c-chart-7: 148 226 213;
+  --c-chart-8: 186 194 222;
 }
 
 html,
@@ -13,32 +130,32 @@ body,
 }
 
 body {
-  @apply bg-zinc-950 text-zinc-200 antialiased;
+  @apply bg-canvas text-fg antialiased;
 }
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-zinc-800 bg-zinc-900/70 backdrop-blur;
+    @apply rounded-2xl border border-line bg-surface;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/60 disabled:pointer-events-none disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 disabled:pointer-events-none disabled:opacity-40;
   }
 
   .btn-primary {
-    @apply btn bg-rose-500 text-white hover:bg-rose-400;
+    @apply btn bg-accent text-on-accent hover:bg-accent-strong;
   }
 
   .btn-ghost {
-    @apply btn border border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800;
+    @apply btn border border-line bg-transparent text-fg hover:bg-raised;
   }
 
   .input {
-    @apply w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-rose-500/60 focus:outline-none focus:ring-1 focus:ring-rose-500/40;
+    @apply w-full rounded-xl border border-line bg-canvas px-3 py-2 text-sm text-fg placeholder-muted focus:border-accent/60 focus:outline-none focus:ring-1 focus:ring-accent/40;
   }
 
   .kbd {
-    @apply rounded border border-zinc-700 bg-zinc-800 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400;
+    @apply rounded border border-line bg-raised px-1.5 py-0.5 font-mono text-[10px] text-muted;
   }
 }
 
@@ -47,7 +164,7 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-zinc-700;
+  @apply rounded-full bg-raised;
 }
 ::-webkit-scrollbar-track {
   @apply bg-transparent;
