@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { TimerStatus } from '../types'
+import type { Session, TimerStatus } from '../types'
 import { getTickerWorker } from '../lib/tickerWorker'
 import { fmtElapsed } from '../lib/time'
 
-export interface FlowStopResult {
+export const MIN_FLOW_SESSION_MS = 60_000
+
+export interface FlowSessionResult {
   start: number
   end: number
-  elapsedMs: number
+  durationMs: number
+  task: string
+  tag: string
 }
 
 export interface FlowTimerApi {
@@ -16,18 +20,30 @@ export interface FlowTimerApi {
   start: () => void
   pause: () => void
   toggle: () => void
-  stop: () => FlowStopResult | null
-  reset: () => void
+  finishSession: () => void
+  resetTimer: () => void
 }
 
-/** Open-ended count-up stopwatch. `stop()` returns the measured interval and resets. */
-export function useFlowTimer(): FlowTimerApi {
+interface FlowTimerOptions {
+  task: string
+  tag: string
+  onFinish: (session: Omit<Session, 'id' | 'notes'>) => void
+}
+
+/** Open-ended count-up stopwatch. `finishSession()` logs the interval, `resetTimer()` discards it. */
+export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTimerApi {
   const [status, setStatus] = useState<TimerStatus>('idle')
   const [elapsedMs, setElapsedMs] = useState(0)
   const statusRef = useRef(status)
   const elapsedRef = useRef(elapsedMs)
   const segStartRef = useRef<number | null>(null)
   const baseRef = useRef(0)
+  const taskRef = useRef(task)
+  const tagRef = useRef(tag)
+  const onFinishRef = useRef(onFinish)
+  taskRef.current = task
+  tagRef.current = tag
+  onFinishRef.current = onFinish
 
   useEffect(() => {
     statusRef.current = status
@@ -55,18 +71,27 @@ export function useFlowTimer(): FlowTimerApi {
     else start()
   }, [start, pause])
 
-  const stop = useCallback((): FlowStopResult | null => {
+  /** Capture the current elapsed time, save the session (>= 1 min) and reset to ready. */
+  const finishSession = useCallback(() => {
     const segStart = segStartRef.current
     const total = segStart != null ? baseRef.current + (Date.now() - segStart) : elapsedRef.current
     segStartRef.current = null
+    baseRef.current = 0
     setElapsedMs(0)
     setStatus('idle')
-    if (total <= 0) return null
+    if (total < MIN_FLOW_SESSION_MS) return
     const end = Date.now()
-    return { start: end - total, end, elapsedMs: total }
+    onFinishRef.current({
+      start: end - total,
+      end,
+      durationMs: total,
+      task: taskRef.current,
+      tag: tagRef.current,
+    })
   }, [])
 
-  const reset = useCallback(() => {
+  /** Discard an accidentally started session without saving anything. */
+  const resetTimer = useCallback(() => {
     segStartRef.current = null
     baseRef.current = 0
     setElapsedMs(0)
@@ -95,5 +120,5 @@ export function useFlowTimer(): FlowTimerApi {
     return () => w.removeEventListener('message', handler)
   }, [])
 
-  return { status, elapsedMs, time: fmtElapsed(elapsedMs), start, pause, toggle, stop, reset }
+  return { status, elapsedMs, time: fmtElapsed(elapsedMs), start, pause, toggle, finishSession, resetTimer }
 }

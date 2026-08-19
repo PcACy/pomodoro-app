@@ -16,6 +16,13 @@ export interface Messages {
     rounds: (done: number, total: number) => string
     status: { running: string; paused: string; ready: string }
   }
+  flow: {
+    finish: string
+    finishShortcut: string
+    discard: string
+    discardShortcut: string
+    finishedToast: (minutes: number) => string
+  }
   shortcuts: { startPause: string; skip: string; reset: string }
   pip: { open: string; close: string }
   todo: {
@@ -152,6 +159,13 @@ const de: Messages = {
     stop: 'Stoppen & Zeit loggen (N)',
     rounds: (done, total) => `${done}/${total} Runden`,
     status: { running: 'läuft', paused: 'pausiert', ready: 'bereit' },
+  },
+  flow: {
+    finish: 'Flow beenden & speichern',
+    finishShortcut: 'Beenden & speichern',
+    discard: 'Verwerfen ohne Speichern',
+    discardShortcut: 'Verwerfen',
+    finishedToast: (minutes) => `Flow abgeschlossen! +${minutes} Min. Fokuszeit gespeichert`,
   },
   shortcuts: { startPause: 'Start / Pause', skip: 'Skip', reset: 'Reset' },
   pip: { open: 'In Mini-Widget anzeigen', close: 'Mini-Widget schließen' },
@@ -301,6 +315,13 @@ const en: Messages = {
     stop: 'Stop & log time (N)',
     rounds: (done, total) => `${done}/${total} rounds`,
     status: { running: 'running', paused: 'paused', ready: 'ready' },
+  },
+  flow: {
+    finish: 'Finish flow & save',
+    finishShortcut: 'Finish & save',
+    discard: 'Discard without saving',
+    discardShortcut: 'Discard',
+    finishedToast: (minutes) => `Flow complete! +${minutes} min focus saved`,
   },
   shortcuts: { startPause: 'Start / Pause', skip: 'Skip', reset: 'Reset' },
   pip: { open: 'Show in mini window', close: 'Close mini window' },

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
-import { BarChart3, Settings as SettingsIcon, Timer as TimerIcon } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { BarChart3, Check, Settings as SettingsIcon, Timer as TimerIcon } from 'lucide-react'
 import { useSettings } from './hooks/useSettings'
 import { useLocalState } from './hooks/useLocalState'
 import { useSessions } from './hooks/useSessions'
@@ -61,11 +61,35 @@ export default function App() {
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null)
   const [mode, setMode] = useLocalState<TimerMode>(STORAGE_KEYS.mode, 'pomodoro')
   const [activeTodoId, setActiveTodoId] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ message: string; id: number } | null>(null)
+  const toastTimer = useRef<number | null>(null)
   const sessions = useSessions()
   const todosApi = useTodos()
   const auth = useAuth()
   const sync = useSync({ user: auth.user, mergeRemoteTodos: todosApi.mergeRemote })
-  const flow = useFlowTimer()
+
+  const showToast = useCallback((message: string) => {
+    setToast({ message, id: Date.now() })
+    if (toastTimer.current != null) window.clearTimeout(toastTimer.current)
+    toastTimer.current = window.setTimeout(() => setToast(null), 3500)
+  }, [])
+
+  useEffect(
+    () => () => {
+      if (toastTimer.current != null) window.clearTimeout(toastTimer.current)
+    },
+    [],
+  )
+
+  const handleFlowFinished = useCallback(
+    (session: Omit<Session, 'id' | 'notes'>) => {
+      void addSession(session).then((id) => setPendingSessionId(id))
+      showToast(t.flow.finishedToast(Math.max(1, Math.round(session.durationMs / 60_000))))
+    },
+    [showToast, t],
+  )
+
+  const flow = useFlowTimer({ task, tag, onFinish: handleFlowFinished })
 
   const handleFocusComplete = useCallback(
     (s: Omit<Session, 'id' | 'notes'>) => {
@@ -87,18 +111,13 @@ export default function App() {
 
   const timer = useTimer({ settings, task, tag, onFocusComplete: handleFocusComplete })
 
-  const handleFlowStop = useCallback(() => {
-    const data = flow.stop()
-    if (data && data.elapsedMs >= 1000) {
-      void addSession({
-        start: data.start,
-        end: data.end,
-        durationMs: data.elapsedMs,
-        task,
-        tag,
-      })
-    }
-  }, [flow, task, tag])
+  const handleFlowFinish = useCallback(() => {
+    if (mode === 'flow') flow.finishSession()
+  }, [mode, flow])
+
+  const handleFlowDiscard = useCallback(() => {
+    flow.resetTimer()
+  }, [flow])
 
   const handleToggle = useCallback(() => {
     void requestNotificationPermission()
@@ -107,14 +126,14 @@ export default function App() {
   }, [mode, flow, timer])
 
   const handleSkip = useCallback(() => {
-    if (mode === 'flow') handleFlowStop()
+    if (mode === 'flow') handleFlowFinish()
     else timer.skip()
-  }, [mode, flow, timer, handleFlowStop])
+  }, [mode, timer, handleFlowFinish])
 
   const handleReset = useCallback(() => {
-    if (mode === 'flow') flow.reset()
+    if (mode === 'flow') handleFlowDiscard()
     else timer.reset()
-  }, [mode, flow, timer])
+  }, [mode, timer, handleFlowDiscard])
 
   const handleModeChange = useCallback(
     (m: TimerMode) => {
@@ -122,11 +141,11 @@ export default function App() {
       if (m === 'flow') {
         timer.reset()
       } else {
-        handleFlowStop()
+        flow.resetTimer()
       }
       setMode(m)
     },
-    [mode, timer, handleFlowStop, setMode],
+    [mode, timer, flow, setMode],
   )
 
   const handleFocusTodo = useCallback(
@@ -140,7 +159,12 @@ export default function App() {
     [todosApi.todos, setTask, setTag],
   )
 
-  useKeyboard({ onToggle: handleToggle, onSkip: handleSkip, onReset: handleReset })
+  useKeyboard({
+    onToggle: handleToggle,
+    onSkip: handleSkip,
+    onReset: handleReset,
+    onFlowFinish: handleFlowFinish,
+  })
 
   const chromePhase = mode === 'flow' ? 'focus' : timer.phase
   const chromeStatus = mode === 'flow' ? flow.status : timer.status
@@ -369,6 +393,17 @@ export default function App() {
           <button type="button" className="btn-primary px-3 py-1.5" onClick={reload}>
             {t.update.reload}
           </button>
+        </div>
+      )}
+
+      {toast && (
+        <div
+          key={toast.id}
+          role="status"
+          className="animate-fade-in fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-2xl border border-accent/40 bg-surface px-4 py-3 text-sm text-fg shadow-lg"
+        >
+          <Check size={16} className="shrink-0 text-accent" />
+          <span>{toast.message}</span>
         </div>
       )}
 

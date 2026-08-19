@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Pause, PictureInPicture2, Play, RotateCcw, SkipForward, Square } from 'lucide-react'
+import { Flag, Pause, PictureInPicture2, Play, RotateCcw, SkipForward, X } from 'lucide-react'
 import type { TimerStatus, PhaseId, TimerMode } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
 
@@ -245,11 +245,11 @@ export const Timer = memo(function Timer({
           flowStatus !== 'idle' && (
             <button
               type="button"
-              onClick={onSkip}
-              title={t.timer.stop}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-accent/60 bg-accent/10 text-accent transition-colors hover:bg-accent/20"
+              onClick={onReset}
+              title={`${t.flow.discard} (R)`}
+              className="flex h-12 w-12 items-center justify-center rounded-xl border border-line text-muted transition-colors hover:bg-raised hover:text-fg"
             >
-              <Square size={16} />
+              <X size={18} />
             </button>
           )
         ) : (
@@ -265,7 +265,18 @@ export const Timer = memo(function Timer({
         >
           {running ? <Pause size={26} /> : <Play size={26} className="translate-x-0.5" />}
         </button>
-        {!isFlow && (
+        {isFlow ? (
+          flowStatus !== 'idle' && (
+            <button
+              type="button"
+              onClick={onSkip}
+              title={`${t.flow.finish} (F)`}
+              className="flex h-12 w-12 items-center justify-center rounded-xl border border-accent/60 bg-accent/15 text-accent shadow-sm shadow-accent/20 transition-colors hover:bg-accent/25"
+            >
+              <Flag size={20} />
+            </button>
+          )
+        ) : (
           <button type="button" onClick={onReset} title={`${t.shortcuts.reset} (R)`} className="btn-ghost">
             <RotateCcw size={18} />
           </button>
@@ -294,7 +305,18 @@ export const Timer = memo(function Timer({
         <span className="flex items-center gap-1">
           <span className="kbd">Space</span> {t.shortcuts.startPause}
         </span>
-        {!isFlow && (
+        {isFlow ? (
+          flowStatus !== 'idle' && (
+            <>
+              <span className="flex items-center gap-1">
+                <span className="kbd">F</span> {t.flow.finishShortcut}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="kbd">R</span> {t.flow.discardShortcut}
+              </span>
+            </>
+          )
+        ) : (
           <>
             <span className="flex items-center gap-1">
               <span className="kbd">N</span> {t.shortcuts.skip}
