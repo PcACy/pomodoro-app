@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { Search, StickyNote, Trash2 } from 'lucide-react'
 import type { Session } from '../types'
 import { fmtDateTime, fmtDuration } from '../lib/time'
@@ -53,7 +53,7 @@ function SessionRow({ s, locale }: { s: Session; locale: string }) {
   )
 }
 
-export function SessionLog({ sessions, onClear }: Props) {
+export const SessionLog = memo(function SessionLog({ sessions, onClear }: Props) {
   const { t, lang } = useTranslation()
   const locale = lang === 'de' ? 'de-DE' : 'en-GB'
   const [query, setQuery] = useState('')
@@ -100,4 +100,4 @@ export function SessionLog({ sessions, onClear }: Props) {
       )}
     </div>
   )
-}
+})

@@ -20,6 +20,18 @@ interface TodoRow extends Omit<TodoItem, 'createdAt' | 'completedAt' | 'updatedA
   updated_at: number
 }
 
+interface SessionRow {
+  id: string
+  user_id: string
+  start: number
+  end: number
+  duration_ms: number
+  task: string
+  tag: string
+  notes: string | null
+  updated_at: number
+}
+
 const todoToRow = (t: TodoItem, userId: string): TodoRow => ({
   id: t.id,
   user_id: userId,
@@ -43,6 +55,32 @@ const rowToTodo = (r: TodoRow): TodoItem => ({
   updatedAt: r.updated_at,
 })
 
+const sessionToRow = (s: Session, userId: string): SessionRow => ({
+  id: s.id,
+  user_id: userId,
+  start: s.start,
+  end: s.end,
+  duration_ms: s.durationMs,
+  task: s.task,
+  tag: s.tag,
+  notes: s.notes ?? null,
+  updated_at: s.updatedAt ?? s.start,
+})
+
+const rowToSession = (r: SessionRow): Session => ({
+  id: r.id,
+  start: r.start,
+  end: r.end,
+  durationMs: r.duration_ms,
+  task: r.task,
+  tag: r.tag,
+  notes: r.notes ?? undefined,
+  updatedAt: r.updated_at,
+})
+
+/** Last-write-wins merge key; falls back to `start` for legacy records. */
+const sessionTs = (s: Session): number => s.updatedAt ?? s.start
+
 async function mergeSessionsIntoDb(remote: Session[]): Promise<void> {
   if (remote.length === 0) return
   const local = await db.sessions.toArray()
@@ -55,8 +93,12 @@ async function mergeSessionsIntoDb(remote: Session[]): Promise<void> {
       toAdd.push(r)
       continue
     }
-    if (!l.notes && r.notes) toPut.push({ ...l, notes: r.notes })
-    else if (l.notes && r.notes && l.notes !== r.notes) toPut.push({ ...l, notes: l.notes })
+    if (sessionTs(r) > sessionTs(l)) {
+      toPut.push(r)
+    } else if (sessionTs(r) === sessionTs(l) && !l.notes && r.notes) {
+      // Same timestamp, equal data – keep the local record but fill a remote note.
+      toPut.push({ ...l, notes: r.notes })
+    }
   }
   if (toAdd.length || toPut.length) {
     await db.transaction('rw', db.sessions, async () => {
@@ -97,7 +139,7 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
           if (table === 'sessions') {
             const rec = await db.sessions.get(op.id)
             if (!rec) deletes.push(op.id)
-            else upserts.push({ ...rec, user_id: userId })
+            else upserts.push(sessionToRow(rec, userId))
           } else {
             const rec = readTodosLocal().find((t) => t.id === op.id)
             if (!rec) deletes.push(op.id)
@@ -112,7 +154,7 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
               : readTodosLocal()
           if (all.length) {
             const rows = all.map((r) =>
-              table === 'sessions' ? { ...r, user_id: userId } : todoToRow(r as TodoItem, userId),
+              table === 'sessions' ? sessionToRow(r as Session, userId) : todoToRow(r as TodoItem, userId),
             )
             await supabase.from(table).upsert(rows, { onConflict: 'id' })
           }
@@ -139,7 +181,7 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
       ])
       if (sess.error) throw sess.error
       if (todos.error) throw todos.error
-      await mergeSessionsIntoDb((sess.data ?? []) as Session[])
+      await mergeSessionsIntoDb((sess.data ?? []).map((r) => rowToSession(r as SessionRow)))
       mergeRef.current((todos.data ?? []).map((r) => rowToTodo(r as TodoRow)))
       return true
     } catch (e) {

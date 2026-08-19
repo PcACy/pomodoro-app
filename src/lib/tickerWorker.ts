@@ -1,14 +1,23 @@
 const WORKER_CODE = `
 let timer = null;
+
+function tick() {
+  var now = Date.now();
+  self.postMessage({ type: 'tick', now: now });
+  if (timer === null) return;
+  // Self-healing cadence: schedule the next wakeup relative to wall-clock time,
+  // so throttling / system sleep does not accumulate interval drift while awake.
+  var elapsed = Date.now() - now;
+  timer = setTimeout(tick, Math.max(50, 250 - elapsed));
+}
+
 self.onmessage = function (e) {
   var msg = e.data;
   if (msg.type === 'start') {
     if (timer !== null) return;
-    timer = self.setInterval(function () {
-      self.postMessage({ type: 'tick', now: Date.now() });
-    }, 250);
+    tick();
   } else if (msg.type === 'stop') {
-    if (timer !== null) { self.clearInterval(timer); timer = null; }
+    if (timer !== null) { clearTimeout(timer); timer = null; }
   }
 };
 `
@@ -18,7 +27,8 @@ let worker: Worker | null = null
 /**
  * Difference-based ticking: the worker only reports wall-clock timestamps.
  * The main thread computes remaining time from a fixed target end timestamp,
- * so the countdown stays exact even when background tabs throttle the worker.
+ * so the countdown stays exact even when background tabs throttle the worker
+ * or the system sleeps between wakeups.
  */
 export function getTickerWorker(): Worker {
   if (!worker) {

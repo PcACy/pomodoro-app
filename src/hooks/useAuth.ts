@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 
@@ -51,18 +51,22 @@ export function useAuth() {
     if (error) console.error('[auth] logout failed:', error.message)
   }, [])
 
-  const profile: GitHubProfile | null = user
-    ? {
-        name: String(
-          user.user_metadata?.user_name ??
-            user.user_metadata?.name ??
-            user.user_metadata?.full_name ??
-            user.email ??
-            '',
-        ),
-        avatarUrl: String(user.user_metadata?.avatar_url ?? ''),
-      }
-    : null
+  const profile: GitHubProfile | null = useMemo(
+    () =>
+      user
+        ? {
+            name: String(
+              user.user_metadata?.user_name ??
+                user.user_metadata?.name ??
+                user.user_metadata?.full_name ??
+                user.email ??
+                '',
+            ),
+            avatarUrl: String(user.user_metadata?.avatar_url ?? ''),
+          }
+        : null,
+    [user],
+  )
 
   return { user, profile, loading, login, logout, available: isSupabaseConfigured }
 }

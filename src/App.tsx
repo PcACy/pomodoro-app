@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { BarChart3, Settings as SettingsIcon, Timer as TimerIcon } from 'lucide-react'
 import { useSettings } from './hooks/useSettings'
 import { useLocalState } from './hooks/useLocalState'
@@ -10,12 +10,15 @@ import { useDocumentChrome } from './hooks/useDocumentChrome'
 import { useTheme } from './hooks/useTheme'
 import { useServiceWorker } from './hooks/useServiceWorker'
 import { usePictureInPicture } from './hooks/usePictureInPicture'
+import { useWakeLock } from './hooks/useWakeLock'
+import { useNotificationActions } from './hooks/useNotificationActions'
 import { useTodos } from './hooks/useTodos'
 import { useAuth } from './hooks/useAuth'
 import { useSync } from './hooks/useSync'
 import { useTranslation } from './hooks/useTranslation'
 import { addSession, updateSessionNotes } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
+import { initAudio } from './lib/sound'
 import { todayMinutes } from './lib/stats'
 import { fmtDuration } from './lib/time'
 import { STORAGE_KEYS, type Session, type Settings, type TimerMode } from './types'
@@ -23,7 +26,7 @@ import type { Messages } from './lib/i18n'
 import { Timer } from './components/Timer'
 import { Dashboard } from './components/Dashboard'
 import { SettingsPanel } from './components/Settings'
-import { PipTimer } from './components/PipTimer'
+import { PipTimer, PipCanvas } from './components/PipTimer'
 import { ReflectionModal } from './components/ReflectionModal'
 import { TodoList } from './components/TodoList'
 
@@ -140,12 +143,44 @@ export default function App() {
   useDocumentChrome(chromePhase, chromeStatus, chromeTime, chromeProgress, chromeRemaining)
 
   const { updateAvailable, reload } = useServiceWorker()
-  const { pipWindow, isSupported: pipSupported, open: openPip, close: closePip } = usePictureInPicture()
+  const { pipWindow, isSupported: pipSupported, open: openPip, close: closePip, mode: pipMode, canvasRef, videoRef } =
+    usePictureInPicture()
   const zenRunning = tab === 'timer' && chromeStatus === 'running'
 
-  const handleImportSettings = (s: unknown) => {
+  useWakeLock(chromeStatus === 'running')
+
+  // Unlock the AudioContext on the first user gesture (autoplay policy).
+  useEffect(() => {
+    const unlock = () => initAudio()
+    window.addEventListener('pointerdown', unlock, { once: true })
+    window.addEventListener('keydown', unlock, { once: true })
+    return () => {
+      window.removeEventListener('pointerdown', unlock)
+      window.removeEventListener('keydown', unlock)
+    }
+  }, [])
+
+  useNotificationActions({
+    onStartPhase: () => {
+      if (mode === 'flow') {
+        if (flow.status !== 'running') flow.toggle()
+      } else if (timer.status !== 'running') {
+        timer.toggle()
+      }
+    },
+    onAddTime: () => {
+      if (mode !== 'flow') timer.addTime(5 * 60_000)
+    },
+  })
+
+  const handleImportSettings = useCallback((s: unknown) => {
     if (s && typeof s === 'object') updateSettings(() => s as Settings)
-  }
+  }, [updateSettings])
+
+  const handlePipToggle = useCallback(() => {
+    if (pipMode !== 'none') closePip()
+    else void openPip()
+  }, [pipMode, closePip, openPip])
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center gap-8 px-4 py-8">
@@ -207,11 +242,8 @@ export default function App() {
               onSkip={handleSkip}
               onReset={handleReset}
               pipSupported={pipSupported}
-              pipOpen={pipWindow != null}
-              onPipToggle={() => {
-                if (pipWindow) closePip()
-                else void openPip()
-              }}
+              pipOpen={pipMode !== 'none'}
+              onPipToggle={handlePipToggle}
             />
             <TodoList
               todos={todosApi.todos}
@@ -263,13 +295,24 @@ export default function App() {
       )}
 
       <PipTimer
+        mode={pipMode}
         pipWindow={pipWindow}
         phase={chromePhase}
         phaseLabel={mode === 'flow' ? 'Flow' : timer.phaseLabel}
         status={chromeStatus}
         time={chromeTime}
+        activeTodo={task}
         onToggle={handleToggle}
         onSkip={handleSkip}
+      />
+
+      <canvas ref={canvasRef} width={480} height={320} className="hidden" aria-hidden="true" />
+      <video ref={videoRef} className="hidden" aria-hidden="true" muted playsInline />
+      <PipCanvas
+        canvasRef={canvasRef}
+        phaseLabel={mode === 'flow' ? 'Flow' : timer.phaseLabel}
+        status={chromeStatus}
+        time={chromeTime}
       />
 
       {pendingSessionId != null && (

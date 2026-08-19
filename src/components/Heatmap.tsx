@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { fmtDate } from '../lib/time'
 import type { HeatmapWeek } from '../lib/stats'
 import { useTranslation } from '../hooks/useTranslation'
@@ -14,7 +15,7 @@ function cellClass(minutes: number): string {
   return 'bg-accent/90'
 }
 
-export function Heatmap({ weeks }: Props) {
+export const Heatmap = memo(function Heatmap({ weeks }: Props) {
   const { t, lang } = useTranslation()
   const locale = lang === 'de' ? 'de-DE' : 'en-GB'
   return (
@@ -48,4 +49,4 @@ export function Heatmap({ weeks }: Props) {
       </div>
     </div>
   )
-}
+})

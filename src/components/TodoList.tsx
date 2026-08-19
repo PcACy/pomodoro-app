@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { Check, Pencil, Plus, Target, Trash2, X } from 'lucide-react'
 import type { TodoItem } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
@@ -14,7 +14,7 @@ interface Props {
   onFocus: (id: string) => void
 }
 
-export function TodoList({ todos, tags, activeTodoId, onAdd, onToggle, onEdit, onRemove, onFocus }: Props) {
+export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAdd, onToggle, onEdit, onRemove, onFocus }: Props) {
   const { t: tr } = useTranslation()
   const [title, setTitle] = useState('')
   const [tag, setTag] = useState(tags[0] ?? '')
@@ -173,4 +173,4 @@ export function TodoList({ todos, tags, activeTodoId, onAdd, onToggle, onEdit, o
       )}
     </section>
   )
-}
+})

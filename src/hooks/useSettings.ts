@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocalState } from './useLocalState'
 import { DEFAULT_SETTINGS, STORAGE_KEYS, type Settings } from '../types'
 
@@ -14,6 +14,8 @@ function mergeWithDefaults(stored: Partial<Settings> | undefined): Settings {
 export function useSettings(): [Settings, (updater: (s: Settings) => Settings) => void] {
   const [settings, setSettings] = useLocalState<Partial<Settings>>(STORAGE_KEYS.settings, {})
 
+  const merged = useMemo(() => mergeWithDefaults(settings), [settings])
+
   const update = useCallback(
     (updater: (s: Settings) => Settings) => {
       setSettings((prev) => updater(mergeWithDefaults(prev)) as Partial<Settings>)
@@ -21,5 +23,5 @@ export function useSettings(): [Settings, (updater: (s: Settings) => Settings) =
     [setSettings],
   )
 
-  return [mergeWithDefaults(settings), update]
+  return [merged, update]
 }

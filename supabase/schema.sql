@@ -9,8 +9,13 @@ create table if not exists public.sessions (
   duration_ms bigint not null,
   task text not null,
   tag text not null,
-  notes text
+  notes text,
+  updated_at bigint not null default 0
 );
+
+-- Upgrades for an already-deployed schema (previous version had no updated_at):
+alter table public.sessions add column if not exists updated_at bigint not null default 0;
+alter table public.todos add column if not exists updated_at bigint not null default 0;
 
 create table if not exists public.todos (
   id text primary key,

@@ -1,14 +1,18 @@
+import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Pause, Play, SkipForward } from 'lucide-react'
 import type { PhaseId, TimerStatus } from '../types'
+import type { PipMode } from '../hooks/usePictureInPicture'
 import { useTranslation } from '../hooks/useTranslation'
 
 interface Props {
+  mode: PipMode
   pipWindow: Window | null
   phase: PhaseId
   phaseLabel: string
   status: TimerStatus
   time: string
+  activeTodo: string
   onToggle: () => void
   onSkip: () => void
 }
@@ -19,9 +23,9 @@ const BADGE: Record<PhaseId, string> = {
   longBreak: 'bg-long/15 text-long',
 }
 
-export function PipTimer({ pipWindow, phase, phaseLabel, status, time, onToggle, onSkip }: Props) {
+export function PipTimer({ mode, pipWindow, phase, phaseLabel, status, time, activeTodo, onToggle, onSkip }: Props) {
   const { t } = useTranslation()
-  if (!pipWindow?.document?.body) return null
+  if (mode !== 'document' || !pipWindow?.document?.body) return null
 
   const running = status === 'running'
 
@@ -33,6 +37,12 @@ export function PipTimer({ pipWindow, phase, phaseLabel, status, time, onToggle,
         {phaseLabel}
       </span>
       <span className="font-mono text-4xl font-bold tabular-nums leading-none text-fg">{time}</span>
+
+      {activeTodo && (
+        <span className="max-w-full truncate text-xs text-muted" title={activeTodo}>
+          {activeTodo}
+        </span>
+      )}
 
       <div className="mt-1 flex items-center gap-2">
         <button
@@ -55,4 +65,42 @@ export function PipTimer({ pipWindow, phase, phaseLabel, status, time, onToggle,
     </div>,
     pipWindow.document.body,
   )
+}
+
+interface CanvasProps {
+  canvasRef: React.RefObject<HTMLCanvasElement>
+  phaseLabel: string
+  status: TimerStatus
+  time: string
+}
+
+const CANVAS_BG = '#0b0d12'
+const CANVAS_FG = '#f5f5f5'
+
+/** Renders the timer onto the hidden canvas that feeds the video-PiP fallback stream. */
+export function PipCanvas({ canvasRef, phaseLabel, status, time }: CanvasProps) {
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    const dpr = window.devicePixelRatio || 1
+    const w = canvas.width / dpr
+    const h = canvas.height / dpr
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    ctx.fillStyle = CANVAS_BG
+    ctx.fillRect(0, 0, w, h)
+    ctx.textAlign = 'center'
+    ctx.fillStyle = '#83a598'
+    ctx.font = '600 14px system-ui, sans-serif'
+    ctx.fillText(phaseLabel.toUpperCase(), w / 2, h / 2 - 26)
+    ctx.fillStyle = CANVAS_FG
+    ctx.font = '700 34px ui-monospace, monospace'
+    ctx.fillText(time, w / 2, h / 2 + 10)
+    ctx.fillStyle = status === 'running' ? '#8ec07c' : '#928374'
+    ctx.font = '500 12px system-ui, sans-serif'
+    ctx.fillText(status === 'running' ? '●' : '❚❚', w / 2, h / 2 + 34)
+  }, [canvasRef, phaseLabel, status, time])
+
+  return null
 }

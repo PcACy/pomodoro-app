@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Pause, PictureInPicture2, Play, RotateCcw, SkipForward, Square } from 'lucide-react'
 import type { TimerStatus, PhaseId, TimerMode } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
@@ -52,7 +53,7 @@ const STROKE = 14
 const R = (SIZE - STROKE) / 2
 const CIRC = 2 * Math.PI * R
 
-export function Timer({
+export const Timer = memo(function Timer({
   phase,
   phaseLabel,
   status,
@@ -264,4 +265,4 @@ export function Timer({
       </div>
     </section>
   )
-}
+})

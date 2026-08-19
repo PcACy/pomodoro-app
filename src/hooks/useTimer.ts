@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PhaseId, Settings, TimerState } from '../types'
 import { MS_PER_MINUTE } from '../lib/time'
 import { getTickerWorker } from '../lib/tickerWorker'
-import { playChime } from '../lib/sound'
+import { playChime, initAudio } from '../lib/sound'
 import { notify } from '../lib/notify'
 import { fmtTime } from '../lib/time'
 import { getLang, translations } from '../lib/i18n'
@@ -80,7 +80,10 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
         playChime('focus')
         const lang = getLang()
         const nn = translations[lang].notify
-        notify(nn.focusDoneTitle, nn.focusDoneBody(nextCycle))
+        notify(nn.focusDoneTitle, nn.focusDoneBody(nextCycle), [
+          { action: 'start-break', title: nn.pauseStart },
+          { action: 'add-5', title: nn.add5Min },
+        ])
       }
       nextPhase = nextCycle % phases.roundsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
     } else {
@@ -91,7 +94,10 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
         playChime('break')
         const lang = getLang()
         const nn = translations[lang].notify
-        notify(nn.breakOverTitle, nn.breakOverBody)
+        notify(nn.breakOverTitle, nn.breakOverBody, [
+          { action: 'start-focus', title: nn.focusStart },
+          { action: 'add-5', title: nn.add5Min },
+        ])
       }
     }
 
@@ -125,6 +131,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
   const start = useCallback(() => {
     const m = machineRef.current
     if (m.status === 'running') return
+    initAudio()
     const now = Date.now()
     if (m.status === 'idle') phaseStartedAtRef.current = now
     endRef.current = now + m.remainingMs
@@ -154,6 +161,14 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
   const reset = useCallback(() => {
     endRef.current = null
     setMachine((prev) => ({ ...prev, status: 'idle', remainingMs: prev.totalMs }))
+  }, [])
+
+  /** Extend the current phase (running or paused) by `ms`. */
+  const addTime = useCallback((ms: number) => {
+    const m = machineRef.current
+    if (m.status === 'idle') return
+    if (endRef.current != null) endRef.current += ms
+    setMachine((prev) => ({ ...prev, remainingMs: prev.remainingMs + ms }))
   }, [])
 
   // Keep the worker running only while the timer runs.
@@ -209,5 +224,6 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     toggle,
     skip,
     reset,
+    addTime,
   }
 }

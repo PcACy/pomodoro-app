@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { memo, useMemo, useRef, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Check, Clock, Copy, Download, FileDown, Flame, Target, Upload } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../types'
@@ -15,6 +15,13 @@ import {
 } from '../lib/stats'
 import { fmtDuration, startOfWeek } from '../lib/time'
 import { buildDailyMarkdown, buildDayExport, copyMarkdown, downloadMarkdown } from '../lib/markdownExport'
+import {
+  downloadText,
+  sessionsToCsv,
+  sessionsToJson,
+  todosToCsv,
+  todosToJson,
+} from '../lib/dataExport'
 import { Heatmap } from './Heatmap'
 import { SessionLog } from './SessionLog'
 import { exportAll, importSessions, clearSessions } from '../lib/db'
@@ -53,7 +60,7 @@ function MetricCard({
   )
 }
 
-export function Dashboard({ sessions, settings, themeId, todos, onImportSettings }: Props) {
+export const Dashboard = memo(function Dashboard({ sessions, settings, themeId, todos, onImportSettings }: Props) {
   const { t, lang } = useTranslation()
   const colors = useThemeColors(themeId)
   const today = todayMinutes(sessions)
@@ -129,6 +136,21 @@ export function Dashboard({ sessions, settings, themeId, todos, onImportSettings
     } catch {
       /* Zwischenablage nicht verfügbar */
     }
+  }
+
+  const todayKey = new Date().toISOString().slice(0, 10)
+
+  const handleSessionsCsv = () => {
+    downloadText(`pomodoro-sessions-${todayKey}.csv`, sessionsToCsv(sessions), 'text/csv')
+  }
+  const handleSessionsJson = () => {
+    downloadText(`pomodoro-sessions-${todayKey}.json`, sessionsToJson(sessions), 'application/json')
+  }
+  const handleTodosCsv = () => {
+    downloadText(`pomodoro-todos-${todayKey}.csv`, todosToCsv(todos), 'text/csv')
+  }
+  const handleTodosJson = () => {
+    downloadText(`pomodoro-todos-${todayKey}.json`, todosToJson(todos), 'application/json')
   }
 
   return (
@@ -258,6 +280,18 @@ export function Dashboard({ sessions, settings, themeId, todos, onImportSettings
             <button type="button" onClick={() => void handleMdCopy()} className="btn-ghost text-xs" title={t.dashboard.copyTitle}>
               {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? t.dashboard.copied : t.dashboard.copy}
             </button>
+            <button type="button" onClick={handleSessionsCsv} className="btn-ghost text-xs" title={t.dashboard.sessionsCsvTitle}>
+              <FileDown size={14} /> {t.dashboard.sessionsCsv}
+            </button>
+            <button type="button" onClick={handleSessionsJson} className="btn-ghost text-xs" title={t.dashboard.sessionsJsonTitle}>
+              <FileDown size={14} /> {t.dashboard.sessionsJson}
+            </button>
+            <button type="button" onClick={handleTodosCsv} className="btn-ghost text-xs" title={t.dashboard.todosCsvTitle}>
+              <FileDown size={14} /> {t.dashboard.todosCsv}
+            </button>
+            <button type="button" onClick={handleTodosJson} className="btn-ghost text-xs" title={t.dashboard.todosJsonTitle}>
+              <FileDown size={14} /> {t.dashboard.todosJson}
+            </button>
             <button type="button" onClick={handleExport} className="btn-ghost text-xs">
               <Download size={14} /> {t.dashboard.export}
             </button>
@@ -281,4 +315,4 @@ export function Dashboard({ sessions, settings, themeId, todos, onImportSettings
       </div>
     </div>
   )
-}
+})

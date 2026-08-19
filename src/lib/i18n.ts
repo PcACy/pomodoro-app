@@ -65,6 +65,14 @@ export interface Messages {
     importFailed: string
     day: string
     days: string
+    sessionsCsv: string
+    sessionsCsvTitle: string
+    sessionsJson: string
+    sessionsJsonTitle: string
+    todosCsv: string
+    todosCsvTitle: string
+    todosJson: string
+    todosJsonTitle: string
   }
   sessionLog: {
     searchPlaceholder: string
@@ -114,6 +122,9 @@ export interface Messages {
     focusDoneBody: (round: number) => string
     breakOverTitle: string
     breakOverBody: string
+    pauseStart: string
+    focusStart: string
+    add5Min: string
   }
   weekdays: [string, string, string, string, string, string, string]
 }
@@ -190,6 +201,14 @@ const de: Messages = {
     importFailed: 'Import fehlgeschlagen: Die Datei ist kein gültiges Backup.',
     day: 'Tag',
     days: 'Tage',
+    sessionsCsv: 'Sessions .csv',
+    sessionsCsvTitle: 'Alle Sessions als CSV exportieren',
+    sessionsJson: 'Sessions .json',
+    sessionsJsonTitle: 'Alle Sessions als JSON exportieren',
+    todosCsv: 'Todos .csv',
+    todosCsvTitle: 'Alle Todos als CSV exportieren',
+    todosJson: 'Todos .json',
+    todosJsonTitle: 'Alle Todos als JSON exportieren',
   },
   sessionLog: {
     searchPlaceholder: 'Sessions durchsuchen (Name, Tag, Datum) …',
@@ -241,6 +260,9 @@ const de: Messages = {
     focusDoneBody: (round) => `Runde ${round} geschafft. Zeit für eine Pause.`,
     breakOverTitle: 'Pause vorbei',
     breakOverBody: 'Zurück an den Fokus.',
+    pauseStart: 'Pause starten',
+    focusStart: 'Fokus starten',
+    add5Min: '+5 Min',
   },
 }
 
@@ -316,6 +338,14 @@ const en: Messages = {
     importFailed: 'Import failed: the file is not a valid backup.',
     day: 'day',
     days: 'days',
+    sessionsCsv: 'Sessions .csv',
+    sessionsCsvTitle: 'Export all sessions as CSV',
+    sessionsJson: 'Sessions .json',
+    sessionsJsonTitle: 'Export all sessions as JSON',
+    todosCsv: 'Todos .csv',
+    todosCsvTitle: 'Export all todos as CSV',
+    todosJson: 'Todos .json',
+    todosJsonTitle: 'Export all todos as JSON',
   },
   sessionLog: {
     searchPlaceholder: 'Search sessions (name, tag, date) …',
@@ -367,6 +397,9 @@ const en: Messages = {
     focusDoneBody: (round) => `Round ${round} done. Time for a break.`,
     breakOverTitle: 'Break over',
     breakOverBody: 'Back to focus.',
+    pauseStart: 'Start break',
+    focusStart: 'Start focus',
+    add5Min: '+5 Min',
   },
 }
 

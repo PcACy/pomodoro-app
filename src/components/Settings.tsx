@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { Check, Github, Loader2, LogOut, Plus, RefreshCw, Trash2, X } from 'lucide-react'
 import type { Settings } from '../types'
 import { THEMES, type ThemeId } from '../themes'
@@ -29,7 +29,7 @@ const PHASE_KEYS: Array<keyof Pick<Settings['phases'], 'focus' | 'shortBreak' | 
   'longBreak',
 ]
 
-export function SettingsPanel({
+export const SettingsPanel = memo(function SettingsPanel({
   settings,
   update,
   themeId,
@@ -289,4 +289,4 @@ export function SettingsPanel({
       </div>
     </div>
   )
-}
+})

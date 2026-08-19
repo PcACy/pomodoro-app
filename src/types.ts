@@ -23,6 +23,7 @@ export interface Session {
   task: string
   tag: string
   notes?: string
+  updatedAt?: number
 }
 
 export interface TimerState {
