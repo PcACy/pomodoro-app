@@ -87,7 +87,8 @@ export interface HeatmapCell {
   key: string
   date: Date
   minutes: number
-  count: number // index within week column
+  dow: number // day of week, 0 = Monday
+  count: number // number of sessions that day
 }
 
 export interface HeatmapWeek {
@@ -98,10 +99,12 @@ export interface HeatmapWeek {
 /** Last `weeks` calendar weeks as GitHub-style columns (Monday-first). */
 export function heatmapData(sessions: Session[], weeks: number): HeatmapWeek[] {
   const totals = new Map<string, number>()
+  const counts = new Map<string, number>()
   for (const s of sessions) {
     const d = new Date(s.start)
     const key = dayKey(d)
     totals.set(key, (totals.get(key) ?? 0) + minutesOf(s))
+    counts.set(key, (counts.get(key) ?? 0) + 1)
   }
 
   const today = startOfDay(new Date())
@@ -119,7 +122,8 @@ export function heatmapData(sessions: Session[], weeks: number): HeatmapWeek[] {
         key,
         date,
         minutes: totals.get(key) ?? 0,
-        count: i,
+        dow: i,
+        count: counts.get(key) ?? 0,
       })
     }
     weeksOut.push({ start: cursor, days })

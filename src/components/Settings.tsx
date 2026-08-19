@@ -1,8 +1,9 @@
 import { memo, useState } from 'react'
-import { Check, Github, Loader2, LogOut, Plus, RefreshCw, Trash2, X } from 'lucide-react'
-import type { Settings } from '../types'
+import { Check, Download, FileDown, FileJson, Github, Loader2, LogOut, Plus, RefreshCw, Trash2, X } from 'lucide-react'
+import type { Settings, Session, TodoItem } from '../types'
 import { THEMES, type ThemeId } from '../themes'
-import { clearSessions } from '../lib/db'
+import { clearSessions, exportAll } from '../lib/db'
+import { downloadText, sessionsToCsv, sessionsToJson, todosToCsv, todosToJson } from '../lib/dataExport'
 import { useTranslation } from '../hooks/useTranslation'
 import type { SyncStatus } from '../hooks/useSync'
 import type { GitHubProfile } from '../hooks/useAuth'
@@ -12,6 +13,8 @@ interface Props {
   update: (updater: (s: Settings) => Settings) => void
   themeId: ThemeId
   onThemeChange: (id: ThemeId) => void
+  sessions: Session[]
+  todos: TodoItem[]
   syncStatus: SyncStatus
   syncPending: boolean
   syncLastSyncAt: number | null
@@ -34,6 +37,8 @@ export const SettingsPanel = memo(function SettingsPanel({
   update,
   themeId,
   onThemeChange,
+  sessions,
+  todos,
   syncStatus,
   syncPending,
   syncLastSyncAt,
@@ -46,6 +51,30 @@ export const SettingsPanel = memo(function SettingsPanel({
 }: Props) {
   const { t, lang, setLang } = useTranslation()
   const [newTag, setNewTag] = useState('')
+
+  const todayKey = new Date().toISOString().slice(0, 10)
+
+  const handleBackup = () => {
+    void exportAll().then((data) => {
+      downloadText(`pomodoro-backup-${todayKey}.json`, JSON.stringify(data, null, 2), 'application/json')
+    })
+  }
+
+  const handleSessionsCsv = () => {
+    downloadText(`pomodoro-sessions-${todayKey}.csv`, sessionsToCsv(sessions), 'text/csv')
+  }
+
+  const handleSessionsJson = () => {
+    downloadText(`pomodoro-sessions-${todayKey}.json`, sessionsToJson(sessions), 'application/json')
+  }
+
+  const handleTodosCsv = () => {
+    downloadText(`pomodoro-todos-${todayKey}.csv`, todosToCsv(todos), 'text/csv')
+  }
+
+  const handleTodosJson = () => {
+    downloadText(`pomodoro-todos-${todayKey}.json`, todosToJson(todos), 'application/json')
+  }
 
   const setPhaseDuration = (key: keyof Settings['phases'], value: number) => {
     const v = Math.max(1, Math.min(180, value || 1))
@@ -277,15 +306,34 @@ export const SettingsPanel = memo(function SettingsPanel({
       <div className="card border-accent-strong/40 p-6">
         <h3 className="mb-1 text-sm font-semibold text-accent-strong">{t.settings.data}</h3>
         <p className="mb-4 text-xs text-muted">{t.settings.dataHint}</p>
-        <button
-          type="button"
-          onClick={() => {
-            if (window.confirm(t.settings.confirmClear)) void clearSessions()
-          }}
-          className="btn border border-accent-strong/60 bg-accent-strong/10 text-accent-strong hover:bg-accent-strong/20"
-        >
-          <Trash2 size={15} /> {t.settings.clearSessions}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={handleBackup} className="btn-ghost text-xs">
+            <Download size={14} /> {t.settings.backup}
+          </button>
+          <button type="button" onClick={handleSessionsCsv} className="btn-ghost text-xs" title={t.dashboard.sessionsCsvTitle}>
+            <FileDown size={14} /> {t.dashboard.sessionsCsv}
+          </button>
+          <button type="button" onClick={handleSessionsJson} className="btn-ghost text-xs" title={t.dashboard.sessionsJsonTitle}>
+            <FileJson size={14} /> {t.dashboard.sessionsJson}
+          </button>
+          <button type="button" onClick={handleTodosCsv} className="btn-ghost text-xs" title={t.dashboard.todosCsvTitle}>
+            <FileDown size={14} /> {t.dashboard.todosCsv}
+          </button>
+          <button type="button" onClick={handleTodosJson} className="btn-ghost text-xs" title={t.dashboard.todosJsonTitle}>
+            <FileJson size={14} /> {t.dashboard.todosJson}
+          </button>
+        </div>
+        <div className="mt-5 border-t border-line pt-4">
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm(t.settings.confirmClear)) void clearSessions()
+            }}
+            className="btn border border-accent-strong/60 bg-accent-strong/10 text-accent-strong hover:bg-accent-strong/20"
+          >
+            <Trash2 size={15} /> {t.settings.clearSessions}
+          </button>
+        </div>
       </div>
     </div>
   )

@@ -272,6 +272,8 @@ export default function App() {
             update={updateSettings}
             themeId={themeId}
             onThemeChange={setTheme}
+            sessions={sessions}
+            todos={todosApi.todos}
             syncStatus={sync.status}
             syncPending={sync.pending}
             syncLastSyncAt={sync.lastSyncAt}

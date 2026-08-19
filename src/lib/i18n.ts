@@ -47,7 +47,7 @@ export interface Messages {
     focusMinutes: string
     byTag: string
     noWeekData: string
-    last13Weeks: string
+    last52Weeks: string
     hourOfDay: string
     sessionsPerHour: string
     noData: string
@@ -55,14 +55,6 @@ export interface Messages {
     sessions: string
     amount: string
     sessionLog: string
-    export: string
-    import: string
-    mdDownload: string
-    mdDownloadTitle: string
-    copy: string
-    copyTitle: string
-    copied: string
-    importFailed: string
     day: string
     days: string
     sessionsCsv: string
@@ -80,6 +72,14 @@ export interface Messages {
     empty: string
     noResults: string
     noTask: string
+    import: string
+    export: string
+    mdDownload: string
+    copy: string
+    copied: string
+    csv: string
+    json: string
+    importFailed: string
   }
   settings: {
     theme: string
@@ -100,6 +100,7 @@ export interface Messages {
     dataHint: string
     confirmClear: string
     clearSessions: string
+    backup: string
     language: string
   }
   sync: {
@@ -116,7 +117,7 @@ export interface Messages {
     syncNow: string
     lastSync: (d: Date) => string
   }
-  heatmap: { less: string; more: string }
+  heatmap: { less: string; more: string; tooltip: (minutes: number, count: number, date: string) => string }
   notify: {
     focusDoneTitle: string
     focusDoneBody: (round: number) => string
@@ -183,7 +184,7 @@ const de: Messages = {
     focusMinutes: 'Fokuszeit in Minuten',
     byTag: 'Verteilung nach Tag',
     noWeekData: 'Diese Woche noch keine Daten.',
-    last13Weeks: 'Letzte 13 Wochen',
+    last52Weeks: 'Letzte 52 Wochen',
     hourOfDay: 'Tageszeit',
     sessionsPerHour: 'Abgeschlossene Sessions pro Stunde',
     noData: 'Noch keine Daten.',
@@ -191,14 +192,6 @@ const de: Messages = {
     sessions: 'Sessions',
     amount: 'Anzahl',
     sessionLog: 'Session-Log',
-    export: 'Export',
-    import: 'Import',
-    mdDownload: 'Als .md',
-    mdDownloadTitle: 'Obsidian Markdown für heute herunterladen',
-    copy: 'Kopieren',
-    copyTitle: 'Markdown für heute in die Zwischenablage kopieren',
-    copied: 'Kopiert!',
-    importFailed: 'Import fehlgeschlagen: Die Datei ist kein gültiges Backup.',
     day: 'Tag',
     days: 'Tage',
     sessionsCsv: 'Sessions .csv',
@@ -216,6 +209,14 @@ const de: Messages = {
     empty: 'Noch keine Sessions erfasst.',
     noResults: 'Keine Treffer.',
     noTask: 'Ohne Aufgabe',
+    import: 'Import',
+    export: 'Export',
+    mdDownload: 'Markdown herunterladen (.md)',
+    copy: 'In Zwischenablage kopieren',
+    copied: 'Kopiert!',
+    csv: 'CSV-Tabelle (.csv)',
+    json: 'JSON-Rohdaten (.json)',
+    importFailed: 'Import fehlgeschlagen: Die Datei ist kein gültiges Backup.',
   },
   settings: {
     theme: 'Theme',
@@ -232,10 +233,11 @@ const de: Messages = {
     newTag: 'Neuer Tag …',
     addTag: 'Hinzufügen',
     removeTag: (tag) => `Tag "${tag}" entfernen`,
-    data: 'Daten',
-    dataHint: 'Alle erfassten Sessions unwiderruflich löschen. Vorher ein Backup exportieren.',
+    data: 'Daten & Backup',
+    dataHint: 'Exportiere ein Komplett-Backup oder deine Daten als CSV/JSON. Das Löschen aller Sessions ist unwiderruflich.',
     confirmClear: 'Wirklich ALLE Sessions löschen?',
     clearSessions: 'Sessions löschen',
+    backup: 'Komplett-Backup (.json)',
     language: 'Sprache',
   },
   sync: {
@@ -254,7 +256,12 @@ const de: Messages = {
     lastSync: (d) =>
       `Zuletzt synchronisiert: ${d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`,
   },
-  heatmap: { less: 'Weniger', more: 'Mehr' },
+  heatmap: {
+    less: 'Weniger',
+    more: 'Mehr',
+    tooltip: (minutes, count, date) =>
+      `${minutes} Min. Fokus · ${count} ${count === 1 ? 'Session' : 'Sessions'} am ${date}`,
+  },
   notify: {
     focusDoneTitle: 'Fokus abgeschlossen',
     focusDoneBody: (round) => `Runde ${round} geschafft. Zeit für eine Pause.`,
@@ -320,7 +327,7 @@ const en: Messages = {
     focusMinutes: 'Focus minutes',
     byTag: 'Distribution by tag',
     noWeekData: 'No data this week yet.',
-    last13Weeks: 'Last 13 weeks',
+    last52Weeks: 'Last 52 weeks',
     hourOfDay: 'Time of day',
     sessionsPerHour: 'Completed sessions per hour',
     noData: 'No data yet.',
@@ -328,14 +335,6 @@ const en: Messages = {
     sessions: 'Sessions',
     amount: 'Count',
     sessionLog: 'Session log',
-    export: 'Export',
-    import: 'Import',
-    mdDownload: 'Download .md',
-    mdDownloadTitle: 'Download Obsidian Markdown for today',
-    copy: 'Copy',
-    copyTitle: 'Copy Markdown for today to the clipboard',
-    copied: 'Copied!',
-    importFailed: 'Import failed: the file is not a valid backup.',
     day: 'day',
     days: 'days',
     sessionsCsv: 'Sessions .csv',
@@ -353,6 +352,14 @@ const en: Messages = {
     empty: 'No sessions recorded yet.',
     noResults: 'No matches.',
     noTask: 'No task',
+    import: 'Import',
+    export: 'Export',
+    mdDownload: 'Download Markdown (.md)',
+    copy: 'Copy to clipboard',
+    copied: 'Copied!',
+    csv: 'CSV table (.csv)',
+    json: 'JSON raw data (.json)',
+    importFailed: 'Import failed: the file is not a valid backup.',
   },
   settings: {
     theme: 'Theme',
@@ -369,10 +376,11 @@ const en: Messages = {
     newTag: 'New tag …',
     addTag: 'Add',
     removeTag: (tag) => `Remove tag "${tag}"`,
-    data: 'Data',
-    dataHint: 'Permanently delete all recorded sessions. Export a backup first.',
+    data: 'Data & Backup',
+    dataHint: 'Export a full backup or your data as CSV/JSON. Deleting all sessions is irreversible.',
     confirmClear: 'Really delete ALL sessions?',
     clearSessions: 'Delete sessions',
+    backup: 'Full backup (.json)',
     language: 'Language',
   },
   sync: {
@@ -391,7 +399,12 @@ const en: Messages = {
     lastSync: (d) =>
       `Last synced: ${d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`,
   },
-  heatmap: { less: 'Less', more: 'More' },
+  heatmap: {
+    less: 'Less',
+    more: 'More',
+    tooltip: (minutes, count, date) =>
+      `${minutes} min focus · ${count} ${count === 1 ? 'session' : 'sessions'} on ${date}`,
+  },
   notify: {
     focusDoneTitle: 'Focus complete',
     focusDoneBody: (round) => `Round ${round} done. Time for a break.`,

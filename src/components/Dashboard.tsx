@@ -1,6 +1,6 @@
-import { memo, useMemo, useRef, useState } from 'react'
+import { memo, useMemo } from 'react'
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { Check, Clock, Copy, Download, FileDown, Flame, Target, Upload } from 'lucide-react'
+import { Clock, Flame, Target } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../types'
 import type { ThemeId } from '../themes'
 import { useThemeColors } from '../hooks/useTheme'
@@ -14,17 +14,9 @@ import {
   weekMinutes,
 } from '../lib/stats'
 import { fmtDuration, startOfWeek } from '../lib/time'
-import { buildDailyMarkdown, buildDayExport, copyMarkdown, downloadMarkdown } from '../lib/markdownExport'
-import {
-  downloadText,
-  sessionsToCsv,
-  sessionsToJson,
-  todosToCsv,
-  todosToJson,
-} from '../lib/dataExport'
 import { Heatmap } from './Heatmap'
 import { SessionLog } from './SessionLog'
-import { exportAll, importSessions, clearSessions } from '../lib/db'
+import { clearSessions } from '../lib/db'
 import { useTranslation } from '../hooks/useTranslation'
 
 interface Props {
@@ -68,8 +60,6 @@ export const Dashboard = memo(function Dashboard({ sessions, settings, themeId, 
   const week = weekMinutes(sessions)
   const goal = settings.weeklyGoalMinutes
   const goalPct = Math.min(100, Math.round((week / goal) * 100))
-  const importRef = useRef<HTMLInputElement>(null)
-  const [copied, setCopied] = useState(false)
 
   const tooltipStyle = useMemo(
     () => ({
@@ -95,63 +85,9 @@ export const Dashboard = memo(function Dashboard({ sessions, settings, themeId, 
     return minutesByTag(sessions, from).map((t, i) => ({ ...t, color: colors.chart[i % colors.chart.length] }))
   }, [sessions, colors])
 
-  const heat = useMemo(() => heatmapData(sessions, 13), [sessions])
+  const heat = useMemo(() => heatmapData(sessions, 52), [sessions])
 
   const hourData = useMemo(() => sessionsByHour(sessions), [sessions])
-
-  const handleExport = async () => {
-    const data = await exportAll()
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `pomodoro-backup-${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const handleImport = async (file: File) => {
-    try {
-      const text = await file.text()
-      const data = JSON.parse(text) as { settings?: unknown; sessions?: Session[] }
-      if (Array.isArray(data.sessions)) await importSessions(data.sessions)
-      if (data.settings) onImportSettings(data.settings)
-    } catch {
-      alert(t.dashboard.importFailed)
-    }
-  }
-
-  const todayExport = () => buildDayExport(sessions, new Date())
-
-  const handleMdDownload = () => {
-    const exp = todayExport()
-    downloadMarkdown(buildDailyMarkdown(exp, todos), exp.key)
-  }
-
-  const handleMdCopy = async () => {
-    try {
-      await copyMarkdown(buildDailyMarkdown(todayExport(), todos))
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 2000)
-    } catch {
-      /* Zwischenablage nicht verfügbar */
-    }
-  }
-
-  const todayKey = new Date().toISOString().slice(0, 10)
-
-  const handleSessionsCsv = () => {
-    downloadText(`pomodoro-sessions-${todayKey}.csv`, sessionsToCsv(sessions), 'text/csv')
-  }
-  const handleSessionsJson = () => {
-    downloadText(`pomodoro-sessions-${todayKey}.json`, sessionsToJson(sessions), 'application/json')
-  }
-  const handleTodosCsv = () => {
-    downloadText(`pomodoro-todos-${todayKey}.csv`, todosToCsv(todos), 'text/csv')
-  }
-  const handleTodosJson = () => {
-    downloadText(`pomodoro-todos-${todayKey}.json`, todosToJson(todos), 'application/json')
-  }
 
   return (
     <div className="flex w-full max-w-5xl flex-col gap-5">
@@ -228,90 +164,59 @@ export const Dashboard = memo(function Dashboard({ sessions, settings, themeId, 
         </div>
 
         <div className="card p-5">
-          <h3 className="mb-4 text-sm font-semibold text-fg">{t.dashboard.last13Weeks}</h3>
-          <Heatmap weeks={heat} />
-        </div>
-      </div>
-
-      <div className="card p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-fg">{t.dashboard.hourOfDay}</h3>
-          <span className="text-xs text-muted">{t.dashboard.sessionsPerHour}</span>
-        </div>
-        {hourData.every((h) => h.count === 0) ? (
-          <p className="py-10 text-center text-sm text-muted">{t.dashboard.noData}</p>
-        ) : (
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={hourData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={colors.raised} vertical={false} />
-              <XAxis
-                dataKey="hour"
-                tick={{ fill: colors.muted, fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-                ticks={[0, 3, 6, 9, 12, 15, 18, 21]}
-                tickFormatter={(h) => `${h}:00`}
-              />
-              <YAxis
-                allowDecimals={false}
-                tick={{ fill: colors.muted, fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                contentStyle={tooltipStyle}
-                cursor={{ fill: colors.raised }}
-                formatter={(v: number) => [`${v} ${t.dashboard.sessions}`, t.dashboard.amount]}
-                labelFormatter={(h) => t.dashboard.hourRange(h as number)}
-              />
-              <Bar dataKey="count" fill={colors.accent} radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        )}
-      </div>
-
-      <div className="card p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-fg">{t.dashboard.sessionLog}</h3>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={handleMdDownload} className="btn-ghost text-xs" title={t.dashboard.mdDownloadTitle}>
-              <FileDown size={14} /> {t.dashboard.mdDownload}
-            </button>
-            <button type="button" onClick={() => void handleMdCopy()} className="btn-ghost text-xs" title={t.dashboard.copyTitle}>
-              {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? t.dashboard.copied : t.dashboard.copy}
-            </button>
-            <button type="button" onClick={handleSessionsCsv} className="btn-ghost text-xs" title={t.dashboard.sessionsCsvTitle}>
-              <FileDown size={14} /> {t.dashboard.sessionsCsv}
-            </button>
-            <button type="button" onClick={handleSessionsJson} className="btn-ghost text-xs" title={t.dashboard.sessionsJsonTitle}>
-              <FileDown size={14} /> {t.dashboard.sessionsJson}
-            </button>
-            <button type="button" onClick={handleTodosCsv} className="btn-ghost text-xs" title={t.dashboard.todosCsvTitle}>
-              <FileDown size={14} /> {t.dashboard.todosCsv}
-            </button>
-            <button type="button" onClick={handleTodosJson} className="btn-ghost text-xs" title={t.dashboard.todosJsonTitle}>
-              <FileDown size={14} /> {t.dashboard.todosJson}
-            </button>
-            <button type="button" onClick={handleExport} className="btn-ghost text-xs">
-              <Download size={14} /> {t.dashboard.export}
-            </button>
-            <button type="button" onClick={() => importRef.current?.click()} className="btn-ghost text-xs">
-              <Upload size={14} /> {t.dashboard.import}
-            </button>
-            <input
-              ref={importRef}
-              type="file"
-              accept="application/json"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0]
-                if (f) void handleImport(f)
-                e.target.value = ''
-              }}
-            />
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-fg">{t.dashboard.hourOfDay}</h3>
+            <span className="text-xs text-muted">{t.dashboard.sessionsPerHour}</span>
           </div>
+          {hourData.every((h) => h.count === 0) ? (
+            <p className="py-10 text-center text-sm text-muted">{t.dashboard.noData}</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={hourData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={colors.raised} vertical={false} />
+                <XAxis
+                  dataKey="hour"
+                  tick={{ fill: colors.muted, fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  ticks={[0, 3, 6, 9, 12, 15, 18, 21]}
+                  tickFormatter={(h) => `${h}:00`}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  tick={{ fill: colors.muted, fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  cursor={{ fill: colors.raised }}
+                  formatter={(v: number) => [`${v} ${t.dashboard.sessions}`, t.dashboard.amount]}
+                  labelFormatter={(h) => t.dashboard.hourRange(h as number)}
+                />
+                <Bar dataKey="count" fill={colors.accent} radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
-        <SessionLog sessions={sessions} onClear={() => void clearSessions()} />
+      </div>
+
+      <div className="card p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-fg">{t.dashboard.last52Weeks}</h3>
+          <span className="text-xs text-muted">{t.dashboard.focusMinutes}</span>
+        </div>
+        <Heatmap weeks={heat} />
+      </div>
+
+      <div className="card p-5">
+        <SessionLog
+          sessions={sessions}
+          todos={todos}
+          title={t.dashboard.sessionLog}
+          onClear={() => void clearSessions()}
+          onImportSettings={onImportSettings}
+        />
       </div>
     </div>
   )
