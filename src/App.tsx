@@ -190,7 +190,7 @@ export default function App() {
             <TimerIcon className="text-accent" size={22} />
           </div>
           <div className="leading-tight">
-            <h1 className="text-lg font-bold text-fg">Pomodoro</h1>
+            <h1 className="text-lg font-bold text-fg">Pomau</h1>
             <p className="text-xs text-muted">
               {t.header.today}: {fmtDuration(todayMinutes(sessions) * 60_000, lang)}
             </p>

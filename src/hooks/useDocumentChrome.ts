@@ -82,7 +82,7 @@ export function useDocumentChrome(
 
   useEffect(() => {
     const paused = status === 'paused'
-    document.title = `${time} (${t.phases[phase]}) - Pomodoro${paused ? ` (${t.paused})` : ''}`
+    document.title = `${time} (${t.phases[phase]}) - Pomau${paused ? ` (${t.paused})` : ''}`
     const link = document.querySelector<HTMLLinkElement>('#dynamic-favicon')
     if (!link) return
     if (status === 'idle') {

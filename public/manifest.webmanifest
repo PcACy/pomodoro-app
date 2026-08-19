@@ -1,6 +1,6 @@
 {
-  "name": "Pomodoro Timer",
-  "short_name": "Pomodoro",
+  "name": "Pomau",
+  "short_name": "Pomau",
   "description": "Persönlicher Pomodoro-Timer mit Statistik-Dashboard – 100% offline",
   "start_url": ".",
   "scope": ".",
