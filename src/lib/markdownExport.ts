@@ -59,6 +59,14 @@ export function buildDailyMarkdown(exportData: DayExport): string {
     return `| ${start} - ${end} | ${task} | ${tag} | ${minutesOf(s)}m | Abgeschlossen |`
   })
 
+  const reflections = sessions
+    .filter((s) => s.notes?.trim())
+    .map((s) => {
+      const time = fmtClock(new Date(s.start))
+      const task = s.task || 'Ohne Aufgabe'
+      return `- **${time}** (${task}): ${s.notes!.trim().replace(/\s*\n+\s*/g, ' · ')}`
+    })
+
   return [
     '---',
     `date: ${key}`,
@@ -77,6 +85,9 @@ export function buildDailyMarkdown(exportData: DayExport): string {
     '| Uhrzeit | Aufgabe | Kategorie | Dauer | Status |',
     '|---|---|---|---|---|',
     rows.length ? rows.join('\n') : '| — | — | — | — | — |',
+    '',
+    '### Reflexionen',
+    reflections.length ? reflections.join('\n') : '- Keine Reflexionen erfasst',
   ].join('\n')
 }
 

@@ -9,7 +9,7 @@ import { useDocumentChrome } from './hooks/useDocumentChrome'
 import { useTheme } from './hooks/useTheme'
 import { useServiceWorker } from './hooks/useServiceWorker'
 import { usePictureInPicture } from './hooks/usePictureInPicture'
-import { addSession } from './lib/db'
+import { addSession, updateSessionNotes } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
 import { todayMinutes } from './lib/stats'
 import { fmtDuration } from './lib/time'
@@ -18,6 +18,7 @@ import { Timer } from './components/Timer'
 import { Dashboard } from './components/Dashboard'
 import { SettingsPanel } from './components/Settings'
 import { PipTimer } from './components/PipTimer'
+import { ReflectionModal } from './components/ReflectionModal'
 
 type Tab = 'timer' | 'dashboard' | 'settings'
 
@@ -33,11 +34,22 @@ export default function App() {
   const [task, setTask] = useLocalState(STORAGE_KEYS.task, '')
   const [tag, setTag] = useLocalState(STORAGE_KEYS.tag, '')
   const [tab, setTab] = useState<Tab>('timer')
+  const [pendingSessionId, setPendingSessionId] = useState<number | null>(null)
   const sessions = useSessions()
 
   const handleFocusComplete = useCallback((s: Session) => {
-    void addSession(s)
+    void addSession(s).then((id) => setPendingSessionId(id))
   }, [])
+
+  const handleSaveNote = useCallback(
+    (notes: string) => {
+      if (pendingSessionId != null) void updateSessionNotes(pendingSessionId, notes)
+      setPendingSessionId(null)
+    },
+    [pendingSessionId],
+  )
+
+  const handleSkipNote = useCallback(() => setPendingSessionId(null), [])
 
   const timer = useTimer({ settings, task, tag, onFocusComplete: handleFocusComplete })
 
@@ -152,6 +164,10 @@ export default function App() {
         onToggle={handleToggle}
         onSkip={timer.skip}
       />
+
+      {pendingSessionId != null && (
+        <ReflectionModal onSave={handleSaveNote} onSkip={handleSkipNote} />
+      )}
     </div>
   )
 }

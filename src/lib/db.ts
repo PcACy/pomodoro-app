@@ -18,6 +18,10 @@ export async function addSession(session: Omit<Session, 'id'>): Promise<number> 
   return db.sessions.add(session)
 }
 
+export async function updateSessionNotes(id: number, notes: string): Promise<void> {
+  await db.sessions.update(id, { notes })
+}
+
 export async function clearSessions(): Promise<void> {
   await db.sessions.clear()
 }

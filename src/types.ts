@@ -21,6 +21,7 @@ export interface Session {
   durationMs: number
   task: string
   tag: string
+  notes?: string
 }
 
 export interface TimerState {
