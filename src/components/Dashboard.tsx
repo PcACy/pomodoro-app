@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Check, Clock, Copy, Download, FileDown, Flame, Target, Upload } from 'lucide-react'
-import type { Settings, Session } from '../types'
+import type { Settings, Session, TodoItem } from '../types'
 import type { ThemeId } from '../themes'
 import { useThemeColors } from '../hooks/useTheme'
 import {
@@ -23,6 +23,7 @@ interface Props {
   sessions: Session[]
   settings: Settings
   themeId: ThemeId
+  todos: TodoItem[]
   onImportSettings: (s: unknown) => void
 }
 
@@ -51,7 +52,7 @@ function MetricCard({
   )
 }
 
-export function Dashboard({ sessions, settings, themeId, onImportSettings }: Props) {
+export function Dashboard({ sessions, settings, themeId, todos, onImportSettings }: Props) {
   const colors = useThemeColors(themeId)
   const today = todayMinutes(sessions)
   const streak = currentStreakDays(sessions)
@@ -114,12 +115,12 @@ export function Dashboard({ sessions, settings, themeId, onImportSettings }: Pro
 
   const handleMdDownload = () => {
     const exp = todayExport()
-    downloadMarkdown(buildDailyMarkdown(exp), exp.key)
+    downloadMarkdown(buildDailyMarkdown(exp, todos), exp.key)
   }
 
   const handleMdCopy = async () => {
     try {
-      await copyMarkdown(buildDailyMarkdown(todayExport()))
+      await copyMarkdown(buildDailyMarkdown(todayExport(), todos))
       setCopied(true)
       window.setTimeout(() => setCopied(false), 2000)
     } catch {

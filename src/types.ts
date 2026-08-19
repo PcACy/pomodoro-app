@@ -1,5 +1,6 @@
 export type PhaseId = 'focus' | 'shortBreak' | 'longBreak'
 export type TimerStatus = 'idle' | 'running' | 'paused'
+export type TimerMode = 'pomodoro' | 'flow'
 
 export interface PhaseConfig {
   focus: number
@@ -32,6 +33,16 @@ export interface TimerState {
   totalMs: number
 }
 
+export interface TodoItem {
+  id: string
+  title: string
+  tag: string
+  done: boolean
+  pomodoros: number
+  createdAt: number
+  completedAt?: number
+}
+
 export const PHASE_LABELS: Record<PhaseId, string> = {
   focus: 'Fokus',
   shortBreak: 'Kurze Pause',
@@ -53,6 +64,8 @@ export const STORAGE_KEYS = {
   settings: 'pomodoro.settings',
   task: 'pomodoro.task',
   tag: 'pomodoro.tag',
+  mode: 'pomodoro.mode',
+  todos: 'pomodoro.todos',
 } as const
 
 declare global {

@@ -11,6 +11,15 @@ export const fmtTime = (ms: number): string => {
   return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`
 }
 
+/** Count-up format, always with hours: "00:00:00", "01:02:03", "25:00:00". */
+export const fmtElapsed = (ms: number): string => {
+  const totalSec = Math.max(0, Math.floor(ms / 1000))
+  const h = Math.floor(totalSec / 3600)
+  const m = Math.floor((totalSec % 3600) / 60)
+  const s = totalSec % 60
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
 export const fmtDuration = (ms: number): string => {
   const min = Math.round(ms / MS_PER_MINUTE)
   if (min < 60) return `${min} min`

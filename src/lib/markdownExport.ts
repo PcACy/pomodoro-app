@@ -1,4 +1,4 @@
-import type { Session } from '../types'
+import type { Session, TodoItem } from '../types'
 import { MS_PER_MINUTE, dayKey } from './time'
 
 const fmtClock = (d: Date): string =>
@@ -33,7 +33,7 @@ export function buildDayExport(sessions: Session[], date: Date): DayExport {
 }
 
 /** Obsidian-optimiertes Markdown (Frontmatter + Daily-Note-Struktur). */
-export function buildDailyMarkdown(exportData: DayExport): string {
+export function buildDailyMarkdown(exportData: DayExport, todos?: TodoItem[]): string {
   const { key, sessions, totalMinutes, completedCount } = exportData
 
   const byTag = new Map<string, { count: number; minutes: number }>()
@@ -67,6 +67,15 @@ export function buildDailyMarkdown(exportData: DayExport): string {
       return `- **${time}** (${task}): ${s.notes!.trim().replace(/\s*\n+\s*/g, ' · ')}`
     })
 
+  const doneToday = (todos ?? [])
+    .filter((t) => t.done && t.completedAt && dayKey(new Date(t.completedAt)) === key)
+    .sort((a, b) => (a.completedAt ?? 0) - (b.completedAt ?? 0))
+  const todoLines = doneToday.map((t) => {
+    const time = fmtClock(new Date(t.completedAt!))
+    const tag = t.tag ? ` (${t.tag})` : ''
+    return `- [x] ${t.title}${tag} – erledigt um ${time}`
+  })
+
   return [
     '---',
     `date: ${key}`,
@@ -80,6 +89,9 @@ export function buildDailyMarkdown(exportData: DayExport): string {
     '',
     '### Aufgaben-Übersicht',
     taskLines.length ? taskLines.join('\n') : '- Keine Aufgaben erfasst',
+    '',
+    '### Erledigte Tasks',
+    todoLines.length ? todoLines.join('\n') : '- Keine Tasks erledigt',
     '',
     '### Detaillierter Verlauf',
     '| Uhrzeit | Aufgabe | Kategorie | Dauer | Status |',

@@ -1,5 +1,5 @@
-import { Pause, PictureInPicture2, Play, RotateCcw, SkipForward } from 'lucide-react'
-import type { TimerStatus, PhaseId } from '../types'
+import { Pause, PictureInPicture2, Play, RotateCcw, SkipForward, Square } from 'lucide-react'
+import type { TimerStatus, PhaseId, TimerMode } from '../types'
 
 interface Props {
   phase: PhaseId
@@ -12,6 +12,10 @@ interface Props {
   task: string
   tag: string
   tags: string[]
+  mode: TimerMode
+  flowStatus: TimerStatus
+  flowTime: string
+  onModeChange: (m: TimerMode) => void
   onTaskChange: (v: string) => void
   onTagChange: (v: string) => void
   onToggle: () => void
@@ -40,6 +44,11 @@ const GLOW_VAR: Record<PhaseId, string> = {
   longBreak: '--c-long',
 }
 
+const MODES: { id: TimerMode; label: string }[] = [
+  { id: 'pomodoro', label: 'Pomodoro' },
+  { id: 'flow', label: 'Flow' },
+]
+
 const SIZE = 300
 const STROKE = 14
 const R = (SIZE - STROKE) / 2
@@ -56,6 +65,10 @@ export function Timer({
   task,
   tag,
   tags,
+  mode,
+  flowStatus,
+  flowTime,
+  onModeChange,
   onTaskChange,
   onTagChange,
   onToggle,
@@ -65,18 +78,40 @@ export function Timer({
   pipOpen,
   onPipToggle,
 }: Props) {
-  const offset = CIRC * (1 - Math.min(1, Math.max(0, progress)))
-  const running = status === 'running'
+  const isFlow = mode === 'flow'
+  const running = isFlow ? flowStatus === 'running' : status === 'running'
+  const paused = isFlow ? flowStatus === 'paused' : status === 'paused'
   const dotsFilled = completedFocusInCycle % roundsBeforeLongBreak
 
+  const shownLabel = isFlow ? 'Flow' : phaseLabel
+  const shownTime = isFlow ? flowTime : time
+  const shownStatus = running ? 'läuft' : paused ? 'pausiert' : 'bereit'
+  const offset = CIRC * (1 - Math.min(1, Math.max(0, progress)))
+  const glowVar = isFlow ? '--c-accent' : GLOW_VAR[phase]
+
   return (
-    <section className="card border border-[#504945] flex w-full max-w-md flex-col items-center gap-8 p-8">
+    <section className="card flex w-full max-w-md flex-col items-center gap-8 border border-[#504945] p-8">
+      <div className="flex w-full items-center gap-1 rounded-xl border border-line bg-canvas p-1">
+        {MODES.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => onModeChange(m.id)}
+            className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+              mode === m.id ? 'bg-raised text-fg' : 'text-muted hover:text-fg'
+            }`}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+
       <div className="relative isolate" style={{ width: SIZE, height: SIZE }}>
         <div
           className={`pointer-events-none absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle,var(--primary-color)_0%,transparent_70%)] blur-2xl transition-opacity duration-500 ${
             running ? 'animate-glow' : 'opacity-10'
           }`}
-          style={{ '--primary-color': `rgb(var(${GLOW_VAR[phase]}))` } as React.CSSProperties}
+          style={{ '--primary-color': `rgb(var(${glowVar}))` } as React.CSSProperties}
         />
         <svg width={SIZE} height={SIZE} className="-rotate-90">
           <circle
@@ -87,44 +122,46 @@ export function Timer({
             strokeWidth={STROKE}
             className="stroke-track"
           />
-          <circle
-            cx={SIZE / 2}
-            cy={SIZE / 2}
-            r={R}
-            fill="none"
-            strokeWidth={STROKE}
-            strokeLinecap="round"
-            strokeDasharray={CIRC}
-            strokeDashoffset={offset}
-            className={`${RING[phase]} transition-all duration-300 ease-linear`}
-          />
+          {!isFlow && (
+            <circle
+              cx={SIZE / 2}
+              cy={SIZE / 2}
+              r={R}
+              fill="none"
+              strokeWidth={STROKE}
+              strokeLinecap="round"
+              strokeDasharray={CIRC}
+              strokeDashoffset={offset}
+              className={`${RING[phase]} transition-all duration-300 ease-linear`}
+            />
+          )}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
           <span className={`text-sm font-medium uppercase tracking-widest ${PHASE_TEXT[phase]}`}>
-            {phaseLabel}
+            {shownLabel}
           </span>
           <span className="font-mono text-5xl font-bold tabular-nums leading-none tracking-wider text-fg">
-            {time}
+            {shownTime}
           </span>
-          <span className="text-xs text-muted">
-            {running ? 'läuft' : status === 'paused' ? 'pausiert' : 'bereit'}
-          </span>
+          <span className="text-xs text-muted">{shownStatus}</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-2" aria-label="Fortschritt im Zyklus">
-        {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => (
-          <span
-            key={i}
-            className={`h-2.5 w-2.5 rounded-full transition-colors ${
-              i < dotsFilled ? 'bg-accent' : 'bg-line'
-            }`}
-          />
-        ))}
-        <span className="ml-1 text-xs text-muted">
-          {completedFocusInCycle % roundsBeforeLongBreak}/{roundsBeforeLongBreak} Runden
-        </span>
-      </div>
+      {!isFlow && (
+        <div className="flex items-center gap-2" aria-label="Fortschritt im Zyklus">
+          {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => (
+            <span
+              key={i}
+              className={`h-2.5 w-2.5 rounded-full transition-colors ${
+                i < dotsFilled ? 'bg-accent' : 'bg-line'
+              }`}
+            />
+          ))}
+          <span className="ml-1 text-xs text-muted">
+            {completedFocusInCycle % roundsBeforeLongBreak}/{roundsBeforeLongBreak} Runden
+          </span>
+        </div>
+      )}
 
       <div
         className={`flex w-full flex-col gap-3 transition-opacity duration-500 ${
@@ -158,9 +195,22 @@ export function Timer({
       </div>
 
       <div className="flex items-center gap-3">
-        <button type="button" onClick={onSkip} title="Skip (N)" className="btn-ghost">
-          <SkipForward size={18} />
-        </button>
+        {isFlow ? (
+          flowStatus !== 'idle' && (
+            <button
+              type="button"
+              onClick={onSkip}
+              title="Stoppen & Zeit loggen (N)"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-accent/60 bg-accent/10 text-accent transition-colors hover:bg-accent/20"
+            >
+              <Square size={16} />
+            </button>
+          )
+        ) : (
+          <button type="button" onClick={onSkip} title="Skip (N)" className="btn-ghost">
+            <SkipForward size={18} />
+          </button>
+        )}
         <button
           type="button"
           onClick={onToggle}
@@ -169,9 +219,11 @@ export function Timer({
         >
           {running ? <Pause size={26} /> : <Play size={26} className="translate-x-0.5" />}
         </button>
-        <button type="button" onClick={onReset} title="Reset (R)" className="btn-ghost">
-          <RotateCcw size={18} />
-        </button>
+        {!isFlow && (
+          <button type="button" onClick={onReset} title="Reset (R)" className="btn-ghost">
+            <RotateCcw size={18} />
+          </button>
+        )}
         {pipSupported && (
           <button
             type="button"
@@ -196,12 +248,16 @@ export function Timer({
         <span className="flex items-center gap-1">
           <span className="kbd">Space</span> Start / Pause
         </span>
-        <span className="flex items-center gap-1">
-          <span className="kbd">N</span> Skip
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="kbd">R</span> Reset
-        </span>
+        {!isFlow && (
+          <>
+            <span className="flex items-center gap-1">
+              <span className="kbd">N</span> Skip
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="kbd">R</span> Reset
+            </span>
+          </>
+        )}
       </div>
     </section>
   )
