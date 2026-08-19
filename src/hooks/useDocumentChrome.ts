@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { PhaseId, TimerStatus } from '../types'
-import { PHASE_LABELS } from '../types'
 import { MS_PER_MINUTE } from '../lib/time'
+import { useTranslation } from './useTranslation'
 
 const CSS_VAR: Record<PhaseId, string> = {
   focus: '--c-accent',
@@ -74,6 +74,7 @@ export function useDocumentChrome(
   progress: number,
   remainingMs: number,
 ): void {
+  const { t } = useTranslation()
   const progressRef = useRef(progress)
   const remainingMsRef = useRef(remainingMs)
   progressRef.current = progress
@@ -81,7 +82,7 @@ export function useDocumentChrome(
 
   useEffect(() => {
     const paused = status === 'paused'
-    document.title = `${time} · ${PHASE_LABELS[phase]}${paused ? ' (pausiert)' : ''}`
+    document.title = `${time} (${t.phases[phase]}) - Pomodoro${paused ? ` (${t.paused})` : ''}`
     const link = document.querySelector<HTMLLinkElement>('#dynamic-favicon')
     if (!link) return
     if (status === 'idle') {
@@ -94,5 +95,5 @@ export function useDocumentChrome(
       progressRef.current,
       remainingMsRef.current,
     )
-  }, [phase, status, time])
+  }, [phase, status, time, t])
 }

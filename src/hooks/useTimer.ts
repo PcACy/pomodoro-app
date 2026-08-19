@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PhaseId, Settings, TimerState } from '../types'
-import { PHASE_LABELS } from '../types'
 import { MS_PER_MINUTE } from '../lib/time'
 import { getTickerWorker } from '../lib/tickerWorker'
 import { playChime } from '../lib/sound'
 import { notify } from '../lib/notify'
 import { fmtTime } from '../lib/time'
+import { getLang, translations } from '../lib/i18n'
+import { useTranslation } from './useTranslation'
 
 export interface FocusSessionData {
   start: number
@@ -34,6 +35,7 @@ const initialMachine = (settings: Settings): TimerState => ({
 })
 
 export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
+  const { t } = useTranslation()
   const [machine, setMachine] = useState<TimerState>(() => initialMachine(settings))
 
   const machineRef = useRef(machine)
@@ -76,7 +78,9 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
           tag: tagRef.current,
         })
         playChime('focus')
-        notify('Fokus abgeschlossen', `Runde ${nextCycle} geschafft. Zeit für eine Pause.`)
+        const lang = getLang()
+        const nn = translations[lang].notify
+        notify(nn.focusDoneTitle, nn.focusDoneBody(nextCycle))
       }
       nextPhase = nextCycle % phases.roundsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
     } else {
@@ -85,7 +89,9 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       if (isLong) nextCycle = 0
       if (!skipped) {
         playChime('break')
-        notify('Pause vorbei', 'Zurück an den Fokus.')
+        const lang = getLang()
+        const nn = translations[lang].notify
+        notify(nn.breakOverTitle, nn.breakOverBody)
       }
     }
 
@@ -196,7 +202,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     completedFocusInCycle: machine.completedFocusInCycle,
     roundsBeforeLongBreak,
     progress,
-    phaseLabel: PHASE_LABELS[machine.phase],
+    phaseLabel: t.phases[machine.phase],
     time: fmtTime(machine.remainingMs),
     start,
     pause,

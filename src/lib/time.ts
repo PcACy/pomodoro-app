@@ -20,12 +20,13 @@ export const fmtElapsed = (ms: number): string => {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-export const fmtDuration = (ms: number): string => {
+export const fmtDuration = (ms: number, lang: 'de' | 'en' = 'de'): string => {
   const min = Math.round(ms / MS_PER_MINUTE)
   if (min < 60) return `${min} min`
   const h = Math.floor(min / 60)
   const rest = min % 60
-  return rest > 0 ? `${h} h ${rest} min` : `${h} h`
+  if (rest > 0) return lang === 'de' ? `${h} h ${rest} min` : `${h}h ${rest}m`
+  return lang === 'de' ? `${h} h` : `${h}h`
 }
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -50,11 +51,11 @@ export const sameDay = (a: Date, b: Date): boolean => dayKey(a) === dayKey(b)
 /** "Mo", "Di", … short German weekday labels, Monday-indexed (0 = Mo) */
 export const WEEKDAY_SHORT: string[] = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
 
-export const fmtDate = (d: Date): string =>
-  d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+export const fmtDate = (d: Date, locale = 'de-DE'): string =>
+  d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
 
-export const fmtDateTime = (d: Date): string =>
-  d.toLocaleDateString('de-DE', {
+export const fmtDateTime = (d: Date, locale = 'de-DE'): string =>
+  d.toLocaleDateString(locale, {
     day: '2-digit',
     month: '2-digit',
     hour: '2-digit',

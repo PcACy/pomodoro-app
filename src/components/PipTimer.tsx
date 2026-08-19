@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom'
 import { Pause, Play, SkipForward } from 'lucide-react'
 import type { PhaseId, TimerStatus } from '../types'
+import { useTranslation } from '../hooks/useTranslation'
 
 interface Props {
   pipWindow: Window | null
@@ -19,6 +20,7 @@ const BADGE: Record<PhaseId, string> = {
 }
 
 export function PipTimer({ pipWindow, phase, phaseLabel, status, time, onToggle, onSkip }: Props) {
+  const { t } = useTranslation()
   if (!pipWindow?.document?.body) return null
 
   const running = status === 'running'
@@ -36,7 +38,7 @@ export function PipTimer({ pipWindow, phase, phaseLabel, status, time, onToggle,
         <button
           type="button"
           onClick={onToggle}
-          title={running ? 'Pause (Leertaste)' : 'Start (Leertaste)'}
+          title={running ? t.timer.pause : t.timer.start}
           className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-on-accent transition-colors hover:bg-accent-strong active:scale-95"
         >
           {running ? <Pause size={20} /> : <Play size={20} className="translate-x-0.5" />}
@@ -44,7 +46,7 @@ export function PipTimer({ pipWindow, phase, phaseLabel, status, time, onToggle,
         <button
           type="button"
           onClick={onSkip}
-          title="Skip (N)"
+          title={`${t.shortcuts.skip} (N)`}
           className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-fg transition-colors hover:bg-raised"
         >
           <SkipForward size={16} />

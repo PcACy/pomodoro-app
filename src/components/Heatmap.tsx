@@ -1,6 +1,6 @@
 import { fmtDate } from '../lib/time'
-import { WEEKDAY_SHORT } from '../lib/time'
 import type { HeatmapWeek } from '../lib/stats'
+import { useTranslation } from '../hooks/useTranslation'
 
 interface Props {
   weeks: HeatmapWeek[]
@@ -15,11 +15,13 @@ function cellClass(minutes: number): string {
 }
 
 export function Heatmap({ weeks }: Props) {
+  const { t, lang } = useTranslation()
+  const locale = lang === 'de' ? 'de-DE' : 'en-GB'
   return (
     <div className="overflow-x-auto">
       <div className="inline-flex gap-[3px]">
         <div className="mr-1 flex flex-col justify-between py-0.5 text-[10px] text-muted">
-          {WEEKDAY_SHORT.map((d) => (
+          {t.weekdays.map((d) => (
             <span key={d} className="h-[11px] leading-[11px]">
               {d}
             </span>
@@ -30,7 +32,7 @@ export function Heatmap({ weeks }: Props) {
             {week.days.map((cell) => (
               <div
                 key={cell.key}
-                title={`${fmtDate(cell.date)}: ${cell.minutes} min`}
+                title={`${fmtDate(cell.date, locale)}: ${cell.minutes} min`}
                 className={`h-[11px] w-[11px] rounded-[2px] ${cellClass(cell.minutes)}`}
               />
             ))}
@@ -38,11 +40,11 @@ export function Heatmap({ weeks }: Props) {
         ))}
       </div>
       <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted">
-        <span>Weniger</span>
+        <span>{t.heatmap.less}</span>
         {[0, 15, 45, 90, 150].map((m) => (
           <span key={m} className={`h-2.5 w-2.5 rounded-[2px] ${cellClass(m)}`} />
         ))}
-        <span>Mehr</span>
+        <span>{t.heatmap.more}</span>
       </div>
     </div>
   )

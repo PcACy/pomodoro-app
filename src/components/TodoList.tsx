@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Check, Pencil, Plus, Target, Trash2, X } from 'lucide-react'
 import type { TodoItem } from '../types'
+import { useTranslation } from '../hooks/useTranslation'
 
 interface Props {
   todos: TodoItem[]
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function TodoList({ todos, tags, activeTodoId, onAdd, onToggle, onEdit, onRemove, onFocus }: Props) {
+  const { t: tr } = useTranslation()
   const [title, setTitle] = useState('')
   const [tag, setTag] = useState(tags[0] ?? '')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -39,9 +41,9 @@ export function TodoList({ todos, tags, activeTodoId, onAdd, onToggle, onEdit, o
   return (
     <section className="card flex w-full max-w-md flex-col gap-4 p-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-fg">To-Do</h3>
+        <h3 className="text-sm font-semibold text-fg">{tr.todo.title}</h3>
         <span className="text-xs text-muted">
-          {todos.filter((t) => t.done).length}/{todos.length} erledigt
+          {tr.todo.doneCount(todos.filter((x) => x.done).length, todos.length)}
         </span>
       </div>
 
@@ -51,24 +53,24 @@ export function TodoList({ todos, tags, activeTodoId, onAdd, onToggle, onEdit, o
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
-          placeholder="Neue Aufgabe …"
+          placeholder={tr.todo.addPlaceholder}
           className="input"
           maxLength={80}
         />
-        <select value={tag} onChange={(e) => setTag(e.target.value)} className="input w-auto shrink-0" title="Tag">
-          {tags.map((t) => (
-            <option key={t} value={t}>
-              {t}
+        <select value={tag} onChange={(e) => setTag(e.target.value)} className="input w-auto shrink-0" title={tr.todo.tag}>
+          {tags.map((tag) => (
+            <option key={tag} value={tag}>
+              {tag}
             </option>
           ))}
         </select>
-        <button type="button" onClick={submitAdd} className="btn-primary shrink-0 px-3" title="Hinzufügen">
+        <button type="button" onClick={submitAdd} className="btn-primary shrink-0 px-3" title={tr.todo.add}>
           <Plus size={16} />
         </button>
       </div>
 
       {todos.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted">Noch keine Aufgaben. Lege eine neue an.</p>
+        <p className="py-6 text-center text-sm text-muted">{tr.todo.empty}</p>
       ) : (
         <ul className="flex flex-col gap-1.5">
           {todos.map((t) => (
@@ -81,7 +83,7 @@ export function TodoList({ todos, tags, activeTodoId, onAdd, onToggle, onEdit, o
               <button
                 type="button"
                 onClick={() => onToggle(t.id)}
-                title={t.done ? 'Wieder öffnen' : 'Erledigt'}
+                title={t.done ? tr.todo.reopen : tr.todo.done}
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
                   t.done ? 'border-accent bg-accent text-on-accent' : 'border-line text-transparent hover:border-accent'
                 }`}
@@ -106,10 +108,10 @@ export function TodoList({ todos, tags, activeTodoId, onAdd, onToggle, onEdit, o
                       </option>
                     ))}
                   </select>
-                  <button type="button" onClick={() => submitEdit(t.id)} className="btn-primary shrink-0 px-2 py-1" title="Speichern">
+                  <button type="button" onClick={() => submitEdit(t.id)} className="btn-primary shrink-0 px-2 py-1" title={tr.todo.save}>
                     <Check size={14} />
                   </button>
-                  <button type="button" onClick={() => setEditingId(null)} className="btn-ghost shrink-0 px-2 py-1" title="Abbrechen">
+                  <button type="button" onClick={() => setEditingId(null)} className="btn-ghost shrink-0 px-2 py-1" title={tr.todo.cancel}>
                     <X size={14} />
                   </button>
                 </div>
@@ -138,7 +140,7 @@ export function TodoList({ todos, tags, activeTodoId, onAdd, onToggle, onEdit, o
                   <button
                     type="button"
                     onClick={() => onFocus(t.id)}
-                    title="Als aktive Aufgabe wählen"
+                    title={tr.todo.selectFocus}
                     className={`rounded-md p-1.5 transition-colors ${
                       activeTodoId === t.id
                         ? 'bg-accent/15 text-accent'
@@ -150,7 +152,7 @@ export function TodoList({ todos, tags, activeTodoId, onAdd, onToggle, onEdit, o
                   <button
                     type="button"
                     onClick={() => startEdit(t)}
-                    title="Bearbeiten"
+                    title={tr.todo.edit}
                     className="rounded-md p-1.5 text-muted transition-colors hover:bg-raised hover:text-fg"
                   >
                     <Pencil size={14} />
@@ -158,7 +160,7 @@ export function TodoList({ todos, tags, activeTodoId, onAdd, onToggle, onEdit, o
                   <button
                     type="button"
                     onClick={() => onRemove(t.id)}
-                    title="Löschen"
+                    title={tr.todo.delete}
                     className="rounded-md p-1.5 text-muted transition-colors hover:bg-raised hover:text-accent"
                   >
                     <Trash2 size={14} />

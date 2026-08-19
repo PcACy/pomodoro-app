@@ -2,13 +2,15 @@ import { useMemo, useState } from 'react'
 import { Search, StickyNote, Trash2 } from 'lucide-react'
 import type { Session } from '../types'
 import { fmtDateTime, fmtDuration } from '../lib/time'
+import { useTranslation } from '../hooks/useTranslation'
 
 interface Props {
   sessions: Session[]
   onClear: () => void
 }
 
-function SessionRow({ s }: { s: Session }) {
+function SessionRow({ s, locale }: { s: Session; locale: string }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const hasNote = Boolean(s.notes?.trim())
 
@@ -16,8 +18,8 @@ function SessionRow({ s }: { s: Session }) {
     <li className="py-2.5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 flex-col">
-          <span className="truncate text-sm text-fg">{s.task || 'Ohne Aufgabe'}</span>
-          <span className="text-xs text-muted">{fmtDateTime(new Date(s.start))}</span>
+          <span className="truncate text-sm text-fg">{s.task || t.sessionLog.noTask}</span>
+          <span className="text-xs text-muted">{fmtDateTime(new Date(s.start), locale)}</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {hasNote && (
@@ -38,7 +40,7 @@ function SessionRow({ s }: { s: Session }) {
             {s.tag || '—'}
           </span>
           <span className="w-16 text-right font-mono text-xs tabular-nums text-accent">
-            {fmtDuration(s.durationMs)}
+            {fmtDuration(s.durationMs, locale === 'de-DE' ? 'de' : 'en')}
           </span>
         </div>
       </div>
@@ -52,18 +54,20 @@ function SessionRow({ s }: { s: Session }) {
 }
 
 export function SessionLog({ sessions, onClear }: Props) {
+  const { t, lang } = useTranslation()
+  const locale = lang === 'de' ? 'de-DE' : 'en-GB'
   const [query, setQuery] = useState('')
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return sessions
     return sessions.filter((s) =>
-      [s.task, s.tag, fmtDateTime(new Date(s.start))]
+      [s.task, s.tag, fmtDateTime(new Date(s.start), locale)]
         .join(' ')
         .toLowerCase()
         .includes(q),
     )
-  }, [sessions, query])
+  }, [sessions, query, locale])
 
   return (
     <div className="flex flex-col gap-3">
@@ -74,23 +78,23 @@ export function SessionLog({ sessions, onClear }: Props) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Sessions durchsuchen (Name, Tag, Datum) …"
+            placeholder={t.sessionLog.searchPlaceholder}
             className="input pl-9"
           />
         </div>
-        <button type="button" onClick={onClear} className="btn-ghost text-xs" title="Alle löschen">
+        <button type="button" onClick={onClear} className="btn-ghost text-xs" title={t.sessionLog.clearAll}>
           <Trash2 size={15} />
         </button>
       </div>
 
       {filtered.length === 0 ? (
         <p className="py-6 text-center text-sm text-muted">
-          {sessions.length === 0 ? 'Noch keine Sessions erfasst.' : 'Keine Treffer.'}
+          {sessions.length === 0 ? t.sessionLog.empty : t.sessionLog.noResults}
         </p>
       ) : (
         <ul className="max-h-80 divide-y divide-line overflow-y-auto">
           {filtered.map((s) => (
-            <SessionRow key={s.id} s={s} />
+            <SessionRow key={s.id} s={s} locale={locale} />
           ))}
         </ul>
       )}

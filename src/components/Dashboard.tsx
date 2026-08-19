@@ -13,11 +13,12 @@ import {
   todayMinutes,
   weekMinutes,
 } from '../lib/stats'
-import { fmtDuration, startOfWeek, WEEKDAY_SHORT } from '../lib/time'
+import { fmtDuration, startOfWeek } from '../lib/time'
 import { buildDailyMarkdown, buildDayExport, copyMarkdown, downloadMarkdown } from '../lib/markdownExport'
 import { Heatmap } from './Heatmap'
 import { SessionLog } from './SessionLog'
 import { exportAll, importSessions, clearSessions } from '../lib/db'
+import { useTranslation } from '../hooks/useTranslation'
 
 interface Props {
   sessions: Session[]
@@ -53,6 +54,7 @@ function MetricCard({
 }
 
 export function Dashboard({ sessions, settings, themeId, todos, onImportSettings }: Props) {
+  const { t, lang } = useTranslation()
   const colors = useThemeColors(themeId)
   const today = todayMinutes(sessions)
   const streak = currentStreakDays(sessions)
@@ -74,11 +76,12 @@ export function Dashboard({ sessions, settings, themeId, todos, onImportSettings
   )
 
   const barData = useMemo(() => {
+    const idxToday = 6
     return lastNDaysStats(sessions, 7).map((d, i) => ({
-      label: i === 6 ? 'Heute' : WEEKDAY_SHORT[(d.date.getDay() + 6) % 7],
+      label: i === idxToday ? t.dashboard.today : t.weekdays[(d.date.getDay() + 6) % 7],
       minutes: d.minutes,
     }))
-  }, [sessions])
+  }, [sessions, t])
 
   const tagData = useMemo(() => {
     const from = startOfWeek(new Date())
@@ -107,7 +110,7 @@ export function Dashboard({ sessions, settings, themeId, todos, onImportSettings
       if (Array.isArray(data.sessions)) await importSessions(data.sessions)
       if (data.settings) onImportSettings(data.settings)
     } catch {
-      alert('Import fehlgeschlagen: Die Datei ist kein gültiges Backup.')
+      alert(t.dashboard.importFailed)
     }
   }
 
@@ -133,28 +136,28 @@ export function Dashboard({ sessions, settings, themeId, todos, onImportSettings
       <div className="grid gap-4 sm:grid-cols-3">
         <MetricCard
           icon={<Clock size={20} />}
-          label="Heutige Fokuszeit"
-          value={fmtDuration(today * 60_000)}
-          sub={today === 0 ? 'Noch nichts erfasst' : `${today} min`}
+          label={t.dashboard.todayFocus}
+          value={fmtDuration(today * 60_000, lang)}
+          sub={today === 0 ? t.dashboard.noDataToday : `${today} min`}
         />
         <MetricCard
           icon={<Flame size={20} />}
-          label="Tages-Streak"
-          value={`${streak} ${streak === 1 ? 'Tag' : 'Tage'}`}
-          sub={streak > 0 ? 'Am Laufen' : 'Morgen neu starten'}
+          label={t.dashboard.streak}
+          value={`${streak} ${streak === 1 ? t.dashboard.day : t.dashboard.days}`}
+          sub={streak > 0 ? t.dashboard.streakActive : t.dashboard.streakReset}
         />
         <MetricCard
           icon={<Target size={20} />}
-          label="Wochenziel"
+          label={t.dashboard.weeklyGoal}
           value={`${Math.round(week / 60)} / ${Math.round(goal / 60)} h`}
-          sub={`${goalPct}% erreicht`}
+          sub={t.dashboard.goalReached(goalPct)}
         />
       </div>
 
       <div className="card p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-fg">Letzte 7 Tage</h3>
-          <span className="text-xs text-muted">Fokuszeit in Minuten</span>
+          <h3 className="text-sm font-semibold text-fg">{t.dashboard.last7Days}</h3>
+          <span className="text-xs text-muted">{t.dashboard.focusMinutes}</span>
         </div>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={barData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
@@ -169,9 +172,9 @@ export function Dashboard({ sessions, settings, themeId, todos, onImportSettings
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="card p-5">
-          <h3 className="mb-4 text-sm font-semibold text-fg">Verteilung nach Tag</h3>
+          <h3 className="mb-4 text-sm font-semibold text-fg">{t.dashboard.byTag}</h3>
           {tagData.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted">Diese Woche noch keine Daten.</p>
+            <p className="py-10 text-center text-sm text-muted">{t.dashboard.noWeekData}</p>
           ) : (
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
@@ -203,18 +206,18 @@ export function Dashboard({ sessions, settings, themeId, todos, onImportSettings
         </div>
 
         <div className="card p-5">
-          <h3 className="mb-4 text-sm font-semibold text-fg">Letzte 13 Wochen</h3>
+          <h3 className="mb-4 text-sm font-semibold text-fg">{t.dashboard.last13Weeks}</h3>
           <Heatmap weeks={heat} />
         </div>
       </div>
 
       <div className="card p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-fg">Tageszeit</h3>
-          <span className="text-xs text-muted">Abgeschlossene Sessions pro Stunde</span>
+          <h3 className="text-sm font-semibold text-fg">{t.dashboard.hourOfDay}</h3>
+          <span className="text-xs text-muted">{t.dashboard.sessionsPerHour}</span>
         </div>
         {hourData.every((h) => h.count === 0) ? (
-          <p className="py-10 text-center text-sm text-muted">Noch keine Daten.</p>
+          <p className="py-10 text-center text-sm text-muted">{t.dashboard.noData}</p>
         ) : (
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={hourData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
@@ -236,8 +239,8 @@ export function Dashboard({ sessions, settings, themeId, todos, onImportSettings
               <Tooltip
                 contentStyle={tooltipStyle}
                 cursor={{ fill: colors.raised }}
-                formatter={(v: number) => [`${v} Sessions`, 'Anzahl']}
-                labelFormatter={(h) => `${h}:00 – ${h + 1}:00 Uhr`}
+                formatter={(v: number) => [`${v} ${t.dashboard.sessions}`, t.dashboard.amount]}
+                labelFormatter={(h) => t.dashboard.hourRange(h as number)}
               />
               <Bar dataKey="count" fill={colors.accent} radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -247,19 +250,19 @@ export function Dashboard({ sessions, settings, themeId, todos, onImportSettings
 
       <div className="card p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-fg">Session-Log</h3>
+          <h3 className="text-sm font-semibold text-fg">{t.dashboard.sessionLog}</h3>
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={handleMdDownload} className="btn-ghost text-xs" title="Obsidian Markdown für heute herunterladen">
-              <FileDown size={14} /> Als .md
+            <button type="button" onClick={handleMdDownload} className="btn-ghost text-xs" title={t.dashboard.mdDownloadTitle}>
+              <FileDown size={14} /> {t.dashboard.mdDownload}
             </button>
-            <button type="button" onClick={() => void handleMdCopy()} className="btn-ghost text-xs" title="Markdown für heute in die Zwischenablage kopieren">
-              {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Kopiert!' : 'Kopieren'}
+            <button type="button" onClick={() => void handleMdCopy()} className="btn-ghost text-xs" title={t.dashboard.copyTitle}>
+              {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? t.dashboard.copied : t.dashboard.copy}
             </button>
             <button type="button" onClick={handleExport} className="btn-ghost text-xs">
-              <Download size={14} /> Export
+              <Download size={14} /> {t.dashboard.export}
             </button>
             <button type="button" onClick={() => importRef.current?.click()} className="btn-ghost text-xs">
-              <Upload size={14} /> Import
+              <Upload size={14} /> {t.dashboard.import}
             </button>
             <input
               ref={importRef}

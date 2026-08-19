@@ -11,11 +11,13 @@ import { useTheme } from './hooks/useTheme'
 import { useServiceWorker } from './hooks/useServiceWorker'
 import { usePictureInPicture } from './hooks/usePictureInPicture'
 import { useTodos } from './hooks/useTodos'
+import { useTranslation } from './hooks/useTranslation'
 import { addSession, updateSessionNotes } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
 import { todayMinutes } from './lib/stats'
 import { fmtDuration } from './lib/time'
 import { STORAGE_KEYS, type Session, type Settings, type TimerMode } from './types'
+import type { Messages } from './lib/i18n'
 import { Timer } from './components/Timer'
 import { Dashboard } from './components/Dashboard'
 import { SettingsPanel } from './components/Settings'
@@ -25,13 +27,20 @@ import { TodoList } from './components/TodoList'
 
 type Tab = 'timer' | 'dashboard' | 'settings'
 
-const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-  { id: 'timer', label: 'Timer', icon: <TimerIcon size={16} /> },
-  { id: 'dashboard', label: 'Statistik', icon: <BarChart3 size={16} /> },
-  { id: 'settings', label: 'Einstellungen', icon: <SettingsIcon size={16} /> },
+const TABS: { id: Tab; icon: React.ReactNode }[] = [
+  { id: 'timer', icon: <TimerIcon size={16} /> },
+  { id: 'dashboard', icon: <BarChart3 size={16} /> },
+  { id: 'settings', icon: <SettingsIcon size={16} /> },
 ]
 
+const TAB_LABEL_KEYS: Record<Tab, keyof Messages['nav']> = {
+  timer: 'timer',
+  dashboard: 'statistics',
+  settings: 'settings',
+}
+
 export default function App() {
+  const { t, lang } = useTranslation()
   const [themeId, setTheme] = useTheme()
   const [settings, updateSettings] = useSettings()
   const [task, setTask] = useLocalState(STORAGE_KEYS.task, '')
@@ -143,7 +152,9 @@ export default function App() {
           </div>
           <div className="leading-tight">
             <h1 className="text-lg font-bold text-fg">Pomodoro</h1>
-            <p className="text-xs text-muted">Heute: {fmtDuration(todayMinutes(sessions) * 60_000)}</p>
+            <p className="text-xs text-muted">
+              {t.header.today}: {fmtDuration(todayMinutes(sessions) * 60_000, lang)}
+            </p>
           </div>
         </div>
 
@@ -152,17 +163,17 @@ export default function App() {
             zenRunning ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
           }`}
         >
-          {TABS.map((t) => (
+          {TABS.map((tb) => (
             <button
-              key={t.id}
+              key={tb.id}
               type="button"
-              onClick={() => setTab(t.id)}
+              onClick={() => setTab(tb.id)}
               className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors ${
-                tab === t.id ? 'bg-raised text-fg' : 'text-muted hover:text-fg'
+                tab === tb.id ? 'bg-raised text-fg' : 'text-muted hover:text-fg'
               }`}
             >
-              {t.icon}
-              <span className="hidden sm:inline">{t.label}</span>
+              {tb.icon}
+              <span className="hidden sm:inline">{t.nav[TAB_LABEL_KEYS[tb.id]]}</span>
             </button>
           ))}
         </nav>
@@ -231,9 +242,9 @@ export default function App() {
 
       {updateAvailable && (
         <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-sm shadow-lg">
-          <span className="text-fg">Neue Version verfügbar</span>
+          <span className="text-fg">{t.update.available}</span>
           <button type="button" className="btn-primary px-3 py-1.5" onClick={reload}>
-            Neu laden
+            {t.update.reload}
           </button>
         </div>
       )}

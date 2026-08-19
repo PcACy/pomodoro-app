@@ -1,5 +1,6 @@
 import { Pause, PictureInPicture2, Play, RotateCcw, SkipForward, Square } from 'lucide-react'
 import type { TimerStatus, PhaseId, TimerMode } from '../types'
+import { useTranslation } from '../hooks/useTranslation'
 
 interface Props {
   phase: PhaseId
@@ -44,10 +45,7 @@ const GLOW_VAR: Record<PhaseId, string> = {
   longBreak: '--c-long',
 }
 
-const MODES: { id: TimerMode; label: string }[] = [
-  { id: 'pomodoro', label: 'Pomodoro' },
-  { id: 'flow', label: 'Flow' },
-]
+const MODES: TimerMode[] = ['pomodoro', 'flow']
 
 const SIZE = 300
 const STROKE = 14
@@ -78,14 +76,19 @@ export function Timer({
   pipOpen,
   onPipToggle,
 }: Props) {
+  const { t } = useTranslation()
   const isFlow = mode === 'flow'
   const running = isFlow ? flowStatus === 'running' : status === 'running'
   const paused = isFlow ? flowStatus === 'paused' : status === 'paused'
   const dotsFilled = completedFocusInCycle % roundsBeforeLongBreak
 
-  const shownLabel = isFlow ? 'Flow' : phaseLabel
+  const shownLabel = isFlow ? t.timer.flow : phaseLabel
   const shownTime = isFlow ? flowTime : time
-  const shownStatus = running ? 'läuft' : paused ? 'pausiert' : 'bereit'
+  const shownStatus = running
+    ? t.timer.status.running
+    : paused
+      ? t.timer.status.paused
+      : t.timer.status.ready
   const offset = CIRC * (1 - Math.min(1, Math.max(0, progress)))
   const glowVar = isFlow ? '--c-accent' : GLOW_VAR[phase]
 
@@ -94,14 +97,14 @@ export function Timer({
       <div className="flex w-full items-center gap-1 rounded-xl border border-line bg-canvas p-1">
         {MODES.map((m) => (
           <button
-            key={m.id}
+            key={m}
             type="button"
-            onClick={() => onModeChange(m.id)}
+            onClick={() => onModeChange(m)}
             className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-              mode === m.id ? 'bg-raised text-fg' : 'text-muted hover:text-fg'
+              mode === m ? 'bg-raised text-fg' : 'text-muted hover:text-fg'
             }`}
           >
-            {m.label}
+            {t.timer[m]}
           </button>
         ))}
       </div>
@@ -158,7 +161,7 @@ export function Timer({
             />
           ))}
           <span className="ml-1 text-xs text-muted">
-            {completedFocusInCycle % roundsBeforeLongBreak}/{roundsBeforeLongBreak} Runden
+            {t.timer.rounds(completedFocusInCycle % roundsBeforeLongBreak, roundsBeforeLongBreak)}
           </span>
         </div>
       )}
@@ -172,7 +175,7 @@ export function Timer({
           type="text"
           value={task}
           onChange={(e) => onTaskChange(e.target.value)}
-          placeholder="Aktuelle Aufgabe …"
+          placeholder={t.timer.taskPlaceholder}
           className="input"
           maxLength={80}
         />
@@ -200,14 +203,14 @@ export function Timer({
             <button
               type="button"
               onClick={onSkip}
-              title="Stoppen & Zeit loggen (N)"
+              title={t.timer.stop}
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-accent/60 bg-accent/10 text-accent transition-colors hover:bg-accent/20"
             >
               <Square size={16} />
             </button>
           )
         ) : (
-          <button type="button" onClick={onSkip} title="Skip (N)" className="btn-ghost">
+          <button type="button" onClick={onSkip} title={`${t.shortcuts.skip} (N)`} className="btn-ghost">
             <SkipForward size={18} />
           </button>
         )}
@@ -215,12 +218,12 @@ export function Timer({
           type="button"
           onClick={onToggle}
           className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-on-accent shadow-lg shadow-accent/25 transition-all hover:bg-accent-strong active:scale-95"
-          title={running ? 'Pause (Leertaste)' : 'Start (Leertaste)'}
+          title={running ? t.timer.pause : t.timer.start}
         >
           {running ? <Pause size={26} /> : <Play size={26} className="translate-x-0.5" />}
         </button>
         {!isFlow && (
-          <button type="button" onClick={onReset} title="Reset (R)" className="btn-ghost">
+          <button type="button" onClick={onReset} title={`${t.shortcuts.reset} (R)`} className="btn-ghost">
             <RotateCcw size={18} />
           </button>
         )}
@@ -228,7 +231,7 @@ export function Timer({
           <button
             type="button"
             onClick={onPipToggle}
-            title={pipOpen ? 'Mini-Widget schließen' : 'In Mini-Widget anzeigen'}
+            title={pipOpen ? t.pip.close : t.pip.open}
             className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition-colors ${
               pipOpen
                 ? 'border-accent/60 bg-accent/10 text-accent'
@@ -246,15 +249,15 @@ export function Timer({
         }`}
       >
         <span className="flex items-center gap-1">
-          <span className="kbd">Space</span> Start / Pause
+          <span className="kbd">Space</span> {t.shortcuts.startPause}
         </span>
         {!isFlow && (
           <>
             <span className="flex items-center gap-1">
-              <span className="kbd">N</span> Skip
+              <span className="kbd">N</span> {t.shortcuts.skip}
             </span>
             <span className="flex items-center gap-1">
-              <span className="kbd">R</span> Reset
+              <span className="kbd">R</span> {t.shortcuts.reset}
             </span>
           </>
         )}

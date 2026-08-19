@@ -3,6 +3,7 @@ import { Check, Plus, Trash2, X } from 'lucide-react'
 import type { Settings } from '../types'
 import { THEMES, type ThemeId } from '../themes'
 import { clearSessions } from '../lib/db'
+import { useTranslation } from '../hooks/useTranslation'
 
 interface Props {
   settings: Settings
@@ -11,13 +12,14 @@ interface Props {
   onThemeChange: (id: ThemeId) => void
 }
 
-const DURATION_FIELDS: { key: keyof Settings['phases']; label: string; hint: string }[] = [
-  { key: 'focus', label: 'Fokus', hint: 'Minuten' },
-  { key: 'shortBreak', label: 'Kurze Pause', hint: 'Minuten' },
-  { key: 'longBreak', label: 'Lange Pause', hint: 'Minuten' },
+const PHASE_KEYS: Array<keyof Pick<Settings['phases'], 'focus' | 'shortBreak' | 'longBreak'>> = [
+  'focus',
+  'shortBreak',
+  'longBreak',
 ]
 
 export function SettingsPanel({ settings, update, themeId, onThemeChange }: Props) {
+  const { t, lang, setLang } = useTranslation()
   const [newTag, setNewTag] = useState('')
 
   const setPhaseDuration = (key: keyof Settings['phases'], value: number) => {
@@ -39,8 +41,26 @@ export function SettingsPanel({ settings, update, themeId, onThemeChange }: Prop
   return (
     <div className="flex w-full max-w-2xl flex-col gap-5">
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">Theme</h3>
-        <p className="mb-4 text-xs text-muted">Farbschema der App, wird lokal gespeichert.</p>
+        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.language}</h3>
+        <div className="flex gap-2">
+          {(['de', 'en'] as const).map((l) => (
+            <button
+              key={l}
+              type="button"
+              onClick={() => setLang(l)}
+              className={`rounded-xl border px-4 py-2 text-sm font-medium transition-colors ${
+                lang === l ? 'border-accent bg-accent/10 text-fg' : 'border-line bg-canvas text-muted hover:bg-raised'
+              }`}
+            >
+              {l === 'de' ? 'Deutsch 🇩🇪' : 'English 🇬🇧'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="card p-6">
+        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.theme}</h3>
+        <p className="mb-4 text-xs text-muted">{t.settings.themeHint}</p>
         <div className="grid gap-2 sm:grid-cols-2">
           {THEMES.map((t) => (
             <button
@@ -72,29 +92,29 @@ export function SettingsPanel({ settings, update, themeId, onThemeChange }: Prop
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">Phasen</h3>
-        <p className="mb-4 text-xs text-muted">Dauern in Minuten, zwischen 1 und 180.</p>
+        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.phases}</h3>
+        <p className="mb-4 text-xs text-muted">{t.settings.phasesHint}</p>
         <div className="grid gap-4 sm:grid-cols-3">
-          {DURATION_FIELDS.map((f) => (
-            <label key={f.key} className="flex flex-col gap-1.5">
-              <span className="text-xs text-muted">{f.label}</span>
+          {PHASE_KEYS.map((key) => (
+            <label key={key} className="flex flex-col gap-1.5">
+              <span className="text-xs text-muted">{t.phases[key]}</span>
               <input
                 type="number"
                 min={1}
                 max={180}
-                value={settings.phases[f.key]}
-                onChange={(e) => setPhaseDuration(f.key, Number(e.target.value))}
+                value={settings.phases[key]}
+                onChange={(e) => setPhaseDuration(key, Number(e.target.value))}
                 className="input font-mono"
               />
-              <span className="text-[10px] text-muted">{f.hint}</span>
+              <span className="text-[10px] text-muted">{t.settings.minutes}</span>
             </label>
           ))}
         </div>
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">Zyklus</h3>
-        <p className="mb-4 text-xs text-muted">Nach wie vielen Fokus-Runden folgt eine lange Pause?</p>
+        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.cycle}</h3>
+        <p className="mb-4 text-xs text-muted">{t.settings.cycleHint}</p>
         <input
           type="number"
           min={1}
@@ -111,8 +131,8 @@ export function SettingsPanel({ settings, update, themeId, onThemeChange }: Prop
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">Wochenziel</h3>
-        <p className="mb-4 text-xs text-muted">Ziel-Fokuszeit pro Woche.</p>
+        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.weeklyGoal}</h3>
+        <p className="mb-4 text-xs text-muted">{t.settings.weeklyGoalHint}</p>
         <input
           type="number"
           min={1}
@@ -126,24 +146,24 @@ export function SettingsPanel({ settings, update, themeId, onThemeChange }: Prop
           }
           className="input w-40 font-mono"
         />
-        <span className="ml-2 text-xs text-muted">Minuten</span>
+        <span className="ml-2 text-xs text-muted">{t.settings.minutes}</span>
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">Tags</h3>
-        <p className="mb-4 text-xs text-muted">Kategorien für die Aufgaben-Zuweisung.</p>
+        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.tags}</h3>
+        <p className="mb-4 text-xs text-muted">{t.settings.tagsHint}</p>
         <div className="flex gap-2">
           <input
             type="text"
             value={newTag}
             onChange={(e) => setNewTag(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addTag()}
-            placeholder="Neuer Tag …"
+            placeholder={t.settings.newTag}
             className="input max-w-xs"
             maxLength={30}
           />
           <button type="button" onClick={addTag} className="btn-primary">
-            <Plus size={15} /> Hinzufügen
+            <Plus size={15} /> {t.settings.addTag}
           </button>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -157,7 +177,7 @@ export function SettingsPanel({ settings, update, themeId, onThemeChange }: Prop
                 type="button"
                 onClick={() => removeTag(tag)}
                 className="text-muted transition-colors hover:text-accent"
-                title={`Tag "${tag}" entfernen`}
+                title={t.settings.removeTag(tag)}
               >
                 <X size={13} />
               </button>
@@ -167,18 +187,16 @@ export function SettingsPanel({ settings, update, themeId, onThemeChange }: Prop
       </div>
 
       <div className="card border-accent-strong/40 p-6">
-        <h3 className="mb-1 text-sm font-semibold text-accent-strong">Daten</h3>
-        <p className="mb-4 text-xs text-muted">
-          Alle erfassten Sessions unwiderruflich löschen. Vorher ein Backup exportieren.
-        </p>
+        <h3 className="mb-1 text-sm font-semibold text-accent-strong">{t.settings.data}</h3>
+        <p className="mb-4 text-xs text-muted">{t.settings.dataHint}</p>
         <button
           type="button"
           onClick={() => {
-            if (window.confirm('Wirklich ALLE Sessions löschen?')) void clearSessions()
+            if (window.confirm(t.settings.confirmClear)) void clearSessions()
           }}
           className="btn border border-accent-strong/60 bg-accent-strong/10 text-accent-strong hover:bg-accent-strong/20"
         >
-          <Trash2 size={15} /> Sessions löschen
+          <Trash2 size={15} /> {t.settings.clearSessions}
         </button>
       </div>
     </div>
