@@ -21,7 +21,7 @@ import { requestNotificationPermission } from './lib/notify'
 import { initAudio } from './lib/sound'
 import { todayMinutes } from './lib/stats'
 import { fmtDuration } from './lib/time'
-import { STORAGE_KEYS, type Session, type Settings, type TimerMode } from './types'
+import { STORAGE_KEYS, type PhaseId, type Session, type Settings, type TimerMode } from './types'
 import type { Messages } from './lib/i18n'
 import { Timer } from './components/Timer'
 import { Dashboard } from './components/Dashboard'
@@ -43,6 +43,12 @@ const TAB_LABEL_KEYS: Record<Tab, keyof Messages['nav']> = {
   dashboard: 'statistics',
   settings: 'settings',
 }
+
+const GLOW_PHASES: { id: PhaseId; cssVar: string }[] = [
+  { id: 'focus', cssVar: '--c-accent' },
+  { id: 'shortBreak', cssVar: '--c-break' },
+  { id: 'longBreak', cssVar: '--c-long' },
+]
 
 export default function App() {
   const { t, lang } = useTranslation()
@@ -140,6 +146,7 @@ export default function App() {
   const chromeTime = mode === 'flow' ? flow.time : timer.time
   const chromeProgress = mode === 'flow' ? 0 : timer.progress
   const chromeRemaining = mode === 'flow' ? flow.elapsedMs : timer.remainingMs
+  const isRunning = chromeStatus === 'running'
   useDocumentChrome(chromePhase, chromeStatus, chromeTime, chromeProgress, chromeRemaining)
 
   const { updateAvailable, reload } = useServiceWorker()
@@ -184,6 +191,32 @@ export default function App() {
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center gap-8 px-4 py-8">
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgb(var(--c-fg) / 0.07) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+        <div
+          className={`absolute left-1/2 top-[35%] h-[64rem] w-[64rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl ${
+            isRunning ? 'ambient-breath' : ''
+          }`}
+          style={isRunning ? undefined : { opacity: 0.12 }}
+        >
+          {GLOW_PHASES.map((g) => (
+            <div
+              key={g.id}
+              className="ambient-glow-layer absolute inset-0 rounded-full"
+              style={{
+                opacity: chromePhase === g.id ? 1 : 0,
+                background: `radial-gradient(circle at center, rgb(var(${g.cssVar}) / 0.55) 0%, transparent 62%)`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
       <header className="flex w-full items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15">
@@ -220,7 +253,7 @@ export default function App() {
 
       <main className="flex w-full flex-1 flex-col items-center gap-8 pb-8">
         {tab === 'timer' && (
-          <div className="flex w-full max-w-md flex-col gap-8">
+          <div className="mx-auto grid w-full max-w-5xl grid-cols-1 items-start justify-items-center gap-8 lg:grid-cols-2">
             <Timer
               phase={timer.phase}
               phaseLabel={timer.phaseLabel}

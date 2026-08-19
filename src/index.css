@@ -159,6 +159,27 @@ body {
   }
 }
 
+/* Ambient background: phase-colored glow with smooth crossfade between phases. */
+.ambient-glow-layer {
+  transition: opacity 1000ms ease-in-out;
+  will-change: opacity;
+}
+
+/* Slow breathing pulse while a phase is running (opacity animated, cheap to composite). */
+@keyframes ambient-breath {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+.ambient-breath {
+  animation: ambient-breath 7s ease-in-out infinite;
+  will-change: opacity;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
