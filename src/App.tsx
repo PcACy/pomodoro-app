@@ -7,6 +7,7 @@ import { useTimer } from './hooks/useTimer'
 import { useKeyboard } from './hooks/useKeyboard'
 import { useDocumentChrome } from './hooks/useDocumentChrome'
 import { useTheme } from './hooks/useTheme'
+import { useServiceWorker } from './hooks/useServiceWorker'
 import { addSession } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
 import { todayMinutes } from './lib/stats'
@@ -45,6 +46,7 @@ export default function App() {
 
   useKeyboard({ onToggle: handleToggle, onSkip: timer.skip, onReset: timer.reset })
   useDocumentChrome(timer.phase, timer.status, timer.time)
+  const { updateAvailable, reload } = useServiceWorker()
 
   const handleImportSettings = (s: unknown) => {
     if (s && typeof s === 'object') updateSettings(() => s as Settings)
@@ -124,6 +126,15 @@ export default function App() {
         </span>
         <span>Daten lokal auf diesem Gerät</span>
       </footer>
+
+      {updateAvailable && (
+        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-sm shadow-lg">
+          <span className="text-fg">Neue Version verfügbar</span>
+          <button type="button" className="btn-primary px-3 py-1.5" onClick={reload}>
+            Neu laden
+          </button>
+        </div>
+      )}
     </div>
   )
 }

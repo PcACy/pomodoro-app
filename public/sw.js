@@ -1,4 +1,4 @@
-const CACHE = 'pomodoro-v1'
+const CACHE = 'pomodoro-v2'
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(['.', '/manifest.webmanifest'])))
