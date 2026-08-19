@@ -47,6 +47,7 @@ export default function App() {
   useKeyboard({ onToggle: handleToggle, onSkip: timer.skip, onReset: timer.reset })
   useDocumentChrome(timer.phase, timer.status, timer.time)
   const { updateAvailable, reload } = useServiceWorker()
+  const zenRunning = tab === 'timer' && timer.status === 'running'
 
   const handleImportSettings = (s: unknown) => {
     if (s && typeof s === 'object') updateSettings(() => s as Settings)
@@ -65,7 +66,11 @@ export default function App() {
           </div>
         </div>
 
-        <nav className="flex items-center gap-1 rounded-2xl border border-line bg-surface p-1">
+        <nav
+          className={`flex items-center gap-1 rounded-2xl border border-line bg-surface p-1 transition-opacity duration-500 ${
+            zenRunning ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
+          }`}
+        >
           {TABS.map((t) => (
             <button
               key={t.id}

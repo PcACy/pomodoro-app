@@ -31,6 +31,14 @@ const RING: Record<PhaseId, string> = {
   longBreak: 'stroke-long',
 }
 
+const RING_GLOW: Record<PhaseId, string> = {
+  focus: 'drop-shadow(0 0 6px rgb(var(--c-accent) / 0.45)) drop-shadow(0 0 18px rgb(var(--c-accent) / 0.2))',
+  shortBreak:
+    'drop-shadow(0 0 6px rgb(var(--c-break) / 0.45)) drop-shadow(0 0 18px rgb(var(--c-break) / 0.2))',
+  longBreak:
+    'drop-shadow(0 0 6px rgb(var(--c-long) / 0.45)) drop-shadow(0 0 18px rgb(var(--c-long) / 0.2))',
+}
+
 const SIZE = 300
 const STROKE = 14
 const R = (SIZE - STROKE) / 2
@@ -58,7 +66,7 @@ export function Timer({
   const dotsFilled = completedFocusInCycle % roundsBeforeLongBreak
 
   return (
-    <section className="card flex w-full max-w-md flex-col items-center gap-8 p-8">
+    <section className="card border border-[#504945] flex w-full max-w-md flex-col items-center gap-8 p-8">
       <div className="relative" style={{ width: SIZE, height: SIZE }}>
         <svg width={SIZE} height={SIZE} className="-rotate-90">
           <circle
@@ -78,6 +86,7 @@ export function Timer({
             strokeLinecap="round"
             strokeDasharray={CIRC}
             strokeDashoffset={offset}
+            style={{ filter: RING_GLOW[phase] }}
             className={`${RING[phase]} transition-all duration-300 ease-linear`}
           />
         </svg>
@@ -85,7 +94,9 @@ export function Timer({
           <span className={`text-sm font-medium uppercase tracking-widest ${PHASE_TEXT[phase]}`}>
             {phaseLabel}
           </span>
-          <span className="font-mono text-5xl font-bold tabular-nums text-fg">{time}</span>
+          <span className="font-mono text-5xl font-bold tabular-nums leading-none tracking-wider text-fg">
+            {time}
+          </span>
           <span className="text-xs text-muted">
             {running ? 'läuft' : status === 'paused' ? 'pausiert' : 'bereit'}
           </span>
@@ -106,7 +117,11 @@ export function Timer({
         </span>
       </div>
 
-      <div className="flex w-full flex-col gap-3">
+      <div
+        className={`flex w-full flex-col gap-3 transition-opacity duration-500 ${
+          running ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
+        }`}
+      >
         <input
           type="text"
           value={task}
@@ -121,10 +136,10 @@ export function Timer({
               key={t}
               type="button"
               onClick={() => onTagChange(tag === t ? '' : t)}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
                 tag === t
-                  ? 'border-accent bg-accent/15 text-accent'
-                  : 'border-line text-muted hover:border-muted hover:text-fg'
+                  ? 'border-accent bg-accent/20 text-accent shadow-sm shadow-accent/20'
+                  : 'border-line text-muted hover:border-accent/50 hover:bg-accent/5 hover:text-fg'
               }`}
             >
               {t}
@@ -150,7 +165,11 @@ export function Timer({
         </button>
       </div>
 
-      <div className="flex items-center gap-3 text-[11px] text-muted">
+      <div
+        className={`flex items-center gap-3 text-[11px] text-muted transition-opacity duration-500 ${
+          running ? 'opacity-20 hover:opacity-100' : 'opacity-100'
+        }`}
+      >
         <span className="flex items-center gap-1">
           <span className="kbd">Space</span> Start / Pause
         </span>
