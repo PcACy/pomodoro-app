@@ -49,6 +49,23 @@ const GLOW_VAR: Record<PhaseId, string> = {
 
 const MODES: TimerMode[] = ['pomodoro', 'flow']
 
+const FLOW_BARS = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+
+/** Minimal equalizer waveform for the flow mode (transform-only, GPU-composited). */
+function Waveform({ active }: { active: boolean }) {
+  return (
+    <div className="flex h-8 items-center justify-center gap-1.5" aria-hidden="true">
+      {FLOW_BARS.map((i) => (
+        <span
+          key={i}
+          className={`flow-bar bg-accent ${active ? 'flow-bar--active' : ''}`}
+          style={{ animationDelay: `${i * 0.11}s` }}
+        />
+      ))}
+    </div>
+  )
+}
+
 export const Timer = memo(function Timer({
   phase,
   phaseLabel,
@@ -118,16 +135,21 @@ export const Timer = memo(function Timer({
           }`}
           style={{ '--primary-color': `rgb(var(${glowVar}))` } as React.CSSProperties}
         />
-        <svg width={size} height={size} className="-rotate-90">
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={r}
-            fill="none"
-            strokeWidth={stroke}
-            className="stroke-track"
-          />
-          {!isFlow && (
+
+        <div
+          className={`absolute inset-0 transition-opacity duration-300 ${
+            isFlow ? 'pointer-events-none opacity-0' : 'opacity-100'
+          }`}
+        >
+          <svg width={size} height={size} className="-rotate-90">
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={r}
+              fill="none"
+              strokeWidth={stroke}
+              className="stroke-track"
+            />
             <circle
               cx={size / 2}
               cy={size / 2}
@@ -139,19 +161,34 @@ export const Timer = memo(function Timer({
               strokeDashoffset={offset}
               className={`${RING[phase]} transition-all duration-300 ease-linear`}
             />
-          )}
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-          <span className={`text-sm font-medium uppercase tracking-widest ${PHASE_TEXT[phase]}`}>
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+            <span className={`text-sm font-medium uppercase tracking-widest ${PHASE_TEXT[phase]}`}>
+              {shownLabel}
+            </span>
+            <span
+              className={`font-mono font-bold tabular-nums leading-none tracking-wider text-fg ${
+                large ? 'text-6xl' : 'text-5xl'
+              }`}
+            >
+              {shownTime}
+            </span>
+            <span className="text-xs text-muted">{shownStatus}</span>
+          </div>
+        </div>
+
+        <div
+          className={`absolute inset-0 flex flex-col items-center justify-center gap-4 transition-opacity duration-300 ${
+            isFlow ? 'opacity-100' : 'pointer-events-none opacity-0'
+          }`}
+        >
+          <span className="text-xs font-semibold uppercase tracking-[0.35em] text-accent/80">
             {shownLabel}
           </span>
-          <span
-            className={`font-mono font-bold tabular-nums leading-none tracking-wider text-fg ${
-              large ? 'text-6xl' : 'text-5xl'
-            }`}
-          >
+          <span className="font-mono text-6xl font-bold leading-none tracking-tight tabular-nums text-fg sm:text-7xl">
             {shownTime}
           </span>
+          <Waveform active={running} />
           <span className="text-xs text-muted">{shownStatus}</span>
         </div>
       </div>

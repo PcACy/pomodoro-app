@@ -180,6 +180,37 @@ body {
   will-change: opacity;
 }
 
+/* Flow-mode equalizer bars: transform-only animation (GPU-composited). */
+.flow-bar {
+  height: 28px;
+  width: 4px;
+  border-radius: 9999px;
+  transform: scaleY(0.35);
+  transform-origin: center;
+  transition: transform 600ms ease-in-out;
+  will-change: transform;
+}
+
+.flow-bar--active {
+  animation: flow-eq 1.6s ease-in-out infinite;
+}
+
+@keyframes flow-eq {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-bar--active {
+    animation: none;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
