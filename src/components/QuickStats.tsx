@@ -1,0 +1,82 @@
+import { memo, useMemo } from 'react'
+import { Flame, ListChecks } from 'lucide-react'
+import type { Session, Settings } from '../types'
+import { currentStreakDays, minutesByTag, todayMinutes } from '../lib/stats'
+import { fmtDuration, sameDay, startOfDay } from '../lib/time'
+import { useTranslation } from '../hooks/useTranslation'
+
+interface Props {
+  sessions: Session[]
+  settings: Settings
+}
+
+export const QuickStats = memo(function QuickStats({ sessions, settings }: Props) {
+  const { t, lang } = useTranslation()
+  const today = todayMinutes(sessions)
+  const dailyGoal = Math.max(1, Math.round(settings.weeklyGoalMinutes / 7))
+  const pct = Math.min(100, Math.round((today / dailyGoal) * 100))
+  const streak = currentStreakDays(sessions)
+  const roundsToday = useMemo(
+    () => sessions.filter((s) => sameDay(new Date(s.start), new Date())).length,
+    [sessions],
+  )
+  const tags = useMemo(() => minutesByTag(sessions, startOfDay(new Date())).slice(0, 5), [sessions])
+
+  return (
+    <section className="card flex w-full max-w-md flex-col gap-5 p-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-fg">{t.dashboard.todayFocus}</h3>
+        <span className="text-xs text-muted">{t.dashboard.dailyGoal}</span>
+      </div>
+
+      <div>
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-2xl font-bold text-fg">{fmtDuration(today * 60_000, lang)}</span>
+          <span className="text-xs font-medium text-accent">{pct}%</span>
+        </div>
+        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-raised">
+          <div
+            className="h-full rounded-full bg-accent transition-all duration-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex items-center gap-2.5 rounded-xl border border-line bg-raised/40 px-3 py-2.5">
+          <Flame size={18} className="shrink-0 text-accent" />
+          <div className="min-w-0">
+            <p className="text-[11px] text-muted">{t.dashboard.streak}</p>
+            <p className="truncate text-base font-bold leading-tight text-fg">
+              {streak} {streak === 1 ? t.dashboard.day : t.dashboard.days}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5 rounded-xl border border-line bg-raised/40 px-3 py-2.5">
+          <ListChecks size={18} className="shrink-0 text-accent" />
+          <div className="min-w-0">
+            <p className="text-[11px] text-muted">{t.dashboard.pomodorosToday}</p>
+            <p className="truncate text-base font-bold leading-tight text-fg">{roundsToday}</p>
+          </div>
+        </div>
+      </div>
+
+      {tags.length > 0 && (
+        <div>
+          <p className="mb-2 text-xs text-muted">{t.dashboard.byTag}</p>
+          <div className="flex flex-wrap gap-2">
+            {tags.map((ts) => (
+              <span
+                key={ts.tag}
+                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-raised px-3 py-1 text-xs text-fg"
+              >
+                {ts.tag}
+                <span className="text-muted">{ts.minutes} min</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  )
+})

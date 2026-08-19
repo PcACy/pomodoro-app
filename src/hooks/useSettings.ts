@@ -8,6 +8,7 @@ function mergeWithDefaults(stored: Partial<Settings> | undefined): Settings {
     phases,
     weeklyGoalMinutes: stored?.weeklyGoalMinutes ?? DEFAULT_SETTINGS.weeklyGoalMinutes,
     tags: stored?.tags?.length ? stored.tags : DEFAULT_SETTINGS.tags,
+    layoutMode: stored?.layoutMode ?? DEFAULT_SETTINGS.layoutMode,
   }
 }
 

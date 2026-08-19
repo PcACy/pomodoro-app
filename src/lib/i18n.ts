@@ -37,6 +37,8 @@ export interface Messages {
   dashboard: {
     today: string
     todayFocus: string
+    dailyGoal: string
+    pomodorosToday: string
     streak: string
     weeklyGoal: string
     noDataToday: string
@@ -102,6 +104,10 @@ export interface Messages {
     clearSessions: string
     backup: string
     language: string
+    appearance: string
+    layoutHint: string
+    layoutSplit: string
+    layoutSingle: string
   }
   sync: {
     title: string
@@ -174,6 +180,8 @@ const de: Messages = {
   dashboard: {
     today: 'Heute',
     todayFocus: 'Heutige Fokuszeit',
+    dailyGoal: 'Tagesziel',
+    pomodorosToday: 'Runden heute',
     streak: 'Tages-Streak',
     weeklyGoal: 'Wochenziel',
     noDataToday: 'Noch nichts erfasst',
@@ -239,6 +247,10 @@ const de: Messages = {
     clearSessions: 'Sessions löschen',
     backup: 'Komplett-Backup (.json)',
     language: 'Sprache',
+    appearance: 'Darstellung',
+    layoutHint: 'Anordnung von Timer, Aufgaben und Statistiken.',
+    layoutSplit: '2 Spalten (Timer & Aufgaben nebeneinander)',
+    layoutSingle: '1 Spalte (Zentrierter Fokus & großer Timer)',
   },
   sync: {
     title: 'Cloud-Sync',
@@ -317,6 +329,8 @@ const en: Messages = {
   dashboard: {
     today: 'Today',
     todayFocus: 'Today’s focus time',
+    dailyGoal: 'Daily goal',
+    pomodorosToday: 'Rounds today',
     streak: 'Daily streak',
     weeklyGoal: 'Weekly goal',
     noDataToday: 'Nothing recorded yet',
@@ -382,6 +396,10 @@ const en: Messages = {
     clearSessions: 'Delete sessions',
     backup: 'Full backup (.json)',
     language: 'Language',
+    appearance: 'Appearance',
+    layoutHint: 'Arrange timer, tasks and stats.',
+    layoutSplit: 'Two columns (Timer & tasks side by side)',
+    layoutSingle: 'One column (Centered focus & large timer)',
   },
   sync: {
     title: 'Cloud Sync',

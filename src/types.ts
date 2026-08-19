@@ -1,6 +1,7 @@
 export type PhaseId = 'focus' | 'shortBreak' | 'longBreak'
 export type TimerStatus = 'idle' | 'running' | 'paused'
 export type TimerMode = 'pomodoro' | 'flow'
+export type LayoutMode = 'split' | 'single'
 
 export interface PhaseConfig {
   focus: number
@@ -13,6 +14,7 @@ export interface Settings {
   phases: PhaseConfig
   weeklyGoalMinutes: number
   tags: string[]
+  layoutMode: LayoutMode
 }
 
 export interface Session {
@@ -60,6 +62,7 @@ export const DEFAULT_SETTINGS: Settings = {
   },
   weeklyGoalMinutes: 5 * 60,
   tags: ['Uni', 'Projekt', 'Coding'],
+  layoutMode: 'split',
 }
 
 export const STORAGE_KEYS = {

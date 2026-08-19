@@ -24,6 +24,7 @@ import { fmtDuration } from './lib/time'
 import { STORAGE_KEYS, type PhaseId, type Session, type Settings, type TimerMode } from './types'
 import type { Messages } from './lib/i18n'
 import { Timer } from './components/Timer'
+import { QuickStats } from './components/QuickStats'
 import { Dashboard } from './components/Dashboard'
 import { SettingsPanel } from './components/Settings'
 import { PipTimer, PipCanvas } from './components/PipTimer'
@@ -252,9 +253,10 @@ export default function App() {
       </header>
 
       <main className="flex w-full flex-1 flex-col items-center gap-8 pb-8">
-        {tab === 'timer' && (
-          <div className="mx-auto grid w-full max-w-5xl grid-cols-1 items-start justify-items-center gap-8 lg:grid-cols-2">
+        {tab === 'timer' && (settings.layoutMode === 'single' ? (
+          <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-8">
             <Timer
+              large
               phase={timer.phase}
               phaseLabel={timer.phaseLabel}
               status={timer.status}
@@ -288,8 +290,49 @@ export default function App() {
               onRemove={todosApi.remove}
               onFocus={handleFocusTodo}
             />
+            <QuickStats sessions={sessions} settings={settings} />
           </div>
-        )}
+        ) : (
+          <div className="mx-auto grid w-full max-w-5xl grid-cols-1 items-start justify-items-center gap-8 lg:grid-cols-2">
+            <Timer
+              phase={timer.phase}
+              phaseLabel={timer.phaseLabel}
+              status={timer.status}
+              time={timer.time}
+              progress={timer.progress}
+              completedFocusInCycle={timer.completedFocusInCycle}
+              roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
+              task={task}
+              tag={tag}
+              tags={settings.tags}
+              mode={mode}
+              flowStatus={flow.status}
+              flowTime={flow.time}
+              onModeChange={handleModeChange}
+              onTaskChange={setTask}
+              onTagChange={setTag}
+              onToggle={handleToggle}
+              onSkip={handleSkip}
+              onReset={handleReset}
+              pipSupported={pipSupported}
+              pipOpen={pipMode !== 'none'}
+              onPipToggle={handlePipToggle}
+            />
+            <div className="flex w-full max-w-md flex-col gap-8">
+              <TodoList
+                todos={todosApi.todos}
+                tags={settings.tags}
+                activeTodoId={activeTodoId}
+                onAdd={todosApi.add}
+                onToggle={todosApi.toggle}
+                onEdit={todosApi.edit}
+                onRemove={todosApi.remove}
+                onFocus={handleFocusTodo}
+              />
+              <QuickStats sessions={sessions} settings={settings} />
+            </div>
+          </div>
+        ))}
         {tab === 'dashboard' && (
           <Dashboard
             sessions={sessions}

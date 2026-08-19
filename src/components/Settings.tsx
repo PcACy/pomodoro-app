@@ -209,6 +209,28 @@ export const SettingsPanel = memo(function SettingsPanel({
       </div>
 
       <div className="card p-6">
+        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.appearance}</h3>
+        <p className="mb-4 text-xs text-muted">{t.settings.layoutHint}</p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {(['split', 'single'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => update((s) => ({ ...s, layoutMode: m }))}
+              className={`flex items-center justify-between gap-2 rounded-xl border px-4 py-3 text-left transition-colors ${
+                settings.layoutMode === m ? 'border-accent bg-accent/10' : 'border-line bg-canvas hover:bg-raised'
+              }`}
+            >
+              <span className="text-sm font-medium text-fg">
+                {m === 'split' ? t.settings.layoutSplit : t.settings.layoutSingle}
+              </span>
+              {settings.layoutMode === m && <Check size={16} className="shrink-0 text-accent" />}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="card p-6">
         <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.phases}</h3>
         <p className="mb-4 text-xs text-muted">{t.settings.phasesHint}</p>
         <div className="grid gap-4 sm:grid-cols-3">

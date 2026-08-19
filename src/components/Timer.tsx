@@ -9,6 +9,7 @@ interface Props {
   status: TimerStatus
   time: string
   progress: number
+  large?: boolean
   completedFocusInCycle: number
   roundsBeforeLongBreak: number
   task: string
@@ -48,17 +49,13 @@ const GLOW_VAR: Record<PhaseId, string> = {
 
 const MODES: TimerMode[] = ['pomodoro', 'flow']
 
-const SIZE = 300
-const STROKE = 14
-const R = (SIZE - STROKE) / 2
-const CIRC = 2 * Math.PI * R
-
 export const Timer = memo(function Timer({
   phase,
   phaseLabel,
   status,
   time,
   progress,
+  large = false,
   completedFocusInCycle,
   roundsBeforeLongBreak,
   task,
@@ -90,7 +87,11 @@ export const Timer = memo(function Timer({
     : paused
       ? t.timer.status.paused
       : t.timer.status.ready
-  const offset = CIRC * (1 - Math.min(1, Math.max(0, progress)))
+  const size = large ? 380 : 300
+  const stroke = large ? 16 : 14
+  const r = (size - stroke) / 2
+  const circ = 2 * Math.PI * r
+  const offset = circ * (1 - Math.min(1, Math.max(0, progress)))
   const glowVar = isFlow ? '--c-accent' : GLOW_VAR[phase]
 
   return (
@@ -110,31 +111,31 @@ export const Timer = memo(function Timer({
         ))}
       </div>
 
-      <div className="relative isolate" style={{ width: SIZE, height: SIZE }}>
+      <div className="relative isolate" style={{ width: size, height: size }}>
         <div
           className={`pointer-events-none absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle,var(--primary-color)_0%,transparent_70%)] blur-2xl transition-opacity duration-500 ${
             running ? 'animate-glow' : 'opacity-10'
           }`}
           style={{ '--primary-color': `rgb(var(${glowVar}))` } as React.CSSProperties}
         />
-        <svg width={SIZE} height={SIZE} className="-rotate-90">
+        <svg width={size} height={size} className="-rotate-90">
           <circle
-            cx={SIZE / 2}
-            cy={SIZE / 2}
-            r={R}
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
             fill="none"
-            strokeWidth={STROKE}
+            strokeWidth={stroke}
             className="stroke-track"
           />
           {!isFlow && (
             <circle
-              cx={SIZE / 2}
-              cy={SIZE / 2}
-              r={R}
+              cx={size / 2}
+              cy={size / 2}
+              r={r}
               fill="none"
-              strokeWidth={STROKE}
+              strokeWidth={stroke}
               strokeLinecap="round"
-              strokeDasharray={CIRC}
+              strokeDasharray={circ}
               strokeDashoffset={offset}
               className={`${RING[phase]} transition-all duration-300 ease-linear`}
             />
@@ -144,7 +145,11 @@ export const Timer = memo(function Timer({
           <span className={`text-sm font-medium uppercase tracking-widest ${PHASE_TEXT[phase]}`}>
             {shownLabel}
           </span>
-          <span className="font-mono text-5xl font-bold tabular-nums leading-none tracking-wider text-fg">
+          <span
+            className={`font-mono font-bold tabular-nums leading-none tracking-wider text-fg ${
+              large ? 'text-6xl' : 'text-5xl'
+            }`}
+          >
             {shownTime}
           </span>
           <span className="text-xs text-muted">{shownStatus}</span>
