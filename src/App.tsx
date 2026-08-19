@@ -1,0 +1,119 @@
+import { useCallback, useState } from 'react'
+import { BarChart3, Settings as SettingsIcon, Timer as TimerIcon, Clock } from 'lucide-react'
+import { useSettings } from './hooks/useSettings'
+import { useLocalState } from './hooks/useLocalState'
+import { useSessions } from './hooks/useSessions'
+import { useTimer } from './hooks/useTimer'
+import { useKeyboard } from './hooks/useKeyboard'
+import { useDocumentChrome } from './hooks/useDocumentChrome'
+import { addSession } from './lib/db'
+import { requestNotificationPermission } from './lib/notify'
+import { todayMinutes } from './lib/stats'
+import { fmtDuration } from './lib/time'
+import { STORAGE_KEYS, type Session, type Settings } from './types'
+import { Timer } from './components/Timer'
+import { Dashboard } from './components/Dashboard'
+import { SettingsPanel } from './components/Settings'
+
+type Tab = 'timer' | 'dashboard' | 'settings'
+
+const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
+  { id: 'timer', label: 'Timer', icon: <TimerIcon size={16} /> },
+  { id: 'dashboard', label: 'Statistik', icon: <BarChart3 size={16} /> },
+  { id: 'settings', label: 'Einstellungen', icon: <SettingsIcon size={16} /> },
+]
+
+export default function App() {
+  const [settings, updateSettings] = useSettings()
+  const [task, setTask] = useLocalState(STORAGE_KEYS.task, '')
+  const [tag, setTag] = useLocalState(STORAGE_KEYS.tag, '')
+  const [tab, setTab] = useState<Tab>('timer')
+  const sessions = useSessions()
+
+  const handleFocusComplete = useCallback((s: Session) => {
+    void addSession(s)
+  }, [])
+
+  const timer = useTimer({ settings, task, tag, onFocusComplete: handleFocusComplete })
+
+  const handleToggle = useCallback(() => {
+    void requestNotificationPermission()
+    timer.toggle()
+  }, [timer])
+
+  useKeyboard({ onToggle: handleToggle, onSkip: timer.skip, onReset: timer.reset })
+  useDocumentChrome(timer.phase, timer.status, timer.time)
+
+  const handleImportSettings = (s: unknown) => {
+    if (s && typeof s === 'object') updateSettings(() => s as Settings)
+  }
+
+  return (
+    <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center gap-8 px-4 py-8">
+      <header className="flex w-full items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/15">
+            <TimerIcon className="text-rose-400" size={22} />
+          </div>
+          <div className="leading-tight">
+            <h1 className="text-lg font-bold text-zinc-100">Pomodoro</h1>
+            <p className="text-xs text-zinc-500">Heute: {fmtDuration(todayMinutes(sessions) * 60_000)}</p>
+          </div>
+        </div>
+
+        <nav className="flex items-center gap-1 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-1">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors ${
+                tab === t.id ? 'bg-zinc-800 text-zinc-100' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              {t.icon}
+              <span className="hidden sm:inline">{t.label}</span>
+            </button>
+          ))}
+        </nav>
+      </header>
+
+      <main className="flex w-full flex-1 flex-col items-center gap-8 pb-8">
+        {tab === 'timer' && (
+          <Timer
+            phase={timer.phase}
+            phaseLabel={timer.phaseLabel}
+            status={timer.status}
+            time={timer.time}
+            progress={timer.progress}
+            completedFocusInCycle={timer.completedFocusInCycle}
+            roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
+            task={task}
+            tag={tag}
+            tags={settings.tags}
+            onTaskChange={setTask}
+            onTagChange={setTag}
+            onToggle={handleToggle}
+            onSkip={timer.skip}
+            onReset={timer.reset}
+          />
+        )}
+        {tab === 'dashboard' && (
+          <Dashboard
+            sessions={sessions}
+            settings={settings}
+            onImportSettings={handleImportSettings}
+          />
+        )}
+        {tab === 'settings' && <SettingsPanel settings={settings} update={updateSettings} />}
+      </main>
+
+      <footer className="flex w-full items-center justify-center gap-4 pb-2 text-xs text-zinc-600">
+        <span className="flex items-center gap-1">
+          <Clock size={12} /> 100% offline
+        </span>
+        <span>Daten lokal auf diesem Gerät</span>
+      </footer>
+    </div>
+  )
+}

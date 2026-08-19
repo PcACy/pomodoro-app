@@ -1,0 +1,166 @@
+import { Pause, Play, RotateCcw, SkipForward } from 'lucide-react'
+import type { TimerStatus, PhaseId } from '../types'
+
+interface Props {
+  phase: PhaseId
+  phaseLabel: string
+  status: TimerStatus
+  time: string
+  progress: number
+  completedFocusInCycle: number
+  roundsBeforeLongBreak: number
+  task: string
+  tag: string
+  tags: string[]
+  onTaskChange: (v: string) => void
+  onTagChange: (v: string) => void
+  onToggle: () => void
+  onSkip: () => void
+  onReset: () => void
+}
+
+const PHASE_TEXT: Record<PhaseId, string> = {
+  focus: 'text-rose-400',
+  shortBreak: 'text-emerald-400',
+  longBreak: 'text-sky-400',
+}
+
+const RING: Record<PhaseId, string> = {
+  focus: 'stroke-rose-500',
+  shortBreak: 'stroke-emerald-500',
+  longBreak: 'stroke-sky-500',
+}
+
+const SIZE = 300
+const STROKE = 14
+const R = (SIZE - STROKE) / 2
+const CIRC = 2 * Math.PI * R
+
+export function Timer({
+  phase,
+  phaseLabel,
+  status,
+  time,
+  progress,
+  completedFocusInCycle,
+  roundsBeforeLongBreak,
+  task,
+  tag,
+  tags,
+  onTaskChange,
+  onTagChange,
+  onToggle,
+  onSkip,
+  onReset,
+}: Props) {
+  const offset = CIRC * (1 - Math.min(1, Math.max(0, progress)))
+  const running = status === 'running'
+  const dotsFilled = completedFocusInCycle % roundsBeforeLongBreak
+
+  return (
+    <section className="card flex w-full max-w-md flex-col items-center gap-8 p-8">
+      <div className="relative" style={{ width: SIZE, height: SIZE }}>
+        <svg width={SIZE} height={SIZE} className="-rotate-90">
+          <circle
+            cx={SIZE / 2}
+            cy={SIZE / 2}
+            r={R}
+            fill="none"
+            strokeWidth={STROKE}
+            className="stroke-zinc-800"
+          />
+          <circle
+            cx={SIZE / 2}
+            cy={SIZE / 2}
+            r={R}
+            fill="none"
+            strokeWidth={STROKE}
+            strokeLinecap="round"
+            strokeDasharray={CIRC}
+            strokeDashoffset={offset}
+            className={`${RING[phase]} transition-all duration-300 ease-linear`}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+          <span className={`text-sm font-medium uppercase tracking-widest ${PHASE_TEXT[phase]}`}>
+            {phaseLabel}
+          </span>
+          <span className="font-mono text-5xl font-bold tabular-nums text-zinc-100">{time}</span>
+          <span className="text-xs text-zinc-500">
+            {running ? 'läuft' : status === 'paused' ? 'pausiert' : 'bereit'}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2" aria-label="Fortschritt im Zyklus">
+        {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => (
+          <span
+            key={i}
+            className={`h-2.5 w-2.5 rounded-full transition-colors ${
+              i < dotsFilled ? 'bg-rose-500' : 'bg-zinc-700'
+            }`}
+          />
+        ))}
+        <span className="ml-1 text-xs text-zinc-500">
+          {completedFocusInCycle % roundsBeforeLongBreak}/{roundsBeforeLongBreak} Runden
+        </span>
+      </div>
+
+      <div className="flex w-full flex-col gap-3">
+        <input
+          type="text"
+          value={task}
+          onChange={(e) => onTaskChange(e.target.value)}
+          placeholder="Aktuelle Aufgabe …"
+          className="input"
+          maxLength={80}
+        />
+        <div className="flex flex-wrap gap-2">
+          {tags.map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => onTagChange(tag === t ? '' : t)}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                tag === t
+                  ? 'border-rose-500 bg-rose-500/15 text-rose-300'
+                  : 'border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button type="button" onClick={onSkip} title="Skip (N)" className="btn-ghost">
+          <SkipForward size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          className="h-16 w-16 rounded-full bg-rose-500 text-white shadow-lg shadow-rose-500/25 transition-all hover:bg-rose-400 hover:shadow-rose-400/30 active:scale-95"
+          title={running ? 'Pause (Leertaste)' : 'Start (Leertaste)'}
+        >
+          {running ? <Pause size={26} /> : <Play size={26} className="ml-1" />}
+        </button>
+        <button type="button" onClick={onReset} title="Reset (R)" className="btn-ghost">
+          <RotateCcw size={18} />
+        </button>
+      </div>
+
+      <div className="flex items-center gap-3 text-[11px] text-zinc-500">
+        <span className="flex items-center gap-1">
+          <span className="kbd">Space</span> Start / Pause
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="kbd">N</span> Skip
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="kbd">R</span> Reset
+        </span>
+      </div>
+    </section>
+  )
+}
