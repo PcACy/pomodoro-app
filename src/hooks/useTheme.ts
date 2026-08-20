@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
-import { DEFAULT_THEME, THEME_KEY, type ThemeId } from '../themes'
+import { DEFAULT_THEME, THEME_KEY } from '../themes'
+import type { ThemeId } from '../themes'
 
 const applyTheme = (id: ThemeId): void => {
   document.documentElement.dataset.theme = id
