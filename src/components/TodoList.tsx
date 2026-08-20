@@ -152,7 +152,7 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                   <button
                     type="button"
                     onClick={() => onFocus(t.id)}
-                    title={tr.todo.selectFocus}
+                    title={activeTodoId === t.id ? tr.todo.unselectFocus : tr.todo.selectFocus}
                     className={`rounded-md p-1.5 transition-colors ${
                       activeTodoId === t.id
                         ? 'bg-accent/15 text-accent'

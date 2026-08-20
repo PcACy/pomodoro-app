@@ -156,10 +156,9 @@ export default function App() {
 
   const handleFocusTodo = useCallback(
     (id: string) => {
-      if (!todosApi.todos.some((x) => x.id === id)) return
-      setActiveTodoId(id)
+      setActiveTodoId((prev) => (prev === id ? null : id))
     },
-    [todosApi.todos],
+    [],
   )
 
   useKeyboard({

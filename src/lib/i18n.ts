@@ -35,6 +35,7 @@ export interface Messages {
     reopen: string
     done: string
     selectFocus: string
+    unselectFocus: string
     edit: string
     delete: string
     save: string
@@ -179,6 +180,7 @@ const de: Messages = {
     reopen: 'Wieder öffnen',
     done: 'Erledigt',
     selectFocus: 'Als aktive Aufgabe wählen',
+    unselectFocus: 'Aktive Aufgabe abwählen',
     edit: 'Bearbeiten',
     delete: 'Löschen',
     save: 'Speichern',
@@ -335,6 +337,7 @@ const en: Messages = {
     reopen: 'Reopen',
     done: 'Done',
     selectFocus: 'Select as active task',
+    unselectFocus: 'Deselect active task',
     edit: 'Edit',
     delete: 'Delete',
     save: 'Save',
