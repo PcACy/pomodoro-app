@@ -55,8 +55,6 @@ export default function App() {
   const { t, lang } = useTranslation()
   const [themeId, setTheme] = useTheme()
   const [settings, updateSettings] = useSettings()
-  const [task, setTask] = useLocalState(STORAGE_KEYS.task, '')
-  const [tag, setTag] = useLocalState(STORAGE_KEYS.tag, '')
   const [tab, setTab] = useState<Tab>('timer')
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null)
   const [mode, setMode] = useLocalState<TimerMode>(STORAGE_KEYS.mode, 'pomodoro')
@@ -65,6 +63,9 @@ export default function App() {
   const toastTimer = useRef<number | null>(null)
   const sessions = useSessions()
   const todosApi = useTodos()
+  const activeTodo = todosApi.todos.find((x) => x.id === activeTodoId) ?? null
+  const sessionTask = activeTodo?.title ?? ''
+  const sessionTag = activeTodo?.tag ?? ''
   const auth = useAuth()
   const sync = useSync({ user: auth.user, mergeRemoteTodos: todosApi.mergeRemote })
 
@@ -89,7 +90,7 @@ export default function App() {
     [showToast, t],
   )
 
-  const flow = useFlowTimer({ task, tag, onFinish: handleFlowFinished })
+  const flow = useFlowTimer({ task: sessionTask, tag: sessionTag, onFinish: handleFlowFinished })
 
   const handleFocusComplete = useCallback(
     (s: Omit<Session, 'id' | 'notes'>) => {
@@ -109,7 +110,12 @@ export default function App() {
 
   const handleSkipNote = useCallback(() => setPendingSessionId(null), [])
 
-  const timer = useTimer({ settings, task, tag, onFocusComplete: handleFocusComplete })
+  const timer = useTimer({
+    settings,
+    task: sessionTask,
+    tag: sessionTag,
+    onFocusComplete: handleFocusComplete,
+  })
 
   const handleFlowFinish = useCallback(() => {
     if (mode === 'flow') flow.finishSession()
@@ -150,13 +156,10 @@ export default function App() {
 
   const handleFocusTodo = useCallback(
     (id: string) => {
-      const t = todosApi.todos.find((x) => x.id === id)
-      if (!t) return
+      if (!todosApi.todos.some((x) => x.id === id)) return
       setActiveTodoId(id)
-      setTask(t.title)
-      setTag(t.tag)
     },
-    [todosApi.todos, setTask, setTag],
+    [todosApi.todos],
   )
 
   useKeyboard({
@@ -288,15 +291,10 @@ export default function App() {
               progress={timer.progress}
               completedFocusInCycle={timer.completedFocusInCycle}
               roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
-              task={task}
-              tag={tag}
-              tags={settings.tags}
               mode={mode}
               flowStatus={flow.status}
               flowTime={flow.time}
               onModeChange={handleModeChange}
-              onTaskChange={setTask}
-              onTagChange={setTag}
               onToggle={handleToggle}
               onSkip={handleSkip}
               onReset={handleReset}
@@ -326,15 +324,10 @@ export default function App() {
               progress={timer.progress}
               completedFocusInCycle={timer.completedFocusInCycle}
               roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
-              task={task}
-              tag={tag}
-              tags={settings.tags}
               mode={mode}
               flowStatus={flow.status}
               flowTime={flow.time}
               onModeChange={handleModeChange}
-              onTaskChange={setTask}
-              onTagChange={setTag}
               onToggle={handleToggle}
               onSkip={handleSkip}
               onReset={handleReset}
@@ -414,7 +407,7 @@ export default function App() {
         phaseLabel={mode === 'flow' ? 'Flow' : timer.phaseLabel}
         status={chromeStatus}
         time={chromeTime}
-        activeTodo={task}
+        activeTodo={sessionTask}
         onToggle={handleToggle}
         onSkip={handleSkip}
       />

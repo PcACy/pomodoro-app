@@ -12,15 +12,10 @@ interface Props {
   large?: boolean
   completedFocusInCycle: number
   roundsBeforeLongBreak: number
-  task: string
-  tag: string
-  tags: string[]
   mode: TimerMode
   flowStatus: TimerStatus
   flowTime: string
   onModeChange: (m: TimerMode) => void
-  onTaskChange: (v: string) => void
-  onTagChange: (v: string) => void
   onToggle: () => void
   onSkip: () => void
   onReset: () => void
@@ -75,15 +70,10 @@ export const Timer = memo(function Timer({
   large = false,
   completedFocusInCycle,
   roundsBeforeLongBreak,
-  task,
-  tag,
-  tags,
   mode,
   flowStatus,
   flowTime,
   onModeChange,
-  onTaskChange,
-  onTagChange,
   onToggle,
   onSkip,
   onReset,
@@ -112,7 +102,7 @@ export const Timer = memo(function Timer({
   const glowVar = isFlow ? '--c-accent' : GLOW_VAR[phase]
 
   return (
-    <section className="card flex w-full max-w-md flex-col items-center gap-8 border border-[#504945] p-8">
+    <section className="card flex w-full max-w-md flex-col items-center gap-6 border border-[#504945] p-8">
       <div className="flex w-full items-center gap-1 rounded-xl border border-line bg-canvas p-1">
         {MODES.map((m) => (
           <button
@@ -208,37 +198,6 @@ export const Timer = memo(function Timer({
           </span>
         </div>
       )}
-
-      <div
-        className={`flex w-full flex-col gap-3 transition-opacity duration-500 ${
-          running ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
-        }`}
-      >
-        <input
-          type="text"
-          value={task}
-          onChange={(e) => onTaskChange(e.target.value)}
-          placeholder={t.timer.taskPlaceholder}
-          className="input"
-          maxLength={80}
-        />
-        <div className="flex flex-wrap gap-2">
-          {tags.map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => onTagChange(tag === t ? '' : t)}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
-                tag === t
-                  ? 'border-accent bg-accent/20 text-accent shadow-sm shadow-accent/20'
-                  : 'border-line text-muted hover:border-accent/50 hover:bg-accent/5 hover:text-fg'
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      </div>
 
       <div className="flex items-center gap-3">
         {isFlow ? (
