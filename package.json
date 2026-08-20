@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
@@ -28,7 +29,8 @@
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",
-    "vite-plugin-singlefile": "^2.0.3"
+    "vite-plugin-singlefile": "^2.0.3",
+    "vitest": "^1.6.1"
   },
   "allowScripts": {
     "esbuild@0.21.5": true
