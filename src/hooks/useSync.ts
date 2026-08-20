@@ -130,20 +130,36 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
         const replace = tOps.some((o) => o.kind === 'replace')
         const upserts: unknown[] = []
         const deletes: string[] = []
-        for (const op of tOps) {
-          if (op.kind === 'replace') continue
+
+        const nonReplaceOps = tOps.filter((o) => o.kind !== 'replace')
+        for (const op of nonReplaceOps) {
           if (op.kind === 'delete') {
             deletes.push(op.id)
-            continue
           }
+        }
+
+        const upsertOps = nonReplaceOps.filter(
+          (o): o is Extract<typeof o, { kind: 'upsert' }> => o.kind === 'upsert',
+        )
+
+        if (upsertOps.length > 0) {
           if (table === 'sessions') {
-            const rec = await db.sessions.get(op.id)
-            if (!rec) deletes.push(op.id)
-            else upserts.push(sessionToRow(rec, userId))
+            const ids = upsertOps.map((o) => o.id)
+            const records = await db.sessions.bulkGet(ids)
+            for (let i = 0; i < upsertOps.length; i++) {
+              const op = upsertOps[i]
+              const rec = records[i]
+              if (!rec) deletes.push(op.id)
+              else upserts.push(sessionToRow(rec, userId))
+            }
           } else {
-            const rec = readTodosLocal().find((t) => t.id === op.id)
-            if (!rec) deletes.push(op.id)
-            else upserts.push(todoToRow(rec, userId))
+            const localTodos = readTodosLocal()
+            const todosMap = new Map(localTodos.map((t) => [t.id, t]))
+            for (const op of upsertOps) {
+              const rec = todosMap.get(op.id)
+              if (!rec) deletes.push(op.id)
+              else upserts.push(todoToRow(rec, userId))
+            }
           }
         }
         if (replace) {
