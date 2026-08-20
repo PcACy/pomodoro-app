@@ -143,8 +143,8 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                 <>
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span
-                      className={`truncate text-sm ${
-                        t.done ? 'text-muted line-through' : 'text-fg'
+                      className={`truncate text-sm transition-all ${
+                        t.done ? 'line-through text-muted opacity-60' : 'text-fg'
                       }`}
                     >
                       {t.title}

@@ -102,16 +102,16 @@ export const Timer = memo(function Timer({
   const glowVar = isFlow ? '--c-accent' : GLOW_VAR[phase]
 
   return (
-    <section className="card relative flex w-full max-w-md flex-col items-center gap-6 p-6 sm:p-8">
+    <section className="card group relative flex w-full max-w-md flex-col items-center gap-6 p-6 sm:p-8">
       {pipSupported && (
         <button
           type="button"
           onClick={onPipToggle}
           title={pipOpen ? t.pip.close : t.pip.open}
-          className={`absolute right-4 top-4 rounded-lg p-2 transition-colors ${
+          className={`absolute right-3.5 top-3.5 rounded-lg p-2 transition-all duration-200 ${
             pipOpen
-              ? 'bg-accent/15 text-accent'
-              : 'text-muted hover:bg-raised/50 hover:text-fg'
+              ? 'bg-accent/15 text-accent opacity-100'
+              : 'text-muted opacity-0 hover:bg-raised/50 hover:text-fg focus:opacity-100 group-hover:opacity-100'
           }`}
         >
           <PictureInPicture2 size={16} />
