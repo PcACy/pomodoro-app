@@ -94,18 +94,36 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
     try {
       const text = await file.text()
       const data = JSON.parse(text) as unknown
-      let importedSessions: Session[] | null = null
+      let rawSessions: unknown[] | null = null
       let importedSettings: unknown = null
 
       if (Array.isArray(data)) {
-        importedSessions = data as Session[]
-      } else if (data && typeof data === 'object') {
-        const obj = data as { settings?: unknown; sessions?: Session[] }
-        if (Array.isArray(obj.sessions)) importedSessions = obj.sessions
+        rawSessions = data
+      } else if (data && typeof data === 'object' && data !== null) {
+        const obj = data as { settings?: unknown; sessions?: unknown[] }
+        if (Array.isArray(obj.sessions)) rawSessions = obj.sessions
         if (obj.settings) importedSettings = obj.settings
       }
 
-      if (importedSessions) {
+      // Security: Validate schema & types for imported sessions to prevent prototype pollution or invalid data structures
+      const importedSessions = rawSessions
+        ? rawSessions.filter((s): s is Session => {
+            if (!s || typeof s !== 'object') return false
+            const item = s as Record<string, unknown>
+            return (
+              typeof item.start === 'number' &&
+              !isNaN(item.start) &&
+              typeof item.end === 'number' &&
+              !isNaN(item.end) &&
+              typeof item.durationMs === 'number' &&
+              !isNaN(item.durationMs) &&
+              typeof item.task === 'string' &&
+              typeof item.tag === 'string'
+            )
+          })
+        : null
+
+      if (importedSessions && importedSessions.length > 0) {
         await importSessions(importedSessions)
       }
       if (importedSettings) {
