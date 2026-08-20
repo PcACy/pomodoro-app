@@ -103,21 +103,6 @@ export const Timer = memo(function Timer({
 
   return (
     <section className="card group relative flex w-full max-w-md flex-col items-center gap-6 p-6 sm:p-8">
-      {pipSupported && (
-        <button
-          type="button"
-          onClick={onPipToggle}
-          title={pipOpen ? t.pip.close : t.pip.open}
-          className={`absolute right-3.5 top-3.5 rounded-lg p-2 transition-all duration-200 ${
-            pipOpen
-              ? 'bg-accent/15 text-accent opacity-100'
-              : 'text-muted opacity-0 hover:bg-raised/50 hover:text-fg focus:opacity-100 group-hover:opacity-100'
-          }`}
-        >
-          <PictureInPicture2 size={16} />
-        </button>
-      )}
-
       <div className="flex w-full flex-col items-center">
         <div className="flex w-full items-center gap-1 rounded-xl border border-line bg-canvas p-1">
           {MODES.map((m) => (
@@ -303,6 +288,29 @@ export const Timer = memo(function Timer({
           </>
         )}
       </div>
+
+      {pipSupported && (
+        <div className="group/pip absolute bottom-4 right-4 z-10">
+          <button
+            type="button"
+            onClick={onPipToggle}
+            aria-label={pipOpen ? t.pip.close : t.pip.open}
+            className={`rounded-lg p-2 transition-all duration-200 ${
+              pipOpen
+                ? 'bg-accent/15 text-accent opacity-100'
+                : 'text-muted opacity-0 hover:bg-raised/50 hover:text-fg focus:opacity-100 group-hover:opacity-100'
+            }`}
+          >
+            <PictureInPicture2 size={16} />
+          </button>
+          <span
+            role="tooltip"
+            className="pointer-events-none absolute bottom-full right-0 mb-2 whitespace-nowrap rounded-md border border-line bg-raised px-2 py-1 text-xs font-normal text-fg opacity-0 shadow-lg transition-opacity duration-150 group-hover/pip:opacity-100"
+          >
+            {pipOpen ? t.pip.close : t.pip.open}
+          </span>
+        </div>
+      )}
     </section>
   )
 })

@@ -169,7 +169,7 @@ const de: Messages = {
     finishedToast: (minutes) => `Flow abgeschlossen! +${minutes} Min. Fokuszeit gespeichert`,
   },
   shortcuts: { startPause: 'Start / Pause', skip: 'Skip', reset: 'Reset' },
-  pip: { open: 'In Mini-Widget anzeigen', close: 'Mini-Widget schließen' },
+  pip: { open: 'Mini-Player (PiP)', close: 'Mini-Player schließen' },
   todo: {
     title: 'To-Do',
     tag: 'Tag',
@@ -326,7 +326,7 @@ const en: Messages = {
     finishedToast: (minutes) => `Flow complete! +${minutes} min focus saved`,
   },
   shortcuts: { startPause: 'Start / Pause', skip: 'Skip', reset: 'Reset' },
-  pip: { open: 'Show in mini window', close: 'Close mini window' },
+  pip: { open: 'Mini-Player (PiP)', close: 'Close Mini-Player' },
   todo: {
     title: 'To-Do',
     tag: 'Tag',
