@@ -288,6 +288,8 @@ export default function App() {
               status={timer.status}
               time={timer.time}
               progress={timer.progress}
+              completedFocusInCycle={timer.completedFocusInCycle}
+              roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
               mode={mode}
               flowStatus={flow.status}
               flowTime={flow.time}
@@ -319,6 +321,8 @@ export default function App() {
               status={timer.status}
               time={timer.time}
               progress={timer.progress}
+              completedFocusInCycle={timer.completedFocusInCycle}
+              roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
               mode={mode}
               flowStatus={flow.status}
               flowTime={flow.time}
