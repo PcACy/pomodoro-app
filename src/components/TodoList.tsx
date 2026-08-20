@@ -85,13 +85,25 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
           {todos.map((t) => (
             <li
               key={t.id}
-              className={`flex items-center gap-2 rounded-xl border px-3 py-2 transition-colors ${
-                activeTodoId === t.id ? 'border-accent/60 bg-accent/10' : 'border-line'
+              onClick={(e) => {
+                const target = e.target as HTMLElement
+                if (target.closest('button, input, select, textarea') || editingId === t.id) return
+                onFocus(t.id)
+              }}
+              className={`group flex items-center gap-2 rounded-xl border px-3 py-2 transition-all ${
+                editingId !== t.id ? 'cursor-pointer' : ''
+              } ${
+                activeTodoId === t.id
+                  ? 'border-line border-l-4 border-l-accent bg-accent/10 shadow-sm'
+                  : 'border-line hover:bg-raised/35'
               }`}
             >
               <button
                 type="button"
-                onClick={() => onToggle(t.id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onToggle(t.id)
+                }}
                 title={t.done ? tr.todo.reopen : tr.todo.done}
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
                   t.done ? 'border-accent bg-accent text-on-accent' : 'border-line text-transparent hover:border-accent'
@@ -148,14 +160,17 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
               )}
 
               {editingId !== t.id && (
-                <div className="flex shrink-0 items-center gap-1">
+                <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
                   <button
                     type="button"
-                    onClick={() => onFocus(t.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onFocus(t.id)
+                    }}
                     title={activeTodoId === t.id ? tr.todo.unselectFocus : tr.todo.selectFocus}
                     className={`rounded-md p-1.5 transition-colors ${
                       activeTodoId === t.id
-                        ? 'bg-accent/15 text-accent'
+                        ? 'bg-accent/20 text-accent'
                         : 'text-muted hover:bg-raised hover:text-fg'
                     }`}
                   >
@@ -163,7 +178,10 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                   </button>
                   <button
                     type="button"
-                    onClick={() => startEdit(t)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      startEdit(t)
+                    }}
                     title={tr.todo.edit}
                     className="rounded-md p-1.5 text-muted transition-colors hover:bg-raised hover:text-fg"
                   >
@@ -171,7 +189,10 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                   </button>
                   <button
                     type="button"
-                    onClick={() => onRemove(t.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onRemove(t.id)
+                    }}
                     title={tr.todo.delete}
                     className="rounded-md p-1.5 text-muted transition-colors hover:bg-raised hover:text-accent"
                   >

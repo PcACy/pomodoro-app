@@ -102,7 +102,22 @@ export const Timer = memo(function Timer({
   const glowVar = isFlow ? '--c-accent' : GLOW_VAR[phase]
 
   return (
-    <section className="card flex w-full max-w-md flex-col items-center gap-6 p-8">
+    <section className="card relative flex w-full max-w-md flex-col items-center gap-6 p-6 sm:p-8">
+      {pipSupported && (
+        <button
+          type="button"
+          onClick={onPipToggle}
+          title={pipOpen ? t.pip.close : t.pip.open}
+          className={`absolute right-4 top-4 rounded-lg p-2 transition-colors ${
+            pipOpen
+              ? 'bg-accent/15 text-accent'
+              : 'text-muted hover:bg-raised/50 hover:text-fg'
+          }`}
+        >
+          <PictureInPicture2 size={16} />
+        </button>
+      )}
+
       <div className="flex w-full flex-col items-center">
         <div className="flex w-full items-center gap-1 rounded-xl border border-line bg-canvas p-1">
           {MODES.map((m) => (
@@ -213,7 +228,7 @@ export const Timer = memo(function Timer({
 
       <div className="flex items-center gap-3">
         {isFlow ? (
-          flowStatus !== 'idle' && (
+          flowStatus !== 'idle' ? (
             <button
               type="button"
               onClick={onReset}
@@ -222,10 +237,12 @@ export const Timer = memo(function Timer({
             >
               <X size={18} />
             </button>
+          ) : (
+            <div className="h-12 w-12" />
           )
         ) : (
-          <button type="button" onClick={onSkip} title={`${t.shortcuts.skip} (N)`} className="btn-ghost">
-            <SkipForward size={18} />
+          <button type="button" onClick={onReset} title={`${t.shortcuts.reset} (R)`} className="btn-ghost">
+            <RotateCcw size={18} />
           </button>
         )}
         <button
@@ -237,7 +254,7 @@ export const Timer = memo(function Timer({
           {running ? <Pause size={26} /> : <Play size={26} className="translate-x-0.5" />}
         </button>
         {isFlow ? (
-          flowStatus !== 'idle' && (
+          flowStatus !== 'idle' ? (
             <button
               type="button"
               onClick={onSkip}
@@ -246,24 +263,12 @@ export const Timer = memo(function Timer({
             >
               <Flag size={20} />
             </button>
+          ) : (
+            <div className="h-12 w-12" />
           )
         ) : (
-          <button type="button" onClick={onReset} title={`${t.shortcuts.reset} (R)`} className="btn-ghost">
-            <RotateCcw size={18} />
-          </button>
-        )}
-        {pipSupported && (
-          <button
-            type="button"
-            onClick={onPipToggle}
-            title={pipOpen ? t.pip.close : t.pip.open}
-            className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition-colors ${
-              pipOpen
-                ? 'border-accent/60 bg-accent/10 text-accent'
-                : 'border-line text-muted hover:bg-raised hover:text-fg'
-            }`}
-          >
-            <PictureInPicture2 size={18} />
+          <button type="button" onClick={onSkip} title={`${t.shortcuts.skip} (N)`} className="btn-ghost">
+            <SkipForward size={18} />
           </button>
         )}
       </div>
@@ -280,20 +285,20 @@ export const Timer = memo(function Timer({
           flowStatus !== 'idle' && (
             <>
               <span className="flex items-center gap-1">
-                <span className="kbd">F</span> {t.flow.finishShortcut}
+                <span className="kbd">R</span> {t.flow.discardShortcut}
               </span>
               <span className="flex items-center gap-1">
-                <span className="kbd">R</span> {t.flow.discardShortcut}
+                <span className="kbd">F</span> {t.flow.finishShortcut}
               </span>
             </>
           )
         ) : (
           <>
             <span className="flex items-center gap-1">
-              <span className="kbd">N</span> {t.shortcuts.skip}
+              <span className="kbd">R</span> {t.shortcuts.reset}
             </span>
             <span className="flex items-center gap-1">
-              <span className="kbd">R</span> {t.shortcuts.reset}
+              <span className="kbd">N</span> {t.shortcuts.skip}
             </span>
           </>
         )}

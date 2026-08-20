@@ -19,8 +19,6 @@ import { useTranslation } from './hooks/useTranslation'
 import { addSession, updateSessionNotes } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
 import { initAudio } from './lib/sound'
-import { todayMinutes } from './lib/stats'
-import { fmtDuration } from './lib/time'
 import { STORAGE_KEYS, type PhaseId, type Session, type Settings, type TimerMode } from './types'
 import type { Messages } from './lib/i18n'
 import { Timer } from './components/Timer'
@@ -52,7 +50,7 @@ const GLOW_PHASES: { id: PhaseId; cssVar: string }[] = [
 ]
 
 export default function App() {
-  const { t, lang } = useTranslation()
+  const { t } = useTranslation()
   const [themeId, setTheme] = useTheme()
   const [settings, updateSettings] = useSettings()
   const [tab, setTab] = useState<Tab>('timer')
@@ -249,12 +247,7 @@ export default function App() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15">
             <TimerIcon className="text-accent" size={22} />
           </div>
-          <div className="leading-tight">
-            <h1 className="text-lg font-bold text-fg">Pomau</h1>
-            <p className="text-xs text-muted">
-              {t.header.today}: {fmtDuration(todayMinutes(sessions) * 60_000, lang)}
-            </p>
-          </div>
+          <h1 className="text-lg font-bold text-fg">Pomau</h1>
         </div>
 
         <nav
