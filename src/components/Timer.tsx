@@ -10,8 +10,6 @@ interface Props {
   time: string
   progress: number
   large?: boolean
-  completedFocusInCycle: number
-  roundsBeforeLongBreak: number
   mode: TimerMode
   flowStatus: TimerStatus
   flowTime: string
@@ -68,8 +66,6 @@ export const Timer = memo(function Timer({
   time,
   progress,
   large = false,
-  completedFocusInCycle,
-  roundsBeforeLongBreak,
   mode,
   flowStatus,
   flowTime,
@@ -85,7 +81,6 @@ export const Timer = memo(function Timer({
   const isFlow = mode === 'flow'
   const running = isFlow ? flowStatus === 'running' : status === 'running'
   const paused = isFlow ? flowStatus === 'paused' : status === 'paused'
-  const dotsFilled = completedFocusInCycle % roundsBeforeLongBreak
 
   const shownLabel = isFlow ? t.timer.flow : phaseLabel
   const shownTime = isFlow ? flowTime : time
@@ -182,22 +177,6 @@ export const Timer = memo(function Timer({
           <span className="text-xs text-muted">{shownStatus}</span>
         </div>
       </div>
-
-      {!isFlow && (
-        <div className="flex items-center gap-2" aria-label="Fortschritt im Zyklus">
-          {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => (
-            <span
-              key={i}
-              className={`h-2.5 w-2.5 rounded-full transition-colors ${
-                i < dotsFilled ? 'bg-accent' : 'bg-line'
-              }`}
-            />
-          ))}
-          <span className="ml-1 text-xs text-muted">
-            {t.timer.rounds(completedFocusInCycle % roundsBeforeLongBreak, roundsBeforeLongBreak)}
-          </span>
-        </div>
-      )}
 
       <div className="flex items-center gap-3">
         {isFlow ? (
