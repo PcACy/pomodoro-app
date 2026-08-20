@@ -73,7 +73,13 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
             </option>
           ))}
         </select>
-        <button type="button" onClick={submitAdd} className="btn-primary shrink-0 px-3" title={tr.todo.add}>
+        <button
+          type="button"
+          onClick={submitAdd}
+          className="btn-primary shrink-0 px-3"
+          title={tr.todo.add}
+          aria-label={tr.todo.add}
+        >
           <Plus size={16} />
         </button>
       </div>
@@ -105,6 +111,7 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                   onToggle(t.id)
                 }}
                 title={t.done ? tr.todo.reopen : tr.todo.done}
+                aria-label={t.done ? tr.todo.reopen : tr.todo.done}
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
                   t.done ? 'border-accent bg-accent text-on-accent' : 'border-line text-transparent hover:border-accent'
                 }`}
@@ -132,10 +139,22 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                       </option>
                     ))}
                   </select>
-                  <button type="button" onClick={() => submitEdit(t.id)} className="btn-primary shrink-0 px-2 py-1" title={tr.todo.save}>
+                  <button
+                    type="button"
+                    onClick={() => submitEdit(t.id)}
+                    className="btn-primary shrink-0 px-2 py-1"
+                    title={tr.todo.save}
+                    aria-label={tr.todo.save}
+                  >
                     <Check size={14} />
                   </button>
-                  <button type="button" onClick={() => setEditingId(null)} className="btn-ghost shrink-0 px-2 py-1" title={tr.todo.cancel}>
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(null)}
+                    className="btn-ghost shrink-0 px-2 py-1"
+                    title={tr.todo.cancel}
+                    aria-label={tr.todo.cancel}
+                  >
                     <X size={14} />
                   </button>
                 </div>
@@ -168,6 +187,7 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                       onFocus(t.id)
                     }}
                     title={activeTodoId === t.id ? tr.todo.unselectFocus : tr.todo.selectFocus}
+                    aria-label={activeTodoId === t.id ? tr.todo.unselectFocus : tr.todo.selectFocus}
                     className={`rounded-md p-1.5 transition-colors ${
                       activeTodoId === t.id
                         ? 'bg-accent/20 text-accent'
@@ -183,6 +203,7 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                       startEdit(t)
                     }}
                     title={tr.todo.edit}
+                    aria-label={tr.todo.edit}
                     className="rounded-md p-1.5 text-muted transition-colors hover:bg-raised hover:text-fg"
                   >
                     <Pencil size={14} />
@@ -194,6 +215,7 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                       onRemove(t.id)
                     }}
                     title={tr.todo.delete}
+                    aria-label={tr.todo.delete}
                     className="rounded-md p-1.5 text-muted transition-colors hover:bg-raised hover:text-accent"
                   >
                     <Trash2 size={14} />
