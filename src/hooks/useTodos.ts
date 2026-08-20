@@ -1,8 +1,8 @@
-import { useCallback } from 'react'
-import { useLocalState } from './useLocalState'
+import { useCallback, useEffect, useState } from 'react'
 import { STORAGE_KEYS, type TodoItem } from '../types'
 import { uid } from '../lib/uid'
 import { enqueue } from '../lib/syncQueue'
+import { readTodosLocal, writeTodosLocal } from '../lib/localTodos'
 
 export interface TodoPatch {
   title?: string
@@ -19,7 +19,30 @@ const preferNewer = (a: TodoItem, b: TodoItem): TodoItem => {
 }
 
 export function useTodos() {
-  const [todos, setTodos] = useLocalState<TodoItem[]>(STORAGE_KEYS.todos, [])
+  const [todos, setTodos] = useState<TodoItem[]>(readTodosLocal)
+
+  const updateTodos = useCallback((updater: (prev: TodoItem[]) => TodoItem[]) => {
+    setTodos((prev) => {
+      const next = updater(prev)
+      writeTodosLocal(next)
+      return next
+    })
+  }, [])
+
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEYS.todos && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue) as TodoItem[]
+          if (Array.isArray(parsed)) setTodos(parsed)
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
 
   const add = useCallback(
     (title: string, tag: string) => {
@@ -34,15 +57,15 @@ export function useTodos() {
         createdAt: Date.now(),
         updatedAt: Date.now(),
       }
-      setTodos((prev) => [...prev, todo])
+      updateTodos((prev) => [...prev, todo])
       enqueue({ kind: 'upsert', table: 'todos', id: todo.id })
     },
-    [setTodos],
+    [updateTodos],
   )
 
   const toggle = useCallback(
     (id: string) => {
-      setTodos((prev) =>
+      updateTodos((prev) =>
         prev.map((t) =>
           t.id === id
             ? withUpdatedAt({ ...t, done: !t.done, completedAt: !t.done ? Date.now() : undefined })
@@ -51,40 +74,40 @@ export function useTodos() {
       )
       enqueue({ kind: 'upsert', table: 'todos', id })
     },
-    [setTodos],
+    [updateTodos],
   )
 
   const edit = useCallback(
     (id: string, patch: TodoPatch) => {
-      setTodos((prev) => prev.map((t) => (t.id === id ? withUpdatedAt({ ...t, ...patch }) : t)))
+      updateTodos((prev) => prev.map((t) => (t.id === id ? withUpdatedAt({ ...t, ...patch }) : t)))
       enqueue({ kind: 'upsert', table: 'todos', id })
     },
-    [setTodos],
+    [updateTodos],
   )
 
   const remove = useCallback(
     (id: string) => {
-      setTodos((prev) => prev.filter((t) => t.id !== id))
+      updateTodos((prev) => prev.filter((t) => t.id !== id))
       enqueue({ kind: 'delete', table: 'todos', id })
     },
-    [setTodos],
+    [updateTodos],
   )
 
   const incrementPomodoros = useCallback(
     (id: string | null) => {
       if (!id) return
-      setTodos((prev) =>
+      updateTodos((prev) =>
         prev.map((t) => (t.id === id ? withUpdatedAt({ ...t, pomodoros: t.pomodoros + 1 }) : t)),
       )
       enqueue({ kind: 'upsert', table: 'todos', id })
     },
-    [setTodos],
+    [updateTodos],
   )
 
   const mergeRemote = useCallback(
     (remote: TodoItem[]) => {
       if (!remote.length) return
-      setTodos((prev) => {
+      updateTodos((prev) => {
         const byId = new Map<string, TodoItem>()
         for (const t of [...prev, ...remote]) {
           const existing = byId.get(t.id)
@@ -93,7 +116,7 @@ export function useTodos() {
         return [...byId.values()]
       })
     },
-    [setTodos],
+    [updateTodos],
   )
 
   return { todos, add, toggle, edit, remove, incrementPomodoros, mergeRemote }

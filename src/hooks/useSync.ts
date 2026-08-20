@@ -147,7 +147,8 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
           }
         }
         if (replace) {
-          await supabase.from(table).delete().eq('user_id', userId)
+          const resDel = await supabase.from(table).delete().eq('user_id', userId)
+          if (resDel.error) throw resDel.error
           const all =
             table === 'sessions'
               ? await db.sessions.toArray()
@@ -156,11 +157,18 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
             const rows = all.map((r) =>
               table === 'sessions' ? sessionToRow(r as Session, userId) : todoToRow(r as TodoItem, userId),
             )
-            await supabase.from(table).upsert(rows, { onConflict: 'id' })
+            const resUpsert = await supabase.from(table).upsert(rows, { onConflict: 'id' })
+            if (resUpsert.error) throw resUpsert.error
           }
         } else {
-          if (upserts.length) await supabase.from(table).upsert(upserts, { onConflict: 'id' })
-          if (deletes.length) await supabase.from(table).delete().in('id', deletes)
+          if (upserts.length) {
+            const resUpsert = await supabase.from(table).upsert(upserts, { onConflict: 'id' })
+            if (resUpsert.error) throw resUpsert.error
+          }
+          if (deletes.length) {
+            const resDel = await supabase.from(table).delete().in('id', deletes).eq('user_id', userId)
+            if (resDel.error) throw resDel.error
+          }
         }
       }
       return true

@@ -93,9 +93,27 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
   const handleImport = async (file: File) => {
     try {
       const text = await file.text()
-      const data = JSON.parse(text) as { settings?: unknown; sessions?: Session[] }
-      if (Array.isArray(data.sessions)) await importSessions(data.sessions)
-      if (data.settings) onImportSettings(data.settings)
+      const data = JSON.parse(text) as unknown
+      let importedSessions: Session[] | null = null
+      let importedSettings: unknown = null
+
+      if (Array.isArray(data)) {
+        importedSessions = data as Session[]
+      } else if (data && typeof data === 'object') {
+        const obj = data as { settings?: unknown; sessions?: Session[] }
+        if (Array.isArray(obj.sessions)) importedSessions = obj.sessions
+        if (obj.settings) importedSettings = obj.settings
+      }
+
+      if (importedSessions) {
+        await importSessions(importedSessions)
+      }
+      if (importedSettings) {
+        onImportSettings(importedSettings)
+      }
+      if (!importedSessions && !importedSettings) {
+        alert(t.sessionLog.importFailed)
+      }
     } catch {
       alert(t.sessionLog.importFailed)
     }

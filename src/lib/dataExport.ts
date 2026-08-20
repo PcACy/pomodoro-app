@@ -8,7 +8,7 @@ function toCsv(rows: unknown[][], delimiter: string): string {
       row
         .map((cell) => {
           const s = String(cell ?? '')
-          if (s.includes(delimiter) || s.includes('"') || s.includes('\n')) {
+          if (s.includes(delimiter) || s.includes('"') || s.includes('\n') || s.includes('\r')) {
             return `"${s.replace(/"/g, '""')}"`
           }
           return s

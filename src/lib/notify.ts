@@ -23,13 +23,22 @@ export function notify(
 ): void {
   if (!notificationsSupported() || Notification.permission !== 'granted') return
   try {
-    const options: NotificationOptions & { actions?: NotificationActionConfig[] } = {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      void navigator.serviceWorker.ready.then((reg) => {
+        reg.showNotification(title, {
+          body,
+          icon: '/icon-192.svg',
+          actions,
+        } as NotificationOptions & { actions?: NotificationActionConfig[] })
+      })
+      return
+    }
+    // Fallback: in non-SW context, do not pass actions array to avoid TypeError in Chromium
+    new Notification(title, {
       body,
       icon: '/icon-192.svg',
-      actions,
-    }
-    new Notification(title, options)
+    })
   } catch {
-    /* some browsers require a service worker registration; ignore */
+    /* notification display failed */
   }
 }

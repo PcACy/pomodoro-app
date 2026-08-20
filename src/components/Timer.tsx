@@ -102,7 +102,7 @@ export const Timer = memo(function Timer({
   const glowVar = isFlow ? '--c-accent' : GLOW_VAR[phase]
 
   return (
-    <section className="card flex w-full max-w-md flex-col items-center gap-6 border border-[#504945] p-8">
+    <section className="card flex w-full max-w-md flex-col items-center gap-6 p-8">
       <div className="flex w-full items-center gap-1 rounded-xl border border-line bg-canvas p-1">
         {MODES.map((m) => (
           <button

@@ -62,8 +62,8 @@ function getBuffer(audio: AudioContext, kind: ChimeKind): AudioBuffer | null {
 export function initAudio(): void {
   const audio = ensureCtx()
   if (!audio || initialized) return
-  renderChime(audio, 'focus')
-  renderChime(audio, 'break')
+  getBuffer(audio, 'focus')
+  getBuffer(audio, 'break')
   initialized = true
 }
 

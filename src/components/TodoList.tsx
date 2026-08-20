@@ -22,19 +22,28 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
   const [editTitle, setEditTitle] = useState('')
   const [editTag, setEditTag] = useState('')
 
+  const activeTag = tags.includes(tag) ? tag : (tags[0] ?? '')
+
   const submitAdd = () => {
-    onAdd(title, tag)
+    const trimmed = title.trim()
+    if (!trimmed) return
+    onAdd(trimmed, activeTag)
     setTitle('')
   }
 
   const startEdit = (t: TodoItem) => {
     setEditingId(t.id)
     setEditTitle(t.title)
-    setEditTag(t.tag)
+    setEditTag(tags.includes(t.tag) ? t.tag : (tags[0] ?? ''))
   }
 
   const submitEdit = (id: string) => {
-    onEdit(id, { title: editTitle.trim() || editTitle, tag: editTag })
+    const trimmed = editTitle.trim()
+    if (!trimmed) {
+      setEditingId(null)
+      return
+    }
+    onEdit(id, { title: trimmed, tag: editTag })
     setEditingId(null)
   }
 
@@ -57,7 +66,7 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
           className="input"
           maxLength={80}
         />
-        <select value={tag} onChange={(e) => setTag(e.target.value)} className="input w-auto shrink-0" title={tr.todo.tag}>
+        <select value={activeTag} onChange={(e) => setTag(e.target.value)} className="input w-auto shrink-0" title={tr.todo.tag}>
           {tags.map((tag) => (
             <option key={tag} value={tag}>
               {tag}
@@ -96,7 +105,10 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                   <input
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && submitEdit(t.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') submitEdit(t.id)
+                      else if (e.key === 'Escape') setEditingId(null)
+                    }}
                     autoFocus
                     className="input py-1 text-sm"
                     maxLength={80}

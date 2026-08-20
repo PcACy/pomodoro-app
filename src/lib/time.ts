@@ -41,10 +41,11 @@ export const startOfDay = (d: Date): Date => new Date(d.getFullYear(), d.getMont
 export const startOfWeek = (d: Date): Date => {
   const s = startOfDay(d)
   const offset = (s.getDay() + 6) % 7
-  return new Date(s.getTime() - offset * MS_PER_DAY)
+  return new Date(s.getFullYear(), s.getMonth(), s.getDate() - offset)
 }
 
-export const addDays = (d: Date, n: number): Date => new Date(d.getTime() + n * MS_PER_DAY)
+export const addDays = (d: Date, n: number): Date =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate() + n, d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds())
 
 export const sameDay = (a: Date, b: Date): boolean => dayKey(a) === dayKey(b)
 

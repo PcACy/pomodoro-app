@@ -44,6 +44,8 @@ export async function clearSessions(): Promise<void> {
   enqueue({ kind: 'replace', table: 'sessions' })
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
 export async function importSessions(sessions: Session[]): Promise<void> {
   const now = Date.now()
   const cleaned = sessions
@@ -51,7 +53,9 @@ export async function importSessions(sessions: Session[]): Promise<void> {
     .map((s) => ({
       ...s,
       // Deterministic id from content so re-imports across devices don't duplicate.
-      id: s.id ?? uidFrom(`${s.start}:${s.durationMs}:${s.task}:${s.tag}`),
+      id: typeof s.id === 'string' && UUID_REGEX.test(s.id)
+        ? s.id
+        : uidFrom(`${s.start}:${s.durationMs}:${s.task}:${s.tag}`),
       updatedAt: s.updatedAt ?? now,
     }))
   await db.transaction('rw', db.sessions, async () => {

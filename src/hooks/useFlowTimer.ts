@@ -102,7 +102,21 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
   useEffect(() => {
     const w = getTickerWorker()
     w.postMessage({ type: status === 'running' ? 'start' : 'stop' })
+    return () => {
+      w.postMessage({ type: 'stop' })
+    }
   }, [status])
+
+  // Reconcile elapsed time when tab becomes visible again.
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible' && statusRef.current === 'running' && segStartRef.current != null) {
+        setElapsedMs(baseRef.current + (Date.now() - segStartRef.current))
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
 
   // Count up on every tick while running. Idempotent: base + segment delta,
   // so elapsed grows 1:1 with wall-clock time instead of accumulating twice.

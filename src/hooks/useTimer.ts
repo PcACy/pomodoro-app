@@ -69,7 +69,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     if (m.phase === 'focus') {
       if (!skipped) {
         nextCycle = cycle + 1
-        const durationMs = phases.focus * MS_PER_MINUTE
+        const durationMs = Math.max(phases.focus * MS_PER_MINUTE, m.totalMs)
         onFocusCompleteRef.current({
           start: phaseStartedAtRef.current,
           end: now,
@@ -85,7 +85,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
           { action: 'add-5', title: nn.add5Min },
         ])
       }
-      nextPhase = nextCycle % phases.roundsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
+      nextPhase = (nextCycle > 0 && nextCycle % phases.roundsBeforeLongBreak === 0) ? 'longBreak' : 'shortBreak'
     } else {
       const isLong = m.phase === 'longBreak'
       nextPhase = 'focus'
@@ -168,13 +168,20 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     const m = machineRef.current
     if (m.status === 'idle') return
     if (endRef.current != null) endRef.current += ms
-    setMachine((prev) => ({ ...prev, remainingMs: prev.remainingMs + ms }))
+    setMachine((prev) => ({
+      ...prev,
+      totalMs: prev.totalMs + ms,
+      remainingMs: prev.remainingMs + ms,
+    }))
   }, [])
 
   // Keep the worker running only while the timer runs.
   useEffect(() => {
     const w = getTickerWorker()
     w.postMessage({ type: machine.status === 'running' ? 'start' : 'stop' })
+    return () => {
+      w.postMessage({ type: 'stop' })
+    }
   }, [machine.status])
 
   // Listen to worker ticks exactly once.
