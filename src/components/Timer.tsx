@@ -218,6 +218,7 @@ export const Timer = memo(function Timer({
               type="button"
               onClick={onReset}
               title={`${t.flow.discard} (R)`}
+              aria-label={t.flow.discard}
               className="flex h-12 w-12 items-center justify-center rounded-xl border border-line text-muted transition-colors hover:bg-raised hover:text-fg"
             >
               <X size={18} />
@@ -226,7 +227,13 @@ export const Timer = memo(function Timer({
             <div className="h-12 w-12" />
           )
         ) : (
-          <button type="button" onClick={onReset} title={`${t.shortcuts.reset} (R)`} className="btn-ghost">
+          <button
+            type="button"
+            onClick={onReset}
+            title={`${t.shortcuts.reset} (R)`}
+            aria-label={t.shortcuts.reset}
+            className="btn-ghost"
+          >
             <RotateCcw size={18} />
           </button>
         )}
@@ -235,6 +242,7 @@ export const Timer = memo(function Timer({
           onClick={onToggle}
           className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-on-accent shadow-lg shadow-accent/25 transition-all hover:bg-accent-strong active:scale-95"
           title={running ? t.timer.pause : t.timer.start}
+          aria-label={running ? t.timer.pause : t.timer.start}
         >
           {running ? <Pause size={26} /> : <Play size={26} className="translate-x-0.5" />}
         </button>
@@ -244,6 +252,7 @@ export const Timer = memo(function Timer({
               type="button"
               onClick={onSkip}
               title={`${t.flow.finish} (F)`}
+              aria-label={t.flow.finish}
               className="flex h-12 w-12 items-center justify-center rounded-xl border border-accent/60 bg-accent/15 text-accent shadow-sm shadow-accent/20 transition-colors hover:bg-accent/25"
             >
               <Flag size={20} />
@@ -252,7 +261,13 @@ export const Timer = memo(function Timer({
             <div className="h-12 w-12" />
           )
         ) : (
-          <button type="button" onClick={onSkip} title={`${t.shortcuts.skip} (N)`} className="btn-ghost">
+          <button
+            type="button"
+            onClick={onSkip}
+            title={`${t.shortcuts.skip} (N)`}
+            aria-label={t.shortcuts.skip}
+            className="btn-ghost"
+          >
             <SkipForward size={18} />
           </button>
         )}
