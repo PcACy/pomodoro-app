@@ -123,6 +123,13 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
     const ops = drainQueue()
     if (ops.length === 0) return true
     const userId = userRef.current.id
+    let cachedLocalTodos: TodoItem[] | null = null
+    const getLocalTodos = (): TodoItem[] => {
+      if (!cachedLocalTodos) {
+        cachedLocalTodos = readTodosLocal()
+      }
+      return cachedLocalTodos
+    }
     try {
       for (const table of ['sessions', 'todos'] as const) {
         const tOps = ops.filter((o) => o.table === table)
@@ -153,7 +160,7 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
               else upserts.push(sessionToRow(rec, userId))
             }
           } else {
-            const localTodos = readTodosLocal()
+            const localTodos = getLocalTodos()
             const todosMap = new Map(localTodos.map((t) => [t.id, t]))
             for (const op of upsertOps) {
               const rec = todosMap.get(op.id)
@@ -168,7 +175,7 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
           const all =
             table === 'sessions'
               ? await db.sessions.toArray()
-              : readTodosLocal()
+              : getLocalTodos()
           if (all.length) {
             const rows = all.map((r) =>
               table === 'sessions' ? sessionToRow(r as Session, userId) : todoToRow(r as TodoItem, userId),
