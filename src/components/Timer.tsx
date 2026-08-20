@@ -10,6 +10,8 @@ interface Props {
   time: string
   progress: number
   large?: boolean
+  completedFocusInCycle: number
+  roundsBeforeLongBreak: number
   mode: TimerMode
   flowStatus: TimerStatus
   flowTime: string
@@ -66,6 +68,8 @@ export const Timer = memo(function Timer({
   time,
   progress,
   large = false,
+  completedFocusInCycle,
+  roundsBeforeLongBreak,
   mode,
   flowStatus,
   flowTime,
@@ -81,6 +85,7 @@ export const Timer = memo(function Timer({
   const isFlow = mode === 'flow'
   const running = isFlow ? flowStatus === 'running' : status === 'running'
   const paused = isFlow ? flowStatus === 'paused' : status === 'paused'
+  const currentRoundIndex = completedFocusInCycle % roundsBeforeLongBreak
 
   const shownLabel = isFlow ? t.timer.flow : phaseLabel
   const shownTime = isFlow ? flowTime : time
@@ -98,19 +103,47 @@ export const Timer = memo(function Timer({
 
   return (
     <section className="card flex w-full max-w-md flex-col items-center gap-6 p-8">
-      <div className="flex w-full items-center gap-1 rounded-xl border border-line bg-canvas p-1">
-        {MODES.map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => onModeChange(m)}
-            className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-              mode === m ? 'bg-raised text-fg' : 'text-muted hover:text-fg'
-            }`}
+      <div className="flex w-full flex-col items-center">
+        <div className="flex w-full items-center gap-1 rounded-xl border border-line bg-canvas p-1">
+          {MODES.map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => onModeChange(m)}
+              className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                mode === m ? 'bg-raised text-fg' : 'text-muted hover:text-fg'
+              }`}
+            >
+              {t.timer[m]}
+            </button>
+          ))}
+        </div>
+
+        {!isFlow && (
+          <div
+            className="mt-3 mb-1 flex items-center justify-center gap-1.5"
+            aria-label={`Runde ${currentRoundIndex + 1} von ${roundsBeforeLongBreak}`}
           >
-            {t.timer[m]}
-          </button>
-        ))}
+            {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => {
+              const isCompleted = i < currentRoundIndex
+              const isCurrent = i === currentRoundIndex
+
+              let pillStyle = 'bg-line'
+              if (isCompleted) {
+                pillStyle = 'bg-accent'
+              } else if (isCurrent) {
+                pillStyle = running ? 'bg-accent animate-pulse' : 'bg-accent/60'
+              }
+
+              return (
+                <span
+                  key={i}
+                  className={`h-1 w-7 rounded-full transition-all duration-300 ${pillStyle}`}
+                />
+              )
+            })}
+          </div>
+        )}
       </div>
 
       <div className="relative isolate" style={{ width: size, height: size }}>
