@@ -105,31 +105,13 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
         if (obj.settings) importedSettings = obj.settings
       }
 
-      // Security: Validate schema & types for imported sessions to prevent prototype pollution or invalid data structures
-      const importedSessions = rawSessions
-        ? rawSessions.filter((s): s is Session => {
-            if (!s || typeof s !== 'object') return false
-            const item = s as Record<string, unknown>
-            return (
-              typeof item.start === 'number' &&
-              !isNaN(item.start) &&
-              typeof item.end === 'number' &&
-              !isNaN(item.end) &&
-              typeof item.durationMs === 'number' &&
-              !isNaN(item.durationMs) &&
-              typeof item.task === 'string' &&
-              typeof item.tag === 'string'
-            )
-          })
-        : null
-
-      if (importedSessions && importedSessions.length > 0) {
-        await importSessions(importedSessions)
+      if (rawSessions && rawSessions.length > 0) {
+        await importSessions(rawSessions)
       }
       if (importedSettings) {
         onImportSettings(importedSettings)
       }
-      if (!importedSessions && !importedSettings) {
+      if (!rawSessions && !importedSettings) {
         alert(t.sessionLog.importFailed)
       }
     } catch {

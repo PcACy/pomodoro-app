@@ -269,15 +269,9 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
     const interval = window.setInterval(() => {
       setPending(hasPendingOps())
       void sync(false)
-    }, 45_000)
+    }, 30_000)
     return () => window.clearInterval(interval)
   }, [user, sync])
-
-  useEffect(() => {
-    if (!user || !supabase) return
-    const interval = window.setInterval(() => setPending(hasPendingOps()), 5000)
-    return () => window.clearInterval(interval)
-  }, [user])
 
   return { status, lastSyncAt, pending, sync }
 }

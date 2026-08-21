@@ -179,9 +179,9 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
   // Keep the worker running only while the timer runs.
   useEffect(() => {
     const w = getTickerWorker()
-    w.postMessage({ type: machine.status === 'running' ? 'start' : 'stop' })
+    w.postMessage({ type: machine.status === 'running' ? 'start' : 'stop', id: 'timer' })
     return () => {
-      w.postMessage({ type: 'stop' })
+      w.postMessage({ type: 'stop', id: 'timer' })
     }
   }, [machine.status])
 

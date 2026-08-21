@@ -105,7 +105,7 @@ export function PipCanvas({ canvasRef, phaseLabel, status, time, enabled = true 
     ctx.fillStyle = status === 'running' ? '#8ec07c' : '#928374'
     ctx.font = '500 12px system-ui, sans-serif'
     ctx.fillText(status === 'running' ? '●' : '❚❚', w / 2, h / 2 + 34)
-  }, [canvasRef, phaseLabel, status, time])
+  }, [canvasRef, phaseLabel, status, time, enabled])
 
   return null
 }

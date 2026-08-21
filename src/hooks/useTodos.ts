@@ -31,7 +31,11 @@ export function useTodos() {
 
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEYS.todos && e.newValue) {
+      if (e.key === STORAGE_KEYS.todos) {
+        if (!e.newValue) {
+          setTodos([])
+          return
+        }
         try {
           const parsed = JSON.parse(e.newValue) as TodoItem[]
           if (Array.isArray(parsed)) setTodos(parsed)

@@ -20,17 +20,21 @@ export function useLocalState<T>(key: string, initial: T): [T, Dispatch<SetState
 
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key === key && e.newValue) {
-        try {
-          setValue(JSON.parse(e.newValue) as T)
-        } catch {
-          /* invalid json */
+      if (e.key === key) {
+        if (e.newValue != null) {
+          try {
+            setValue(JSON.parse(e.newValue) as T)
+          } catch {
+            /* invalid json */
+          }
+        } else {
+          setValue(initial)
         }
       }
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
-  }, [key])
+  }, [key, initial])
 
   return [value, setValue]
 }

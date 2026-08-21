@@ -1,5 +1,7 @@
 const WORKER_CODE = `
 let timer = null;
+var activeClients = {};
+var clientCount = 0;
 
 function tick() {
   var now = Date.now();
@@ -14,11 +16,26 @@ function tick() {
 
 self.onmessage = function (e) {
   var msg = e.data;
+  if (!msg) return;
+  var id = msg.id || 'default';
   if (msg.type === 'start') {
-    if (timer !== null) return;
-    tick();
+    if (!activeClients[id]) {
+      activeClients[id] = true;
+      clientCount++;
+    }
+    if (timer === null && clientCount > 0) {
+      tick();
+    }
   } else if (msg.type === 'stop') {
-    if (timer !== null) { clearTimeout(timer); timer = null; }
+    if (activeClients[id]) {
+      delete activeClients[id];
+      clientCount--;
+    }
+    if (clientCount <= 0 && timer !== null) {
+      clearTimeout(timer);
+      timer = null;
+      clientCount = 0;
+    }
   }
 };
 `

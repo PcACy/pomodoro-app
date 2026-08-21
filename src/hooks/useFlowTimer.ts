@@ -102,9 +102,9 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
   // Keep the shared worker running only while the flow timer runs.
   useEffect(() => {
     const w = getTickerWorker()
-    w.postMessage({ type: status === 'running' ? 'start' : 'stop' })
+    w.postMessage({ type: status === 'running' ? 'start' : 'stop', id: 'flow' })
     return () => {
-      w.postMessage({ type: 'stop' })
+      w.postMessage({ type: 'stop', id: 'flow' })
     }
   }, [status])
 

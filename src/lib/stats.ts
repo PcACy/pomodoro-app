@@ -56,10 +56,11 @@ export function lastNDaysStats(sessions: Session[], n: number): DayStat[] {
 
 export function groupMinutesByDay(sessions: Session[], from: Date, to: Date, count: number): DayStat[] {
   const totals = new Map<string, number>()
+  const fromMs = startOfDay(from).getTime()
+  const toMs = new Date(to.getFullYear(), to.getMonth(), to.getDate(), 23, 59, 59, 999).getTime()
   for (const s of sessions) {
-    const d = new Date(s.start)
-    if (d >= from && d <= to) {
-      const key = dayKey(d)
+    if (s.start >= fromMs && s.start <= toMs) {
+      const key = dayKey(new Date(s.start))
       totals.set(key, (totals.get(key) ?? 0) + minutesOf(s))
     }
   }
