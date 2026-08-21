@@ -104,14 +104,23 @@ export const Timer = memo(function Timer({
   return (
     <section className="card group relative flex w-full max-w-md 2xl:max-w-lg flex-col items-center gap-6 2xl:gap-8 p-6 sm:p-8 2xl:p-10">
       <div className="flex w-full flex-col items-center">
-        <div className="flex w-full items-center gap-1 rounded-xl border border-line/60 bg-canvas/80 p-1 backdrop-blur-md">
+        <div className="relative grid grid-cols-2 w-full items-center gap-1 rounded-xl border border-line/60 bg-canvas/80 p-1 backdrop-blur-md">
+          {/* iOS-typical Sliding Pill Indicator */}
+          <div
+            className="pointer-events-none absolute bottom-1 top-1 rounded-lg bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            style={{
+              width: 'calc((100% - 8px - 4px) / 2)',
+              left: '4px',
+              transform: `translateX(calc(${MODES.indexOf(mode)} * (100% + 4px)))`,
+            }}
+          />
           {MODES.map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => onModeChange(m)}
-              className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
-                mode === m ? 'bg-raised text-fg shadow-sm' : 'text-muted hover:text-fg'
+              className={`relative z-10 flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200 active:scale-95 ${
+                mode === m ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
               {t.timer[m]}
@@ -119,31 +128,32 @@ export const Timer = memo(function Timer({
           ))}
         </div>
 
-        {!isFlow && (
-          <div
-            className="mt-3 mb-1 flex items-center justify-center gap-1.5"
-            aria-label={`Runde ${currentRoundIndex + 1} von ${roundsBeforeLongBreak}`}
-          >
-            {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => {
-              const isCompleted = i < currentRoundIndex
-              const isCurrent = i === currentRoundIndex
+        <div
+          className={`flex items-center justify-center gap-1.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden ${
+            isFlow ? 'max-h-0 opacity-0 -translate-y-2 pointer-events-none mt-0 mb-0' : 'max-h-8 opacity-100 translate-y-0 mt-3 mb-1'
+          }`}
+          aria-hidden={isFlow}
+          aria-label={`Runde ${currentRoundIndex + 1} von ${roundsBeforeLongBreak}`}
+        >
+          {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => {
+            const isCompleted = i < currentRoundIndex
+            const isCurrent = i === currentRoundIndex
 
-              let pillStyle = 'bg-line'
-              if (isCompleted) {
-                pillStyle = 'bg-accent'
-              } else if (isCurrent) {
-                pillStyle = running ? 'bg-accent animate-pulse' : 'bg-accent/60'
-              }
+            let pillStyle = 'bg-line'
+            if (isCompleted) {
+              pillStyle = 'bg-accent'
+            } else if (isCurrent) {
+              pillStyle = running ? 'bg-accent animate-pulse' : 'bg-accent/60'
+            }
 
-              return (
-                <span
-                  key={i}
-                  className={`h-1 w-7 2xl:w-8 rounded-full transition-all duration-300 ${pillStyle}`}
-                />
-              )
-            })}
-          </div>
-        )}
+            return (
+              <span
+                key={i}
+                className={`h-1 w-7 2xl:w-8 rounded-full transition-all duration-300 ${pillStyle}`}
+              />
+            )
+          })}
+        </div>
       </div>
 
       <div className="relative isolate" style={{ width: size, height: size }}>
@@ -155,8 +165,8 @@ export const Timer = memo(function Timer({
         />
 
         <div
-          className={`absolute inset-0 transition-opacity duration-300 ${
-            isFlow ? 'pointer-events-none opacity-0' : 'opacity-100'
+          className={`absolute inset-0 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+            isFlow ? 'pointer-events-none opacity-0 scale-95' : 'opacity-100 scale-100'
           }`}
         >
           <svg width={size} height={size} className="-rotate-90">
@@ -196,8 +206,8 @@ export const Timer = memo(function Timer({
         </div>
 
         <div
-          className={`absolute inset-0 flex flex-col items-center justify-center gap-4 transition-opacity duration-300 ${
-            isFlow ? 'opacity-100' : 'pointer-events-none opacity-0'
+          className={`absolute inset-0 flex flex-col items-center justify-center gap-4 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+            isFlow ? 'opacity-100 scale-100 translate-y-0' : 'pointer-events-none opacity-0 scale-95 translate-y-2'
           }`}
         >
           <span className="text-xs font-semibold uppercase tracking-[0.35em] text-accent/80">
@@ -206,7 +216,9 @@ export const Timer = memo(function Timer({
           <span className="font-mono text-6xl 2xl:text-7xl font-bold leading-none tracking-tight tabular-nums text-fg sm:text-7xl 2xl:text-8xl">
             {shownTime}
           </span>
-          <Waveform active={running} />
+          <div className={`transition-all duration-300 delay-75 ${isFlow ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+            <Waveform active={running} />
+          </div>
           <span className="text-xs font-medium text-muted">{shownStatus}</span>
         </div>
       </div>

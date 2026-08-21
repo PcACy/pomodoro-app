@@ -253,17 +253,26 @@ export default function App() {
         </div>
 
         <nav
-          className={`flex items-center gap-1 rounded-2xl border border-line bg-surface p-1 transition-opacity duration-500 ${
+          className={`relative grid grid-cols-3 items-center gap-1 rounded-2xl border border-line/60 bg-surface/90 p-1 backdrop-blur-md transition-opacity duration-500 ${
             zenRunning ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
           }`}
         >
+          {/* iOS-typical Sliding Pill Indicator */}
+          <div
+            className="pointer-events-none absolute bottom-1 top-1 rounded-xl bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            style={{
+              width: 'calc((100% - 8px - 8px) / 3)',
+              left: '4px',
+              transform: `translateX(calc(${TABS.findIndex((tb) => tb.id === tab)} * (100% + 4px)))`,
+            }}
+          />
           {TABS.map((tb) => (
             <button
               key={tb.id}
               type="button"
               onClick={() => setTab(tb.id)}
-              className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors ${
-                tab === tb.id ? 'bg-raised text-fg' : 'text-muted hover:text-fg'
+              className={`relative z-10 flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors duration-200 active:scale-95 ${
+                tab === tb.id ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
               {tb.icon}
@@ -274,63 +283,29 @@ export default function App() {
       </header>
 
       <main className="flex w-full flex-1 flex-col items-center gap-8 2xl:gap-10 pb-8">
-        {tab === 'timer' && (settings.layoutMode === 'single' ? (
-          <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-8 2xl:gap-10">
-            <Timer
-              large
-              phase={timer.phase}
-              phaseLabel={timer.phaseLabel}
-              status={timer.status}
-              time={timer.time}
-              progress={timer.progress}
-              completedFocusInCycle={timer.completedFocusInCycle}
-              roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
-              mode={mode}
-              flowStatus={flow.status}
-              flowTime={flow.time}
-              onModeChange={handleModeChange}
-              onToggle={handleToggle}
-              onSkip={handleSkip}
-              onReset={handleReset}
-              pipSupported={pipSupported}
-              pipOpen={pipMode !== 'none'}
-              onPipToggle={handlePipToggle}
-            />
-            <TodoList
-              todos={todosApi.todos}
-              tags={settings.tags}
-              activeTodoId={activeTodoId}
-              onAdd={todosApi.add}
-              onToggle={todosApi.toggle}
-              onEdit={todosApi.edit}
-              onRemove={todosApi.remove}
-              onFocus={handleFocusTodo}
-            />
-            <QuickStats sessions={sessions} settings={settings} />
-            <DayTimeline sessions={sessions} />
-          </div>
-        ) : (
-          <div className="mx-auto grid w-full max-w-5xl 2xl:max-w-6xl grid-cols-1 items-start justify-items-center gap-8 2xl:gap-10 lg:grid-cols-2">
-            <Timer
-              phase={timer.phase}
-              phaseLabel={timer.phaseLabel}
-              status={timer.status}
-              time={timer.time}
-              progress={timer.progress}
-              completedFocusInCycle={timer.completedFocusInCycle}
-              roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
-              mode={mode}
-              flowStatus={flow.status}
-              flowTime={flow.time}
-              onModeChange={handleModeChange}
-              onToggle={handleToggle}
-              onSkip={handleSkip}
-              onReset={handleReset}
-              pipSupported={pipSupported}
-              pipOpen={pipMode !== 'none'}
-              onPipToggle={handlePipToggle}
-            />
-            <div className="flex w-full max-w-md 2xl:max-w-lg flex-col gap-8 2xl:gap-10">
+        <div key={tab} className="animate-tab-enter flex w-full flex-col items-center">
+          {tab === 'timer' && (settings.layoutMode === 'single' ? (
+            <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-8 2xl:gap-10">
+              <Timer
+                large
+                phase={timer.phase}
+                phaseLabel={timer.phaseLabel}
+                status={timer.status}
+                time={timer.time}
+                progress={timer.progress}
+                completedFocusInCycle={timer.completedFocusInCycle}
+                roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
+                mode={mode}
+                flowStatus={flow.status}
+                flowTime={flow.time}
+                onModeChange={handleModeChange}
+                onToggle={handleToggle}
+                onSkip={handleSkip}
+                onReset={handleReset}
+                pipSupported={pipSupported}
+                pipOpen={pipMode !== 'none'}
+                onPipToggle={handlePipToggle}
+              />
               <TodoList
                 todos={todosApi.todos}
                 tags={settings.tags}
@@ -342,44 +317,80 @@ export default function App() {
                 onFocus={handleFocusTodo}
               />
               <QuickStats sessions={sessions} settings={settings} />
-            </div>
-            <div className="col-span-full w-full">
               <DayTimeline sessions={sessions} />
             </div>
-          </div>
-        ))}
-        {tab === 'dashboard' && (
-          <Suspense fallback={<div className="flex h-64 w-full items-center justify-center text-sm text-muted animate-pulse">Laden...</div>}>
-            <Dashboard
-              sessions={sessions}
-              settings={settings}
-              themeId={themeId}
-              todos={todosApi.todos}
-              onImportSettings={handleImportSettings}
-            />
-          </Suspense>
-        )}
-        {tab === 'settings' && (
-          <Suspense fallback={<div className="flex h-64 w-full items-center justify-center text-sm text-muted animate-pulse">Laden...</div>}>
-            <SettingsPanel
-              settings={settings}
-              update={updateSettings}
-              themeId={themeId}
-              onThemeChange={setTheme}
-              sessions={sessions}
-              todos={todosApi.todos}
-              syncStatus={sync.status}
-              syncPending={sync.pending}
-              syncLastSyncAt={sync.lastSyncAt}
-              syncProfile={auth.profile}
-              syncAvailable={auth.available}
-              syncLoading={auth.loading}
-              onSyncLogin={auth.login}
-              onSyncLogout={auth.logout}
-              onSyncNow={() => void sync.sync(true)}
-            />
-          </Suspense>
-        )}
+          ) : (
+            <div className="mx-auto grid w-full max-w-5xl 2xl:max-w-6xl grid-cols-1 items-start justify-items-center gap-8 2xl:gap-10 lg:grid-cols-2">
+              <Timer
+                phase={timer.phase}
+                phaseLabel={timer.phaseLabel}
+                status={timer.status}
+                time={timer.time}
+                progress={timer.progress}
+                completedFocusInCycle={timer.completedFocusInCycle}
+                roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
+                mode={mode}
+                flowStatus={flow.status}
+                flowTime={flow.time}
+                onModeChange={handleModeChange}
+                onToggle={handleToggle}
+                onSkip={handleSkip}
+                onReset={handleReset}
+                pipSupported={pipSupported}
+                pipOpen={pipMode !== 'none'}
+                onPipToggle={handlePipToggle}
+              />
+              <div className="flex w-full max-w-md 2xl:max-w-lg flex-col gap-8 2xl:gap-10">
+                <TodoList
+                  todos={todosApi.todos}
+                  tags={settings.tags}
+                  activeTodoId={activeTodoId}
+                  onAdd={todosApi.add}
+                  onToggle={todosApi.toggle}
+                  onEdit={todosApi.edit}
+                  onRemove={todosApi.remove}
+                  onFocus={handleFocusTodo}
+                />
+                <QuickStats sessions={sessions} settings={settings} />
+              </div>
+              <div className="col-span-full w-full">
+                <DayTimeline sessions={sessions} />
+              </div>
+            </div>
+          ))}
+          {tab === 'dashboard' && (
+            <Suspense fallback={<div className="flex h-64 w-full items-center justify-center text-sm text-muted animate-pulse">Laden...</div>}>
+              <Dashboard
+                sessions={sessions}
+                settings={settings}
+                themeId={themeId}
+                todos={todosApi.todos}
+                onImportSettings={handleImportSettings}
+              />
+            </Suspense>
+          )}
+          {tab === 'settings' && (
+            <Suspense fallback={<div className="flex h-64 w-full items-center justify-center text-sm text-muted animate-pulse">Laden...</div>}>
+              <SettingsPanel
+                settings={settings}
+                update={updateSettings}
+                themeId={themeId}
+                onThemeChange={setTheme}
+                sessions={sessions}
+                todos={todosApi.todos}
+                syncStatus={sync.status}
+                syncPending={sync.pending}
+                syncLastSyncAt={sync.lastSyncAt}
+                syncProfile={auth.profile}
+                syncAvailable={auth.available}
+                syncLoading={auth.loading}
+                onSyncLogin={auth.login}
+                onSyncLogout={auth.logout}
+                onSyncNow={() => void sync.sync(true)}
+              />
+            </Suspense>
+          )}
+        </div>
       </main>
 
       {updateAvailable && (
