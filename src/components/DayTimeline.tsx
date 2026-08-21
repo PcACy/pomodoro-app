@@ -42,11 +42,6 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
     [sessions],
   )
 
-  const totalFocusMinutes = useMemo(
-    () => Math.round(todaySessions.reduce((acc, s) => acc + s.durationMs, 0) / 60_000),
-    [todaySessions],
-  )
-
   // Dynamic start & end hours based on today's sessions and current time
   const { startHour, endHour, hourTicks } = useMemo(() => {
     let minH = 8
@@ -98,14 +93,9 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
 
   return (
     <section className="card flex w-full flex-col gap-4 p-5 2xl:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Clock size={16} className="text-accent" />
-          <h3 className="text-sm font-semibold text-fg">{t.timeline.title}</h3>
-        </div>
-        <span className="rounded-full border border-line/60 bg-raised/40 px-2.5 py-0.5 font-mono text-xs font-medium tabular-nums text-muted">
-          {t.timeline.todayProgress(todaySessions.length, totalFocusMinutes)}
-        </span>
+      <div className="flex items-center gap-2">
+        <Clock size={16} className="text-accent" />
+        <h3 className="text-sm font-semibold text-fg">{t.timeline.title}</h3>
       </div>
 
       <div className="relative pt-2 pb-6">
@@ -150,14 +140,14 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
         </div>
 
         {/* Hour Ticks & Labels */}
-        <div className="pointer-events-none absolute inset-x-0 top-7 flex justify-between text-[10px] font-mono tabular-nums text-muted">
+        <div className="pointer-events-none absolute inset-x-0 top-7 flex justify-between text-[11px] font-medium text-muted tracking-normal">
           {hourTicks.map((h) => {
             const pct = ((h - startHour) / (endHour - startHour)) * 100
             return (
               <span
                 key={h}
                 className="absolute -translate-x-1/2 whitespace-nowrap"
-                style={{ left: `${Math.max(2, Math.min(98, pct))}%` }}
+                style={{ left: `${Math.max(0, Math.min(100, pct))}%` }}
               >
                 {String(h).padStart(2, '0')}:00
               </span>
