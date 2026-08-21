@@ -106,8 +106,15 @@ export function useDocumentChrome(
         progressRef.current,
         remainingMsRef.current,
       )
-      lastFaviconRef.current = { key: cacheKey, uri }
       link.href = uri
+    }
+
+    return () => {
+      document.title = 'Pomau'
+      const link = document.querySelector<HTMLLinkElement>('#dynamic-favicon')
+      if (link && link.href !== DEFAULT_FAVICON) {
+        link.href = DEFAULT_FAVICON
+      }
     }
   }, [phase, status, time, t])
 }

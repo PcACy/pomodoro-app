@@ -2,7 +2,6 @@ export type Lang = 'de' | 'en'
 
 export interface Messages {
   nav: { timer: string; statistics: string; settings: string }
-  header: { today: string }
   update: { available: string; reload: string }
   phases: { focus: string; shortBreak: string; longBreak: string }
   paused: string
@@ -153,7 +152,6 @@ export interface Messages {
 
 const de: Messages = {
   nav: { timer: 'Timer', statistics: 'Statistik', settings: 'Einstellungen' },
-  header: { today: 'Heute' },
   update: { available: 'Neue Version verfügbar', reload: 'Neu laden' },
   phases: { focus: 'Fokus', shortBreak: 'Kurze Pause', longBreak: 'Lange Pause' },
   weekdays: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
@@ -317,7 +315,6 @@ const de: Messages = {
 
 const en: Messages = {
   nav: { timer: 'Timer', statistics: 'Statistics', settings: 'Settings' },
-  header: { today: 'Today' },
   update: { available: 'New version available', reload: 'Reload' },
   phases: { focus: 'Focus', shortBreak: 'Short Break', longBreak: 'Long Break' },
   weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],

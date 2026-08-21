@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { PhaseId, Settings, TimerState } from '../types'
+import type { PhaseId, Session, Settings, TimerState } from '../types'
 import { MS_PER_MINUTE } from '../lib/time'
 import { getTickerWorker } from '../lib/tickerWorker'
 import { playChime, initAudio } from '../lib/sound'
@@ -8,19 +8,11 @@ import { fmtTime } from '../lib/time'
 import { getLang, translations } from '../lib/i18n'
 import { useTranslation } from './useTranslation'
 
-export interface FocusSessionData {
-  start: number
-  end: number
-  durationMs: number
-  task: string
-  tag: string
-}
-
 interface Options {
   settings: Settings
   task: string
   tag: string
-  onFocusComplete: (session: FocusSessionData) => void
+  onFocusComplete: (session: Omit<Session, 'id' | 'notes'>) => void
 }
 
 const phaseDuration = (settings: Settings, phase: PhaseId): number =>
@@ -39,14 +31,10 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
   const [machine, setMachine] = useState<TimerState>(() => initialMachine(settings))
 
   const machineRef = useRef(machine)
-  useEffect(() => {
-    machineRef.current = machine
-  }, [machine])
-
   const settingsRef = useRef(settings)
-  useEffect(() => {
-    settingsRef.current = settings
-  }, [settings])
+  // Update refs synchronously during render to avoid stale closures
+  machineRef.current = machine
+  settingsRef.current = settings
 
   const cycleRef = useRef(0)
   const endRef = useRef<number | null>(null)

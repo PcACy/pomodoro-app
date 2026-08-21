@@ -51,7 +51,9 @@ let worker: Worker | null = null
 export function getTickerWorker(): Worker {
   if (!worker) {
     const blob = new Blob([WORKER_CODE], { type: 'application/javascript' })
-    worker = new Worker(URL.createObjectURL(blob))
+    const blobUrl = URL.createObjectURL(blob)
+    worker = new Worker(blobUrl)
+    URL.revokeObjectURL(blobUrl)
   }
   return worker
 }

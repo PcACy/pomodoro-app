@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 interface ShortcutHandlers {
   onToggle: () => void
@@ -20,25 +20,29 @@ const isEditableTarget = (el: EventTarget | null): boolean => {
   )
 }
 
-export function useKeyboard({ onToggle, onSkip, onReset, onFlowFinish }: ShortcutHandlers): void {
+export function useKeyboard(handlers: ShortcutHandlers): void {
+  const handlersRef = useRef(handlers)
+  handlersRef.current = handlers
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (isEditableTarget(e.target)) return
+      const h = handlersRef.current
       if (e.key === ' ') {
         e.preventDefault()
-        onToggle()
-      } else if (e.key.toLowerCase() === 'f' && onFlowFinish) {
+        h.onToggle()
+      } else if (e.key.toLowerCase() === 'f' && h.onFlowFinish) {
         e.preventDefault()
-        onFlowFinish()
+        h.onFlowFinish()
       } else if (e.key.toLowerCase() === 'n') {
         e.preventDefault()
-        onSkip()
+        h.onSkip()
       } else if (e.key.toLowerCase() === 'r') {
         e.preventDefault()
-        onReset()
+        h.onReset()
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [onToggle, onSkip, onReset, onFlowFinish])
+  }, [])
 }

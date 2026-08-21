@@ -113,6 +113,7 @@ export function useServiceWorker(): ServiceWorkerState {
     return () => {
       disposed = true
       clearInterval(intervalId)
+      registration?.removeEventListener('updatefound', onUpdateFound)
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange)
       }

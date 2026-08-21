@@ -22,6 +22,10 @@ export function useWakeLock(active: boolean): void {
       if (!activeRef.current || sentinelRef.current) return
       try {
         const sentinel = await navigator.wakeLock.request('screen')
+        if (!activeRef.current) {
+          void sentinel.release()
+          return
+        }
         sentinelRef.current = sentinel
         sentinel.addEventListener('release', () => {
           if (sentinelRef.current === sentinel) sentinelRef.current = null

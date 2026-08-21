@@ -229,18 +229,21 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
         return
       }
       busyRef.current = true
-      if (showSyncing) setStatus('syncing')
-      const pushed = await pushQueue()
-      let ok = pushed
-      if (ok) ok = await pullAndMerge()
-      setPending(hasPendingOps())
-      if (ok) {
-        setLastSyncAt(Date.now())
-        setStatus('synced')
-      } else {
-        setStatus('offline')
+      try {
+        if (showSyncing) setStatus('syncing')
+        const pushed = await pushQueue()
+        let ok = pushed
+        if (ok) ok = await pullAndMerge()
+        setPending(hasPendingOps())
+        if (ok) {
+          setLastSyncAt(Date.now())
+          setStatus('synced')
+        } else {
+          setStatus('offline')
+        }
+      } finally {
+        busyRef.current = false
       }
-      busyRef.current = false
     },
     [pushQueue, pullAndMerge],
   )

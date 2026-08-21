@@ -38,9 +38,9 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
   const todaySessions = useMemo(
     () =>
       sessions
-        .filter((s) => sameDay(new Date(s.start), new Date()))
+        .filter((s) => sameDay(new Date(s.start), now))
         .sort((a, b) => a.start - b.start),
-    [sessions],
+    [sessions, now],
   )
 
   // Dynamic start & end hours based on today's sessions and current time
@@ -180,10 +180,10 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
       {/* Floating Glass Tooltip */}
       {tip && (
         <div
-          className="pointer-events-none fixed z-50 flex flex-col gap-1 rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-2 text-xs font-medium text-fg shadow-2xl backdrop-blur-md"
+          className="pointer-events-none fixed z-50 flex flex-col gap-1 rounded-xl border border-line bg-surface/95 px-3 py-2 text-xs font-medium text-fg shadow-2xl backdrop-blur-md"
           style={{
             left: Math.max(12, Math.min(tip.x - 100, window.innerWidth - 240)),
-            top: tip.y - 75,
+            top: Math.max(12, tip.y - 75),
           }}
         >
           <div className="flex items-center gap-2">

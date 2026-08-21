@@ -1,5 +1,5 @@
 import type { Session } from '../types'
-import { MS_PER_DAY, addDays, dayKey, sameDay, startOfDay, startOfWeek } from './time'
+import { addDays, dayKey, sameDay, startOfDay, startOfWeek } from './time'
 
 export interface TagStat {
   tag: string
@@ -133,12 +133,6 @@ export function heatmapData(sessions: Session[], weeks: number): HeatmapWeek[] {
   return weeksOut
 }
 
-export function totalMinutesInRange(sessions: Session[], from: Date): number {
-  return sessions
-    .filter((s) => new Date(s.start) >= from)
-    .reduce((sum, s) => sum + minutesOf(s), 0)
-}
-
 /** Number of completed sessions per hour of day (0-23), based on the session's end time. */
 export function sessionsByHour(sessions: Session[]): HourStat[] {
   const counts = new Array<number>(24).fill(0)
@@ -149,5 +143,3 @@ export function sessionsByHour(sessions: Session[]): HourStat[] {
   }
   return counts.map((count, hour) => ({ hour, count }))
 }
-
-export const DAYS_MS = MS_PER_DAY

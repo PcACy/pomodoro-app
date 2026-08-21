@@ -214,7 +214,9 @@ export const Dashboard = memo(function Dashboard({ sessions, settings, themeId, 
           sessions={sessions}
           todos={todos}
           title={t.dashboard.sessionLog}
-          onClear={() => void clearSessions()}
+          onClear={() => {
+            if (window.confirm(t.settings.confirmClear)) void clearSessions()
+          }}
           onImportSettings={onImportSettings}
         />
       </div>

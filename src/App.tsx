@@ -92,12 +92,13 @@ export default function App() {
 
   const flow = useFlowTimer({ task: sessionTask, tag: sessionTag, onFinish: handleFlowFinished })
 
+  const { incrementPomodoros } = todosApi
   const handleFocusComplete = useCallback(
     (s: Omit<Session, 'id' | 'notes'>) => {
       void addSession(s).then((id) => setPendingSessionId(id))
-      todosApi.incrementPomodoros(activeTodoId)
+      incrementPomodoros(activeTodoId)
     },
-    [activeTodoId, todosApi],
+    [activeTodoId, incrementPomodoros],
   )
 
   const handleSaveNote = useCallback(
@@ -117,41 +118,48 @@ export default function App() {
     onFocusComplete: handleFocusComplete,
   })
 
+  const flowFinish = flow.finishSession
+  const flowDiscard = flow.resetTimer
+  const flowToggle = flow.toggle
+  const timerToggle = timer.toggle
+  const timerSkip = timer.skip
+  const timerReset = timer.reset
+
   const handleFlowFinish = useCallback(() => {
-    if (mode === 'flow') flow.finishSession()
-  }, [mode, flow])
+    if (mode === 'flow') flowFinish()
+  }, [mode, flowFinish])
 
   const handleFlowDiscard = useCallback(() => {
-    flow.resetTimer()
-  }, [flow])
+    flowDiscard()
+  }, [flowDiscard])
 
   const handleToggle = useCallback(() => {
     void requestNotificationPermission()
-    if (mode === 'flow') flow.toggle()
-    else timer.toggle()
-  }, [mode, flow, timer])
+    if (mode === 'flow') flowToggle()
+    else timerToggle()
+  }, [mode, flowToggle, timerToggle])
 
   const handleSkip = useCallback(() => {
     if (mode === 'flow') handleFlowFinish()
-    else timer.skip()
-  }, [mode, timer, handleFlowFinish])
+    else timerSkip()
+  }, [mode, timerSkip, handleFlowFinish])
 
   const handleReset = useCallback(() => {
     if (mode === 'flow') handleFlowDiscard()
-    else timer.reset()
-  }, [mode, timer, handleFlowDiscard])
+    else timerReset()
+  }, [mode, timerReset, handleFlowDiscard])
 
   const handleModeChange = useCallback(
     (m: TimerMode) => {
       if (m === mode) return
       if (m === 'flow') {
-        timer.reset()
+        timerReset()
       } else {
-        flow.resetTimer()
+        flowDiscard()
       }
       setMode(m)
     },
-    [mode, timer, flow, setMode],
+    [mode, timerReset, flowDiscard, setMode],
   )
 
   const handleFocusTodo = useCallback(
@@ -215,6 +223,9 @@ export default function App() {
     if (pipMode !== 'none') closePip()
     else void openPip()
   }, [pipMode, closePip, openPip])
+
+  const syncNow = sync.sync
+  const handleSyncNow = useCallback(() => void syncNow(true), [syncNow])
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-5xl 2xl:max-w-6xl flex-col items-center gap-8 2xl:gap-10 px-4 py-8">
@@ -386,7 +397,7 @@ export default function App() {
                 syncLoading={auth.loading}
                 onSyncLogin={auth.login}
                 onSyncLogout={auth.logout}
-                onSyncNow={() => void sync.sync(true)}
+                onSyncNow={handleSyncNow}
               />
             </Suspense>
           )}

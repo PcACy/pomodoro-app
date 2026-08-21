@@ -5,14 +5,6 @@ import { fmtElapsed } from '../lib/time'
 
 export const MIN_FLOW_SESSION_MS = 60_000
 
-export interface FlowSessionResult {
-  start: number
-  end: number
-  durationMs: number
-  task: string
-  tag: string
-}
-
 export interface FlowTimerApi {
   status: TimerStatus
   elapsedMs: number
@@ -41,16 +33,12 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
   const taskRef = useRef(task)
   const tagRef = useRef(tag)
   const onFinishRef = useRef(onFinish)
+  // Update refs synchronously during render to avoid stale closures
+  statusRef.current = status
+  elapsedRef.current = elapsedMs
   taskRef.current = task
   tagRef.current = tag
   onFinishRef.current = onFinish
-
-  useEffect(() => {
-    statusRef.current = status
-  }, [status])
-  useEffect(() => {
-    elapsedRef.current = elapsedMs
-  }, [elapsedMs])
 
   const start = useCallback(() => {
     if (statusRef.current === 'running') return

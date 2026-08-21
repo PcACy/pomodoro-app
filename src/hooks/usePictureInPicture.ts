@@ -128,6 +128,9 @@ export function usePictureInPicture(): PictureInPictureState {
           /* already closed */
         }
       }
+      if (document.pictureInPictureElement) {
+        void document.exitPictureInPicture().catch(() => {})
+      }
       cleanupVideo()
     }
   }, [pipWindow, cleanupVideo])

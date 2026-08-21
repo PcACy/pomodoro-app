@@ -130,14 +130,16 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
           className="pointer-events-none fixed z-50 flex flex-col gap-0.5 rounded-xl border border-line bg-canvas/95 px-3 py-2 text-xs font-medium text-fg shadow-xl backdrop-blur-md"
           style={{
             left: Math.max(12, Math.min(tip.x + 14, window.innerWidth - 230)),
-            top: tip.y - 60,
+            top: Math.max(12, tip.y - 60),
           }}
         >
           <span className="font-semibold text-fg">{getFormattedDate(tip.cell)}</span>
           <span className="text-[11px] font-mono tabular-nums text-muted">
             {tip.cell.minutes > 0 ? (
               <>
-                <span className="font-semibold text-accent">{tip.cell.minutes} Min. Fokus</span>
+                <span className="font-semibold text-accent">
+                  {tip.cell.minutes} {lang === 'de' ? 'Min. Fokus' : 'min focus'}
+                </span>
                 <span> · </span>
                 <span>{tip.cell.count} {tip.cell.count === 1 ? 'Session' : 'Sessions'}</span>
               </>

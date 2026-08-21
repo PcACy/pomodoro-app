@@ -48,12 +48,6 @@ export interface TodoItem {
   updatedAt?: number
 }
 
-export const PHASE_LABELS: Record<PhaseId, string> = {
-  focus: 'Fokus',
-  shortBreak: 'Kurze Pause',
-  longBreak: 'Lange Pause',
-}
-
 export const DEFAULT_SETTINGS: Settings = {
   phases: {
     focus: 25,
@@ -68,8 +62,6 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export const STORAGE_KEYS = {
   settings: 'pomodoro.settings',
-  task: 'pomodoro.task',
-  tag: 'pomodoro.tag',
   mode: 'pomodoro.mode',
   todos: 'pomodoro.todos',
 } as const
@@ -84,5 +76,3 @@ declare global {
     documentPictureInPicture?: DocumentPictureInPicture
   }
 }
-
-export {}

@@ -7,7 +7,6 @@ import {
   minutesByTag,
   sessionsByHour,
   todayMinutes,
-  totalMinutesInRange,
   weekMinutes,
 } from './stats'
 import type { Session } from '../types'
@@ -151,25 +150,6 @@ describe('stats lib', () => {
       ]
 
       expect(currentStreakDays(sessions)).toBe(2)
-    })
-  })
-
-  describe('totalMinutesInRange', () => {
-    it('returns 0 for empty sessions', () => {
-      expect(totalMinutesInRange([], new Date(2025, 4, 1, 0, 0, 0))).toBe(0)
-    })
-
-    it('filters sessions starting on or after "from" date', () => {
-      const from = new Date(2025, 4, 10, 0, 0, 0)
-      const afterFrom = new Date(2025, 4, 12, 10, 0, 0).getTime()
-      const beforeFrom = new Date(2025, 4, 8, 10, 0, 0).getTime()
-
-      const sessions: Session[] = [
-        makeSession({ start: afterFrom, durationMs: 40 * 60_000 }),
-        makeSession({ start: beforeFrom, durationMs: 60 * 60_000 }),
-      ]
-
-      expect(totalMinutesInRange(sessions, from)).toBe(40)
     })
   })
 

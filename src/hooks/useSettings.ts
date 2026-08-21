@@ -12,8 +12,10 @@ function mergeWithDefaults(stored: Partial<Settings> | undefined): Settings {
   }
 }
 
+const EMPTY_SETTINGS: Partial<Settings> = {}
+
 export function useSettings(): [Settings, (updater: (s: Settings) => Settings) => void] {
-  const [settings, setSettings] = useLocalState<Partial<Settings>>(STORAGE_KEYS.settings, {})
+  const [settings, setSettings] = useLocalState<Partial<Settings>>(STORAGE_KEYS.settings, EMPTY_SETTINGS)
 
   const merged = useMemo(() => mergeWithDefaults(settings), [settings])
 
