@@ -16,7 +16,6 @@ import { useTodos } from './hooks/useTodos'
 import { useAuth } from './hooks/useAuth'
 import { useSync } from './hooks/useSync'
 import { useTranslation } from './hooks/useTranslation'
-import { useMediaSession } from './hooks/useMediaSession'
 import { addSession, updateSessionNotes } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
 import { initAudio } from './lib/sound'
@@ -176,19 +175,6 @@ export default function App() {
   const chromeRemaining = mode === 'flow' ? flow.elapsedMs : timer.remainingMs
   const isRunning = chromeStatus === 'running'
   useDocumentChrome(chromePhase, chromeStatus, chromeTime, chromeProgress, chromeRemaining)
-
-  const modeTitle = mode === 'flow' ? t.timer.flow : timer.phaseLabel
-  useMediaSession({
-    isRunning,
-    formattedTime: chromeTime,
-    modeTitle,
-    activeTask: sessionTask,
-    activeTag: sessionTag,
-    onPlay: handleToggle,
-    onPause: handleToggle,
-    onSkip: handleSkip,
-    onReset: handleReset,
-  })
 
   const { updateAvailable, reload } = useServiceWorker()
   const { pipWindow, isSupported: pipSupported, open: openPip, close: closePip, mode: pipMode, canvasRef, videoRef } =
