@@ -57,26 +57,24 @@ describe('uid', () => {
       expect(id).toMatch(UUID_V4_REGEX)
     })
 
-    it('falls back to Math.random when crypto is undefined', () => {
+    it('throws an error when crypto is undefined', () => {
       Object.defineProperty(globalThis, 'crypto', {
         value: undefined,
         configurable: true,
         writable: true,
       })
 
-      const id = uid()
-      expect(id).toMatch(UUID_V4_REGEX)
+      expect(() => uid()).toThrow('Cryptographically secure random number generator is unavailable.')
     })
 
-    it('generates unique IDs over multiple calls in Math.random fallback', () => {
+    it('throws an error when crypto contains neither randomUUID nor getRandomValues', () => {
       Object.defineProperty(globalThis, 'crypto', {
-        value: undefined,
+        value: {},
         configurable: true,
         writable: true,
       })
 
-      const ids = new Set(Array.from({ length: 100 }, () => uid()))
-      expect(ids.size).toBe(100)
+      expect(() => uid()).toThrow('Cryptographically secure random number generator is unavailable.')
     })
   })
 
