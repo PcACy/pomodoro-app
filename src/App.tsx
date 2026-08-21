@@ -211,16 +211,6 @@ export default function App() {
     if (s && typeof s === 'object') updateSettings(() => s as Settings)
   }, [updateSettings])
 
-  const handleDurationChange = useCallback(
-    (mins: number) => {
-      updateSettings((prev) => ({
-        ...prev,
-        phases: { ...prev.phases, focus: mins },
-      }))
-    },
-    [updateSettings],
-  )
-
   const handlePipToggle = useCallback(() => {
     if (pipMode !== 'none') closePip()
     else void openPip()
@@ -308,8 +298,6 @@ export default function App() {
                 mode={mode}
                 flowStatus={flow.status}
                 flowTime={flow.time}
-                durationMinutes={settings.phases.focus}
-                onDurationChange={handleDurationChange}
                 onModeChange={handleModeChange}
                 onToggle={handleToggle}
                 onSkip={handleSkip}
@@ -322,7 +310,6 @@ export default function App() {
                 todos={todosApi.todos}
                 tags={settings.tags}
                 activeTodoId={activeTodoId}
-                timerRunning={isRunning}
                 onAdd={todosApi.add}
                 onToggle={todosApi.toggle}
                 onEdit={todosApi.edit}
@@ -345,8 +332,6 @@ export default function App() {
                 mode={mode}
                 flowStatus={flow.status}
                 flowTime={flow.time}
-                durationMinutes={settings.phases.focus}
-                onDurationChange={handleDurationChange}
                 onModeChange={handleModeChange}
                 onToggle={handleToggle}
                 onSkip={handleSkip}
@@ -360,7 +345,6 @@ export default function App() {
                   todos={todosApi.todos}
                   tags={settings.tags}
                   activeTodoId={activeTodoId}
-                  timerRunning={isRunning}
                   onAdd={todosApi.add}
                   onToggle={todosApi.toggle}
                   onEdit={todosApi.edit}
