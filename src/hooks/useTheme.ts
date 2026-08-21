@@ -9,9 +9,9 @@ const applyTheme = (id: ThemeId): void => {
 const VALID_THEMES: Record<string, true> = {
   'gruvbox-dark': true,
   'gruvbox-light': true,
-  'classic-dark': true,
-  nord: true,
-  catppuccin: true,
+  nothing: true,
+  'ios-26': true,
+  'material-you': true,
 }
 
 export function useTheme(): [ThemeId, (id: ThemeId) => void] {

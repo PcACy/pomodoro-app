@@ -2,8 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Default = Gruvbox Dark */
+:root,
+:root[data-theme='gruvbox-dark'] {
+  /* Gruvbox Dark (Default) */
   color-scheme: dark;
   --c-canvas: 40 40 40;
   --c-surface: 60 56 54;
@@ -30,6 +31,7 @@
 }
 
 :root[data-theme='gruvbox-light'] {
+  /* Gruvbox Light */
   color-scheme: light;
   --c-canvas: 251 241 199;
   --c-surface: 235 219 178;
@@ -53,76 +55,79 @@
   --c-chart-8: 124 111 100;
 }
 
-:root[data-theme='classic-dark'] {
+:root[data-theme='nothing'] {
+  /* Nothing OS Aesthetic: Pitch black, monochrome contrast, signature Nothing Red */
   color-scheme: dark;
-  --c-canvas: 9 9 11;
-  --c-surface: 24 24 27;
-  --c-raised: 39 39 42;
-  --c-line: 63 63 70;
-  --c-fg: 244 244 245;
-  --c-muted: 113 113 122;
-  --c-accent: 244 63 94;
-  --c-accent-strong: 251 113 133;
+  --c-canvas: 0 0 0;
+  --c-surface: 14 14 14;
+  --c-raised: 28 28 28;
+  --c-line: 48 48 48;
+  --c-fg: 255 255 255;
+  --c-muted: 150 150 150;
+  --c-accent: 235 0 40;
+  --c-accent-strong: 255 42 42;
   --c-on-accent: 255 255 255;
-  --c-break: 16 185 129;
-  --c-long: 14 165 233;
-  --c-track: 63 63 70;
-  --c-chart-1: 244 63 94;
-  --c-chart-2: 251 146 60;
-  --c-chart-3: 250 204 21;
-  --c-chart-4: 52 211 153;
-  --c-chart-5: 34 211 238;
-  --c-chart-6: 167 139 250;
-  --c-chart-7: 244 114 182;
-  --c-chart-8: 148 163 184;
+  --c-break: 220 220 220;
+  --c-long: 160 160 160;
+  --c-track: 30 30 30;
+  --c-chart-1: 235 0 40;
+  --c-chart-2: 255 255 255;
+  --c-chart-3: 200 200 200;
+  --c-chart-4: 160 160 160;
+  --c-chart-5: 120 120 120;
+  --c-chart-6: 255 80 80;
+  --c-chart-7: 230 230 230;
+  --c-chart-8: 80 80 80;
 }
 
-:root[data-theme='nord'] {
+:root[data-theme='ios-26'] {
+  /* iOS 26 Liquid Glass: Deep night, frosted glass layers, dynamic Apple Orange & Cyan */
   color-scheme: dark;
-  --c-canvas: 46 52 64;
-  --c-surface: 59 66 82;
-  --c-raised: 67 76 94;
-  --c-line: 76 86 106;
-  --c-fg: 236 239 244;
-  --c-muted: 216 222 233;
-  --c-accent: 191 97 106;
-  --c-accent-strong: 208 135 112;
-  --c-on-accent: 46 52 64;
-  --c-break: 163 190 140;
-  --c-long: 129 161 193;
-  --c-track: 67 76 94;
-  --c-chart-1: 191 97 106;
-  --c-chart-2: 208 135 112;
-  --c-chart-3: 235 203 139;
-  --c-chart-4: 163 190 140;
-  --c-chart-5: 129 161 193;
-  --c-chart-6: 180 142 173;
-  --c-chart-7: 136 192 208;
-  --c-chart-8: 143 188 187;
+  --c-canvas: 8 9 14;
+  --c-surface: 16 19 28;
+  --c-raised: 28 33 48;
+  --c-line: 42 49 70;
+  --c-fg: 242 245 250;
+  --c-muted: 138 148 172;
+  --c-accent: 255 107 0;
+  --c-accent-strong: 255 133 51;
+  --c-on-accent: 255 255 255;
+  --c-break: 48 209 88;
+  --c-long: 10 132 255;
+  --c-track: 42 49 70;
+  --c-chart-1: 255 107 0;
+  --c-chart-2: 10 132 255;
+  --c-chart-3: 48 209 88;
+  --c-chart-4: 191 90 242;
+  --c-chart-5: 255 214 10;
+  --c-chart-6: 100 210 255;
+  --c-chart-7: 255 55 95;
+  --c-chart-8: 172 142 104;
 }
 
-:root[data-theme='catppuccin'] {
+:root[data-theme='material-you'] {
+  /* Material Design 3 (M3): Tonal dark palette, Lavender primary, expressive contours */
   color-scheme: dark;
-  --c-canvas: 30 30 46;
-  --c-surface: 49 50 68;
-  --c-raised: 69 71 90;
-  --c-line: 88 91 112;
-  --c-fg: 205 214 244;
-  --c-muted: 166 173 200;
-  --c-accent: 243 139 168;
-  --c-accent-strong: 245 194 231;
-  --c-on-accent: 30 30 46;
-  --c-break: 166 227 161;
-  --c-long: 137 180 250;
-  --c-track: 69 71 90;
-  --c-chart-1: 243 139 168;
-  --c-chart-2: 250 179 135;
-  --c-chart-3: 249 226 175;
-  --c-chart-4: 166 227 161;
-  --c-chart-5: 137 180 250;
-  --c-chart-6: 203 166 247;
-  --c-chart-7: 148 226 213;
-  --c-chart-8: 186 194 222;
+  --c-canvas: 20 18 24;
+  --c-surface: 33 31 38;
+  --c-raised: 43 41 48;
+  --c-line: 73 69 79;
+  --c-fg: 230 224 233;
+  --c-muted: 180 173 186;
+  --c-accent: 208 188 255;
+  --c-accent-strong: 232 222 248;
+  --c-on-accent: 56 30 114;
+  --c-break: 168 199 250;
+  --c-long: 196 238 208;
+  --c-track: 73 69 79;
+  --c-chart-1: 208 188 255;
+  --c-chart-2: 168 199 250;
+  --c-chart-3: 196 238 208;
+  --c-chart-4: 255 216 228;
+  --c-chart-5: 255 180 171;
+  --c-chart-6: 242 184 181;
+  --c-chart-7: 232 222 248;
+  --c-chart-8: 182 196 255;
 }
 
 html,
@@ -160,6 +165,46 @@ body {
   .kbd {
     @apply rounded border border-line bg-raised px-1.5 py-0.5 font-mono text-[10px] text-muted;
   }
+}
+
+/* Design System Specific Overrides */
+:root[data-theme='nothing'] body {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+:root[data-theme='nothing'] .card {
+  border-radius: 0.75rem;
+  border-color: rgb(var(--c-line));
+  background-color: rgba(14, 14, 14, 0.95);
+}
+
+:root[data-theme='nothing'] .btn,
+:root[data-theme='nothing'] .input {
+  border-radius: 0.5rem;
+}
+
+:root[data-theme='ios-26'] .card {
+  border-radius: 1.5rem;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background-color: rgba(16, 19, 28, 0.75);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme='ios-26'] .btn,
+:root[data-theme='ios-26'] .input {
+  border-radius: 1rem;
+}
+
+:root[data-theme='material-you'] .card {
+  border-radius: 1.75rem;
+  border-color: rgba(73, 69, 79, 0.45);
+  background-color: rgb(var(--c-surface));
+}
+
+:root[data-theme='material-you'] .btn,
+:root[data-theme='material-you'] .input {
+  border-radius: 9999px;
 }
 
 /* Ambient background: phase-colored glow with smooth crossfade between phases. */
