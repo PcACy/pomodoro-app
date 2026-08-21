@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { BarChart3, Check, Settings as SettingsIcon, Timer as TimerIcon } from 'lucide-react'
 import { useSettings } from './hooks/useSettings'
 import { useLocalState } from './hooks/useLocalState'
@@ -23,11 +23,12 @@ import { STORAGE_KEYS, type PhaseId, type Session, type Settings, type TimerMode
 import type { Messages } from './lib/i18n'
 import { Timer } from './components/Timer'
 import { QuickStats } from './components/QuickStats'
-import { Dashboard } from './components/Dashboard'
-import { SettingsPanel } from './components/Settings'
 import { PipTimer, PipCanvas } from './components/PipTimer'
-import { ReflectionModal } from './components/ReflectionModal'
 import { TodoList } from './components/TodoList'
+
+const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })))
+const SettingsPanel = lazy(() => import('./components/Settings').then((m) => ({ default: m.SettingsPanel })))
+const ReflectionModal = lazy(() => import('./components/ReflectionModal').then((m) => ({ default: m.ReflectionModal })))
 
 type Tab = 'timer' | 'dashboard' | 'settings'
 
@@ -343,32 +344,36 @@ export default function App() {
           </div>
         ))}
         {tab === 'dashboard' && (
-          <Dashboard
-            sessions={sessions}
-            settings={settings}
-            themeId={themeId}
-            todos={todosApi.todos}
-            onImportSettings={handleImportSettings}
-          />
+          <Suspense fallback={<div className="flex h-64 w-full items-center justify-center text-sm text-muted animate-pulse">Laden...</div>}>
+            <Dashboard
+              sessions={sessions}
+              settings={settings}
+              themeId={themeId}
+              todos={todosApi.todos}
+              onImportSettings={handleImportSettings}
+            />
+          </Suspense>
         )}
         {tab === 'settings' && (
-          <SettingsPanel
-            settings={settings}
-            update={updateSettings}
-            themeId={themeId}
-            onThemeChange={setTheme}
-            sessions={sessions}
-            todos={todosApi.todos}
-            syncStatus={sync.status}
-            syncPending={sync.pending}
-            syncLastSyncAt={sync.lastSyncAt}
-            syncProfile={auth.profile}
-            syncAvailable={auth.available}
-            syncLoading={auth.loading}
-            onSyncLogin={auth.login}
-            onSyncLogout={auth.logout}
-            onSyncNow={() => void sync.sync(true)}
-          />
+          <Suspense fallback={<div className="flex h-64 w-full items-center justify-center text-sm text-muted animate-pulse">Laden...</div>}>
+            <SettingsPanel
+              settings={settings}
+              update={updateSettings}
+              themeId={themeId}
+              onThemeChange={setTheme}
+              sessions={sessions}
+              todos={todosApi.todos}
+              syncStatus={sync.status}
+              syncPending={sync.pending}
+              syncLastSyncAt={sync.lastSyncAt}
+              syncProfile={auth.profile}
+              syncAvailable={auth.available}
+              syncLoading={auth.loading}
+              onSyncLogin={auth.login}
+              onSyncLogout={auth.logout}
+              onSyncNow={() => void sync.sync(true)}
+            />
+          </Suspense>
         )}
       </main>
 
@@ -415,7 +420,9 @@ export default function App() {
       />
 
       {pendingSessionId != null && (
-        <ReflectionModal onSave={handleSaveNote} onSkip={handleSkipNote} />
+        <Suspense fallback={null}>
+          <ReflectionModal onSave={handleSaveNote} onSkip={handleSkipNote} />
+        </Suspense>
       )}
     </div>
   )

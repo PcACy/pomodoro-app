@@ -118,7 +118,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     (now: number) => {
       const end = endRef.current
       if (end == null) return
-      const remaining = end - now
+      const remaining = Math.max(0, end - now)
       if (remaining <= 0) {
         finishCurrentPhase(now)
       } else {
@@ -134,7 +134,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     initAudio()
     const now = Date.now()
     if (m.status === 'idle') phaseStartedAtRef.current = now
-    endRef.current = now + m.remainingMs
+    endRef.current = now + Math.max(0, m.remainingMs)
     setMachine((prev) => (prev.status === 'running' ? prev : { ...prev, status: 'running' }))
   }, [])
 
@@ -167,11 +167,12 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
   const addTime = useCallback((ms: number) => {
     const m = machineRef.current
     if (m.status === 'idle') return
-    if (endRef.current != null) endRef.current += ms
+    const safeMs = Math.max(0, ms)
+    if (endRef.current != null) endRef.current += safeMs
     setMachine((prev) => ({
       ...prev,
-      totalMs: prev.totalMs + ms,
-      remainingMs: prev.remainingMs + ms,
+      totalMs: prev.totalMs + safeMs,
+      remainingMs: prev.remainingMs + safeMs,
     }))
   }, [])
 

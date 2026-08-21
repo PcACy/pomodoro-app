@@ -77,6 +77,7 @@ export function useDocumentChrome(
   const { t } = useTranslation()
   const progressRef = useRef(progress)
   const remainingMsRef = useRef(remainingMs)
+  const lastFaviconRef = useRef<{ key: string; uri: string }>({ key: '', uri: DEFAULT_FAVICON })
   progressRef.current = progress
   remainingMsRef.current = remainingMs
 
@@ -86,14 +87,24 @@ export function useDocumentChrome(
     const link = document.querySelector<HTMLLinkElement>('#dynamic-favicon')
     if (!link) return
     if (status === 'idle') {
-      link.href = DEFAULT_FAVICON
+      if (link.href !== DEFAULT_FAVICON) link.href = DEFAULT_FAVICON
       return
     }
-    link.href = canvasFaviconDataUri(
-      phase,
-      status === 'running',
-      progressRef.current,
-      remainingMsRef.current,
-    )
+
+    const mins = Math.max(1, Math.ceil(remainingMsRef.current / MS_PER_MINUTE))
+    // 60 progress steps around the circle (matches discrete visual change)
+    const progressBucket = Math.round(progressRef.current * 60)
+    const cacheKey = `${phase}:${status}:${mins}:${progressBucket}`
+
+    if (lastFaviconRef.current.key !== cacheKey) {
+      const uri = canvasFaviconDataUri(
+        phase,
+        status === 'running',
+        progressRef.current,
+        remainingMsRef.current,
+      )
+      lastFaviconRef.current = { key: cacheKey, uri }
+      link.href = uri
+    }
   }, [phase, status, time, t])
 }

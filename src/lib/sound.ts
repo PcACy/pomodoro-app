@@ -68,12 +68,23 @@ export function initAudio(): void {
 }
 
 export function playChime(kind: ChimeKind = 'focus'): void {
-  const audio = ensureCtx()
-  if (!audio) return
-  const buf = getBuffer(audio, kind)
-  if (!buf) return
-  const src = audio.createBufferSource()
-  src.buffer = buf
-  src.connect(audio.destination)
-  src.start()
+  try {
+    const audio = ensureCtx()
+    if (!audio) return
+    const buf = getBuffer(audio, kind)
+    if (!buf) return
+    const src = audio.createBufferSource()
+    src.buffer = buf
+    src.connect(audio.destination)
+    src.onended = () => {
+      try {
+        src.disconnect()
+      } catch {
+        /* already disconnected */
+      }
+    }
+    src.start()
+  } catch (err) {
+    console.warn('[sound] Failed to play chime:', err)
+  }
 }

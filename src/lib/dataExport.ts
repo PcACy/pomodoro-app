@@ -1,14 +1,25 @@
 import type { Session, TodoItem } from '../types'
 import { dayKey } from './time'
 
-/** Minimal RFC-4180-style CSV writer; cells with the delimiter/quote/newline are quoted. */
+const FORMULA_REGEX = /^[\=\+\-\@\t\r]/
+
+function sanitizeCell(value: unknown): string {
+  let s = String(value ?? '')
+  // Prevent CSV Formula Injection while preserving pure numeric strings
+  if (FORMULA_REGEX.test(s) && !/^-?\d+(\.\d+)?$/.test(s)) {
+    s = `'${s}`
+  }
+  return s
+}
+
+/** RFC-4180-style CSV writer with CSV formula injection mitigation. */
 function toCsv(rows: unknown[][], delimiter: string): string {
   return rows
     .map((row) =>
       row
         .map((cell) => {
-          const s = String(cell ?? '')
-          if (s.includes(delimiter) || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+          const s = sanitizeCell(cell)
+          if (s.includes(delimiter) || s.includes('"') || s.includes('\n') || s.includes('\r') || s.includes('\t')) {
             return `"${s.replace(/"/g, '""')}"`
           }
           return s

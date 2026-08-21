@@ -1,4 +1,4 @@
-const CACHE = 'pomodoro-v4'
+const CACHE = '__CACHE_VERSION__'
 const API_CACHE = 'pomodoro-api-v1'
 
 function isSupabaseUrl(url) {
@@ -27,7 +27,6 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE).then((c) => c.addAll(['./', '/index.html', '/manifest.webmanifest'])),
   )
-  self.skipWaiting()
 })
 
 self.addEventListener('activate', (event) => {
@@ -104,6 +103,10 @@ self.addEventListener('fetch', (event) => {
   // Writes (upsert/delete) go straight to the network so the sync queue
   // observes real failures instead of faked successes.
   if (request.method !== 'GET') return
+  if (request.url.includes('/version.json') || request.url.includes('/sw.js')) {
+    event.respondWith(fetch(request))
+    return
+  }
   if (isSupabaseUrl(request.url)) {
     event.respondWith(apiNetworkFirst(request))
     return
@@ -129,4 +132,10 @@ self.addEventListener('notificationclick', (event) => {
       return self.clients.openWindow(new URL('./', self.location.origin).href)
     }),
   )
+})
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
 })
