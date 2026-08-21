@@ -89,6 +89,7 @@ export const SettingsPanel = memo(function SettingsPanel({
   }
 
   const removeTag = (tag: string) => {
+    if (settings.tags.length <= 1) return
     update((s) => ({ ...s, tags: s.tags.filter((t) => t !== tag) }))
   }
 

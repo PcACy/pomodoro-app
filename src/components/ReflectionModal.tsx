@@ -24,9 +24,17 @@ export function ReflectionModal({ onSave, onSkip }: Props) {
   }, [onSkip])
 
   return (
-    <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/40 p-4 pt-[15vh]">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="reflection-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onSkip()
+      }}
+      className="fixed inset-0 z-40 flex items-start justify-center bg-black/40 p-4 pt-[15vh]"
+    >
       <div className="card w-full max-w-sm p-5">
-        <h3 className="text-sm font-semibold text-fg">{t.reflection.title}</h3>
+        <h3 id="reflection-title" className="text-sm font-semibold text-fg">{t.reflection.title}</h3>
         <p className="mt-1 text-xs text-muted">{t.reflection.prompt}</p>
         <textarea
           ref={inputRef}

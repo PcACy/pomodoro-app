@@ -15,6 +15,7 @@ const isEditableTarget = (el: EventTarget | null): boolean => {
     tag === 'INPUT' ||
     tag === 'TEXTAREA' ||
     tag === 'SELECT' ||
+    tag === 'BUTTON' ||
     node.isContentEditable
   )
 }
