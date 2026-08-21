@@ -104,14 +104,14 @@ export const Timer = memo(function Timer({
   return (
     <section className="card group relative flex w-full max-w-md flex-col items-center gap-6 p-6 sm:p-8">
       <div className="flex w-full flex-col items-center">
-        <div className="flex w-full items-center gap-1 rounded-xl border border-line bg-canvas p-1">
+        <div className="flex w-full items-center gap-1 rounded-xl border border-line/60 bg-canvas/80 p-1 backdrop-blur-md">
           {MODES.map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => onModeChange(m)}
-              className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                mode === m ? 'bg-raised text-fg' : 'text-muted hover:text-fg'
+              className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
+                mode === m ? 'bg-raised text-fg shadow-sm' : 'text-muted hover:text-fg'
               }`}
             >
               {t.timer[m]}
@@ -177,11 +177,11 @@ export const Timer = memo(function Timer({
               strokeLinecap="round"
               strokeDasharray={circ}
               strokeDashoffset={offset}
-              className={`${RING[phase]} transition-all duration-300 ease-linear`}
+              className={`${RING[phase]} transition-[stroke-dashoffset] duration-1000 ease-linear`}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-            <span className={`text-sm font-medium uppercase tracking-widest ${PHASE_TEXT[phase]}`}>
+            <span className={`text-xs font-semibold uppercase tracking-widest ${PHASE_TEXT[phase]}`}>
               {shownLabel}
             </span>
             <span
@@ -191,7 +191,7 @@ export const Timer = memo(function Timer({
             >
               {shownTime}
             </span>
-            <span className="text-xs text-muted">{shownStatus}</span>
+            <span className="text-xs text-muted font-medium">{shownStatus}</span>
           </div>
         </div>
 
@@ -207,7 +207,7 @@ export const Timer = memo(function Timer({
             {shownTime}
           </span>
           <Waveform active={running} />
-          <span className="text-xs text-muted">{shownStatus}</span>
+          <span className="text-xs text-muted font-medium">{shownStatus}</span>
         </div>
       </div>
 
@@ -219,7 +219,7 @@ export const Timer = memo(function Timer({
               onClick={onReset}
               title={`${t.flow.discard} (R)`}
               aria-label={t.flow.discard}
-              className="flex h-12 w-12 items-center justify-center rounded-xl border border-line text-muted transition-colors hover:bg-raised hover:text-fg"
+              className="flex h-12 w-12 items-center justify-center rounded-xl border border-line text-muted transition-all duration-100 hover:bg-raised hover:text-fg active:scale-[0.94]"
             >
               <X size={18} />
             </button>
@@ -232,7 +232,7 @@ export const Timer = memo(function Timer({
             onClick={onReset}
             title={`${t.shortcuts.reset} (R)`}
             aria-label={t.shortcuts.reset}
-            className="btn-ghost"
+            className="btn-ghost active:scale-[0.94]"
           >
             <RotateCcw size={18} />
           </button>
@@ -240,7 +240,7 @@ export const Timer = memo(function Timer({
         <button
           type="button"
           onClick={onToggle}
-          className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-on-accent shadow-lg shadow-accent/25 transition-all hover:bg-accent-strong active:scale-95"
+          className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-on-accent shadow-lg shadow-accent/25 transition-all duration-200 hover:bg-accent-strong hover:shadow-[0_0_24px_rgb(var(--c-accent)/0.45)] active:scale-[0.94]"
           title={running ? t.timer.pause : t.timer.start}
           aria-label={running ? t.timer.pause : t.timer.start}
         >
@@ -253,7 +253,7 @@ export const Timer = memo(function Timer({
               onClick={onSkip}
               title={`${t.flow.finish} (F)`}
               aria-label={t.flow.finish}
-              className="flex h-12 w-12 items-center justify-center rounded-xl border border-accent/60 bg-accent/15 text-accent shadow-sm shadow-accent/20 transition-colors hover:bg-accent/25"
+              className="flex h-12 w-12 items-center justify-center rounded-xl border border-accent/60 bg-accent/15 text-accent shadow-sm shadow-accent/20 transition-all duration-100 hover:bg-accent/25 active:scale-[0.94]"
             >
               <Flag size={20} />
             </button>
@@ -266,7 +266,7 @@ export const Timer = memo(function Timer({
             onClick={onSkip}
             title={`${t.shortcuts.skip} (N)`}
             aria-label={t.shortcuts.skip}
-            className="btn-ghost"
+            className="btn-ghost active:scale-[0.94]"
           >
             <SkipForward size={18} />
           </button>

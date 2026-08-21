@@ -112,11 +112,11 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                 }}
                 title={t.done ? tr.todo.reopen : tr.todo.done}
                 aria-label={t.done ? tr.todo.reopen : tr.todo.done}
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all duration-150 active:scale-90 ${
                   t.done ? 'border-accent bg-accent text-on-accent' : 'border-line text-transparent hover:border-accent'
                 }`}
               >
-                <Check size={13} />
+                <Check size={13} className={`transition-transform duration-150 ${t.done ? 'scale-100' : 'scale-0'}`} />
               </button>
 
               {editingId === t.id ? (
@@ -163,15 +163,15 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span
                       className={`truncate text-sm transition-all ${
-                        t.done ? 'line-through text-muted opacity-60' : 'text-fg'
+                        t.done ? 'line-through text-muted opacity-60' : 'font-medium text-fg'
                       }`}
                     >
                       {t.title}
                     </span>
-                    <span className="text-[11px] text-muted">🍅 x{t.pomodoros}</span>
+                    <span className="font-mono text-[11px] tabular-nums text-muted">🍅 x{t.pomodoros}</span>
                   </div>
                   {t.tag && (
-                    <span className="shrink-0 rounded-full bg-raised px-2 py-0.5 text-[10px] font-medium text-fg">
+                    <span className="shrink-0 rounded-md border border-accent/25 bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
                       {t.tag}
                     </span>
                   )}

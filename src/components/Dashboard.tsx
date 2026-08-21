@@ -39,14 +39,14 @@ function MetricCard({
   sub?: string
 }) {
   return (
-    <div className="card flex items-center gap-4 p-5">
+    <div className="card flex items-center gap-4 p-5 transition-colors hover:border-line">
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="text-xs text-muted">{label}</p>
-        <p className="text-xl font-bold text-fg">{value}</p>
-        {sub && <p className="truncate text-xs text-muted">{sub}</p>}
+        <p className="text-xs font-medium uppercase tracking-wider text-muted">{label}</p>
+        <p className="text-xl font-bold tabular-nums text-fg">{value}</p>
+        {sub && <p className="truncate text-xs font-medium tabular-nums text-muted">{sub}</p>}
       </div>
     </div>
   )
