@@ -26,6 +26,7 @@ import { QuickStats } from './components/QuickStats'
 import { DayTimeline } from './components/DayTimeline'
 import { PipTimer, PipCanvas } from './components/PipTimer'
 import { TodoList } from './components/TodoList'
+import { CatLogo } from './components/CatLogo'
 
 const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })))
 const SettingsPanel = lazy(() => import('./components/Settings').then((m) => ({ default: m.SettingsPanel })))
@@ -257,8 +258,8 @@ export default function App() {
       </div>
       <header className="flex w-full items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15">
-            <TimerIcon className="text-accent" size={22} />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-accent/20 bg-accent/10 text-accent shadow-sm transition-all hover:scale-105 active:scale-95">
+            <CatLogo className="text-accent" size={20} />
           </div>
           <h1 className="text-lg font-bold text-fg">Pomau</h1>
         </div>

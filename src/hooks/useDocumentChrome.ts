@@ -10,7 +10,7 @@ const CSS_VAR: Record<PhaseId, string> = {
 }
 
 const DEFAULT_FAVICON_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#f43f5e"/></svg>'
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#fe8019" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5L2 3.5L7.5 5C9 4.3 10.5 4 12 4C13.5 4 15 4.3 16.5 5L22 3.5L20.5 8.5C21.5 10.5 22 12.5 22 15C22 19 18 21.5 12 21.5C6 21.5 2 19 2 15C2 12.5 2.5 10.5 3.5 8.5Z"/><path d="M4.8 6.8L6 8.5M19.2 6.8L18 8.5" stroke-width="1.5"/><path d="M7 13.5C8 12.5 9.5 12.8 10 13.8C9.2 14.3 7.8 14.3 7 13.5ZM17 13.5C16 12.5 14.5 12.8 14 13.8C14.8 14.3 16.2 14.3 17 13.5Z" fill="#fe8019" stroke="none"/><path d="M11.2 16.8L12 17.5L12.8 16.8" stroke-width="1.5"/></svg>'
 const DEFAULT_FAVICON = `data:image/svg+xml,${encodeURIComponent(DEFAULT_FAVICON_SVG)}`
 
 function themeColor(varName: string): string {
