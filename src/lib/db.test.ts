@@ -63,3 +63,4 @@ describe('sanitizeImportedSession', () => {
     expect(session?.notes?.length).toBe(2000)
   })
 })
+
