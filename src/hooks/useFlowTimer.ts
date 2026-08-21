@@ -61,7 +61,8 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
 
   const pause = useCallback(() => {
     if (statusRef.current !== 'running' || segStartRef.current == null) return
-    setElapsedMs(baseRef.current + (Date.now() - segStartRef.current))
+    const delta = Math.max(0, Date.now() - segStartRef.current)
+    setElapsedMs(baseRef.current + delta)
     segStartRef.current = null
     setStatus('paused')
   }, [])
@@ -74,7 +75,7 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
   /** Capture the current elapsed time, save the session (>= 1 min) and reset to ready. */
   const finishSession = useCallback(() => {
     const segStart = segStartRef.current
-    const total = segStart != null ? baseRef.current + (Date.now() - segStart) : elapsedRef.current
+    const total = segStart != null ? baseRef.current + Math.max(0, Date.now() - segStart) : elapsedRef.current
     segStartRef.current = null
     baseRef.current = 0
     setElapsedMs(0)
@@ -111,7 +112,8 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
   useEffect(() => {
     const onVisibility = () => {
       if (document.visibilityState === 'visible' && statusRef.current === 'running' && segStartRef.current != null) {
-        setElapsedMs(baseRef.current + (Date.now() - segStartRef.current))
+        const delta = Math.max(0, Date.now() - segStartRef.current)
+        setElapsedMs(baseRef.current + delta)
       }
     }
     document.addEventListener('visibilitychange', onVisibility)
@@ -126,7 +128,8 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
       if (e.data && e.data.type === 'tick') {
         const now = e.data.now as number
         if (statusRef.current === 'running' && segStartRef.current != null) {
-          setElapsedMs(baseRef.current + (now - segStartRef.current))
+          const delta = Math.max(0, now - segStartRef.current)
+          setElapsedMs(baseRef.current + delta)
         }
       }
     }

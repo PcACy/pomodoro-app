@@ -46,18 +46,47 @@ export async function clearSessions(): Promise<void> {
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-export async function importSessions(sessions: Session[]): Promise<void> {
-  const now = Date.now()
-  const cleaned = sessions
-    .filter((s) => s && typeof s.start === 'number')
-    .map((s) => ({
-      ...s,
-      // Deterministic id from content so re-imports across devices don't duplicate.
-      id: typeof s.id === 'string' && UUID_REGEX.test(s.id)
-        ? s.id
-        : uidFrom(`${s.start}:${s.durationMs}:${s.task}:${s.tag}`),
-      updatedAt: s.updatedAt ?? now,
-    }))
+export function sanitizeImportedSession(raw: unknown): Session | null {
+  if (!raw || typeof raw !== 'object') return null
+  const s = raw as Record<string, unknown>
+  const start = typeof s.start === 'number' && Number.isFinite(s.start) && s.start > 0 ? s.start : null
+  if (start == null) return null
+
+  const durationMs =
+    typeof s.durationMs === 'number' && Number.isFinite(s.durationMs) && s.durationMs > 0
+      ? s.durationMs
+      : typeof s.duration_ms === 'number' && Number.isFinite(s.duration_ms) && s.duration_ms > 0
+        ? s.duration_ms
+        : 1500_000
+
+  const end =
+    typeof s.end === 'number' && Number.isFinite(s.end) && s.end >= start
+      ? s.end
+      : start + durationMs
+
+  const task = typeof s.task === 'string' ? s.task.slice(0, 200) : ''
+  const tag = typeof s.tag === 'string' && s.tag ? s.tag.slice(0, 50) : 'Unsorted'
+  const notes = typeof s.notes === 'string' && s.notes.trim() ? s.notes.slice(0, 2000) : undefined
+
+  const rawId = typeof s.id === 'string' ? s.id : ''
+  const id = UUID_REGEX.test(rawId) ? rawId : uidFrom(`${start}:${durationMs}:${task}:${tag}`)
+  const updatedAt =
+    typeof s.updatedAt === 'number' && Number.isFinite(s.updatedAt)
+      ? s.updatedAt
+      : typeof s.updated_at === 'number' && Number.isFinite(s.updated_at)
+        ? s.updated_at
+        : Date.now()
+
+  return { id, start, end, durationMs, task, tag, notes, updatedAt }
+}
+
+export async function importSessions(sessions: unknown[]): Promise<void> {
+  if (!Array.isArray(sessions)) return
+  const cleaned: Session[] = []
+  for (const item of sessions) {
+    const valid = sanitizeImportedSession(item)
+    if (valid) cleaned.push(valid)
+  }
   await db.transaction('rw', db.sessions, async () => {
     await db.sessions.clear()
     if (cleaned.length) await db.sessions.bulkAdd(cleaned)
@@ -67,5 +96,12 @@ export async function importSessions(sessions: Session[]): Promise<void> {
 
 export async function exportAll(): Promise<{ settings: unknown; sessions: Session[] }> {
   const sessions = await db.sessions.orderBy('start').toArray()
-  return { settings: localStorage.getItem('pomodoro.settings'), sessions }
+  let settings: unknown = null
+  try {
+    const raw = localStorage.getItem('pomodoro.settings')
+    if (raw) settings = JSON.parse(raw)
+  } catch {
+    /* fallback to null */
+  }
+  return { settings, sessions }
 }

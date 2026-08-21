@@ -4,11 +4,11 @@
 create table if not exists public.sessions (
   id uuid primary key,
   user_id uuid not null references auth.users (id) on delete cascade,
-  start bigint not null,
-  "end" bigint not null,
-  duration_ms bigint not null,
-  task text not null,
-  tag text not null,
+  start bigint not null check (start > 0),
+  "end" bigint not null check ("end" >= start),
+  duration_ms bigint not null check (duration_ms > 0),
+  task text not null check (char_length(task) <= 500),
+  tag text not null check (char_length(tag) <= 100),
   notes text,
   updated_at bigint not null default 0
 );
@@ -20,11 +20,11 @@ alter table public.todos add column if not exists updated_at bigint not null def
 create table if not exists public.todos (
   id text primary key,
   user_id uuid not null references auth.users (id) on delete cascade,
-  title text not null,
-  tag text not null,
+  title text not null check (char_length(title) <= 500),
+  tag text not null check (char_length(tag) <= 100),
   done boolean not null default false,
-  pomodoros integer not null default 0,
-  created_at bigint not null,
+  pomodoros integer not null default 0 check (pomodoros >= 0),
+  created_at bigint not null check (created_at > 0),
   completed_at bigint,
   updated_at bigint not null
 );
@@ -35,6 +35,7 @@ create index if not exists todos_user_idx on public.todos (user_id);
 alter table public.sessions enable row level security;
 alter table public.todos enable row level security;
 
+-- Row Level Security policies: strict isolation by authenticated user ID
 drop policy if exists "own sessions" on public.sessions;
 create policy "own sessions" on public.sessions
   for all

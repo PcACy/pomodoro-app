@@ -103,6 +103,10 @@ self.addEventListener('fetch', (event) => {
   // Writes (upsert/delete) go straight to the network so the sync queue
   // observes real failures instead of faked successes.
   if (request.method !== 'GET') return
+  if (request.url.includes('/version.json') || request.url.includes('/sw.js')) {
+    event.respondWith(fetch(request))
+    return
+  }
   if (isSupabaseUrl(request.url)) {
     event.respondWith(apiNetworkFirst(request))
     return
