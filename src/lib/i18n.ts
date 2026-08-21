@@ -41,6 +41,12 @@ export interface Messages {
     save: string
     cancel: string
   }
+  timeline: {
+    title: string
+    noSessions: string
+    now: string
+    todayProgress: (count: number, minutes: number) => string
+  }
   reflection: { title: string; prompt: string; placeholder: string; save: string; skip: string }
   dashboard: {
     today: string
@@ -185,6 +191,12 @@ const de: Messages = {
     delete: 'Löschen',
     save: 'Speichern',
     cancel: 'Abbrechen',
+  },
+  timeline: {
+    title: 'Tages-Timeline',
+    noSessions: 'Noch keine Sessions heute aufgezeichnet',
+    now: 'Jetzt',
+    todayProgress: (count, minutes) => `${count} ${count === 1 ? 'Session' : 'Sessions'} · ${minutes} Min. Fokus`,
   },
   reflection: {
     title: 'Micro-Reflection',
@@ -342,6 +354,12 @@ const en: Messages = {
     delete: 'Delete',
     save: 'Save',
     cancel: 'Cancel',
+  },
+  timeline: {
+    title: "Today's Timeline",
+    noSessions: 'No sessions recorded today yet',
+    now: 'Now',
+    todayProgress: (count, minutes) => `${count} ${count === 1 ? 'session' : 'sessions'} · ${minutes} min focus`,
   },
   reflection: {
     title: 'Micro-Reflection',

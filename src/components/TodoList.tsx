@@ -48,7 +48,7 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
   }
 
   return (
-    <section className="card flex w-full max-w-md flex-col gap-4 p-6">
+    <section className="card flex w-full max-w-md 2xl:max-w-lg flex-col gap-4 p-6 2xl:p-8">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-fg">{tr.todo.title}</h3>
         <span className="text-xs text-muted">
@@ -76,7 +76,7 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
         <button
           type="button"
           onClick={submitAdd}
-          className="btn-primary shrink-0 px-3"
+          className="btn-primary shrink-0 px-3 active:scale-[0.94]"
           title={tr.todo.add}
           aria-label={tr.todo.add}
         >
@@ -87,7 +87,7 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
       {todos.length === 0 ? (
         <p className="py-6 text-center text-sm text-muted">{tr.todo.empty}</p>
       ) : (
-        <ul className="flex flex-col gap-1.5">
+        <ul className="flex flex-col gap-1.5 2xl:gap-2">
           {todos.map((t) => (
             <li
               key={t.id}
@@ -96,7 +96,7 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                 if (target.closest('button, input, select, textarea') || editingId === t.id) return
                 onFocus(t.id)
               }}
-              className={`group flex items-center gap-2 rounded-xl border px-3 py-2 transition-all ${
+              className={`group flex items-center gap-2 rounded-xl border px-3 py-2 2xl:px-4 2xl:py-3 transition-all ${
                 editingId !== t.id ? 'cursor-pointer' : ''
               } ${
                 activeTodoId === t.id

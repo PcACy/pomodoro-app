@@ -23,6 +23,7 @@ import { STORAGE_KEYS, type PhaseId, type Session, type Settings, type TimerMode
 import type { Messages } from './lib/i18n'
 import { Timer } from './components/Timer'
 import { QuickStats } from './components/QuickStats'
+import { DayTimeline } from './components/DayTimeline'
 import { PipTimer, PipCanvas } from './components/PipTimer'
 import { TodoList } from './components/TodoList'
 
@@ -216,7 +217,7 @@ export default function App() {
   }, [pipMode, closePip, openPip])
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center gap-8 px-4 py-8">
+    <div className="mx-auto flex min-h-screen w-full max-w-5xl 2xl:max-w-6xl flex-col items-center gap-8 2xl:gap-10 px-4 py-8">
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div
           className="absolute inset-0"
@@ -272,9 +273,9 @@ export default function App() {
         </nav>
       </header>
 
-      <main className="flex w-full flex-1 flex-col items-center gap-8 pb-8">
+      <main className="flex w-full flex-1 flex-col items-center gap-8 2xl:gap-10 pb-8">
         {tab === 'timer' && (settings.layoutMode === 'single' ? (
-          <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-8">
+          <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-8 2xl:gap-10">
             <Timer
               large
               phase={timer.phase}
@@ -306,9 +307,10 @@ export default function App() {
               onFocus={handleFocusTodo}
             />
             <QuickStats sessions={sessions} settings={settings} />
+            <DayTimeline sessions={sessions} />
           </div>
         ) : (
-          <div className="mx-auto grid w-full max-w-5xl grid-cols-1 items-start justify-items-center gap-8 lg:grid-cols-2">
+          <div className="mx-auto grid w-full max-w-5xl 2xl:max-w-6xl grid-cols-1 items-start justify-items-center gap-8 2xl:gap-10 lg:grid-cols-2">
             <Timer
               phase={timer.phase}
               phaseLabel={timer.phaseLabel}
@@ -328,7 +330,7 @@ export default function App() {
               pipOpen={pipMode !== 'none'}
               onPipToggle={handlePipToggle}
             />
-            <div className="flex w-full max-w-md flex-col gap-8">
+            <div className="flex w-full max-w-md 2xl:max-w-lg flex-col gap-8 2xl:gap-10">
               <TodoList
                 todos={todosApi.todos}
                 tags={settings.tags}
@@ -340,6 +342,9 @@ export default function App() {
                 onFocus={handleFocusTodo}
               />
               <QuickStats sessions={sessions} settings={settings} />
+            </div>
+            <div className="col-span-full w-full">
+              <DayTimeline sessions={sessions} />
             </div>
           </div>
         ))}
