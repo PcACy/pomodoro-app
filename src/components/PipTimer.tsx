@@ -72,14 +72,19 @@ interface CanvasProps {
   phaseLabel: string
   status: TimerStatus
   time: string
+  enabled?: boolean
 }
 
 const CANVAS_BG = '#0b0d12'
 const CANVAS_FG = '#f5f5f5'
 
 /** Renders the timer onto the hidden canvas that feeds the video-PiP fallback stream. */
-export function PipCanvas({ canvasRef, phaseLabel, status, time }: CanvasProps) {
+export function PipCanvas({ canvasRef, phaseLabel, status, time, enabled = true }: CanvasProps) {
+  // Bolt Optimization: Skip offscreen 2D canvas drawing when video PiP is inactive.
+  // When video PiP is disabled (default state), rendering onto canvas on every 250ms tick
+  // wastes CPU/GPU resources and triggers unnecessary 2D context updates.
   useEffect(() => {
+    if (!enabled) return
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
