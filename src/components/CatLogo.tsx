@@ -49,3 +49,4 @@ export const CatLogo: FC<CatLogoProps> = ({
     />
   </svg>
 )
+
