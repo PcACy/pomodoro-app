@@ -26,6 +26,9 @@ interface Props {
   onPipToggle: () => void
   isZenMode?: boolean
   onToggleZen?: () => void
+  borderless?: boolean
+  task?: string
+  tag?: string
 }
 
 const PHASE_TEXT: Record<PhaseId, string> = {
@@ -88,6 +91,9 @@ export const Timer = memo(function Timer({
   onPipToggle,
   isZenMode = false,
   onToggleZen,
+  borderless = false,
+  task,
+  tag,
 }: Props) {
   const { t } = useTranslation()
   const isFlow = mode === 'flow'
@@ -182,22 +188,29 @@ export const Timer = memo(function Timer({
         : 'bg-long text-on-accent shadow-long/25 hover:shadow-[0_0_24px_rgb(var(--c-long)/0.45)]'
 
   return (
-    <section className="card group relative flex w-full max-w-md 2xl:max-w-lg flex-col items-center gap-6 2xl:gap-8 p-6 sm:p-8 2xl:p-10">
-      {isZenMode && (
-        <button
-          type="button"
-          onClick={onToggleZen}
-          title={t.zen.exitHint}
-          aria-label={t.zen.exitHint}
-          className="group/zen -mt-1 mb-1 flex items-center gap-2 rounded-full border border-line/70 bg-surface/80 px-3.5 py-1 text-xs font-medium text-muted shadow-sm backdrop-blur-md transition-all hover:border-accent/40 hover:bg-surface hover:text-fg active:scale-95"
-        >
+    <section
+      className={`group relative flex w-full flex-col items-center transition-all duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+        borderless
+          ? 'max-w-xl gap-8 p-0 bg-transparent border-0 shadow-none'
+          : 'card max-w-md 2xl:max-w-lg gap-6 2xl:gap-8 p-6 sm:p-8 2xl:p-10'
+      }`}
+    >
+      {task && (
+        <div className="flex items-center gap-2 rounded-full border border-accent/20 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent shadow-sm backdrop-blur-md">
           <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-          <span>{t.zen.exitHint}</span>
-        </button>
+          <span className="max-w-[280px] truncate font-semibold text-fg">{task}</span>
+          {tag && <span className="font-mono text-[10px] text-accent/80">#{tag}</span>}
+        </div>
       )}
 
       <div className="flex w-full flex-col items-center">
-        <div className="relative grid grid-cols-2 w-full items-center gap-1 rounded-xl border border-line/60 bg-canvas/80 p-1 backdrop-blur-md">
+        <div
+          className={`relative grid grid-cols-2 ${
+            borderless ? 'w-64 sm:w-72' : 'w-full'
+          } items-center gap-1 rounded-xl border border-line/60 bg-canvas/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
+            running && borderless ? 'opacity-30 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
+          }`}
+        >
           {/* iOS-typical Sliding Pill Indicator */}
           <div
             className="pointer-events-none absolute bottom-1 top-1 rounded-lg bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
@@ -315,8 +328,8 @@ export const Timer = memo(function Timer({
               {shownLabel}
             </span>
             <span
-              className={`font-mono font-bold tabular-nums leading-none tracking-wider text-fg ${
-                large ? 'text-6xl 2xl:text-7xl' : 'text-5xl 2xl:text-6xl'
+              className={`font-mono font-bold tabular-nums leading-none tracking-wider text-fg transition-all duration-300 ${
+                large ? 'text-6xl sm:text-7xl 2xl:text-8xl' : 'text-5xl 2xl:text-6xl'
               }`}
             >
               {shownTime}
@@ -333,7 +346,11 @@ export const Timer = memo(function Timer({
           <span className="text-xs font-semibold uppercase tracking-[0.35em] text-accent/80">
             {shownLabel}
           </span>
-          <span className="font-mono text-6xl 2xl:text-7xl font-bold leading-none tracking-tight tabular-nums text-fg sm:text-7xl 2xl:text-8xl">
+          <span
+            className={`font-mono font-bold leading-none tracking-tight tabular-nums text-fg transition-all duration-300 ${
+              large ? 'text-7xl sm:text-8xl 2xl:text-9xl' : 'text-6xl sm:text-7xl 2xl:text-8xl'
+            }`}
+          >
             {shownTime}
           </span>
           <div className={`transition-all duration-300 delay-75 ${isFlow ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
@@ -372,11 +389,17 @@ export const Timer = memo(function Timer({
         <button
           type="button"
           onClick={onToggle}
-          className={`flex h-16 w-16 2xl:h-18 2xl:w-18 items-center justify-center rounded-full shadow-lg transition-all duration-300 hover:scale-105 active:scale-[0.94] ${playBtnColor}`}
+          className={`flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-[0.94] ${
+            large ? 'h-20 w-20 2xl:h-22 2xl:w-22 shadow-2xl' : 'h-16 w-16 2xl:h-18 2xl:w-18 shadow-lg'
+          } ${playBtnColor}`}
           title={running ? t.timer.pause : t.timer.start}
           aria-label={running ? t.timer.pause : t.timer.start}
         >
-          {running ? <Pause size={26} /> : <Play size={26} className="translate-x-0.5" />}
+          {running ? (
+            <Pause size={large ? 32 : 26} />
+          ) : (
+            <Play size={large ? 32 : 26} className="translate-x-0.5" />
+          )}
         </button>
         {isFlow ? (
           flowStatus !== 'idle' ? (

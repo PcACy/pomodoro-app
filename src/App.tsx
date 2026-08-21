@@ -71,6 +71,32 @@ export default function App() {
   const auth = useAuth()
   const sync = useSync({ user: auth.user, mergeRemoteTodos: todosApi.mergeRemote })
 
+  const [isMouseActive, setIsMouseActive] = useState(true)
+  const mouseTimerRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!isZenMode) {
+      setIsMouseActive(true)
+      return
+    }
+    const onActivity = () => {
+      setIsMouseActive(true)
+      if (mouseTimerRef.current != null) window.clearTimeout(mouseTimerRef.current)
+      mouseTimerRef.current = window.setTimeout(() => {
+        setIsMouseActive(false)
+      }, 3500)
+    }
+    window.addEventListener('mousemove', onActivity)
+    window.addEventListener('pointerdown', onActivity)
+    window.addEventListener('keydown', onActivity)
+    return () => {
+      window.removeEventListener('mousemove', onActivity)
+      window.removeEventListener('pointerdown', onActivity)
+      window.removeEventListener('keydown', onActivity)
+      if (mouseTimerRef.current != null) window.clearTimeout(mouseTimerRef.current)
+    }
+  }, [isZenMode])
+
   const showToast = useCallback((message: string) => {
     setToast({ message, id: Date.now() })
     if (toastTimer.current != null) window.clearTimeout(toastTimer.current)
@@ -276,13 +302,7 @@ export default function App() {
           ))}
         </div>
       </div>
-      <header
-        className={`flex w-full items-center justify-between gap-4 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-          isZenMode
-            ? 'pointer-events-none -mb-8 h-0 opacity-0 -translate-y-4 overflow-hidden'
-            : 'opacity-100 translate-y-0'
-        }`}
-      >
+      <header className="flex w-full items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-accent/20 bg-accent/10 text-accent shadow-sm transition-all hover:scale-105 active:scale-95">
             <CatLogo className="text-accent" size={20} />
@@ -323,34 +343,7 @@ export default function App() {
       <main className="flex w-full flex-1 flex-col items-center gap-8 2xl:gap-10 pb-8">
         <div key={tab} className="animate-tab-enter flex w-full flex-col items-center">
           {tab === 'timer' && (
-            isZenMode ? (
-              <div className="flex w-full min-h-[75vh] flex-col items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]">
-                <div className="w-full max-w-md 2xl:max-w-lg scale-105 transition-transform duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]">
-                  <Timer
-                    large
-                    phase={timer.phase}
-                    phaseLabel={timer.phaseLabel}
-                    status={timer.status}
-                    time={timer.time}
-                    progress={timer.progress}
-                    completedFocusInCycle={timer.completedFocusInCycle}
-                    roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
-                    mode={mode}
-                    flowStatus={flow.status}
-                    flowTime={flow.time}
-                    onModeChange={handleModeChange}
-                    onToggle={handleToggle}
-                    onSkip={handleSkip}
-                    onReset={handleReset}
-                    pipSupported={pipSupported}
-                    pipOpen={pipMode !== 'none'}
-                    onPipToggle={handlePipToggle}
-                    isZenMode={isZenMode}
-                    onToggleZen={handleToggleZen}
-                  />
-                </div>
-              </div>
-            ) : settings.layoutMode === 'single' ? (
+            settings.layoutMode === 'single' ? (
               <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-8 2xl:gap-10">
                 <Timer
                   large
@@ -364,6 +357,8 @@ export default function App() {
                   mode={mode}
                   flowStatus={flow.status}
                   flowTime={flow.time}
+                  task={sessionTask}
+                  tag={sessionTag}
                   onModeChange={handleModeChange}
                   onToggle={handleToggle}
                   onSkip={handleSkip}
@@ -401,6 +396,8 @@ export default function App() {
                   mode={mode}
                   flowStatus={flow.status}
                   flowTime={flow.time}
+                  task={sessionTask}
+                  tag={sessionTag}
                   onModeChange={handleModeChange}
                   onToggle={handleToggle}
                   onSkip={handleSkip}
@@ -465,6 +462,80 @@ export default function App() {
           )}
         </div>
       </main>
+
+      {/* Immersive Borderless Zen Mode Overlay */}
+      {isZenMode && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-canvas select-none overflow-hidden animate-fade-in">
+          {/* Subtle Canvas Dot Pattern */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-40"
+            style={{
+              backgroundImage: 'radial-gradient(circle, rgb(var(--c-fg) / 0.08) 1px, transparent 1px)',
+              backgroundSize: '24px 24px',
+            }}
+          />
+
+          {/* Atmospheric Ambient Aura Breathing with Timer */}
+          <div
+            className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[56rem] w-[56rem] rounded-full blur-3xl transition-all duration-1000 ${
+              isRunning ? 'ambient-breath opacity-35 scale-100' : 'opacity-10 scale-95'
+            }`}
+            style={{
+              background: `radial-gradient(circle at center, rgb(var(${GLOW_PHASES.find((g) => g.id === chromePhase)?.cssVar ?? '--c-accent'}) / 0.65) 0%, transparent 65%)`,
+            }}
+          />
+
+          {/* Floating Minimalist Top Exit Badge (auto-fades on idle during focus) */}
+          <div
+            className={`fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${
+              !isRunning || isMouseActive
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 -translate-y-2 pointer-events-none'
+            }`}
+          >
+            <button
+              type="button"
+              onClick={handleExitZen}
+              title={t.zen.exitHint}
+              aria-label={t.zen.exitHint}
+              className="group flex items-center gap-2.5 rounded-full border border-line/70 bg-surface/75 px-4 py-1.5 text-xs font-medium text-muted shadow-lg backdrop-blur-md transition-all hover:border-accent/40 hover:bg-surface hover:text-fg active:scale-95"
+            >
+              <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+              <span>{t.zen.exitHint}</span>
+              <kbd className="kbd text-[10px]">Esc</kbd>
+            </button>
+          </div>
+
+          {/* Heroic Borderless Timer */}
+          <div className="relative z-10 flex flex-col items-center justify-center p-4">
+            <Timer
+              large
+              borderless
+              phase={timer.phase}
+              phaseLabel={timer.phaseLabel}
+              status={timer.status}
+              time={timer.time}
+              progress={timer.progress}
+              completedFocusInCycle={timer.completedFocusInCycle}
+              roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
+              mode={mode}
+              flowStatus={flow.status}
+              flowTime={flow.time}
+              task={sessionTask}
+              tag={sessionTag}
+              onModeChange={handleModeChange}
+              onToggle={handleToggle}
+              onSkip={handleSkip}
+              onReset={handleReset}
+              pipSupported={pipSupported}
+              pipOpen={pipMode !== 'none'}
+              onPipToggle={handlePipToggle}
+              isZenMode={isZenMode}
+              onToggleZen={handleToggleZen}
+            />
+          </div>
+        </div>
+      )}
 
       {updateAvailable && (
         <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-sm shadow-lg">
