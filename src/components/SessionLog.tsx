@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
-import { Check, ChevronDown, Copy, Download, FileDown, FileJson, FileText, Search, StickyNote, Trash2, Upload } from 'lucide-react'
+import { Check, ChevronDown, Copy, Download, FileDown, FileJson, FileText, History, Search, StickyNote, Trash2, Upload } from 'lucide-react'
 import type { Session, TodoItem } from '../types'
 import { fmtDateTime, fmtDuration } from '../lib/time'
 import { buildDailyMarkdown, buildDayExport, copyMarkdown, downloadMarkdown } from '../lib/markdownExport'
@@ -182,7 +182,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
               e.target.value = ''
             }}
           />
-          <button type="button" onClick={() => importRef.current?.click()} className="btn-ghost text-xs">
+          <button type="button" onClick={() => importRef.current?.click()} className="btn-ghost h-9 px-3 text-xs">
             <Upload size={14} /> {t.sessionLog.import}
           </button>
 
@@ -190,7 +190,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
             <button
               type="button"
               onClick={() => setOpen((o) => !o)}
-              className="btn-ghost text-xs"
+              className="btn-ghost h-9 px-3 text-xs"
               aria-haspopup="menu"
               aria-expanded={open}
             >
@@ -258,20 +258,34 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.sessionLog.searchPlaceholder}
-              className="input w-40 pl-9 sm:w-56"
+              className="input h-9 w-40 pl-9 sm:w-56 text-xs bg-canvas/80 border-line/60 focus:border-accent/50"
             />
           </div>
 
-          <button type="button" onClick={onClear} className="btn-ghost text-xs" title={t.sessionLog.clearAll}>
+          <button
+            type="button"
+            onClick={onClear}
+            disabled={sessions.length === 0}
+            className="btn-ghost h-9 w-9 p-0 text-xs disabled:opacity-30 disabled:pointer-events-none"
+            title={t.sessionLog.clearAll}
+          >
             <Trash2 size={15} />
           </button>
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted">
-          {sessions.length === 0 ? t.sessionLog.empty : t.sessionLog.noResults}
-        </p>
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-line/60 bg-raised/30 text-muted/50">
+            <History size={22} />
+          </div>
+          <p className="text-sm font-semibold text-fg">
+            {sessions.length === 0 ? t.sessionLog.empty : t.sessionLog.noResults}
+          </p>
+          <p className="mt-1 max-w-sm text-xs text-muted">
+            {sessions.length === 0 ? t.sessionLog.emptySub : t.sessionLog.searchPlaceholder}
+          </p>
+        </div>
       ) : (
         <ul className="max-h-80 divide-y divide-line overflow-y-auto">
           {filtered.map((s) => (

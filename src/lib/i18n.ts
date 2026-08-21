@@ -86,6 +86,7 @@ export interface Messages {
     searchPlaceholder: string
     clearAll: string
     empty: string
+    emptySub: string
     noResults: string
     noTask: string
     import: string
@@ -242,7 +243,8 @@ const de: Messages = {
   sessionLog: {
     searchPlaceholder: 'Sessions durchsuchen (Name, Tag, Datum) …',
     clearAll: 'Alle löschen',
-    empty: 'Noch keine Sessions erfasst.',
+    empty: 'Noch keine Sessions aufgezeichnet',
+    emptySub: 'Schließe deine erste Pomodoro- oder Flow-Session ab, um deine Historie zu sehen.',
     noResults: 'Keine Treffer.',
     noTask: 'Ohne Aufgabe',
     import: 'Import',
@@ -405,7 +407,8 @@ const en: Messages = {
   sessionLog: {
     searchPlaceholder: 'Search sessions (name, tag, date) …',
     clearAll: 'Delete all',
-    empty: 'No sessions recorded yet.',
+    empty: 'No sessions recorded yet',
+    emptySub: 'Complete your first Pomodoro or Flow session to see your activity history.',
     noResults: 'No matches.',
     noTask: 'No task',
     import: 'Import',
