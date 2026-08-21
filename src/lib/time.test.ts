@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  MS_PER_DAY,
+  MS_PER_MINUTE,
+  WEEKDAY_SHORT,
   addDays,
   dayKey,
   fmtDate,
@@ -10,10 +13,20 @@ import {
   sameDay,
   startOfDay,
   startOfWeek,
-  WEEKDAY_SHORT,
 } from './time'
 
 describe('time lib', () => {
+  describe('constants', () => {
+    it('defines correct millisecond constants', () => {
+      expect(MS_PER_MINUTE).toBe(60_000)
+      expect(MS_PER_DAY).toBe(86_400_000)
+    })
+
+    it('defines weekday short labels starting with Monday', () => {
+      expect(WEEKDAY_SHORT).toEqual(['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'])
+    })
+  })
+
   describe('dayKey', () => {
     it('formats a date as YYYY-MM-DD with zero padding for single digits', () => {
       const date = new Date(2026, 0, 5, 14, 30, 0) // Jan 5, 2026
@@ -80,9 +93,13 @@ describe('time lib', () => {
       expect(dayKey(added)).toBe('2025-05-19')
       expect(added.getHours()).toBe(10)
       expect(added.getMinutes()).toBe(20)
+      expect(added.getSeconds()).toBe(30)
+      expect(added.getMilliseconds()).toBe(400)
 
       const subtracted = addDays(base, -3)
       expect(dayKey(subtracted)).toBe('2025-05-11')
+      expect(subtracted.getHours()).toBe(10)
+      expect(subtracted.getMinutes()).toBe(20)
     })
   })
 
@@ -101,65 +118,103 @@ describe('time lib', () => {
   })
 
   describe('fmtTime', () => {
-    it('formats ms into MM:SS when under 1 hour', () => {
+    it('formats 0 ms as 00:00', () => {
       expect(fmtTime(0)).toBe('00:00')
+    })
+
+    it('handles negative ms by clamping to 00:00', () => {
+      expect(fmtTime(-5000)).toBe('00:00')
+    })
+
+    it('rounds up sub-second milliseconds using Math.ceil', () => {
+      expect(fmtTime(1)).toBe('00:01')
+      expect(fmtTime(999)).toBe('00:01')
+      expect(fmtTime(1000)).toBe('00:01')
+      expect(fmtTime(1001)).toBe('00:02')
+    })
+
+    it('formats minutes and seconds under an hour', () => {
       expect(fmtTime(65_000)).toBe('01:05')
+      expect(fmtTime(25 * 60_000)).toBe('25:00')
       expect(fmtTime(59 * 60_000 + 59_000)).toBe('59:59')
     })
 
-    it('formats ms into H:MM:SS when 1 hour or more', () => {
+    it('formats hours when ms >= 1 hour', () => {
       expect(fmtTime(3600_000)).toBe('1:00:00')
-      expect(fmtTime(3665_000)).toBe('1:01:05')
+      expect(fmtTime(3661_000)).toBe('1:01:01')
+      expect(fmtTime(10 * 3600_000 + 5 * 60_000 + 9_000)).toBe('10:05:09')
       expect(fmtTime(25 * 3600_000 + 120_000 + 3_000)).toBe('25:02:03')
     })
   })
 
   describe('fmtElapsed', () => {
-    it('formats elapsed ms into HH:MM:SS format always', () => {
+    it('formats 0 ms as 00:00:00', () => {
       expect(fmtElapsed(0)).toBe('00:00:00')
+    })
+
+    it('handles negative ms by clamping to 00:00:00', () => {
+      expect(fmtElapsed(-5000)).toBe('00:00:00')
+    })
+
+    it('floors sub-second milliseconds using Math.floor', () => {
+      expect(fmtElapsed(999)).toBe('00:00:00')
+      expect(fmtElapsed(1000)).toBe('00:00:01')
+      expect(fmtElapsed(1999)).toBe('00:00:01')
+    })
+
+    it('always includes padded 2-digit hours, minutes, and seconds', () => {
       expect(fmtElapsed(65_000)).toBe('00:01:05')
-      expect(fmtElapsed(3665_000)).toBe('01:01:05')
+      expect(fmtElapsed(3600_000 + 120_000 + 3_000)).toBe('01:02:03')
       expect(fmtElapsed(25 * 3600_000)).toBe('25:00:00')
     })
   })
 
   describe('fmtDuration', () => {
-    it('formats durations under 60 minutes in German and English', () => {
+    it('formats duration < 60 minutes in German and English', () => {
+      expect(fmtDuration(0)).toBe('0 min')
+      expect(fmtDuration(25 * 60_000)).toBe('25 min')
       expect(fmtDuration(25 * 60_000, 'de')).toBe('25 min')
       expect(fmtDuration(25 * 60_000, 'en')).toBe('25 min')
+      expect(fmtDuration(59 * 60_000)).toBe('59 min')
     })
 
-    it('formats exact hours in German and English', () => {
+    it('rounds duration to nearest minute', () => {
+      expect(fmtDuration(24 * 60_000 + 29_000)).toBe('24 min')
+      expect(fmtDuration(24 * 60_000 + 31_000)).toBe('25 min')
+    })
+
+    it('formats exact hours in German (default) and English', () => {
+      expect(fmtDuration(60 * 60_000)).toBe('1 h')
+      expect(fmtDuration(60 * 60_000, 'de')).toBe('1 h')
+      expect(fmtDuration(60 * 60_000, 'en')).toBe('1h')
+
+      expect(fmtDuration(120 * 60_000)).toBe('2 h')
       expect(fmtDuration(120 * 60_000, 'de')).toBe('2 h')
       expect(fmtDuration(120 * 60_000, 'en')).toBe('2h')
     })
 
     it('formats hours and minutes in German and English', () => {
+      expect(fmtDuration(90 * 60_000)).toBe('1 h 30 min')
+      expect(fmtDuration(90 * 60_000, 'de')).toBe('1 h 30 min')
+      expect(fmtDuration(90 * 60_000, 'en')).toBe('1h 30m')
+
       expect(fmtDuration(135 * 60_000, 'de')).toBe('2 h 15 min')
       expect(fmtDuration(135 * 60_000, 'en')).toBe('2h 15m')
     })
   })
 
   describe('fmtDate and fmtDateTime', () => {
-    it('formats dates using specified locale', () => {
+    it('formats date according to locale', () => {
       const date = new Date(2025, 4, 14, 14, 30)
-      const dateStr = fmtDate(date, 'de-DE')
-      expect(dateStr).toContain('14')
-      expect(dateStr).toContain('05')
-      expect(dateStr).toContain('2025')
+      const formatted = fmtDate(date, 'de-DE')
+      expect(formatted).toMatch(/14\.05\.2025/)
     })
 
-    it('formats date and time using specified locale', () => {
+    it('formats date and time according to locale', () => {
       const date = new Date(2025, 4, 14, 14, 30)
-      const dateTimeStr = fmtDateTime(date, 'de-DE')
-      expect(dateTimeStr).toContain('14')
-      expect(dateTimeStr).toContain('30')
-    })
-  })
-
-  describe('WEEKDAY_SHORT', () => {
-    it('contains 7 German weekday abbreviations starting with Monday', () => {
-      expect(WEEKDAY_SHORT).toEqual(['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'])
+      const formatted = fmtDateTime(date, 'de-DE')
+      expect(formatted).toMatch(/14\.05\./)
+      expect(formatted).toMatch(/14:30/)
     })
   })
 })
