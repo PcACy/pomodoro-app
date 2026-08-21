@@ -7,6 +7,7 @@ interface Props {
   todos: TodoItem[]
   tags: string[]
   activeTodoId: string | null
+  timerRunning?: boolean
   onAdd: (title: string, tag: string) => void
   onToggle: (id: string) => void
   onEdit: (id: string, patch: { title: string; tag: string }) => void
@@ -14,7 +15,17 @@ interface Props {
   onFocus: (id: string) => void
 }
 
-export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAdd, onToggle, onEdit, onRemove, onFocus }: Props) {
+export const TodoList = memo(function TodoList({
+  todos,
+  tags,
+  activeTodoId,
+  timerRunning = false,
+  onAdd,
+  onToggle,
+  onEdit,
+  onRemove,
+  onFocus,
+}: Props) {
   const { t: tr } = useTranslation()
   const [title, setTitle] = useState('')
   const [tag, setTag] = useState(tags[0] ?? '')
@@ -100,7 +111,7 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
                 editingId !== t.id ? 'cursor-pointer' : ''
               } ${
                 activeTodoId === t.id
-                  ? 'border-line border-l-4 border-l-accent bg-accent/10 shadow-sm'
+                  ? 'border-line border-l-2 border-l-accent bg-accent/[0.04] shadow-sm'
                   : 'border-line hover:bg-raised/35'
               }`}
             >
@@ -161,13 +172,21 @@ export const TodoList = memo(function TodoList({ todos, tags, activeTodoId, onAd
               ) : (
                 <>
                   <div className="flex min-w-0 flex-1 flex-col">
-                    <span
-                      className={`truncate text-sm transition-all ${
-                        t.done ? 'line-through text-muted opacity-60' : 'font-medium text-fg'
-                      }`}
-                    >
-                      {t.title}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`truncate text-sm transition-all ${
+                          t.done ? 'line-through text-muted opacity-60' : 'font-medium text-fg'
+                        }`}
+                      >
+                        {t.title}
+                      </span>
+                      {activeTodoId === t.id && timerRunning && !t.done && (
+                        <span className="relative flex h-2 w-2 items-center justify-center shrink-0" title="Aktive Session">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent" />
+                        </span>
+                      )}
+                    </div>
                     <span className="font-mono text-[11px] tabular-nums text-muted">🍅 x{t.pomodoros}</span>
                   </div>
                   {t.tag && (

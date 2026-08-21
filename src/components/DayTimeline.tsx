@@ -26,6 +26,7 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
   const locale = lang === 'de' ? 'de-DE' : 'en-GB'
   const [now, setNow] = useState(() => new Date())
   const [tip, setTip] = useState<ActiveTip | null>(null)
+  const [hoverPct, setHoverPct] = useState<number | null>(null)
 
   // Update current-time marker once per minute (cheap & no timer-ticker overhead)
   useEffect(() => {
@@ -77,6 +78,12 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
   const nowMinutes = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60 - startHour * 60
   const nowPct = totalDayMinutes > 0 ? (nowMinutes / totalDayMinutes) * 100 : -1
 
+  const handleTrackMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+    setHoverPct(pct)
+  }
+
   const handleSessionHover = (e: MouseEvent<HTMLDivElement>, s: Session) => {
     const sStart = new Date(s.start)
     const sEnd = new Date(s.end)
@@ -100,7 +107,14 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
 
       <div className="relative pt-2 pb-6">
         {/* Timeline Bar Track */}
-        <div className="relative h-4 w-full rounded-full border border-line/60 bg-canvas/90 p-0.5 shadow-inner">
+        <div
+          onMouseMove={handleTrackMouseMove}
+          onMouseLeave={() => {
+            setHoverPct(null)
+            setTip(null)
+          }}
+          className="relative h-4 w-full cursor-crosshair rounded-full border border-line/60 bg-canvas/90 p-0.5 shadow-inner"
+        >
           {/* Today's Session Blocks */}
           {todaySessions.map((s) => {
             const sStart = new Date(s.start)
@@ -118,8 +132,7 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
                 tabIndex={0}
                 aria-label={`${s.task || 'Focus'} (${fmtTime(sStart, locale)} - ${fmtTime(sEnd, locale)})`}
                 onMouseMove={(e) => handleSessionHover(e, s)}
-                onMouseLeave={() => setTip(null)}
-                className="absolute top-0.5 bottom-0.5 z-10 rounded-full bg-accent shadow-sm transition-all duration-150 hover:z-20 hover:brightness-125 hover:shadow-[0_0_10px_rgb(var(--c-accent)/0.7)]"
+                className="absolute top-0.5 bottom-0.5 z-10 origin-center rounded-full bg-accent shadow-sm transition-all duration-150 hover:z-30 hover:scale-y-125 hover:brightness-125 hover:shadow-[0_0_12px_rgb(var(--c-accent)/0.8)]"
                 style={{
                   left: `${left}%`,
                   width: `${width}%`,
@@ -127,6 +140,14 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
               />
             )
           })}
+
+          {/* Hover Magnifier / Scrubber Needle */}
+          {hoverPct !== null && (
+            <div
+              className="pointer-events-none absolute -top-1 bottom-[-4px] z-20 w-0.5 -translate-x-1/2 bg-white/40 shadow-sm"
+              style={{ left: `${hoverPct}%` }}
+            />
+          )}
 
           {/* Current Time Needle */}
           {nowPct >= 0 && nowPct <= 100 && (
@@ -156,13 +177,13 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
         </div>
       </div>
 
-      {/* Floating Tooltip */}
+      {/* Floating Glass Tooltip */}
       {tip && (
         <div
-          className="pointer-events-none fixed z-50 flex flex-col gap-0.5 rounded-xl border border-line bg-canvas/95 px-3 py-2 text-xs font-medium text-fg shadow-xl backdrop-blur-md"
+          className="pointer-events-none fixed z-50 flex flex-col gap-1 rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-2 text-xs font-medium text-fg shadow-2xl backdrop-blur-md"
           style={{
-            left: Math.max(12, Math.min(tip.x + 14, window.innerWidth - 220)),
-            top: tip.y - 65,
+            left: Math.max(12, Math.min(tip.x - 100, window.innerWidth - 240)),
+            top: tip.y - 75,
           }}
         >
           <div className="flex items-center gap-2">

@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useCallback, useRef, useState } from 'react'
 import { Flag, Pause, PictureInPicture2, Play, RotateCcw, SkipForward, X } from 'lucide-react'
 import type { TimerStatus, PhaseId, TimerMode } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
@@ -15,6 +15,8 @@ interface Props {
   mode: TimerMode
   flowStatus: TimerStatus
   flowTime: string
+  durationMinutes?: number
+  onDurationChange?: (minutes: number) => void
   onModeChange: (m: TimerMode) => void
   onToggle: () => void
   onSkip: () => void
@@ -73,6 +75,8 @@ export const Timer = memo(function Timer({
   mode,
   flowStatus,
   flowTime,
+  durationMinutes = 25,
+  onDurationChange,
   onModeChange,
   onToggle,
   onSkip,
@@ -83,23 +87,95 @@ export const Timer = memo(function Timer({
 }: Props) {
   const { t } = useTranslation()
   const isFlow = mode === 'flow'
+  const isIdle = status === 'idle'
   const running = isFlow ? flowStatus === 'running' : status === 'running'
   const paused = isFlow ? flowStatus === 'paused' : status === 'paused'
   const currentRoundIndex = completedFocusInCycle % roundsBeforeLongBreak
 
+  const ringRef = useRef<HTMLDivElement>(null)
+  const isDraggingRef = useRef(false)
+  const [scrubbingMinutes, setScrubbingMinutes] = useState<number | null>(null)
+
+  const activeDuration = scrubbingMinutes ?? durationMinutes
+  const scrubFraction = Math.max(5, Math.min(60, activeDuration)) / 60
+
+  const size = large ? 380 : 300
+  const stroke = large ? 16 : 14
+  const r = (size - stroke) / 2
+  const circ = 2 * Math.PI * r
+
+  const effectiveProgress = isIdle && !isFlow ? scrubFraction : Math.min(1, Math.max(0, progress))
+  const offset = circ * (1 - effectiveProgress)
+  const glowVar = isFlow ? '--c-accent' : GLOW_VAR[phase]
+
   const shownLabel = isFlow ? t.timer.flow : phaseLabel
-  const shownTime = isFlow ? flowTime : time
+  const shownTime = isFlow
+    ? flowTime
+    : scrubbingMinutes != null
+      ? `${String(scrubbingMinutes).padStart(2, '0')}:00`
+      : time
   const shownStatus = running
     ? t.timer.status.running
     : paused
       ? t.timer.status.paused
       : t.timer.status.ready
-  const size = large ? 380 : 300
-  const stroke = large ? 16 : 14
-  const r = (size - stroke) / 2
-  const circ = 2 * Math.PI * r
-  const offset = circ * (1 - Math.min(1, Math.max(0, progress)))
-  const glowVar = isFlow ? '--c-accent' : GLOW_VAR[phase]
+
+  // Calculate Knob position on the circular arc (0 = top / 12 o'clock)
+  const knobAngle = scrubFraction * 2 * Math.PI - Math.PI / 2
+  const center = size / 2
+  const knobX = center + r * Math.cos(knobAngle)
+  const knobY = center + r * Math.sin(knobAngle)
+
+  const calcMinutesFromPointer = useCallback((e: React.PointerEvent) => {
+    if (!ringRef.current) return null
+    const rect = ringRef.current.getBoundingClientRect()
+    const cx = rect.left + rect.width / 2
+    const cy = rect.top + rect.height / 2
+    const dx = e.clientX - cx
+    const dy = e.clientY - cy
+    let rad = Math.atan2(dy, dx) + Math.PI / 2
+    if (rad < 0) rad += 2 * Math.PI
+    const frac = rad / (2 * Math.PI)
+    const rawMins = frac * 60
+    let snapped = Math.round(rawMins / 5) * 5
+    if (snapped === 0) snapped = rawMins > 30 ? 60 : 5
+    return Math.max(5, Math.min(60, snapped))
+  }, [])
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (!isIdle || isFlow) return
+    isDraggingRef.current = true
+    const mins = calcMinutesFromPointer(e)
+    if (mins) setScrubbingMinutes(mins)
+    e.currentTarget.setPointerCapture?.(e.pointerId)
+  }
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return
+    const mins = calcMinutesFromPointer(e)
+    if (mins) setScrubbingMinutes(mins)
+  }
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return
+    isDraggingRef.current = false
+    const mins = calcMinutesFromPointer(e)
+    const finalMins = mins ?? scrubbingMinutes
+    if (finalMins != null && onDurationChange) {
+      onDurationChange(finalMins)
+    }
+    setScrubbingMinutes(null)
+    try {
+      e.currentTarget.releasePointerCapture?.(e.pointerId)
+    } catch {}
+  }
+
+  const playBtnColor =
+    isFlow || phase === 'focus'
+      ? 'bg-accent text-on-accent shadow-accent/25 hover:shadow-[0_0_24px_rgb(var(--c-accent)/0.45)]'
+      : phase === 'shortBreak'
+        ? 'bg-break text-on-accent shadow-break/25 hover:shadow-[0_0_24px_rgb(var(--c-break)/0.45)]'
+        : 'bg-long text-on-accent shadow-long/25 hover:shadow-[0_0_24px_rgb(var(--c-long)/0.45)]'
 
   return (
     <section className="card group relative flex w-full max-w-md 2xl:max-w-lg flex-col items-center gap-6 2xl:gap-8 p-6 sm:p-8 2xl:p-10">
@@ -156,10 +232,15 @@ export const Timer = memo(function Timer({
         </div>
       </div>
 
-      <div className="relative isolate" style={{ width: size, height: size }}>
+      <div
+        ref={ringRef}
+        className="relative isolate touch-none select-none"
+        style={{ width: size, height: size }}
+      >
+        {/* Ambient Breathing Glow */}
         <div
-          className={`pointer-events-none absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle,var(--primary-color)_0%,transparent_70%)] blur-2xl transition-opacity duration-500 ${
-            running ? 'animate-glow' : 'opacity-10'
+          className={`pointer-events-none absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle,var(--primary-color)_0%,transparent_70%)] blur-3xl transition-all duration-700 ${
+            running ? 'animate-ambient-breath' : 'opacity-10 scale-95'
           }`}
           style={{ '--primary-color': `rgb(var(${glowVar}))` } as React.CSSProperties}
         />
@@ -171,27 +252,49 @@ export const Timer = memo(function Timer({
         >
           <svg width={size} height={size} className="-rotate-90">
             <circle
-              cx={size / 2}
-              cy={size / 2}
+              cx={center}
+              cy={center}
               r={r}
               fill="none"
               strokeWidth={stroke}
               className="stroke-track"
             />
             <circle
-              cx={size / 2}
-              cy={size / 2}
+              cx={center}
+              cy={center}
               r={r}
               fill="none"
               strokeWidth={stroke}
               strokeLinecap="round"
               strokeDasharray={circ}
               strokeDashoffset={offset}
-              className={`${RING[phase]} transition-[stroke-dashoffset] duration-1000 ease-linear`}
+              className={`${RING[phase]} transition-[stroke-dashoffset,stroke] duration-500 ease-linear`}
             />
           </svg>
+
+          {/* Interactive Dial Scrubbing Knob (in Idle state) */}
+          {isIdle && !isFlow && (
+            <div
+              role="slider"
+              aria-label="Fokusdauer anpassen"
+              aria-valuemin={5}
+              aria-valuemax={60}
+              aria-valuenow={activeDuration}
+              tabIndex={0}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
+              className="group/knob absolute z-20 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center cursor-grab active:cursor-grabbing"
+              style={{ left: `${knobX}px`, top: `${knobY}px` }}
+              title={`${activeDuration} Min (Ziehen zum Anpassen)`}
+            >
+              <div className="h-4 w-4 rounded-full border-2 border-white bg-accent shadow-md shadow-accent/50 transition-transform duration-150 group-hover/knob:scale-125 group-active/knob:scale-110" />
+            </div>
+          )}
+
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-            <span className={`text-xs font-semibold uppercase tracking-widest ${PHASE_TEXT[phase]}`}>
+            <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-500 ${PHASE_TEXT[phase]}`}>
               {shownLabel}
             </span>
             <span
@@ -252,7 +355,7 @@ export const Timer = memo(function Timer({
         <button
           type="button"
           onClick={onToggle}
-          className="flex h-16 w-16 2xl:h-18 2xl:w-18 items-center justify-center rounded-full bg-accent text-on-accent shadow-lg shadow-accent/25 transition-all duration-200 hover:bg-accent-strong hover:shadow-[0_0_24px_rgb(var(--c-accent)/0.45)] active:scale-[0.94]"
+          className={`flex h-16 w-16 2xl:h-18 2xl:w-18 items-center justify-center rounded-full shadow-lg transition-all duration-300 hover:scale-105 active:scale-[0.94] ${playBtnColor}`}
           title={running ? t.timer.pause : t.timer.start}
           aria-label={running ? t.timer.pause : t.timer.start}
         >
