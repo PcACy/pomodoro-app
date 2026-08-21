@@ -411,6 +411,7 @@ export default function App() {
         phaseLabel={mode === 'flow' ? 'Flow' : timer.phaseLabel}
         status={chromeStatus}
         time={chromeTime}
+        enabled={pipMode === 'video'}
       />
 
       {pendingSessionId != null && (
