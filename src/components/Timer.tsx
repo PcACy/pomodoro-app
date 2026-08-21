@@ -24,6 +24,8 @@ interface Props {
   pipSupported: boolean
   pipOpen: boolean
   onPipToggle: () => void
+  isZenMode?: boolean
+  onToggleZen?: () => void
 }
 
 const PHASE_TEXT: Record<PhaseId, string> = {
@@ -84,6 +86,8 @@ export const Timer = memo(function Timer({
   pipSupported,
   pipOpen,
   onPipToggle,
+  isZenMode = false,
+  onToggleZen,
 }: Props) {
   const { t } = useTranslation()
   const isFlow = mode === 'flow'
@@ -179,6 +183,19 @@ export const Timer = memo(function Timer({
 
   return (
     <section className="card group relative flex w-full max-w-md 2xl:max-w-lg flex-col items-center gap-6 2xl:gap-8 p-6 sm:p-8 2xl:p-10">
+      {isZenMode && (
+        <button
+          type="button"
+          onClick={onToggleZen}
+          title={t.zen.exitHint}
+          aria-label={t.zen.exitHint}
+          className="group/zen -mt-1 mb-1 flex items-center gap-2 rounded-full border border-line/70 bg-surface/80 px-3.5 py-1 text-xs font-medium text-muted shadow-sm backdrop-blur-md transition-all hover:border-accent/40 hover:bg-surface hover:text-fg active:scale-95"
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+          <span>{t.zen.exitHint}</span>
+        </button>
+      )}
+
       <div className="flex w-full flex-col items-center">
         <div className="relative grid grid-cols-2 w-full items-center gap-1 rounded-xl border border-line/60 bg-canvas/80 p-1 backdrop-blur-md">
           {/* iOS-typical Sliding Pill Indicator */}
@@ -389,34 +406,43 @@ export const Timer = memo(function Timer({
       </div>
 
       <div
-        className={`flex items-center gap-3 text-[11px] text-muted transition-opacity duration-500 ${
+        className={`flex flex-wrap items-center justify-center gap-3 text-[11px] text-muted transition-opacity duration-500 ${
           running ? 'opacity-20 hover:opacity-100' : 'opacity-100'
         }`}
       >
         <span className="flex items-center gap-1">
-          <span className="kbd">Space</span> {t.shortcuts.startPause}
+          <kbd className="kbd">Space</kbd> {t.shortcuts.startPause}
         </span>
         {isFlow ? (
           flowStatus !== 'idle' && (
             <>
               <span className="flex items-center gap-1">
-                <span className="kbd">R</span> {t.flow.discardShortcut}
+                <kbd className="kbd">R</kbd> {t.flow.discardShortcut}
               </span>
               <span className="flex items-center gap-1">
-                <span className="kbd">F</span> {t.flow.finishShortcut}
+                <kbd className="kbd">F</kbd> {t.flow.finishShortcut}
               </span>
             </>
           )
         ) : (
           <>
             <span className="flex items-center gap-1">
-              <span className="kbd">R</span> {t.shortcuts.reset}
+              <kbd className="kbd">R</kbd> {t.shortcuts.reset}
             </span>
             <span className="flex items-center gap-1">
-              <span className="kbd">N</span> {t.shortcuts.skip}
+              <kbd className="kbd">N</kbd> {t.shortcuts.skip}
             </span>
           </>
         )}
+        <button
+          type="button"
+          onClick={onToggleZen}
+          title={isZenMode ? t.zen.exitHint : t.zen.enterHint}
+          aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
+          className="flex items-center gap-1 transition-colors hover:text-fg"
+        >
+          <kbd className="kbd">Z</kbd> {t.shortcuts.zen}
+        </button>
       </div>
 
       {pipSupported && (

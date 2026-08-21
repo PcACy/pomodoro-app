@@ -22,7 +22,8 @@ export interface Messages {
     discardShortcut: string
     finishedToast: (minutes: number) => string
   }
-  shortcuts: { startPause: string; skip: string; reset: string }
+  shortcuts: { startPause: string; skip: string; reset: string; zen: string }
+  zen: { mode: string; exitHint: string; enterHint: string }
   pip: { open: string; close: string }
   todo: {
     title: string
@@ -173,7 +174,12 @@ const de: Messages = {
     discardShortcut: 'Verwerfen',
     finishedToast: (minutes) => `Flow abgeschlossen! +${minutes} Min. Fokuszeit gespeichert`,
   },
-  shortcuts: { startPause: 'Start / Pause', skip: 'Skip', reset: 'Reset' },
+  shortcuts: { startPause: 'Start / Pause', skip: 'Skip', reset: 'Reset', zen: 'Zen' },
+  zen: {
+    mode: 'Zen-Modus',
+    exitHint: 'Zen-Modus · Z oder Esc zum Beenden',
+    enterHint: 'Zen-Modus aktivieren',
+  },
   pip: { open: 'Mini-Player (PiP)', close: 'Mini-Player schließen' },
   todo: {
     title: 'To-Do',
@@ -336,7 +342,12 @@ const en: Messages = {
     discardShortcut: 'Discard',
     finishedToast: (minutes) => `Flow complete! +${minutes} min focus saved`,
   },
-  shortcuts: { startPause: 'Start / Pause', skip: 'Skip', reset: 'Reset' },
+  shortcuts: { startPause: 'Start / Pause', skip: 'Skip', reset: 'Reset', zen: 'Zen' },
+  zen: {
+    mode: 'Zen Mode',
+    exitHint: 'Zen Mode · Press Z or Esc to exit',
+    enterHint: 'Enter Zen Mode',
+  },
   pip: { open: 'Mini-Player (PiP)', close: 'Close Mini-Player' },
   todo: {
     title: 'To-Do',

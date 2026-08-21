@@ -5,6 +5,8 @@ interface ShortcutHandlers {
   onSkip: () => void
   onReset: () => void
   onFlowFinish?: () => void
+  onToggleZen?: () => void
+  onExitZen?: () => void
 }
 
 const isEditableTarget = (el: EventTarget | null): boolean => {
@@ -31,6 +33,12 @@ export function useKeyboard(handlers: ShortcutHandlers): void {
       if (e.key === ' ') {
         e.preventDefault()
         h.onToggle()
+      } else if (e.key.toLowerCase() === 'z' && h.onToggleZen) {
+        e.preventDefault()
+        h.onToggleZen()
+      } else if (e.key === 'Escape' && h.onExitZen) {
+        e.preventDefault()
+        h.onExitZen()
       } else if (e.key.toLowerCase() === 'f' && h.onFlowFinish) {
         e.preventDefault()
         h.onFlowFinish()

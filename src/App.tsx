@@ -57,6 +57,7 @@ export default function App() {
   const [themeId, setTheme] = useTheme()
   const [settings, updateSettings] = useSettings()
   const [tab, setTab] = useState<Tab>('timer')
+  const [isZenMode, setIsZenMode] = useState(false)
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null)
   const [mode, setMode] = useLocalState<TimerMode>(STORAGE_KEYS.mode, 'pomodoro')
   const [activeTodoId, setActiveTodoId] = useState<string | null>(null)
@@ -170,11 +171,30 @@ export default function App() {
     [],
   )
 
+  const handleTabChange = useCallback((nextTab: Tab) => {
+    setIsZenMode(false)
+    setTab(nextTab)
+  }, [])
+
+  const handleToggleZen = useCallback(() => {
+    setIsZenMode((prev) => {
+      const next = !prev
+      if (next && tab !== 'timer') setTab('timer')
+      return next
+    })
+  }, [tab])
+
+  const handleExitZen = useCallback(() => {
+    setIsZenMode(false)
+  }, [])
+
   useKeyboard({
     onToggle: handleToggle,
     onSkip: handleSkip,
     onReset: handleReset,
     onFlowFinish: handleFlowFinish,
+    onToggleZen: handleToggleZen,
+    onExitZen: isZenMode ? handleExitZen : undefined,
   })
 
   const chromePhase = mode === 'flow' ? 'focus' : timer.phase
@@ -256,7 +276,13 @@ export default function App() {
           ))}
         </div>
       </div>
-      <header className="flex w-full items-center justify-between gap-4">
+      <header
+        className={`flex w-full items-center justify-between gap-4 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+          isZenMode
+            ? 'pointer-events-none -mb-8 h-0 opacity-0 -translate-y-4 overflow-hidden'
+            : 'opacity-100 translate-y-0'
+        }`}
+      >
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-accent/20 bg-accent/10 text-accent shadow-sm transition-all hover:scale-105 active:scale-95">
             <CatLogo className="text-accent" size={20} />
@@ -282,7 +308,7 @@ export default function App() {
             <button
               key={tb.id}
               type="button"
-              onClick={() => setTab(tb.id)}
+              onClick={() => handleTabChange(tb.id)}
               className={`relative z-10 flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors duration-200 active:scale-95 ${
                 tab === tb.id ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
@@ -296,67 +322,63 @@ export default function App() {
 
       <main className="flex w-full flex-1 flex-col items-center gap-8 2xl:gap-10 pb-8">
         <div key={tab} className="animate-tab-enter flex w-full flex-col items-center">
-          {tab === 'timer' && (settings.layoutMode === 'single' ? (
-            <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-8 2xl:gap-10">
-              <Timer
-                large
-                phase={timer.phase}
-                phaseLabel={timer.phaseLabel}
-                status={timer.status}
-                time={timer.time}
-                progress={timer.progress}
-                completedFocusInCycle={timer.completedFocusInCycle}
-                roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
-                mode={mode}
-                flowStatus={flow.status}
-                flowTime={flow.time}
-                onModeChange={handleModeChange}
-                onToggle={handleToggle}
-                onSkip={handleSkip}
-                onReset={handleReset}
-                pipSupported={pipSupported}
-                pipOpen={pipMode !== 'none'}
-                onPipToggle={handlePipToggle}
-              />
-              <TodoList
-                todos={todosApi.todos}
-                tags={settings.tags}
-                activeTodoId={activeTodoId}
-                onAdd={todosApi.add}
-                onToggle={todosApi.toggle}
-                onEdit={todosApi.edit}
-                onRemove={todosApi.remove}
-                onFocus={handleFocusTodo}
-              />
-              <QuickStats sessions={sessions} settings={settings} />
-              <DayTimeline sessions={sessions} />
-            </div>
-          ) : (
-            <div className="mx-auto grid w-full max-w-5xl 2xl:max-w-6xl grid-cols-1 items-start justify-items-center gap-8 2xl:gap-10 lg:grid-cols-2">
-              <Timer
-                phase={timer.phase}
-                phaseLabel={timer.phaseLabel}
-                status={timer.status}
-                time={timer.time}
-                progress={timer.progress}
-                completedFocusInCycle={timer.completedFocusInCycle}
-                roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
-                mode={mode}
-                flowStatus={flow.status}
-                flowTime={flow.time}
-                onModeChange={handleModeChange}
-                onToggle={handleToggle}
-                onSkip={handleSkip}
-                onReset={handleReset}
-                pipSupported={pipSupported}
-                pipOpen={pipMode !== 'none'}
-                onPipToggle={handlePipToggle}
-              />
-              <div className="flex w-full max-w-md 2xl:max-w-lg flex-col gap-8 2xl:gap-10">
+          {tab === 'timer' && (
+            isZenMode ? (
+              <div className="flex w-full min-h-[75vh] flex-col items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]">
+                <div className="w-full max-w-md 2xl:max-w-lg scale-105 transition-transform duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]">
+                  <Timer
+                    large
+                    phase={timer.phase}
+                    phaseLabel={timer.phaseLabel}
+                    status={timer.status}
+                    time={timer.time}
+                    progress={timer.progress}
+                    completedFocusInCycle={timer.completedFocusInCycle}
+                    roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
+                    mode={mode}
+                    flowStatus={flow.status}
+                    flowTime={flow.time}
+                    onModeChange={handleModeChange}
+                    onToggle={handleToggle}
+                    onSkip={handleSkip}
+                    onReset={handleReset}
+                    pipSupported={pipSupported}
+                    pipOpen={pipMode !== 'none'}
+                    onPipToggle={handlePipToggle}
+                    isZenMode={isZenMode}
+                    onToggleZen={handleToggleZen}
+                  />
+                </div>
+              </div>
+            ) : settings.layoutMode === 'single' ? (
+              <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-8 2xl:gap-10">
+                <Timer
+                  large
+                  phase={timer.phase}
+                  phaseLabel={timer.phaseLabel}
+                  status={timer.status}
+                  time={timer.time}
+                  progress={timer.progress}
+                  completedFocusInCycle={timer.completedFocusInCycle}
+                  roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
+                  mode={mode}
+                  flowStatus={flow.status}
+                  flowTime={flow.time}
+                  onModeChange={handleModeChange}
+                  onToggle={handleToggle}
+                  onSkip={handleSkip}
+                  onReset={handleReset}
+                  pipSupported={pipSupported}
+                  pipOpen={pipMode !== 'none'}
+                  onPipToggle={handlePipToggle}
+                  isZenMode={isZenMode}
+                  onToggleZen={handleToggleZen}
+                />
                 <TodoList
                   todos={todosApi.todos}
                   tags={settings.tags}
                   activeTodoId={activeTodoId}
+                  timerRunning={isRunning}
                   onAdd={todosApi.add}
                   onToggle={todosApi.toggle}
                   onEdit={todosApi.edit}
@@ -364,12 +386,51 @@ export default function App() {
                   onFocus={handleFocusTodo}
                 />
                 <QuickStats sessions={sessions} settings={settings} />
-              </div>
-              <div className="col-span-full w-full">
                 <DayTimeline sessions={sessions} />
               </div>
-            </div>
-          ))}
+            ) : (
+              <div className="mx-auto grid w-full max-w-5xl 2xl:max-w-6xl grid-cols-1 items-start justify-items-center gap-8 2xl:gap-10 lg:grid-cols-2">
+                <Timer
+                  phase={timer.phase}
+                  phaseLabel={timer.phaseLabel}
+                  status={timer.status}
+                  time={timer.time}
+                  progress={timer.progress}
+                  completedFocusInCycle={timer.completedFocusInCycle}
+                  roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
+                  mode={mode}
+                  flowStatus={flow.status}
+                  flowTime={flow.time}
+                  onModeChange={handleModeChange}
+                  onToggle={handleToggle}
+                  onSkip={handleSkip}
+                  onReset={handleReset}
+                  pipSupported={pipSupported}
+                  pipOpen={pipMode !== 'none'}
+                  onPipToggle={handlePipToggle}
+                  isZenMode={isZenMode}
+                  onToggleZen={handleToggleZen}
+                />
+                <div className="flex w-full max-w-md 2xl:max-w-lg flex-col gap-8 2xl:gap-10">
+                  <TodoList
+                    todos={todosApi.todos}
+                    tags={settings.tags}
+                    activeTodoId={activeTodoId}
+                    timerRunning={isRunning}
+                    onAdd={todosApi.add}
+                    onToggle={todosApi.toggle}
+                    onEdit={todosApi.edit}
+                    onRemove={todosApi.remove}
+                    onFocus={handleFocusTodo}
+                  />
+                  <QuickStats sessions={sessions} settings={settings} />
+                </div>
+                <div className="col-span-full w-full">
+                  <DayTimeline sessions={sessions} />
+                </div>
+              </div>
+            )
+          )}
           {tab === 'dashboard' && (
             <Suspense fallback={<div className="flex h-64 w-full items-center justify-center text-sm text-muted animate-pulse">Laden...</div>}>
               <Dashboard
