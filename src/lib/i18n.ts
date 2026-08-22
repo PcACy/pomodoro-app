@@ -101,6 +101,10 @@ export interface Messages {
   settings: {
     theme: string
     themeHint: string
+    colorMode: string
+    colorModeHint: string
+    dark: string
+    light: string
     phases: string
     phasesHint: string
     cycle: string
@@ -262,7 +266,11 @@ const de: Messages = {
   },
   settings: {
     theme: 'Theme',
-    themeHint: 'Farbschema der App, wird lokal gespeichert.',
+    themeHint: 'Designstil der App, wird lokal gespeichert.',
+    colorMode: 'Farbmodus',
+    colorModeHint: 'Wähle zwischen dunklem und hellem Erscheinungsbild.',
+    dark: 'Dunkel',
+    light: 'Hell',
     phases: 'Phasen',
     phasesHint: 'Dauern in Minuten, zwischen 1 und 180.',
     cycle: 'Zyklus',
@@ -430,7 +438,11 @@ const en: Messages = {
   },
   settings: {
     theme: 'Theme',
-    themeHint: 'App color scheme, stored locally.',
+    themeHint: 'App design system theme, stored locally.',
+    colorMode: 'Color Mode',
+    colorModeHint: 'Choose between dark and light appearance.',
+    dark: 'Dark',
+    light: 'Light',
     phases: 'Phases',
     phasesHint: 'Durations in minutes, between 1 and 180.',
     cycle: 'Cycle',

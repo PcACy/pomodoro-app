@@ -54,7 +54,7 @@ const GLOW_PHASES: { id: PhaseId; cssVar: string }[] = [
 
 export default function App() {
   const { t } = useTranslation()
-  const [themeId, setTheme] = useTheme()
+  const [themeId, setTheme, colorMode, setColorMode] = useTheme()
   const [settings, updateSettings] = useSettings()
   const [tab, setTab] = useState<Tab>('timer')
   const [isZenMode, setIsZenMode] = useState(false)
@@ -434,6 +434,7 @@ export default function App() {
                 sessions={sessions}
                 settings={settings}
                 themeId={themeId}
+                colorMode={colorMode}
                 todos={todosApi.todos}
                 onImportSettings={handleImportSettings}
               />
@@ -445,7 +446,9 @@ export default function App() {
                 settings={settings}
                 update={updateSettings}
                 themeId={themeId}
+                colorMode={colorMode}
                 onThemeChange={setTheme}
+                onColorModeChange={setColorMode}
                 sessions={sessions}
                 todos={todosApi.todos}
                 syncStatus={sync.status}

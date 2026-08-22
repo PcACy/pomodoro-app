@@ -2,9 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================================
+   1. GRUVBOX (Default)
+   ========================================================================= */
 :root,
-:root[data-theme='gruvbox-dark'] {
-  /* Gruvbox Dark (Default) */
+:root[data-theme='gruvbox'][data-mode='dark'],
+:root[data-theme='gruvbox']:not([data-mode='light']),
+:root:not([data-theme])[data-mode='dark'],
+:root:not([data-theme]):not([data-mode='light']) {
+  /* Gruvbox Dark */
   color-scheme: dark;
   --c-canvas: 40 40 40;
   --c-surface: 60 56 54;
@@ -30,7 +36,8 @@
   --ease-ios-smooth: cubic-bezier(0.2, 0, 0, 1);
 }
 
-:root[data-theme='gruvbox-light'] {
+:root[data-theme='gruvbox'][data-mode='light'],
+:root:not([data-theme])[data-mode='light'] {
   /* Gruvbox Light */
   color-scheme: light;
   --c-canvas: 251 241 199;
@@ -39,24 +46,30 @@
   --c-line: 189 174 147;
   --c-fg: 60 56 54;
   --c-muted: 124 111 100;
-  --c-accent: 214 93 14;
-  --c-accent-strong: 204 36 29;
+  --c-accent: 175 58 3;
+  --c-accent-strong: 157 0 6;
   --c-on-accent: 251 241 199;
   --c-break: 121 116 14;
   --c-long: 7 102 120;
   --c-track: 213 196 161;
-  --c-chart-1: 204 36 29;
+  --c-chart-1: 175 58 3;
   --c-chart-2: 214 93 14;
-  --c-chart-3: 215 153 33;
-  --c-chart-4: 152 151 26;
-  --c-chart-5: 69 133 136;
-  --c-chart-6: 177 98 134;
-  --c-chart-7: 104 157 106;
+  --c-chart-3: 181 118 20;
+  --c-chart-4: 121 116 14;
+  --c-chart-5: 7 102 120;
+  --c-chart-6: 143 63 113;
+  --c-chart-7: 66 123 88;
   --c-chart-8: 124 111 100;
+  --ease-ios-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-ios-smooth: cubic-bezier(0.2, 0, 0, 1);
 }
 
-:root[data-theme='nothing'] {
-  /* Nothing OS Aesthetic: Pitch black, monochrome contrast, signature Nothing Red */
+/* =========================================================================
+   2. NOTHING OS
+   ========================================================================= */
+:root[data-theme='nothing'][data-mode='dark'],
+:root[data-theme='nothing']:not([data-mode='light']) {
+  /* Nothing OS Dark: Pure pitch black, monochrome contrast, signature Nothing Red */
   color-scheme: dark;
   --c-canvas: 0 0 0;
   --c-surface: 14 14 14;
@@ -69,7 +82,7 @@
   --c-on-accent: 255 255 255;
   --c-break: 220 220 220;
   --c-long: 160 160 160;
-  --c-track: 30 30 30;
+  --c-track: 48 48 48;
   --c-chart-1: 235 0 40;
   --c-chart-2: 255 255 255;
   --c-chart-3: 200 200 200;
@@ -80,8 +93,37 @@
   --c-chart-8: 80 80 80;
 }
 
-:root[data-theme='ios-26'] {
-  /* iOS 26 Liquid Glass: Deep night, frosted glass layers, dynamic Apple Orange & Cyan */
+:root[data-theme='nothing'][data-mode='light'] {
+  /* Nothing OS Light: Pure sterile white, monochrome contrast, Nothing Red */
+  color-scheme: light;
+  --c-canvas: 248 248 248;
+  --c-surface: 255 255 255;
+  --c-raised: 235 235 235;
+  --c-line: 212 212 212;
+  --c-fg: 0 0 0;
+  --c-muted: 107 114 128;
+  --c-accent: 235 0 40;
+  --c-accent-strong: 196 0 34;
+  --c-on-accent: 255 255 255;
+  --c-break: 55 65 81;
+  --c-long: 75 85 99;
+  --c-track: 229 231 235;
+  --c-chart-1: 235 0 40;
+  --c-chart-2: 0 0 0;
+  --c-chart-3: 55 65 81;
+  --c-chart-4: 75 85 99;
+  --c-chart-5: 107 114 128;
+  --c-chart-6: 196 0 34;
+  --c-chart-7: 156 163 175;
+  --c-chart-8: 209 213 219;
+}
+
+/* =========================================================================
+   3. iOS 26 LIQUID GLASS
+   ========================================================================= */
+:root[data-theme='ios-26'][data-mode='dark'],
+:root[data-theme='ios-26']:not([data-mode='light']) {
+  /* iOS 26 Dark: Deep night graphite, frosted dark glass, Apple Orange */
   color-scheme: dark;
   --c-canvas: 8 9 14;
   --c-surface: 16 19 28;
@@ -105,8 +147,37 @@
   --c-chart-8: 172 142 104;
 }
 
-:root[data-theme='material-you'] {
-  /* Material Design 3 (M3): Tonal dark palette, Lavender primary, expressive contours */
+:root[data-theme='ios-26'][data-mode='light'] {
+  /* iOS 26 Light: Cupertino light grey/white, translucent frosted glass, Apple Orange */
+  color-scheme: light;
+  --c-canvas: 242 242 247;
+  --c-surface: 255 255 255;
+  --c-raised: 229 229 234;
+  --c-line: 209 209 214;
+  --c-fg: 28 28 30;
+  --c-muted: 142 142 147;
+  --c-accent: 255 107 0;
+  --c-accent-strong: 224 94 0;
+  --c-on-accent: 255 255 255;
+  --c-break: 52 199 89;
+  --c-long: 0 122 255;
+  --c-track: 209 209 214;
+  --c-chart-1: 255 107 0;
+  --c-chart-2: 0 122 255;
+  --c-chart-3: 52 199 89;
+  --c-chart-4: 175 82 222;
+  --c-chart-5: 255 204 0;
+  --c-chart-6: 90 200 250;
+  --c-chart-7: 255 45 85;
+  --c-chart-8: 162 132 94;
+}
+
+/* =========================================================================
+   4. MATERIAL YOU (M3)
+   ========================================================================= */
+:root[data-theme='material-you'][data-mode='dark'],
+:root[data-theme='material-you']:not([data-mode='light']) {
+  /* Material You Dark: Tonal dark palette, Lavender primary */
   color-scheme: dark;
   --c-canvas: 20 18 24;
   --c-surface: 33 31 38;
@@ -128,6 +199,31 @@
   --c-chart-6: 242 184 181;
   --c-chart-7: 232 222 248;
   --c-chart-8: 182 196 255;
+}
+
+:root[data-theme='material-you'][data-mode='light'] {
+  /* Material You Light: Tonal elevation light, warm lilac surfaces, deep purple primary */
+  color-scheme: light;
+  --c-canvas: 253 248 253;
+  --c-surface: 247 242 250;
+  --c-raised: 236 230 238;
+  --c-line: 202 196 208;
+  --c-fg: 29 27 32;
+  --c-muted: 121 116 126;
+  --c-accent: 103 80 164;
+  --c-accent-strong: 127 103 190;
+  --c-on-accent: 255 255 255;
+  --c-break: 0 99 155;
+  --c-long: 56 106 32;
+  --c-track: 202 196 208;
+  --c-chart-1: 103 80 164;
+  --c-chart-2: 0 99 155;
+  --c-chart-3: 56 106 32;
+  --c-chart-4: 187 22 79;
+  --c-chart-5: 186 26 26;
+  --c-chart-6: 125 82 96;
+  --c-chart-7: 127 103 190;
+  --c-chart-8: 67 90 159;
 }
 
 html,
@@ -175,7 +271,13 @@ body {
 :root[data-theme='nothing'] .card {
   border-radius: 0.75rem;
   border-color: rgb(var(--c-line));
+}
+:root[data-theme='nothing'][data-mode='dark'] .card,
+:root[data-theme='nothing']:not([data-mode='light']) .card {
   background-color: rgba(14, 14, 14, 0.95);
+}
+:root[data-theme='nothing'][data-mode='light'] .card {
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
 :root[data-theme='nothing'] .btn,
@@ -187,8 +289,15 @@ body {
   border-radius: 1.5rem;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
+}
+:root[data-theme='ios-26'][data-mode='dark'] .card,
+:root[data-theme='ios-26']:not([data-mode='light']) .card {
   background-color: rgba(16, 19, 28, 0.75);
   border-color: rgba(255, 255, 255, 0.08);
+}
+:root[data-theme='ios-26'][data-mode='light'] .card {
+  background-color: rgba(255, 255, 255, 0.75);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 :root[data-theme='ios-26'] .btn,
@@ -198,8 +307,14 @@ body {
 
 :root[data-theme='material-you'] .card {
   border-radius: 1.75rem;
-  border-color: rgba(73, 69, 79, 0.45);
   background-color: rgb(var(--c-surface));
+}
+:root[data-theme='material-you'][data-mode='dark'] .card,
+:root[data-theme='material-you']:not([data-mode='light']) .card {
+  border-color: rgba(73, 69, 79, 0.45);
+}
+:root[data-theme='material-you'][data-mode='light'] .card {
+  border-color: rgba(202, 196, 208, 0.6);
 }
 
 :root[data-theme='material-you'] .btn,

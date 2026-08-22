@@ -16,6 +16,8 @@ function copyStyles(win: Window): void {
   }
   const theme = document.documentElement.getAttribute('data-theme')
   if (theme) win.document.documentElement.setAttribute('data-theme', theme)
+  const mode = document.documentElement.getAttribute('data-mode')
+  if (mode) win.document.documentElement.setAttribute('data-mode', mode)
   win.document.documentElement.style.height = '100%'
   win.document.body.style.margin = '0'
   win.document.body.style.minHeight = '100%'

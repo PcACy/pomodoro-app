@@ -1,7 +1,21 @@
 import { memo, useState } from 'react'
-import { Check, Download, FileDown, FileJson, Github, Loader2, LogOut, Plus, RefreshCw, Trash2, X } from 'lucide-react'
+import {
+  Check,
+  Download,
+  FileDown,
+  FileJson,
+  Github,
+  Loader2,
+  LogOut,
+  Moon,
+  Plus,
+  RefreshCw,
+  Sun,
+  Trash2,
+  X,
+} from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../types'
-import { THEMES, type ThemeId } from '../themes'
+import { THEMES, type ColorMode, type ThemeId } from '../themes'
 import { clearSessions, exportAll } from '../lib/db'
 import { downloadText, sessionsToCsv, sessionsToJson, todosToCsv, todosToJson } from '../lib/dataExport'
 import { useTranslation } from '../hooks/useTranslation'
@@ -12,7 +26,9 @@ interface Props {
   settings: Settings
   update: (updater: (s: Settings) => Settings) => void
   themeId: ThemeId
+  colorMode: ColorMode
   onThemeChange: (id: ThemeId) => void
+  onColorModeChange: (mode: ColorMode) => void
   sessions: Session[]
   todos: TodoItem[]
   syncStatus: SyncStatus
@@ -36,7 +52,9 @@ export const SettingsPanel = memo(function SettingsPanel({
   settings,
   update,
   themeId,
+  colorMode,
   onThemeChange,
+  onColorModeChange,
   sessions,
   todos,
   syncStatus,
@@ -177,35 +195,78 @@ export const SettingsPanel = memo(function SettingsPanel({
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.theme}</h3>
-        <p className="mb-4 text-xs text-muted">{t.settings.themeHint}</p>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {THEMES.map((t) => (
+        {/* Dark / Light Color Mode Switcher */}
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-line/50 pb-5">
+          <div>
+            <h3 className="text-sm font-semibold text-fg">{t.settings.colorMode}</h3>
+            <p className="text-xs text-muted">{t.settings.colorModeHint}</p>
+          </div>
+          <div className="relative grid grid-cols-2 w-full sm:w-56 items-center gap-1 rounded-xl border border-line/60 bg-canvas/80 p-1 backdrop-blur-md">
+            <div
+              className="pointer-events-none absolute bottom-1 top-1 rounded-lg bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              style={{
+                width: 'calc((100% - 8px - 4px) / 2)',
+                left: '4px',
+                transform: `translateX(calc(${colorMode === 'dark' ? 0 : 1} * (100% + 4px)))`,
+              }}
+            />
             <button
-              key={t.id}
               type="button"
-              onClick={() => onThemeChange(t.id)}
-              className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ${
-                themeId === t.id
-                  ? 'border-accent bg-accent/10'
-                  : 'border-line bg-canvas hover:bg-raised'
+              onClick={() => onColorModeChange('dark')}
+              className={`relative z-10 flex items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors duration-200 active:scale-95 ${
+                colorMode === 'dark' ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
-              <div className="flex items-center gap-3">
-                <span className="flex -space-x-1.5">
-                  {t.swatch.map((c, i) => (
-                    <span
-                      key={i}
-                      className="h-4 w-4 rounded-full border border-line"
-                      style={{ backgroundColor: c }}
-                    />
-                  ))}
-                </span>
-                <span className="text-sm font-medium text-fg">{t.label}</span>
-              </div>
-              {themeId === t.id && <Check size={16} className="text-accent" />}
+              <Moon size={14} />
+              <span>{t.settings.dark}</span>
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => onColorModeChange('light')}
+              className={`relative z-10 flex items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors duration-200 active:scale-95 ${
+                colorMode === 'light' ? 'text-fg' : 'text-muted hover:text-fg'
+              }`}
+            >
+              <Sun size={14} />
+              <span>{t.settings.light}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Theme Families */}
+        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.theme}</h3>
+        <p className="mb-4 text-xs text-muted">{t.settings.themeHint}</p>
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          {THEMES.map((theme) => {
+            const swatches = colorMode === 'dark' ? theme.swatchDark : theme.swatchLight
+            const isSelected = themeId === theme.id
+            return (
+              <button
+                key={theme.id}
+                type="button"
+                onClick={() => onThemeChange(theme.id)}
+                className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-all active:scale-[0.98] ${
+                  isSelected
+                    ? 'border-accent bg-accent/10 shadow-sm shadow-accent/10'
+                    : 'border-line bg-canvas hover:bg-raised'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex -space-x-1.5">
+                    {swatches.map((c, i) => (
+                      <span
+                        key={i}
+                        className="h-4 w-4 rounded-full border border-line/80 shadow-sm"
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </span>
+                  <span className="text-sm font-medium text-fg">{theme.label}</span>
+                </div>
+                {isSelected && <Check size={16} className="text-accent" />}
+              </button>
+            )
+          })}
         </div>
       </div>
 

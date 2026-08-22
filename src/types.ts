@@ -2,7 +2,7 @@ export type PhaseId = 'focus' | 'shortBreak' | 'longBreak'
 export type TimerStatus = 'idle' | 'running' | 'paused'
 export type TimerMode = 'pomodoro' | 'flow'
 export type LayoutMode = 'split' | 'single'
-export type { ThemeId } from './themes'
+export type { ThemeId, ColorMode } from './themes'
 
 export interface PhaseConfig {
   focus: number

@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react'
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Clock, Flame, Target } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../types'
-import type { ThemeId } from '../themes'
+import type { ColorMode, ThemeId } from '../themes'
 import { useThemeColors } from '../hooks/useTheme'
 import {
   currentStreakDays,
@@ -23,6 +23,7 @@ interface Props {
   sessions: Session[]
   settings: Settings
   themeId: ThemeId
+  colorMode?: ColorMode
   todos: TodoItem[]
   onImportSettings: (s: unknown) => void
 }
@@ -52,9 +53,9 @@ function MetricCard({
   )
 }
 
-export const Dashboard = memo(function Dashboard({ sessions, settings, themeId, todos, onImportSettings }: Props) {
+export const Dashboard = memo(function Dashboard({ sessions, settings, themeId, colorMode = 'dark', todos, onImportSettings }: Props) {
   const { t, lang } = useTranslation()
-  const colors = useThemeColors(themeId)
+  const colors = useThemeColors(themeId, colorMode)
   const today = todayMinutes(sessions)
   const streak = currentStreakDays(sessions)
   const week = weekMinutes(sessions)
