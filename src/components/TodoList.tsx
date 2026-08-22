@@ -181,9 +181,8 @@ export const TodoList = memo(function TodoList({
                         {t.title}
                       </span>
                       {activeTodoId === t.id && timerRunning && !t.done && (
-                        <span className="relative flex h-2 w-2 items-center justify-center shrink-0" title="Aktive Session">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent" />
+                        <span className="flex h-1.5 w-1.5 items-center justify-center shrink-0">
+                          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
                         </span>
                       )}
                     </div>

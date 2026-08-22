@@ -197,10 +197,7 @@ export const Timer = memo(function Timer({
     >
       {task && (
         <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-line/70 bg-surface/80 px-3.5 py-1.5 text-xs shadow-sm backdrop-blur-md transition-all duration-300">
-          <span className="relative flex h-2 w-2 shrink-0 items-center justify-center">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
-          </span>
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
           <span className="max-w-[180px] sm:max-w-[280px] truncate font-medium text-fg leading-none">
             {task}
           </span>
