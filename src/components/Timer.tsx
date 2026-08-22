@@ -196,10 +196,19 @@ export const Timer = memo(function Timer({
       }`}
     >
       {task && (
-        <div className="flex items-center gap-2 rounded-full border border-accent/20 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent shadow-sm backdrop-blur-md">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-          <span className="max-w-[280px] truncate font-semibold text-fg">{task}</span>
-          {tag && <span className="font-mono text-[10px] text-accent/80">#{tag}</span>}
+        <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-line/70 bg-surface/80 px-3.5 py-1.5 text-xs shadow-sm backdrop-blur-md transition-all duration-300">
+          <span className="relative flex h-2 w-2 shrink-0 items-center justify-center">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+          </span>
+          <span className="max-w-[180px] sm:max-w-[280px] truncate font-medium text-fg leading-none">
+            {task}
+          </span>
+          {tag && (
+            <span className="shrink-0 rounded-md border border-accent/30 bg-accent/15 px-1.5 py-0.5 text-[11px] font-medium text-accent leading-none">
+              #{tag}
+            </span>
+          )}
         </div>
       )}
 
