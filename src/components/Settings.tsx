@@ -290,6 +290,17 @@ export const SettingsPanel = memo(function SettingsPanel({
     el.classList.add('animate-shake')
   }, [])
 
+  // Reactive add-button: true as soon as the field holds any real character.
+  const canAdd = newTag.trim().length > 0
+  // Increments whenever the button wakes from idle to active so its spring
+  // pop replays on every empty -> filled transition while typing/deleting.
+  const [popNonce, setPopNonce] = useState(0)
+  const prevCanAddRef = useRef(false)
+  useEffect(() => {
+    if (canAdd && !prevCanAddRef.current) setPopNonce((n) => n + 1)
+    prevCanAddRef.current = canAdd
+  }, [canAdd])
+
   const todayKey = new Date().toISOString().slice(0, 10)
 
   const getTagColor = useCallback(
@@ -303,6 +314,15 @@ export const SettingsPanel = memo(function SettingsPanel({
       return colors.chart[index]
     },
     [colors.chart],
+  )
+
+  /** "rgb(254 128 25)" -> "254 128 25" so chips can use alpha variants. */
+  const tagRgbTriplet = useCallback(
+    (tag: string): string => {
+      const parts = getTagColor(tag).match(/[\d.]+/g)
+      return parts && parts.length >= 3 ? `${parts[0]} ${parts[1]} ${parts[2]}` : '128 128 128'
+    },
+    [getTagColor],
   )
 
   const handleBackup = () => {
@@ -792,10 +812,10 @@ export const SettingsPanel = memo(function SettingsPanel({
               if (tagError) setTagError(null)
             }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                addTag()
-              }
+              if (e.key !== 'Enter') return
+              e.preventDefault()
+              if (!newTag.trim()) return
+              addTag()
             }}
             onAnimationEnd={(e) => {
               // Drop the class as soon as the shake finishes so the next
@@ -810,13 +830,22 @@ export const SettingsPanel = memo(function SettingsPanel({
           />
           <button
             type="button"
-            onClick={addTag}
-            disabled={!newTag.trim()}
+            onClick={() => {
+              if (canAdd) addTag()
+            }}
+            aria-disabled={!canAdd}
+            tabIndex={canAdd ? 0 : -1}
             title={t.settings.addTag}
             aria-label={t.settings.addTag}
-            className="absolute right-1.5 flex h-7 w-7 items-center justify-center rounded-sm bg-accent text-on-accent transition-all hover:opacity-90 active:scale-95 disabled:pointer-events-none disabled:opacity-30"
+            className={`absolute right-1.5 flex h-7 w-7 items-center justify-center rounded-sm transition-all duration-150 ${
+              canAdd
+                ? 'cursor-pointer bg-accent text-on-accent opacity-100 shadow-sm hover:opacity-90 active:scale-95'
+                : 'pointer-events-none cursor-not-allowed bg-transparent text-muted opacity-30'
+            }`}
           >
-            <Plus size={16} />
+            <span key={popNonce} className={`flex ${canAdd ? 'animate-add-pop' : ''}`}>
+              <Plus size={16} />
+            </span>
           </button>
         </div>
 
@@ -832,27 +861,28 @@ export const SettingsPanel = memo(function SettingsPanel({
         ) : (
           <div className="mt-3 flex flex-wrap gap-2">
             {settings.tags.map((tag) => {
-              const color = getTagColor(tag)
+              const chipRgb = tagRgbTriplet(tag)
+              const chipVars = { '--chip-rgb': chipRgb } as React.CSSProperties
               return (
                 <span
                   key={tag}
-                  className="tag-badge group flex animate-chip-in items-center gap-1.5 rounded-badge border px-2.5 py-1 font-mono text-xs font-medium transition-[background-color,border-color,color,filter] hover:brightness-105"
-                  style={{
-                    backgroundColor: `${color}18`,
-                    color: color,
-                    borderColor: `${color}40`,
-                  }}
+                  className="tag-badge tag-chip-tonal group inline-flex animate-chip-in items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-xs font-medium"
+                  style={chipVars}
                 >
-                  <span className="tag-dot h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: `rgb(${chipRgb})` }}
+                  />
                   <span className="max-w-[160px] truncate">{tag}</span>
                   <button
                     type="button"
                     onClick={() => removeTag(tag)}
-                    className="cursor-pointer rounded-sm p-0.5 text-current transition-colors hover:bg-black/10 dark:hover:bg-white/20"
+                    className="tag-chip-remove flex h-4 w-4 shrink-0 cursor-pointer items-center justify-center rounded-full"
+                    style={chipVars}
                     title={t.settings.removeTag(tag)}
                     aria-label={t.settings.removeTag(tag)}
                   >
-                    <X size={13} />
+                    <X size={11} />
                   </button>
                 </span>
               )
