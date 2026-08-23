@@ -31,6 +31,9 @@ export interface Messages {
     add: string
     doneCount: (done: number, total: number) => string
     addPlaceholder: string
+    addTaskPlaceholder: string
+    noTag: string
+    selectTag: string
     empty: string
     reopen: string
     done: string
@@ -205,6 +208,9 @@ const de: Messages = {
     add: 'Hinzufügen',
     doneCount: (done, total) => `${done}/${total} erledigt`,
     addPlaceholder: 'Neue Aufgabe …',
+    addTaskPlaceholder: 'Neue Aufgabe …',
+    noTag: 'Ohne Tag',
+    selectTag: 'Tag wählen',
     empty: 'Noch keine Aufgaben. Lege eine neue an.',
     reopen: 'Wieder öffnen',
     done: 'Erledigt',
@@ -391,6 +397,9 @@ const en: Messages = {
     add: 'Add',
     doneCount: (done, total) => `${done}/${total} done`,
     addPlaceholder: 'Add task …',
+    addTaskPlaceholder: 'Add task …',
+    noTag: 'No tag',
+    selectTag: 'Select tag',
     empty: 'No tasks yet. Add one to get started.',
     reopen: 'Reopen',
     done: 'Done',

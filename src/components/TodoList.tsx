@@ -1,7 +1,165 @@
-import { memo, useState } from 'react'
-import { Check, Pencil, Plus, Target, Trash2, X } from 'lucide-react'
+import { memo, useEffect, useRef, useState } from 'react'
+import { Check, ChevronDown, Pencil, Plus, Target, Trash2, X } from 'lucide-react'
 import type { TodoItem } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
+
+const TAG_PALETTE = [
+  '#8ec07c', // Aqua / Mint
+  '#83a598', // Blue / Teal
+  '#fabd2f', // Yellow / Amber
+  '#d3869b', // Purple / Lavender
+  '#b8bb26', // Green
+  '#fe8019', // Orange
+  '#fb4934', // Red
+  '#d65d0e', // Cinnamon
+]
+
+function getTagColor(tag: string): string {
+  if (!tag) return '#928374'
+  let hash = 0
+  for (let i = 0; i < tag.length; i++) {
+    hash = (hash << 5) - hash + tag.charCodeAt(i)
+    hash |= 0
+  }
+  return TAG_PALETTE[Math.abs(hash) % TAG_PALETTE.length]
+}
+
+interface TagSelectProps {
+  value: string
+  tags: string[]
+  onChange: (tag: string) => void
+  noTagLabel: string
+  title?: string
+  className?: string
+}
+
+const TagSelect = memo(function TagSelect({
+  value,
+  tags,
+  onChange,
+  noTagLabel,
+  title,
+  className = '',
+}: TagSelectProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handlePointerDown = (e: PointerEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen])
+
+  const selectedColor = value ? getTagColor(value) : null
+
+  return (
+    <div ref={containerRef} className={`relative ${className}`}>
+      {/* Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className={`flex h-[38px] items-center gap-1.5 px-2.5 rounded-btn border text-xs font-mono font-medium transition-all cursor-pointer select-none ${
+          value
+            ? 'border-line/80 bg-raised/70 text-fg hover:border-accent/50'
+            : 'border-line/60 bg-raised/40 text-muted hover:border-line hover:text-fg'
+        }`}
+        title={title}
+        aria-label={title}
+        aria-expanded={isOpen}
+      >
+        {value ? (
+          <>
+            <span
+              className="h-1.5 w-1.5 shrink-0 rounded-full"
+              style={{ backgroundColor: selectedColor || '#8ec07c' }}
+            />
+            <span className="max-w-[75px] sm:max-w-[100px] truncate">{value}</span>
+          </>
+        ) : (
+          <span className="text-muted">{noTagLabel}</span>
+        )}
+        <ChevronDown
+          size={12}
+          className={`shrink-0 text-muted transition-transform duration-200 ${
+            isOpen ? 'rotate-180 text-fg' : ''
+          }`}
+        />
+      </button>
+
+      {/* Popover Dropdown */}
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-1.5 min-w-[150px] p-1 rounded-card bg-surface/95 border border-line shadow-2xl z-40 animate-fade-in backdrop-blur-md">
+          {/* Option: No Tag */}
+          <button
+            type="button"
+            onClick={() => {
+              onChange('')
+              setIsOpen(false)
+            }}
+            className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-sm text-xs font-mono text-left transition-colors cursor-pointer ${
+              !value
+                ? 'bg-accent/15 text-accent font-semibold'
+                : 'text-muted hover:bg-raised/70 hover:text-fg'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full border border-dashed border-muted shrink-0" />
+              <span>{noTagLabel}</span>
+            </span>
+            {!value && <Check size={13} className="shrink-0 text-accent" />}
+          </button>
+
+          {/* Option: All user tags */}
+          {tags.map((t) => {
+            const color = getTagColor(t)
+            const isSelected = value === t
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => {
+                  onChange(t)
+                  setIsOpen(false)
+                }}
+                className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-sm text-xs font-mono text-left transition-colors cursor-pointer ${
+                  isSelected
+                    ? 'bg-accent/15 text-accent font-semibold'
+                    : 'text-fg hover:bg-raised/70'
+                }`}
+              >
+                <span className="flex items-center gap-2 truncate">
+                  <span
+                    className="h-1.5 w-1.5 rounded-full shrink-0"
+                    style={{ backgroundColor: color }}
+                  />
+                  <span className="truncate">{t}</span>
+                </span>
+                {isSelected && <Check size={13} className="shrink-0 text-accent" />}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+})
 
 interface Props {
   todos: TodoItem[]
@@ -33,7 +191,7 @@ export const TodoList = memo(function TodoList({
   const [editTitle, setEditTitle] = useState('')
   const [editTag, setEditTag] = useState('')
 
-  const activeTag = tags.includes(tag) ? tag : (tags[0] ?? '')
+  const activeTag = tag && tags.includes(tag) ? tag : (tags[0] ?? tag ?? '')
 
   const submitAdd = () => {
     const trimmed = title.trim()
@@ -45,7 +203,7 @@ export const TodoList = memo(function TodoList({
   const startEdit = (t: TodoItem) => {
     setEditingId(t.id)
     setEditTitle(t.title)
-    setEditTag(tags.includes(t.tag) ? t.tag : (tags[0] ?? ''))
+    setEditTag(t.tag || '')
   }
 
   const submitEdit = (id: string) => {
@@ -67,31 +225,40 @@ export const TodoList = memo(function TodoList({
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
+      {/* Unified Input Group */}
+      <div className="flex items-center gap-1.5">
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
-          placeholder={tr.todo.addPlaceholder}
-          className="input"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              submitAdd()
+            }
+          }}
+          placeholder={tr.todo.addTaskPlaceholder || tr.todo.addPlaceholder}
+          className="input h-[38px] min-w-0 flex-1 font-mono text-sm py-2"
           maxLength={80}
         />
-        <select value={activeTag} onChange={(e) => setTag(e.target.value)} className="input w-auto shrink-0" title={tr.todo.tag}>
-          {tags.map((tag) => (
-            <option key={tag} value={tag}>
-              {tag}
-            </option>
-          ))}
-        </select>
+
+        <TagSelect
+          value={activeTag}
+          tags={tags}
+          onChange={setTag}
+          noTagLabel={tr.todo.noTag}
+          title={tr.todo.selectTag || tr.todo.tag}
+        />
+
         <button
           type="button"
           onClick={submitAdd}
-          className="btn-primary shrink-0 px-3 active:scale-[0.94]"
+          disabled={!title.trim()}
+          className="btn-primary shrink-0 h-[38px] w-[38px] p-0 flex items-center justify-center active:scale-[0.94] disabled:opacity-40 disabled:pointer-events-none"
           title={tr.todo.add}
           aria-label={tr.todo.add}
         >
-          <Plus size={16} />
+          <Plus size={18} />
         </button>
       </div>
 
@@ -131,7 +298,7 @@ export const TodoList = memo(function TodoList({
               </button>
 
               {editingId === t.id ? (
-                <div className="flex min-w-0 flex-1 items-center gap-2">
+                <div className="flex min-w-0 flex-1 items-center gap-1.5">
                   <input
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
@@ -140,20 +307,21 @@ export const TodoList = memo(function TodoList({
                       else if (e.key === 'Escape') setEditingId(null)
                     }}
                     autoFocus
-                    className="input py-1 text-sm"
+                    className="input h-8 min-w-0 flex-1 py-1 text-sm font-mono"
                     maxLength={80}
                   />
-                  <select value={editTag} onChange={(e) => setEditTag(e.target.value)} className="input w-auto py-1 text-sm">
-                    {tags.map((tag) => (
-                      <option key={tag} value={tag}>
-                        {tag}
-                      </option>
-                    ))}
-                  </select>
+                  <TagSelect
+                    value={editTag}
+                    tags={tags}
+                    onChange={setEditTag}
+                    noTagLabel={tr.todo.noTag}
+                    title={tr.todo.selectTag || tr.todo.tag}
+                    className="shrink-0"
+                  />
                   <button
                     type="button"
                     onClick={() => submitEdit(t.id)}
-                    className="btn-primary shrink-0 px-2 py-1"
+                    className="btn-primary flex h-8 w-8 shrink-0 items-center justify-center p-0"
                     title={tr.todo.save}
                     aria-label={tr.todo.save}
                   >
@@ -162,7 +330,7 @@ export const TodoList = memo(function TodoList({
                   <button
                     type="button"
                     onClick={() => setEditingId(null)}
-                    className="btn-ghost shrink-0 px-2 py-1"
+                    className="btn-ghost flex h-8 w-8 shrink-0 items-center justify-center p-0"
                     title={tr.todo.cancel}
                     aria-label={tr.todo.cancel}
                   >
@@ -189,7 +357,18 @@ export const TodoList = memo(function TodoList({
                     <span className="font-mono text-[11px] tabular-nums text-muted">🍅 x{t.pomodoros}</span>
                   </div>
                   {t.tag && (
-                    <span className="shrink-0 rounded-badge border border-tag-border bg-tag-bg px-2 py-0.5 text-[10px] font-medium text-tag-text">
+                    <span
+                      className="shrink-0 rounded-badge border px-2 py-0.5 font-mono text-[10px] font-medium"
+                      style={{
+                        backgroundColor: `${getTagColor(t.tag)}18`,
+                        color: getTagColor(t.tag),
+                        borderColor: `${getTagColor(t.tag)}40`,
+                      }}
+                    >
+                      <span
+                        className="mr-1 inline-block h-1.5 w-1.5 rounded-full align-middle"
+                        style={{ backgroundColor: getTagColor(t.tag) }}
+                      />
                       {t.tag}
                     </span>
                   )}
