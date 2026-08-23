@@ -38,13 +38,17 @@ export function sanitizeMarkdownText(text: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
     .replace(/\r?\n+/g, ' ')
     .trim()
 }
 
 /** Escapes table cell delimiters (|) and characters that could corrupt Markdown table formatting. */
 export function sanitizeTableCell(text: string): string {
-  return sanitizeMarkdownText(text).replace(/\|/g, '\\|')
+  return sanitizeMarkdownText(text)
+    .replace(/\\/g, '\\\\')
+    .replace(/\|/g, '\\|')
 }
 
 /** Obsidian-optimiertes Markdown (Frontmatter + Daily-Note-Struktur). */

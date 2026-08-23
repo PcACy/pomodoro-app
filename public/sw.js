@@ -12,9 +12,13 @@ function isSupabaseUrl(url) {
   try {
     const parsed = new URL(url)
     const host = parsed.hostname
+    const isSupabaseHost =
+      host === 'supabase.co' ||
+      host.endsWith('.supabase.co') ||
+      host === 'supabase.in' ||
+      host.endsWith('.supabase.in')
     return (
-      host.endsWith('supabase.co') ||
-      host.endsWith('supabase.in') ||
+      isSupabaseHost ||
       parsed.pathname.startsWith('/rest/v1/') ||
       parsed.pathname.startsWith('/auth/v1/')
     )
@@ -99,8 +103,15 @@ self.addEventListener('fetch', (event) => {
   // Skip browser extensions, chrome-extension schemes, or non-http(s)
   if (!request.url.startsWith('http')) return
 
+  const url = new URL(request.url)
+
   // Version and service worker files should always be fetched fresh
-  if (request.url.includes('/version.json') || request.url.includes('/sw.js')) {
+  if (
+    url.pathname === '/version.json' ||
+    url.pathname.endsWith('/version.json') ||
+    url.pathname === '/sw.js' ||
+    url.pathname.endsWith('/sw.js')
+  ) {
     event.respondWith(fetch(request))
     return
   }
@@ -117,12 +128,16 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  const url = new URL(request.url)
-
   // Hashed build assets & Webfonts: Cache-First for instant (<50ms) repeat loads
+  const isGoogleFonts =
+    url.hostname === 'fonts.gstatic.com' ||
+    url.hostname.endsWith('.fonts.gstatic.com') ||
+    url.hostname === 'fonts.googleapis.com' ||
+    url.hostname.endsWith('.fonts.googleapis.com')
+
   if (
     url.pathname.startsWith('/assets/') ||
-    url.hostname.includes('fonts.gstatic.com') ||
+    isGoogleFonts ||
     url.pathname.endsWith('.woff2')
   ) {
     event.respondWith(cacheFirst(request))
