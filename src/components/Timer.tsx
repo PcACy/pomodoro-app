@@ -283,27 +283,33 @@ export const Timer = memo(function Timer({
       <div className="flex w-full flex-col items-center">
         {/* Segmented Control Track */}
         <div
-          className={`relative grid grid-cols-2 ${
-            borderless ? 'w-64 sm:w-72' : 'w-full max-w-xs'
-          } mx-auto select-none rounded-[var(--radius-btn)] border border-line/60 bg-canvas/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
+          role="tablist"
+          aria-label="Timer Modus"
+          className={`seg-track relative grid grid-cols-2 ${
+            borderless ? 'w-60 sm:w-64' : 'w-full max-w-[260px]'
+          } mx-auto select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
             running && borderless ? 'opacity-30 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
           }`}
         >
           {/* Sliding Pill — transform-based so the glide stays on the compositor */}
           <div
-            className="pointer-events-none absolute inset-y-1 left-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
+            className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
             style={{
-              width: 'calc(50% - 4px)',
-              transform: mode === 'pomodoro' ? 'translateX(0)' : 'translateX(100%)',
+              width: 'calc((100% - 8px - 4px) / 2)',
+              left: '4px',
+              transform: `translateX(calc(${mode === 'pomodoro' ? 0 : 1} * (100% + 4px)))`,
             }}
           />
           {MODES.map((m) => (
             <button
               key={m}
               type="button"
+              role="tab"
+              aria-selected={mode === m}
+              aria-label={t.timer[m]}
               onClick={() => onModeChange(m)}
-              className={`relative z-10 flex w-full items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] py-1.5 font-display text-xs uppercase tracking-wider transition-colors duration-200 active:scale-[0.97] ${
-                mode === m ? 'text-fg font-bold' : 'text-muted hover:text-fg'
+              className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] w-full items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
+                mode === m ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
               {mode === m && (

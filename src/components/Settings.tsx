@@ -442,9 +442,13 @@ export const SettingsPanel = memo(function SettingsPanel({
             </div>
           </div>
 
-          <div className="relative grid grid-cols-2 w-full sm:w-56 items-center gap-1 rounded-btn border border-line/60 bg-canvas/80 p-1 backdrop-blur-md">
+          <div
+            role="tablist"
+            aria-label={t.settings.language}
+            className="seg-track relative grid grid-cols-2 w-full sm:w-56 items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md"
+          >
             <div
-              className="pointer-events-none absolute bottom-1 top-1 rounded-btn bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
               style={{
                 width: 'calc((100% - 8px - 4px) / 2)',
                 left: '4px',
@@ -453,21 +457,31 @@ export const SettingsPanel = memo(function SettingsPanel({
             />
             <button
               type="button"
+              role="tab"
+              aria-selected={lang === 'de'}
               onClick={() => setLang('de')}
-              className={`relative z-10 flex items-center justify-center gap-1.5 rounded-btn px-3 py-1.5 text-xs font-medium transition-colors duration-200 active:scale-95 cursor-pointer ${
+              className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
                 lang === 'de' ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
+              {lang === 'de' && (
+                <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
+              )}
               <span className="font-mono text-[10px] font-bold tracking-wider opacity-60">DE</span>
               <span>Deutsch</span>
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={lang === 'en'}
               onClick={() => setLang('en')}
-              className={`relative z-10 flex items-center justify-center gap-1.5 rounded-btn px-3 py-1.5 text-xs font-medium transition-colors duration-200 active:scale-95 cursor-pointer ${
+              className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
                 lang === 'en' ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
+              {lang === 'en' && (
+                <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
+              )}
               <span className="font-mono text-[10px] font-bold tracking-wider opacity-60">EN</span>
               <span>English</span>
             </button>
@@ -482,9 +496,13 @@ export const SettingsPanel = memo(function SettingsPanel({
             <h3 className="text-sm font-semibold text-fg">{t.settings.colorMode}</h3>
             <p className="text-xs text-muted">{t.settings.colorModeHint}</p>
           </div>
-          <div className="relative grid grid-cols-2 w-full sm:w-56 items-center gap-1 rounded-btn border border-line/60 bg-canvas/80 p-1 backdrop-blur-md">
+          <div
+            role="tablist"
+            aria-label={t.settings.colorMode}
+            className="seg-track relative grid grid-cols-2 w-full sm:w-56 items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md"
+          >
             <div
-              className="pointer-events-none absolute bottom-1 top-1 rounded-btn bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
               style={{
                 width: 'calc((100% - 8px - 4px) / 2)',
                 left: '4px',
@@ -493,21 +511,31 @@ export const SettingsPanel = memo(function SettingsPanel({
             />
             <button
               type="button"
+              role="tab"
+              aria-selected={colorMode === 'dark'}
               onClick={() => onColorModeChange('dark')}
-              className={`relative z-10 flex items-center justify-center gap-2 rounded-btn px-3 py-1.5 text-xs font-medium transition-colors duration-200 active:scale-95 ${
+              className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-2 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
                 colorMode === 'dark' ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
+              {colorMode === 'dark' && (
+                <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
+              )}
               <Moon size={14} />
               <span>{t.settings.dark}</span>
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={colorMode === 'light'}
               onClick={() => onColorModeChange('light')}
-              className={`relative z-10 flex items-center justify-center gap-2 rounded-btn px-3 py-1.5 text-xs font-medium transition-colors duration-200 active:scale-95 ${
+              className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-2 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
                 colorMode === 'light' ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
+              {colorMode === 'light' && (
+                <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
+              )}
               <Sun size={14} />
               <span>{t.settings.light}</span>
             </button>
