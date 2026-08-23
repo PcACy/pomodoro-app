@@ -1,4 +1,4 @@
-import { defineConfig, type Plugin, type UserConfig } from 'vite'
+import { defineConfig, type Plugin, type UserConfig, version as viteVersion } from 'vite'
 import react from '@vitejs/plugin-react'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -36,9 +36,8 @@ function pwaVersionPlugin(): Plugin {
 }
 
 export default defineConfig(({ mode }) => {
-  // Declared as UserConfig so the conditional esbuild assignment below is
-  // contextually typed — a conditional spread would widen `drop`/`pure` to
-  // string[] and fail Vite's stricter literal-union option types.
+  // Declared as UserConfig so conditional assignments below are contextually
+  // typed where the installed Vite version supports them.
   const config: UserConfig = {
     plugins: [react(), pwaVersionPlugin()],
     build: {
@@ -69,9 +68,32 @@ export default defineConfig(({ mode }) => {
   if (mode === 'production') {
     // Production hygiene: strip debug statements; keep console.error/warn so
     // field failures ([sync] push failed, chime errors) remain diagnosable.
-    config.esbuild = {
-      drop: ['debugger'],
-      pure: ['console.log', 'console.info', 'console.debug', 'console.trace'],
+    //
+    // The minifier API differs by Vite generation:
+    // - Vite <=5 (esbuild-based): esbuild transform options `drop`/`pure`.
+    // - Vite >=6 (rolldown/oxc): rolldown output minify options
+    //   `compress.dropConsole` / `compress.dropDebugger`. The assignment goes
+    //   through a structural cast because older type definitions don't know
+    //   these keys; unknown options degrade gracefully to defaults instead of
+    //   failing the build.
+    const major = Number.parseInt(viteVersion.split('.', 1)[0] ?? '0', 10)
+    if (major >= 6) {
+      const build = config.build as Record<string, unknown>
+      build.rolldownOptions = {
+        output: {
+          minify: {
+            compress: {
+              dropConsole: true,
+              dropDebugger: true,
+            },
+          },
+        },
+      }
+    } else {
+      config.esbuild = {
+        drop: ['debugger'],
+        pure: ['console.log', 'console.info', 'console.debug', 'console.trace'],
+      }
     }
   }
 
