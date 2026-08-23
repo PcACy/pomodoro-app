@@ -360,7 +360,7 @@ export const TodoList = memo(function TodoList({
                   </div>
                   {t.tag && (
                     <span
-                      className="shrink-0 rounded-badge border px-2 py-0.5 font-mono text-[10px] font-medium"
+                      className="tag-badge shrink-0 rounded-badge border px-2 py-0.5 font-mono text-[10px] font-medium"
                       style={{
                         backgroundColor: `${getTagColor(t.tag)}18`,
                         color: getTagColor(t.tag),
@@ -368,7 +368,7 @@ export const TodoList = memo(function TodoList({
                       }}
                     >
                       <span
-                        className="mr-1 inline-block h-1.5 w-1.5 rounded-full align-middle"
+                        className="tag-dot mr-1 inline-block h-1.5 w-1.5 rounded-full align-middle"
                         style={{ backgroundColor: getTagColor(t.tag) }}
                       />
                       {t.tag}

@@ -765,14 +765,14 @@ export const SettingsPanel = memo(function SettingsPanel({
               return (
                 <span
                   key={tag}
-                  className="group flex items-center gap-1.5 rounded-badge border px-2.5 py-1 font-mono text-xs font-medium transition-all hover:brightness-105"
+                  className="tag-badge group flex items-center gap-1.5 rounded-badge border px-2.5 py-1 font-mono text-xs font-medium transition-all hover:brightness-105"
                   style={{
                     backgroundColor: `${color}18`,
                     color: color,
                     borderColor: `${color}40`,
                   }}
                 >
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+                  <span className="tag-dot h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
                   <span className="max-w-[160px] truncate">{tag}</span>
                   <button
                     type="button"

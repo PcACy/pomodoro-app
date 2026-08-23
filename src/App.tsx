@@ -278,7 +278,7 @@ export default function App() {
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl 2xl:max-w-6xl flex-col items-center gap-8 2xl:gap-10 px-4 py-8">
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div
-          className="absolute inset-0"
+          className="ambient-grid absolute inset-0"
           style={{
             backgroundImage: 'radial-gradient(circle, rgb(var(--c-fg) / 0.07) 1px, transparent 1px)',
             backgroundSize: '24px 24px',

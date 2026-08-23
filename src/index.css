@@ -120,48 +120,48 @@
   /* Nothing OS Dark */
   color-scheme: dark;
   --c-canvas: 0 0 0;
-  --c-surface: 12 12 12;
-  --c-raised: 24 24 24;
-  --c-line: 44 44 44;
+  --c-surface: 10 10 10;
+  --c-raised: 22 22 22;
+  --c-line: 48 48 48;
   --c-fg: 255 255 255;
-  --c-muted: 150 150 150;
+  --c-muted: 140 140 140;
   --c-accent: 235 0 40;
-  --c-accent-strong: 255 42 42;
+  --c-accent-strong: 255 26 60;
   --c-on-accent: 255 255 255;
   --c-break: 220 220 220;
   --c-long: 160 160 160;
-  --c-track: 44 44 44;
+  --c-track: 36 36 36;
   --c-chart-1: 235 0 40;
   --c-chart-2: 255 255 255;
   --c-chart-3: 200 200 200;
   --c-chart-4: 160 160 160;
   --c-chart-5: 120 120 120;
-  --c-chart-6: 255 80 80;
+  --c-chart-6: 255 42 42;
   --c-chart-7: 230 230 230;
   --c-chart-8: 80 80 80;
 
   /* Nothing OS Structural Tokens: strict angular geometry, dot-matrix aesthetic */
-  --radius-card: 4px;
+  --radius-card: 2px;
   --radius-btn: 2px;
   --radius-sm: 2px;
   --badge-radius: 2px;
   --border-card-width: 1px;
   --border-card-style: solid;
-  --font-display: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'DotGothic16', 'Silkscreen', 'JetBrains Mono', ui-monospace, monospace;
   --font-body: 'JetBrains Mono', ui-monospace, monospace;
   --card-shadow: none;
   --card-blur: 0px;
   --card-bg-opacity: 1;
 
-  /* Semantic Tokens */
-  --color-tag-bg: rgba(255, 255, 255, 0.1);
+  /* Semantic Tokens: strict monochrome + Nothing red */
+  --color-tag-bg: rgba(255, 255, 255, 0.05);
   --color-tag-text: #ffffff;
-  --color-tag-border: rgba(255, 255, 255, 0.25);
+  --color-tag-border: rgba(255, 255, 255, 0.2);
   --color-streak: #eb0028;
   --color-success: #ffffff;
   --glow-opacity: 0;
-  --heatmap-l0: #141414;
-  --heatmap-l0-border: #262626;
+  --heatmap-l0: #101010;
+  --heatmap-l0-border: #222222;
 }
 
 :root[data-theme='nothing'][data-mode='light'] {
@@ -189,20 +189,20 @@
   --c-chart-8: 209 213 219;
 
   /* Nothing OS Structural Tokens */
-  --radius-card: 4px;
+  --radius-card: 2px;
   --radius-btn: 2px;
   --radius-sm: 2px;
   --badge-radius: 2px;
   --border-card-width: 1px;
   --border-card-style: solid;
-  --font-display: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'DotGothic16', 'Silkscreen', 'JetBrains Mono', ui-monospace, monospace;
   --font-body: 'JetBrains Mono', ui-monospace, monospace;
   --card-shadow: none;
   --card-blur: 0px;
   --card-bg-opacity: 1;
 
   /* Semantic Tokens */
-  --color-tag-bg: rgba(0, 0, 0, 0.08);
+  --color-tag-bg: rgba(0, 0, 0, 0.05);
   --color-tag-text: #000000;
   --color-tag-border: rgba(0, 0, 0, 0.2);
   --color-streak: #eb0028;
@@ -589,4 +589,57 @@ body {
 .animate-tab-enter {
   animation: tab-enter 250ms cubic-bezier(0.2, 0, 0, 1) forwards;
   will-change: opacity, transform;
+}
+
+/* =========================================================================
+   NOTHING OS SPECIFIC STYLING & HARDWARE GLYPHS
+   ========================================================================= */
+:root[data-theme='nothing'] .ambient-grid {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px) !important;
+  background-size: 16px 16px !important;
+}
+
+:root[data-theme='nothing'][data-mode='light'] .ambient-grid {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.15) 1px, transparent 1px) !important;
+  background-size: 16px 16px !important;
+}
+
+:root[data-theme='nothing'] .bracket-label::before {
+  content: '[ ';
+  opacity: 0.6;
+}
+
+:root[data-theme='nothing'] .bracket-label::after {
+  content: ' ]';
+  opacity: 0.6;
+}
+
+:root[data-theme='nothing'] .tag-badge {
+  background-color: var(--color-tag-bg) !important;
+  color: var(--color-tag-text) !important;
+  border-color: var(--color-tag-border) !important;
+}
+
+:root[data-theme='nothing'] .tag-dot {
+  background-color: #eb0028 !important;
+}
+
+:root[data-theme='nothing'] .play-btn-nothing {
+  background-color: #eb0028 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+:root[data-theme='nothing'] .play-btn-nothing:hover {
+  background-color: #ff1a3c !important;
+}
+
+:root[data-theme='nothing'] .timer-control-btn {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+:root[data-theme='nothing'] .timer-control-btn:hover {
+  border-color: #ffffff !important;
 }
