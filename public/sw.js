@@ -60,6 +60,21 @@ async function networkFirst(request) {
   }
 }
 
+async function cacheFirst(request) {
+  const cache = await caches.open(CACHE)
+  const cached = await cache.match(request)
+  if (cached) return cached
+  try {
+    const response = await fetch(request)
+    if (response && response.ok) {
+      cache.put(request, response.clone())
+    }
+    return response
+  } catch {
+    return cached || new Response('Offline', { status: 503, statusText: 'Offline' })
+  }
+}
+
 /** Serve from cache immediately, refresh in the background. */
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(CACHE)
@@ -102,7 +117,19 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Static assets: Stale-while-revalidate
+  const url = new URL(request.url)
+
+  // Hashed build assets & Webfonts: Cache-First for instant (<50ms) repeat loads
+  if (
+    url.pathname.startsWith('/assets/') ||
+    url.hostname.includes('fonts.gstatic.com') ||
+    url.pathname.endsWith('.woff2')
+  ) {
+    event.respondWith(cacheFirst(request))
+    return
+  }
+
+  // General static assets: Stale-while-revalidate
   event.respondWith(staleWhileRevalidate(request))
 })
 

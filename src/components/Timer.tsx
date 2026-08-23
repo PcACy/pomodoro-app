@@ -330,6 +330,7 @@ export const Timer = memo(function Timer({
               strokeLinecap="round"
               strokeDasharray={circ}
               strokeDashoffset={offset}
+              style={{ willChange: 'stroke-dashoffset' }}
               className={`${RING[phase]} transition-[stroke-dashoffset,stroke] duration-500 ease-linear`}
             />
           </svg>
