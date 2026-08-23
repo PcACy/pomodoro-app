@@ -83,7 +83,7 @@ export function buildDailyMarkdown(exportData: DayExport, todos?: TodoItem[]): s
     `completed_pomodoros: ${completedCount}`,
     'tags: [pomodoro, focus, log]',
     '---',
-    `# 🍅 Pomodoro Log - ${key}`,
+    `# Pomodoro Log - ${key}`,
     `- **Fokuszeit gesamt:** ${fmtMinutesCompact(totalMinutes)}`,
     `- **Sessions:** ${completedCount} absolviert`,
     '',

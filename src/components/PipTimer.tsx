@@ -30,7 +30,7 @@ export function PipTimer({ mode, pipWindow, phase, phaseLabel, status, time, act
   const running = status === 'running'
 
   return createPortal(
-    <div className="flex h-screen w-screen flex-col items-center justify-center gap-2 bg-canvas p-3 text-fg">
+    <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center gap-2 bg-canvas p-3 text-fg">
       <span
         className={`rounded-full border border-line px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest ${BADGE[phase]}`}
       >

@@ -10,10 +10,10 @@ export default {
         badge: 'var(--badge-radius)',
       },
       fontFamily: {
-        display: ['var(--font-display)', 'system-ui', 'sans-serif'],
-        body: ['var(--font-body)', 'system-ui', 'sans-serif'],
-        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        display: ['var(--font-display)', 'Geist', 'Outfit', 'system-ui', 'sans-serif'],
+        body: ['var(--font-body)', 'Geist', 'system-ui', 'sans-serif'],
+        sans: ['Geist', 'Outfit', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Geist Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
         canvas: 'rgb(var(--c-canvas) / <alpha-value>)',

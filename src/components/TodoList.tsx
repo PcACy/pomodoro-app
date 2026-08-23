@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState } from 'react'
-import { Check, ChevronDown, Pencil, Plus, Target, Trash2, X } from 'lucide-react'
+import { Check, ChevronDown, Pencil, Plus, Target, Timer, Trash2, X } from 'lucide-react'
 import type { TodoItem } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
 
@@ -354,7 +354,9 @@ export const TodoList = memo(function TodoList({
                         </span>
                       )}
                     </div>
-                    <span className="font-mono text-[11px] tabular-nums text-muted">🍅 x{t.pomodoros}</span>
+                    <span className="inline-flex items-center gap-1 font-mono text-[11px] tabular-nums text-muted">
+                      <Timer size={11} className="text-accent/80" /> x{t.pomodoros}
+                    </span>
                   </div>
                   {t.tag && (
                     <span

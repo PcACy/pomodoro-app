@@ -247,8 +247,8 @@
   --badge-radius: 9999px;
   --border-card-width: 1px;
   --border-card-style: solid;
-  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
-  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', 'Geist', system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Outfit', 'Geist', system-ui, sans-serif;
   --card-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.45);
   --card-blur: 24px;
   --card-bg-opacity: 0.72;
@@ -295,8 +295,8 @@
   --badge-radius: 9999px;
   --border-card-width: 1px;
   --border-card-style: solid;
-  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
-  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', 'Geist', system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Outfit', 'Geist', system-ui, sans-serif;
   --card-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.08);
   --card-blur: 24px;
   --card-bg-opacity: 0.78;
@@ -440,12 +440,12 @@ body {
 
   .btn {
     border-radius: var(--radius-btn);
-    transition: all 150ms ease-out;
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 active:scale-[0.96] disabled:pointer-events-none disabled:opacity-40;
+    transition: transform 120ms cubic-bezier(0.32, 0.72, 0, 1), background-color 150ms ease, opacity 150ms ease;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 active:scale-[0.98] active:translate-y-[0.5px] disabled:pointer-events-none disabled:opacity-40;
   }
 
   .btn-primary {
-    @apply btn bg-accent text-on-accent hover:bg-accent-strong hover:shadow-md hover:shadow-accent/20;
+    @apply btn bg-accent text-on-accent hover:opacity-90;
   }
 
   .btn-ghost {

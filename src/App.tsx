@@ -275,7 +275,7 @@ export default function App() {
   const handleSyncNow = useCallback(() => void syncNow(true), [syncNow])
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-5xl 2xl:max-w-6xl flex-col items-center gap-8 2xl:gap-10 px-4 py-8">
+    <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl 2xl:max-w-6xl flex-col items-center gap-8 2xl:gap-10 px-4 py-8">
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div
           className="absolute inset-0"
@@ -329,7 +329,7 @@ export default function App() {
               key={tb.id}
               type="button"
               onClick={() => handleTabChange(tb.id)}
-              className={`relative z-10 flex items-center justify-center gap-2 rounded-btn px-3.5 py-2 text-sm font-medium transition-colors duration-200 active:scale-95 ${
+              className={`relative z-10 flex min-h-[44px] items-center justify-center gap-2 rounded-btn px-3.5 py-2 text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
                 tab === tb.id ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
