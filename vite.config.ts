@@ -38,7 +38,7 @@ function pwaVersionPlugin(): Plugin {
 export default defineConfig({
   plugins: [react(), pwaVersionPlugin()],
   esbuild: {
-    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+    pure: ['console.log', 'console.debug'],
     legalComments: 'none',
   },
   build: {
