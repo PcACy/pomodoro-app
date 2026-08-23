@@ -83,8 +83,8 @@ export const Dashboard = memo(function Dashboard({ sessions, settings, themeId, 
 
   const tagData = useMemo(() => {
     const from = startOfWeek(new Date())
-    return minutesByTag(sessions, from).map((t, i) => ({ ...t, color: colors.chart[i % colors.chart.length] }))
-  }, [sessions, colors])
+    return minutesByTag(sessions, from, t.todo.noTag).map((item, i) => ({ ...item, color: colors.chart[i % colors.chart.length] }))
+  }, [sessions, colors, t.todo.noTag])
 
   const heat = useMemo(() => heatmapData(sessions, 52), [sessions])
 

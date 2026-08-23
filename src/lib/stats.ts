@@ -72,11 +72,11 @@ export function groupMinutesByDay(sessions: Session[], from: Date, to: Date, cou
   return out
 }
 
-export function minutesByTag(sessions: Session[], from?: Date): TagStat[] {
+export function minutesByTag(sessions: Session[], from?: Date, untaggedLabel = 'Ohne Tag'): TagStat[] {
   const totals = new Map<string, number>()
   for (const s of sessions) {
     if (from && new Date(s.start) < from) continue
-    const tag = s.tag || 'Ohne Tag'
+    const tag = s.tag?.trim() || untaggedLabel
     totals.set(tag, (totals.get(tag) ?? 0) + minutesOf(s))
   }
   return [...totals.entries()]

@@ -191,7 +191,7 @@ export const TodoList = memo(function TodoList({
   const [editTitle, setEditTitle] = useState('')
   const [editTag, setEditTag] = useState('')
 
-  const activeTag = tag && tags.includes(tag) ? tag : (tags[0] ?? tag ?? '')
+  const activeTag = tag && tags.includes(tag) ? tag : ''
 
   const submitAdd = () => {
     const trimmed = title.trim()

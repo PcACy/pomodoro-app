@@ -20,7 +20,10 @@ export const QuickStats = memo(function QuickStats({ sessions, settings }: Props
     () => sessions.filter((s) => sameDay(new Date(s.start), new Date())).length,
     [sessions],
   )
-  const tags = useMemo(() => minutesByTag(sessions, startOfDay(new Date())).slice(0, 5), [sessions])
+  const tags = useMemo(
+    () => minutesByTag(sessions, startOfDay(new Date()), t.todo.noTag).slice(0, 5),
+    [sessions, t.todo.noTag],
+  )
 
   return (
     <section className="card flex w-full max-w-md 2xl:max-w-lg flex-col gap-5 p-6 2xl:p-8">
