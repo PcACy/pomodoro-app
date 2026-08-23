@@ -76,6 +76,7 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
       durationMs: total,
       task: taskRef.current,
       tag: tagRef.current,
+      mode: 'flow',
     })
   }, [])
 

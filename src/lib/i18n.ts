@@ -76,6 +76,20 @@ export interface Messages {
     sessionLog: string
     day: string
     days: string
+    rangeWeek: string
+    rangeMonth: string
+    rangeAllTime: string
+    avgDailyFocus: string
+    avgDailyFocusSub: (minStr: string, activeDays: number) => string
+    totalFocusTime: string
+    totalFocusTimeSub: (hours: number, count: number) => string
+    pomodoroVsFlow: string
+    pomodoroRatio: (pomPct: number, flowPct: number) => string
+    noDataPeriod: string
+    activeDay: string
+    activeDays: string
+    focusTime: string
+    periodOverview: string
     sessionsCsv: string
     sessionsCsvTitle: string
     sessionsJson: string
@@ -259,6 +273,20 @@ const de: Messages = {
     sessionLog: 'Session-Log',
     day: 'Tag',
     days: 'Tage',
+    rangeWeek: 'Woche',
+    rangeMonth: 'Monat',
+    rangeAllTime: 'Gesamt',
+    avgDailyFocus: 'Ø Täglicher Fokus',
+    avgDailyFocusSub: (minStr, days) => `Ø ${minStr} / ${days === 1 ? 'aktiver Tag' : `${days} aktive Tage`}`,
+    totalFocusTime: 'Gesamte Fokuszeit',
+    totalFocusTimeSub: (hours, count) => `${hours.toLocaleString('de-DE')} Std. · ${count} ${count === 1 ? 'Session' : 'Sessions'}`,
+    pomodoroVsFlow: 'Pomodoro vs. Flow',
+    pomodoroRatio: (pom, flow) => `${pom}% Pomodoro · ${flow}% Flow`,
+    noDataPeriod: 'Keine Fokus-Sessions in diesem Zeitraum erfasst',
+    activeDay: 'aktiver Tag',
+    activeDays: 'aktive Tage',
+    focusTime: 'Fokuszeit',
+    periodOverview: 'Fokus-Übersicht',
     sessionsCsv: 'Sessions .csv',
     sessionsCsvTitle: 'Alle Sessions als CSV exportieren',
     sessionsJson: 'Sessions .json',
@@ -448,6 +476,20 @@ const en: Messages = {
     sessionLog: 'Session log',
     day: 'day',
     days: 'days',
+    rangeWeek: 'Week',
+    rangeMonth: 'Month',
+    rangeAllTime: 'All Time',
+    avgDailyFocus: 'Ø Daily Focus',
+    avgDailyFocusSub: (minStr, days) => `Ø ${minStr} / ${days === 1 ? 'active day' : `${days} active days`}`,
+    totalFocusTime: 'Total Focus Time',
+    totalFocusTimeSub: (hours, count) => `${hours} hrs · ${count} ${count === 1 ? 'session' : 'sessions'}`,
+    pomodoroVsFlow: 'Pomodoro vs. Flow',
+    pomodoroRatio: (pom, flow) => `${pom}% Pomodoro · ${flow}% Flow`,
+    noDataPeriod: 'No focus sessions logged for this period',
+    activeDay: 'active day',
+    activeDays: 'active days',
+    focusTime: 'Focus time',
+    periodOverview: 'Focus Overview',
     sessionsCsv: 'Sessions .csv',
     sessionsCsvTitle: 'Export all sessions as CSV',
     sessionsJson: 'Sessions .json',

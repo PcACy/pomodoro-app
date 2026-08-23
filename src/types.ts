@@ -27,6 +27,7 @@ export interface Session {
   tag: string
   notes?: string
   updatedAt?: number
+  mode?: TimerMode
 }
 
 export interface TimerState {

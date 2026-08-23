@@ -64,6 +64,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
           durationMs,
           task: taskRef.current,
           tag: tagRef.current,
+          mode: 'pomodoro',
         })
         playChime('focus')
         const lang = getLang()

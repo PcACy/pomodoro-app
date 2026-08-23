@@ -1,10 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  averageDailyFocusMinutes,
   currentStreakDays,
+  formatYAxisTick,
+  getYAxisConfig,
   groupMinutesByDay,
   heatmapData,
   lastNDaysStats,
   minutesByTag,
+  pomodoroVsFlowBreakdown,
   sessionsByHour,
   todayMinutes,
   weekMinutes,
@@ -213,6 +217,58 @@ describe('stats lib', () => {
       expect(result).toHaveLength(24)
       expect(result[10]).toEqual({ hour: 10, count: 1 })
       expect(result[11].count).toBe(0)
+    })
+
+    it('getYAxisConfig returns 120m default when max <= 120 and dynamic hour intervals when > 120', () => {
+      const emptyConfig = getYAxisConfig(0)
+      expect(emptyConfig.domain).toEqual([0, 120])
+      expect(emptyConfig.ticks).toEqual([0, 30, 60, 90, 120])
+
+      const smallConfig = getYAxisConfig(45)
+      expect(smallConfig.domain).toEqual([0, 120])
+      expect(smallConfig.ticks).toEqual([0, 30, 60, 90, 120])
+
+      const largeConfig = getYAxisConfig(150)
+      expect(largeConfig.domain).toEqual([0, 180])
+      expect(largeConfig.ticks).toEqual([0, 60, 120, 180])
+
+      const hugeConfig = getYAxisConfig(650)
+      expect(hugeConfig.domain).toEqual([0, 720])
+    })
+
+    it('formatYAxisTick formats minutes cleanly to 0, 30m, 1h, 2.5h', () => {
+      expect(formatYAxisTick(0)).toBe('0')
+      expect(formatYAxisTick(30)).toBe('30m')
+      expect(formatYAxisTick(60)).toBe('1h')
+      expect(formatYAxisTick(90)).toBe('1.5h')
+      expect(formatYAxisTick(120)).toBe('2h')
+    })
+
+    it('averageDailyFocusMinutes calculates average only across active days', () => {
+      const t1 = new Date(2025, 4, 13, 10, 0, 0).getTime()
+      const t2 = new Date(2025, 4, 14, 10, 0, 0).getTime()
+      const sessions: Session[] = [
+        makeSession({ start: t1, durationMs: 60 * 60_000 }),
+        makeSession({ start: t2, durationMs: 120 * 60_000 }),
+      ]
+
+      const stats = averageDailyFocusMinutes(sessions)
+      expect(stats.activeDays).toBe(2)
+      expect(stats.avgMinutes).toBe(90)
+    })
+
+    it('pomodoroVsFlowBreakdown calculates accurate percentages', () => {
+      const t1 = new Date(2025, 4, 14, 10, 0, 0).getTime()
+      const sessions: Session[] = [
+        makeSession({ start: t1, durationMs: 75 * 60_000, mode: 'pomodoro' }),
+        makeSession({ start: t1, durationMs: 25 * 60_000, mode: 'flow' }),
+      ]
+
+      const breakdown = pomodoroVsFlowBreakdown(sessions)
+      expect(breakdown.pomodoroPct).toBe(75)
+      expect(breakdown.flowPct).toBe(25)
+      expect(breakdown.pomodoroMinutes).toBe(75)
+      expect(breakdown.flowMinutes).toBe(25)
     })
 
     it('heatmapData generates weeks of heatmap cells', () => {
