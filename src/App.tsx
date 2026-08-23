@@ -326,7 +326,7 @@ export default function App() {
         <nav
           role="tablist"
           aria-label="Navigation"
-          className={`relative grid grid-cols-3 items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
+          className={`nav-track relative grid grid-cols-3 items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
             zenRunning ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
           }`}
         >
