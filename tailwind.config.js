@@ -33,6 +33,8 @@ export default {
         'tag-bg': 'var(--color-tag-bg)',
         'tag-text': 'var(--color-tag-text)',
         'tag-border': 'var(--color-tag-border)',
+        'heatmap-l0': 'var(--heatmap-l0)',
+        'heatmap-l0-border': 'var(--heatmap-l0-border)',
       },
       opacity: {
         glow: 'var(--glow-opacity)',
