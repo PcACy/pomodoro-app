@@ -112,6 +112,7 @@ export interface Messages {
     presetDeepWork: string
     presetUltradian: string
     roundsUnit: string
+    minUnit: string
     weeklyGoalHours: (hours: number) => string
     phases: string
     phasesHint: string
@@ -286,7 +287,8 @@ const de: Messages = {
     presetDeepWork: 'Deep Work (50 / 10 min)',
     presetUltradian: 'Ultradian (90 / 20 min)',
     roundsUnit: 'Runden',
-    weeklyGoalHours: (h) => `≈ ${h.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Std. pro Woche`,
+    minUnit: 'min',
+    weeklyGoalHours: (h) => `≈ ${h.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Std./Woche`,
     phases: 'Phasen',
     phasesHint: 'Dauern in Minuten, zwischen 1 und 180.',
     cycle: 'Zyklus',
@@ -466,7 +468,8 @@ const en: Messages = {
     presetDeepWork: 'Deep Work (50 / 10 min)',
     presetUltradian: 'Ultradian (90 / 20 min)',
     roundsUnit: 'rounds',
-    weeklyGoalHours: (h) => `≈ ${h.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} hrs per week`,
+    minUnit: 'min',
+    weeklyGoalHours: (h) => `≈ ${h.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} hrs/week`,
     phases: 'Phases',
     phasesHint: 'Durations in minutes, between 1 and 180.',
     cycle: 'Cycle',

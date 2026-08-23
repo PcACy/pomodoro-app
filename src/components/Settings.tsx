@@ -519,7 +519,7 @@ export const SettingsPanel = memo(function SettingsPanel({
               min={1}
               max={180}
               step={5}
-              suffix={t.settings.minutes}
+              suffix={t.settings.minUnit}
               ariaLabel={t.phases.focus}
               onChange={(val) => setPhaseDuration('focus', val)}
             />
@@ -531,7 +531,7 @@ export const SettingsPanel = memo(function SettingsPanel({
               min={1}
               max={60}
               step={1}
-              suffix={t.settings.minutes}
+              suffix={t.settings.minUnit}
               ariaLabel={t.phases.shortBreak}
               onChange={(val) => setPhaseDuration('shortBreak', val)}
             />
@@ -543,7 +543,7 @@ export const SettingsPanel = memo(function SettingsPanel({
               min={1}
               max={90}
               step={1}
-              suffix={t.settings.minutes}
+              suffix={t.settings.minUnit}
               ariaLabel={t.phases.longBreak}
               onChange={(val) => setPhaseDuration('longBreak', val)}
             />
@@ -553,12 +553,12 @@ export const SettingsPanel = memo(function SettingsPanel({
         {/* Subtle Divider */}
         <div className="my-6 border-t border-line/50" />
 
-        {/* Cycle & Weekly Goal in 2 Columns */}
+        {/* Cycle & Weekly Goal in 2 Columns with Equalized Headers */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <div className="flex flex-col justify-between gap-2">
-            <div>
+          <div className="flex flex-col gap-2">
+            <div className="flex min-h-[38px] flex-col justify-center">
               <span className="text-xs font-semibold text-fg">{t.settings.cycle}</span>
-              <p className="text-[11px] text-muted">{t.settings.cycleHint}</p>
+              <p className="text-[11px] text-muted line-clamp-1">{t.settings.cycleHint}</p>
             </div>
             <NumberStepper
               value={settings.phases.roundsBeforeLongBreak}
@@ -576,30 +576,30 @@ export const SettingsPanel = memo(function SettingsPanel({
             />
           </div>
 
-          <div className="flex flex-col justify-between gap-2">
-            <div>
-              <span className="text-xs font-semibold text-fg">{t.settings.weeklyGoal}</span>
-              <p className="text-[11px] text-muted">{t.settings.weeklyGoalHint}</p>
+          <div className="flex flex-col gap-2">
+            <div className="flex min-h-[38px] flex-col justify-center">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-fg">{t.settings.weeklyGoal}</span>
+                <span className="rounded-md border border-accent/25 bg-accent/10 px-1.5 py-0.5 text-[10px] font-medium text-accent">
+                  {t.settings.weeklyGoalHours(settings.weeklyGoalMinutes / 60)}
+                </span>
+              </div>
+              <p className="text-[11px] text-muted line-clamp-1">{t.settings.weeklyGoalHint}</p>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <NumberStepper
-                value={settings.weeklyGoalMinutes}
-                min={15}
-                max={24 * 60}
-                step={30}
-                suffix={t.settings.minutes}
-                ariaLabel={t.settings.weeklyGoal}
-                onChange={(val) =>
-                  update((s) => ({
-                    ...s,
-                    weeklyGoalMinutes: val,
-                  }))
-                }
-              />
-              <span className="text-[11px] font-medium text-accent">
-                {t.settings.weeklyGoalHours(settings.weeklyGoalMinutes / 60)}
-              </span>
-            </div>
+            <NumberStepper
+              value={settings.weeklyGoalMinutes}
+              min={15}
+              max={24 * 60}
+              step={30}
+              suffix={t.settings.minUnit}
+              ariaLabel={t.settings.weeklyGoal}
+              onChange={(val) =>
+                update((s) => ({
+                  ...s,
+                  weeklyGoalMinutes: val,
+                }))
+              }
+            />
           </div>
         </div>
       </div>
