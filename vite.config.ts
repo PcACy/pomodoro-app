@@ -93,7 +93,7 @@ export default defineConfig(({ mode }) => {
       config.esbuild = {
         drop: ['debugger'],
         pure: ['console.log', 'console.info', 'console.debug', 'console.trace'],
-      }
+      } as Record<string, unknown>
     }
   }
 
