@@ -560,3 +560,54 @@ textarea:focus:not(:focus-visible) {
 .animate-zzz {
   animation: zzz 2.4s ease-in-out infinite;
 }
+
+/* iOS 26 Floating Aurora Orbs (GPU-accelerated composite transform) */
+@keyframes aurora-float-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(60px, 40px) scale(1.1);
+  }
+}
+
+@keyframes aurora-float-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-50px, 50px) scale(0.95);
+  }
+}
+
+@keyframes aurora-float-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(40px, -40px) scale(1.06);
+  }
+}
+
+.animate-aurora-1 {
+  animation: aurora-float-1 22s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-aurora-2 {
+  animation: aurora-float-2 26s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-aurora-3 {
+  animation: aurora-float-3 20s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-aurora-1,
+  .animate-aurora-2,
+  .animate-aurora-3 {
+    animation: none;
+  }
+}

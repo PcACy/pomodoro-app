@@ -19,7 +19,7 @@ import { useTranslation } from './hooks/useTranslation'
 import { addSession, updateSessionNotes } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
 import { initAudio, playMicroClick } from './lib/sound'
-import { STORAGE_KEYS, type PhaseId, type Session, type Settings, type TimerMode } from './types'
+import { STORAGE_KEYS, type Session, type Settings, type TimerMode } from './types'
 import type { Messages } from './lib/i18n'
 import { Timer } from './components/Timer'
 import { QuickStats } from './components/QuickStats'
@@ -28,6 +28,7 @@ import { PipTimer, PipCanvas } from './components/PipTimer'
 import { TodoList } from './components/TodoList'
 import { CatLogo } from './components/CatLogo'
 import { VimStatusLine } from './components/VimStatusLine'
+import { ThemeBackground } from './components/ThemeBackground'
 
 const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })))
 const SettingsPanel = lazy(() => import('./components/Settings').then((m) => ({ default: m.SettingsPanel })))
@@ -46,12 +47,6 @@ const TAB_LABEL_KEYS: Record<Tab, keyof Messages['nav']> = {
   dashboard: 'statistics',
   settings: 'settings',
 }
-
-const GLOW_PHASES: { id: PhaseId; cssVar: string }[] = [
-  { id: 'focus', cssVar: '--c-accent' },
-  { id: 'shortBreak', cssVar: '--c-break' },
-  { id: 'longBreak', cssVar: '--c-long' },
-]
 
 export default function App() {
   const { t } = useTranslation()
@@ -300,43 +295,14 @@ export default function App() {
         {liveAnnouncement}
       </div>
 
-      {/* Gruvbox Vintage Paper & Film Grain Overlay */}
-      {themeId === 'gruvbox' && (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none fixed inset-0 z-0 opacity-[0.032] mix-blend-overlay"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          }}
-        />
-      )}
+      {/* Theme-Specific High-End Atmosphere Background */}
+      <ThemeBackground
+        themeId={themeId}
+        colorMode={colorMode}
+        phase={chromePhase}
+        isRunning={isRunning}
+      />
 
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div
-          className="ambient-grid absolute inset-0"
-          style={{
-            backgroundImage: 'radial-gradient(circle, rgb(var(--c-fg) / 0.07) 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-        <div
-          className={`absolute left-1/2 top-[35%] h-[64rem] w-[64rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl ${
-            isRunning ? 'ambient-breath' : ''
-          }`}
-          style={isRunning ? undefined : { opacity: 0.12 }}
-        >
-          {GLOW_PHASES.map((g) => (
-            <div
-              key={g.id}
-              className="ambient-glow-layer absolute inset-0 rounded-full"
-              style={{
-                opacity: chromePhase === g.id ? 1 : 0,
-                background: `radial-gradient(circle at center, rgb(var(${g.cssVar}) / 0.55) 0%, transparent 62%)`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
       <header className="flex w-full items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-btn border border-accent/20 bg-accent/10 text-accent shadow-sm transition-all hover:scale-105 active:scale-95">
@@ -513,23 +479,12 @@ export default function App() {
       {/* Immersive Borderless Zen Mode Overlay */}
       {isZenMode && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-canvas select-none overflow-hidden animate-fade-in">
-          {/* Subtle Canvas Dot Pattern */}
-          <div
-            className="absolute inset-0 pointer-events-none opacity-40"
-            style={{
-              backgroundImage: 'radial-gradient(circle, rgb(var(--c-fg) / 0.08) 1px, transparent 1px)',
-              backgroundSize: '24px 24px',
-            }}
-          />
-
-          {/* Atmospheric Ambient Aura Breathing with Timer */}
-          <div
-            className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[56rem] w-[56rem] rounded-full blur-3xl transition-all duration-1000 ${
-              isRunning ? 'ambient-breath opacity-35 scale-100' : 'opacity-10 scale-95'
-            }`}
-            style={{
-              background: `radial-gradient(circle at center, rgb(var(${GLOW_PHASES.find((g) => g.id === chromePhase)?.cssVar ?? '--c-accent'}) / 0.65) 0%, transparent 65%)`,
-            }}
+          {/* Theme-Specific Atmosphere Background */}
+          <ThemeBackground
+            themeId={themeId}
+            colorMode={colorMode}
+            phase={chromePhase}
+            isRunning={isRunning}
           />
 
           {/* Floating Minimalist Top Exit Badge (auto-fades on idle during focus) */}
