@@ -1,4 +1,4 @@
-export type ThemeId = 'gruvbox' | 'nothing' | 'ios-26' | 'material-you'
+export type ThemeId = 'gruvbox' | 'ios-26' | 'material-you'
 export type ColorMode = 'dark' | 'light'
 
 export interface ThemeDef {
@@ -14,12 +14,6 @@ export const THEMES: ThemeDef[] = [
     label: 'Gruvbox',
     swatchDark: ['#fe8019', '#8ec07c', '#fabd2f'],
     swatchLight: ['#af3a03', '#689d6a', '#d79921'],
-  },
-  {
-    id: 'nothing',
-    label: 'Nothing OS',
-    swatchDark: ['#eb0028', '#ffffff', '#737373'],
-    swatchLight: ['#eb0028', '#000000', '#737373'],
   },
   {
     id: 'ios-26',

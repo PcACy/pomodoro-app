@@ -11,7 +11,6 @@ const VALID_THEMES: Record<string, ThemeId> = {
   gruvbox: 'gruvbox',
   'gruvbox-dark': 'gruvbox',
   'gruvbox-light': 'gruvbox',
-  nothing: 'nothing',
   'ios-26': 'ios-26',
   'material-you': 'material-you',
 }

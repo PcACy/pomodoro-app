@@ -28,14 +28,14 @@ export const QuickStats = memo(function QuickStats({ sessions, settings }: Props
   return (
     <section className="card flex w-full max-w-md 2xl:max-w-lg flex-col gap-5 p-6 2xl:p-8">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-fg font-display uppercase tracking-wide bracket-label">{t.dashboard.todayFocus}</h3>
-        <span className="text-xs font-mono text-muted bracket-label">{t.dashboard.dailyGoal}</span>
+        <h3 className="text-sm font-semibold text-fg font-display uppercase tracking-wide">{t.dashboard.todayFocus}</h3>
+        <span className="text-xs font-mono text-muted">{t.dashboard.dailyGoal}</span>
       </div>
 
       <div>
         <div className="flex items-baseline justify-between gap-2">
           <span className="text-2xl font-bold font-display tabular-nums text-fg">{fmtDuration(today * 60_000, lang)}</span>
-          <span className="text-xs font-semibold font-mono tabular-nums text-accent bracket-label">{pct}%</span>
+          <span className="text-xs font-semibold font-mono tabular-nums text-accent">{pct}%</span>
         </div>
         <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-raised/70">
           <div
@@ -49,7 +49,7 @@ export const QuickStats = memo(function QuickStats({ sessions, settings }: Props
         <div className="flex items-center gap-2.5 rounded-btn border border-line/60 bg-raised/30 px-3 py-2.5 transition-colors hover:bg-raised/50">
           <Flame size={18} className="shrink-0 text-streak" />
           <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted bracket-label">{t.dashboard.streak}</p>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted">{t.dashboard.streak}</p>
             <p className="truncate text-base font-bold font-display tabular-nums leading-tight text-fg">
               {streak} {streak === 1 ? t.dashboard.day : t.dashboard.days}
             </p>
@@ -58,7 +58,7 @@ export const QuickStats = memo(function QuickStats({ sessions, settings }: Props
         <div className="flex items-center gap-2.5 rounded-btn border border-line/60 bg-raised/30 px-3 py-2.5 transition-colors hover:bg-raised/50">
           <ListChecks size={18} className="shrink-0 text-accent" />
           <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted bracket-label">{t.dashboard.pomodorosToday}</p>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted">{t.dashboard.pomodorosToday}</p>
             <p className="truncate text-base font-bold font-display tabular-nums leading-tight text-fg">{roundsToday}</p>
           </div>
         </div>

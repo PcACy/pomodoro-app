@@ -68,7 +68,7 @@ function MetricCard({
           {icon}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted truncate bracket-label">{label}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted truncate">{label}</p>
           <p className="text-xl font-bold font-display tabular-nums text-fg truncate">{value}</p>
         </div>
       </div>
@@ -319,7 +319,7 @@ export const Dashboard = memo(function Dashboard({
       {/* Main Focus Over Time Bar Chart */}
       <div className="card p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-fg font-display uppercase tracking-wide bracket-label">{chartTitle}</h3>
+          <h3 className="text-sm font-semibold text-fg font-display uppercase tracking-wide">{chartTitle}</h3>
           <span className="text-xs font-mono text-muted">{t.dashboard.focusMinutes}</span>
         </div>
         <ResponsiveContainer width="100%" height={230}>

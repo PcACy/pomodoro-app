@@ -252,7 +252,7 @@ export const Timer = memo(function Timer({
               key={m}
               type="button"
               onClick={() => onModeChange(m)}
-              className={`relative z-10 flex-1 rounded-btn px-3 py-1.5 font-display text-xs uppercase tracking-wider transition-colors duration-200 active:scale-95 bracket-label ${
+              className={`relative z-10 flex-1 rounded-btn px-3 py-1.5 font-display text-xs uppercase tracking-wider transition-colors duration-200 active:scale-95 ${
                 mode === m ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
@@ -356,7 +356,7 @@ export const Timer = memo(function Timer({
           )}
 
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-            <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-500 bracket-label ${PHASE_TEXT[phase]}`}>
+            <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-500 ${PHASE_TEXT[phase]}`}>
               {shownLabel}
             </span>
             <span
@@ -367,7 +367,7 @@ export const Timer = memo(function Timer({
               {shownTime}
             </span>
             {shownStatus ? (
-              <span className="text-xs font-medium text-muted bracket-label">{shownStatus}</span>
+              <span className="text-xs font-medium text-muted">{shownStatus}</span>
             ) : task ? (
               <span className="mt-1 max-w-[180px] truncate text-xs font-medium text-muted">
                 {task}
@@ -381,7 +381,7 @@ export const Timer = memo(function Timer({
             isFlow ? 'opacity-100 scale-100 translate-y-0' : 'pointer-events-none opacity-0 scale-95 translate-y-2'
           }`}
         >
-          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/80 bracket-label">
+          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/80">
             {shownLabel}
           </span>
           <span
@@ -399,7 +399,7 @@ export const Timer = memo(function Timer({
           </span>
           <Waveform status={flowStatus} />
           {shownStatus ? (
-            <span className="text-xs font-medium text-muted bracket-label">{shownStatus}</span>
+            <span className="text-xs font-medium text-muted">{shownStatus}</span>
           ) : task ? (
             <span className="mt-0.5 max-w-[180px] truncate text-xs font-medium text-muted">
               {task}
@@ -418,7 +418,7 @@ export const Timer = memo(function Timer({
           disabled={isFlow ? flowStatus === 'idle' : false}
           title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
           aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-          className={`btn-ghost timer-control-btn flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92] ${
+          className={`btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92] ${
             isFlow && flowStatus === 'idle' ? 'pointer-events-none opacity-20' : 'opacity-100'
           }`}
         >
@@ -429,7 +429,7 @@ export const Timer = memo(function Timer({
         <button
           type="button"
           onClick={onToggle}
-          className={`play-btn-nothing flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-[0.94] ${
+          className={`flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-[0.94] ${
             large ? 'h-20 w-20 2xl:h-22 2xl:w-22 shadow-2xl' : 'h-16 w-16 2xl:h-18 2xl:w-18 shadow-lg'
           } ${playBtnColor}`}
           title={running ? t.timer.pause : t.timer.start}
@@ -462,7 +462,7 @@ export const Timer = memo(function Timer({
             onClick={onSkip}
             title={`${t.shortcuts.skip} (N)`}
             aria-label={t.shortcuts.skip}
-            className="btn-ghost timer-control-btn flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full active:scale-[0.92]"
+            className="btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full active:scale-[0.92]"
           >
             <SkipForward size={18} />
           </button>
