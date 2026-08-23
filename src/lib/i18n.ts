@@ -134,8 +134,10 @@ export interface Messages {
     language: string
     appearance: string
     layoutHint: string
-    layoutSplit: string
-    layoutSingle: string
+    layoutTwoColumns: string
+    layoutTwoColumnsDesc: string
+    layoutOneColumn: string
+    layoutOneColumnDesc: string
   }
   sync: {
     title: string
@@ -307,10 +309,12 @@ const de: Messages = {
     clearSessions: 'Sessions löschen',
     backup: 'Komplett-Backup (.json)',
     language: 'Sprache',
-    appearance: 'Darstellung',
-    layoutHint: 'Anordnung von Timer, Aufgaben und Statistiken.',
-    layoutSplit: '2 Spalten (Timer & Aufgaben nebeneinander)',
-    layoutSingle: '1 Spalte (Zentrierter Fokus & großer Timer)',
+    appearance: 'Darstellung & Layout',
+    layoutHint: 'Wähle die Anordnung von Timer, Aufgaben und Statistiken.',
+    layoutTwoColumns: 'Zwei Spalten',
+    layoutTwoColumnsDesc: 'Timer und Aufgaben nebeneinander',
+    layoutOneColumn: 'Eine Spalte',
+    layoutOneColumnDesc: 'Zentrierter Fokus auf den Timer',
   },
   sync: {
     title: 'Cloud-Sync',
@@ -488,10 +492,12 @@ const en: Messages = {
     clearSessions: 'Delete sessions',
     backup: 'Full backup (.json)',
     language: 'Language',
-    appearance: 'Appearance',
-    layoutHint: 'Arrange timer, tasks and stats.',
-    layoutSplit: 'Two columns (Timer & tasks side by side)',
-    layoutSingle: 'One column (Centered focus & large timer)',
+    appearance: 'Appearance & Layout',
+    layoutHint: 'Choose how timer, tasks and stats are arranged.',
+    layoutTwoColumns: 'Two columns',
+    layoutTwoColumnsDesc: 'Timer & tasks side by side',
+    layoutOneColumn: 'One column',
+    layoutOneColumnDesc: 'Centered focus & large timer',
   },
   sync: {
     title: 'Cloud Sync',
