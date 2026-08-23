@@ -75,7 +75,7 @@ const TagSelect = memo(function TagSelect({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`tap-spring flex h-[38px] cursor-pointer items-center gap-1.5 px-2.5 rounded-btn border text-xs font-mono font-medium select-none ${
+        className={`tap-spring flex h-[38px] cursor-pointer items-center gap-1.5 px-3 rounded-btn border text-xs font-medium select-none ${
           value
             ? 'border-line/80 bg-raised/70 text-fg hover:border-accent/50'
             : 'border-line/60 bg-raised/40 text-muted hover:border-line hover:text-fg'
@@ -87,16 +87,16 @@ const TagSelect = memo(function TagSelect({
         {value ? (
           <>
             <span
-              className="h-1.5 w-1.5 shrink-0 rounded-full"
+              className="h-2 w-2 shrink-0 rounded-full"
               style={{ backgroundColor: selectedColor || '#8ec07c' }}
             />
-            <span className="max-w-[75px] sm:max-w-[100px] truncate">{value}</span>
+            <span className="max-w-[80px] sm:max-w-[110px] truncate">{value}</span>
           </>
         ) : (
           <span className="text-muted">{noTagLabel}</span>
         )}
         <ChevronDown
-          size={12}
+          size={13}
           className={`shrink-0 text-muted transition-transform duration-200 ${
             isOpen ? 'rotate-180 text-fg' : ''
           }`}
@@ -105,7 +105,7 @@ const TagSelect = memo(function TagSelect({
 
       {/* Popover Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-1.5 min-w-[150px] p-1 rounded-card bg-surface/95 border border-line shadow-2xl z-40 animate-fade-in backdrop-blur-md">
+        <div className="absolute right-0 top-full mt-2 w-48 sm:w-52 p-1.5 rounded-2xl bg-surface/95 border border-line shadow-2xl backdrop-blur-2xl z-50 flex flex-col gap-0.5 select-none animate-fade-in">
           {/* Option: No Tag */}
           <button
             type="button"
@@ -113,17 +113,17 @@ const TagSelect = memo(function TagSelect({
               onChange('')
               setIsOpen(false)
             }}
-            className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-sm text-xs font-mono text-left transition-colors cursor-pointer ${
+            className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-left transition-all cursor-pointer active:scale-[0.98] ${
               !value
-                ? 'bg-accent/15 text-accent font-semibold'
+                ? 'bg-accent/15 text-fg font-semibold'
                 : 'text-muted hover:bg-raised/70 hover:text-fg'
             }`}
           >
-            <span className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full border border-dashed border-muted shrink-0" />
+            <span className="flex items-center gap-2.5">
+              <span className="h-2 w-2 rounded-full border border-dashed border-muted/60 shrink-0" />
               <span>{noTagLabel}</span>
             </span>
-            {!value && <Check size={13} className="shrink-0 text-accent" />}
+            {!value && <Check size={14} className="shrink-0 text-accent" />}
           </button>
 
           {/* Option: All user tags */}
@@ -138,20 +138,20 @@ const TagSelect = memo(function TagSelect({
                   onChange(t)
                   setIsOpen(false)
                 }}
-                className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-sm text-xs font-mono text-left transition-colors cursor-pointer ${
+                className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-left transition-all cursor-pointer active:scale-[0.98] ${
                   isSelected
-                    ? 'bg-accent/15 text-accent font-semibold'
-                    : 'text-fg hover:bg-raised/70'
+                    ? 'bg-accent/15 text-fg font-semibold'
+                    : 'text-muted hover:bg-raised/70 hover:text-fg'
                 }`}
               >
-                <span className="flex items-center gap-2 truncate">
+                <span className="flex items-center gap-2.5 truncate">
                   <span
-                    className="h-1.5 w-1.5 rounded-full shrink-0"
+                    className="h-2 w-2 rounded-full shrink-0"
                     style={{ backgroundColor: color }}
                   />
-                  <span className="truncate">{t}</span>
+                  <span className="truncate text-fg">{t}</span>
                 </span>
-                {isSelected && <Check size={13} className="shrink-0 text-accent" />}
+                {isSelected && <Check size={14} className="shrink-0 text-accent" />}
               </button>
             )
           })}
