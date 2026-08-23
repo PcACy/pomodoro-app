@@ -318,7 +318,7 @@ export default function App() {
         <nav
           role="tablist"
           aria-label="Navigation"
-          className={`relative grid grid-cols-3 items-center gap-1 rounded-btn border border-line/60 bg-surface/90 p-1 backdrop-blur-md transition-opacity duration-500 ${
+          className={`relative grid grid-cols-3 items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
             zenRunning ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
           }`}
         >
@@ -339,7 +339,7 @@ export default function App() {
               aria-selected={tab === tb.id}
               aria-label={t.nav[TAB_LABEL_KEYS[tb.id]]}
               onClick={() => handleTabChange(tb.id)}
-              className={`relative z-10 flex min-h-[44px] items-center justify-center gap-2 rounded-btn px-3.5 py-2 text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
+              className={`relative z-10 flex min-h-[40px] sm:min-h-[42px] items-center justify-center gap-2 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
                 tab === tb.id ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
