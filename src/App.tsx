@@ -18,7 +18,7 @@ import { useSync } from './hooks/useSync'
 import { useTranslation } from './hooks/useTranslation'
 import { addSession, updateSessionNotes } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
-import { initAudio } from './lib/sound'
+import { initAudio, playMicroClick } from './lib/sound'
 import { STORAGE_KEYS, type PhaseId, type Session, type Settings, type TimerMode } from './types'
 import type { Messages } from './lib/i18n'
 import { Timer } from './components/Timer'
@@ -27,6 +27,7 @@ import { DayTimeline } from './components/DayTimeline'
 import { PipTimer, PipCanvas } from './components/PipTimer'
 import { TodoList } from './components/TodoList'
 import { CatLogo } from './components/CatLogo'
+import { VimStatusLine } from './components/VimStatusLine'
 
 const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })))
 const SettingsPanel = lazy(() => import('./components/Settings').then((m) => ({ default: m.SettingsPanel })))
@@ -198,6 +199,7 @@ export default function App() {
   )
 
   const handleTabChange = useCallback((nextTab: Tab) => {
+    playMicroClick('tab')
     setIsZenMode(false)
     setTab(nextTab)
   }, [])
@@ -298,6 +300,17 @@ export default function App() {
         {liveAnnouncement}
       </div>
 
+      {/* Gruvbox Vintage Paper & Film Grain Overlay */}
+      {themeId === 'gruvbox' && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 z-0 opacity-[0.032] mix-blend-overlay"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          }}
+        />
+      )}
+
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div
           className="ambient-grid absolute inset-0"
@@ -327,7 +340,11 @@ export default function App() {
       <header className="flex w-full items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-btn border border-accent/20 bg-accent/10 text-accent shadow-sm transition-all hover:scale-105 active:scale-95">
-            <CatLogo className="text-accent" size={20} />
+            <CatLogo
+              className="text-accent"
+              size={22}
+              state={isRunning ? chromePhase : 'idle'}
+            />
           </div>
           <h1 className="text-lg font-bold text-fg">Pomau</h1>
         </div>
@@ -614,6 +631,21 @@ export default function App() {
           <ReflectionModal onSave={handleSaveNote} onSkip={handleSkipNote} />
         </Suspense>
       )}
+
+      {/* Gruvbox Minimalist CLI / Vim Statusline */}
+      <VimStatusLine
+        themeId={themeId}
+        colorMode={colorMode}
+        mode={mode}
+        phase={chromePhase}
+        status={chromeStatus}
+        time={chromeTime}
+        progress={mode === 'flow' ? 1 : timer.progress}
+        task={sessionTask}
+        tag={sessionTag}
+        completedRounds={timer.completedFocusInCycle}
+        totalRounds={settings.phases.roundsBeforeLongBreak}
+      />
     </div>
   )
 }

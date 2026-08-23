@@ -54,6 +54,59 @@ function getBuffer(audio: AudioContext, kind: ChimeKind): AudioBuffer | null {
   return rendered
 }
 
+export type ClickKind = 'tick' | 'tap' | 'toggle' | 'pop' | 'tab'
+
+export function playMicroClick(kind: ClickKind = 'tick'): void {
+  try {
+    const audio = ensureCtx()
+    if (!audio) return
+    const now = audio.currentTime
+
+    const osc = audio.createOscillator()
+    const gain = audio.createGain()
+
+    osc.connect(gain)
+    gain.connect(audio.destination)
+
+    if (kind === 'tick') {
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(1400, now)
+      osc.frequency.exponentialRampToValueAtTime(300, now + 0.006)
+      gain.gain.setValueAtTime(0.04, now)
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.006)
+      osc.start(now)
+      osc.stop(now + 0.006)
+    } else if (kind === 'tap') {
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(900, now)
+      osc.frequency.exponentialRampToValueAtTime(220, now + 0.008)
+      gain.gain.setValueAtTime(0.06, now)
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.008)
+      osc.start(now)
+      osc.stop(now + 0.008)
+    } else if (kind === 'toggle') {
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(650, now)
+      osc.frequency.exponentialRampToValueAtTime(160, now + 0.012)
+      gain.gain.setValueAtTime(0.08, now)
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.012)
+      osc.start(now)
+      osc.stop(now + 0.012)
+    } else if (kind === 'pop') {
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(450, now)
+      osc.frequency.exponentialRampToValueAtTime(900, now + 0.01)
+      osc.frequency.exponentialRampToValueAtTime(200, now + 0.018)
+      gain.gain.setValueAtTime(0.07, now)
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.018)
+      osc.start(now)
+      osc.stop(now + 0.018)
+    }
+  } catch {
+    /* ignore click errors */
+  }
+}
+
 export function playHaptic(pattern: number | number[] = 25): void {
   try {
     if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {

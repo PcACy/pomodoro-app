@@ -2,6 +2,8 @@ import { memo, useCallback, useRef, useState } from 'react'
 import { Check, Pause, PictureInPicture2, Play, RotateCcw, SkipForward } from 'lucide-react'
 import type { TimerStatus, PhaseId, TimerMode } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
+import { CatLogo } from './CatLogo'
+import { playMicroClick } from '../lib/sound'
 
 interface Props {
   phase: PhaseId
@@ -208,6 +210,21 @@ export const Timer = memo(function Timer({
         ? 'bg-break text-on-accent border border-white/10 active:border-break/60 shadow-[0_0_24px_rgb(var(--c-break)/calc(var(--glow-opacity,0.25)*1.5))]'
         : 'bg-long text-on-accent border border-white/10 active:border-long/60 shadow-[0_0_24px_rgb(var(--c-long)/calc(var(--glow-opacity,0.25)*1.5))]'
 
+  const handleToggleClick = () => {
+    playMicroClick(running ? 'tick' : 'pop')
+    onToggle()
+  }
+
+  const handleResetClick = () => {
+    playMicroClick('tap')
+    onReset()
+  }
+
+  const handleSkipClick = () => {
+    playMicroClick('toggle')
+    onSkip()
+  }
+
   return (
     <section
       className={`group relative flex w-full flex-col items-center transition-all duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] ${
@@ -302,17 +319,21 @@ export const Timer = memo(function Timer({
           style={
             {
               '--primary-color': `rgb(var(${glowVar}))`,
-              opacity: running ? 'var(--glow-opacity, 0.25)' : 'calc(var(--glow-opacity, 0.25) * 0.4)',
             } as React.CSSProperties
           }
         />
 
         <div
-          className={`absolute inset-0 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-            isFlow ? 'pointer-events-none opacity-0 scale-95' : 'opacity-100 scale-100'
+          className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+            isFlow ? 'pointer-events-none opacity-0 scale-95 -translate-y-2' : 'opacity-100 scale-100 translate-y-0'
           }`}
         >
-          <svg width={size} height={size} className="-rotate-90">
+          <svg
+            width={size}
+            height={size}
+            className="-rotate-90 select-none overflow-visible"
+            aria-hidden="true"
+          >
             <circle
               cx={center}
               cy={center}
@@ -330,36 +351,34 @@ export const Timer = memo(function Timer({
               strokeLinecap="round"
               strokeDasharray={circ}
               strokeDashoffset={offset}
-              style={{ willChange: 'stroke-dashoffset' }}
-              className={`${RING[phase]} transition-[stroke-dashoffset,stroke] duration-500 ease-linear`}
+              className={`${RING[phase]} transition-all duration-500 ease-linear`}
             />
           </svg>
 
-          {/* Interactive Dial Scrubbing Knob (in Idle state) */}
           {isIdle && !isFlow && (
             <div
-              role="slider"
-              aria-label="Fokusdauer anpassen"
-              aria-valuemin={5}
-              aria-valuemax={60}
-              aria-valuenow={activeDuration}
-              tabIndex={0}
+              className="absolute z-20 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center cursor-grab active:cursor-grabbing"
+              style={{ left: `${knobX}px`, top: `${knobY}px` }}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-              className="group/knob absolute z-20 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center cursor-grab active:cursor-grabbing"
-              style={{ left: `${knobX}px`, top: `${knobY}px` }}
-              title={`${activeDuration} Min (Ziehen zum Anpassen)`}
+              onPointerLeave={handlePointerUp}
             >
               <div className="h-4 w-4 rounded-full border-2 border-white bg-accent shadow-md shadow-accent/50 transition-transform duration-150 group-hover/knob:scale-125 group-active/knob:scale-110" />
             </div>
           )}
 
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-            <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-500 ${PHASE_TEXT[phase]}`}>
-              {shownLabel}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <CatLogo
+                size={16}
+                state={isIdle ? 'idle' : phase}
+                className={`transition-colors duration-500 ${PHASE_TEXT[phase]}`}
+              />
+              <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-500 ${PHASE_TEXT[phase]}`}>
+                {shownLabel}
+              </span>
+            </div>
             <span
               className={`font-display font-bold tabular-nums leading-none tracking-tight text-fg transition-all duration-300 ${
                 large ? 'text-6xl sm:text-7xl 2xl:text-8xl' : 'text-5xl 2xl:text-6xl'
@@ -367,13 +386,7 @@ export const Timer = memo(function Timer({
             >
               {shownTime}
             </span>
-            {shownStatus ? (
-              <span className="text-xs font-medium text-muted">{shownStatus}</span>
-            ) : task ? (
-              <span className="mt-1 max-w-[180px] truncate text-xs font-medium text-muted">
-                {task}
-              </span>
-            ) : null}
+            {shownStatus && <span className="text-xs font-medium text-muted">{shownStatus}</span>}
           </div>
         </div>
 
@@ -382,9 +395,16 @@ export const Timer = memo(function Timer({
             isFlow ? 'opacity-100 scale-100 translate-y-0' : 'pointer-events-none opacity-0 scale-95 translate-y-2'
           }`}
         >
-          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/80">
-            {shownLabel}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <CatLogo
+              size={16}
+              state={flowStatus === 'idle' ? 'idle' : 'focus'}
+              className="text-accent"
+            />
+            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/80">
+              {shownLabel}
+            </span>
+          </div>
           <span
             className={`font-display font-bold leading-none tracking-tight tabular-nums text-fg transition-all duration-300 my-1 ${
               large
@@ -399,24 +419,14 @@ export const Timer = memo(function Timer({
             {shownTime}
           </span>
           <Waveform status={flowStatus} />
-          {shownStatus ? (
-            <span className="text-xs font-medium text-muted">{shownStatus}</span>
-          ) : task ? (
-            <span className="mt-0.5 max-w-[180px] truncate text-xs font-medium text-muted">
-              {task}
-            </span>
-          ) : (
-            <span className="h-4" />
-          )}
+          {shownStatus && <span className="text-xs font-medium text-muted">{shownStatus}</span>}
         </div>
       </div>
 
       <div className="flex items-center gap-3.5 2xl:gap-5">
-        {/* Left Action: Reset */}
         <button
           type="button"
-          onClick={onReset}
-          disabled={isFlow ? flowStatus === 'idle' : false}
+          onClick={handleResetClick}
           title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
           aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
           className={`btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92] ${
@@ -426,10 +436,9 @@ export const Timer = memo(function Timer({
           <RotateCcw size={18} />
         </button>
 
-        {/* Central Play/Pause Action */}
         <button
           type="button"
-          onClick={onToggle}
+          onClick={handleToggleClick}
           className={`flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-[0.94] ${
             large ? 'h-20 w-20 2xl:h-22 2xl:w-22 shadow-2xl' : 'h-16 w-16 2xl:h-18 2xl:w-18 shadow-lg'
           } ${playBtnColor}`}
@@ -443,11 +452,10 @@ export const Timer = memo(function Timer({
           )}
         </button>
 
-        {/* Right Action: Finish & Save (Flow) or Skip (Pomodoro) */}
         {isFlow ? (
           <button
             type="button"
-            onClick={onSkip}
+            onClick={handleSkipClick}
             disabled={flowStatus === 'idle'}
             title={`${t.flow.finish} (F)`}
             aria-label={t.flow.finish}
@@ -460,7 +468,7 @@ export const Timer = memo(function Timer({
         ) : (
           <button
             type="button"
-            onClick={onSkip}
+            onClick={handleSkipClick}
             title={`${t.shortcuts.skip} (N)`}
             aria-label={t.shortcuts.skip}
             className="btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full active:scale-[0.92]"
