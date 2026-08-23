@@ -321,30 +321,34 @@ export const Timer = memo(function Timer({
         </div>
 
         <div
-          className={`flex items-center justify-center gap-1.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden ${
-            isFlow ? 'max-h-0 opacity-0 -translate-y-2 pointer-events-none mt-0 mb-0' : 'max-h-8 opacity-100 translate-y-0 my-4'
-          }`}
+          className="flex h-6 items-center justify-center my-2 transition-opacity duration-300"
           aria-hidden={isFlow}
           aria-label={`Runde ${currentRoundIndex + 1} von ${roundsBeforeLongBreak}`}
         >
-          {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => {
-            const isCompleted = i < currentRoundIndex
-            const isCurrent = i === currentRoundIndex
+          <div
+            className={`flex items-center justify-center gap-1.5 transition-all duration-300 ${
+              isFlow ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
+            }`}
+          >
+            {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => {
+              const isCompleted = i < currentRoundIndex
+              const isCurrent = i === currentRoundIndex
 
-            let pillStyle = 'bg-line'
-            if (isCompleted) {
-              pillStyle = 'bg-accent'
-            } else if (isCurrent) {
-              pillStyle = running ? 'bg-accent animate-pulse' : 'bg-accent/60'
-            }
+              let pillStyle = 'bg-line'
+              if (isCompleted) {
+                pillStyle = 'bg-accent'
+              } else if (isCurrent) {
+                pillStyle = running ? 'bg-accent animate-pulse' : 'bg-accent/60'
+              }
 
-            return (
-              <span
-                key={i}
-                className={`h-1 w-7 2xl:w-8 rounded-full transition-all duration-300 ${pillStyle}`}
-              />
-            )
-          })}
+              return (
+                <span
+                  key={i}
+                  className={`h-1 w-7 2xl:w-8 rounded-full transition-all duration-300 ${pillStyle}`}
+                />
+              )
+            })}
+          </div>
         </div>
       </div>
 
@@ -434,7 +438,7 @@ export const Timer = memo(function Timer({
           )}
 
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 min-h-[20px]">
               <CatLogo
                 size={16}
                 state={isIdle ? 'idle' : phase}
@@ -451,7 +455,15 @@ export const Timer = memo(function Timer({
             >
               {shownTime}
             </span>
-            {shownStatus && <span className="text-xs font-medium text-muted">{shownStatus}</span>}
+            <div className="flex min-h-[20px] items-center justify-center">
+              <span
+                className={`text-xs font-medium text-muted transition-opacity duration-200 ${
+                  shownStatus ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                {shownStatus || ''}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -460,7 +472,7 @@ export const Timer = memo(function Timer({
             isFlow ? 'opacity-100 scale-100 translate-y-0' : 'pointer-events-none opacity-0 scale-95 translate-y-2'
           }`}
         >
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 min-h-[20px]">
             <CatLogo
               size={16}
               state={flowStatus === 'idle' ? 'idle' : 'focus'}
@@ -483,8 +495,18 @@ export const Timer = memo(function Timer({
           >
             {shownTime}
           </span>
-          <Waveform status={flowStatus} />
-          {shownStatus && <span className="text-xs font-medium text-muted">{shownStatus}</span>}
+          <div className="flex min-h-[50px] flex-col items-center justify-center">
+            <Waveform status={flowStatus} />
+            <div className="flex min-h-[18px] items-center justify-center">
+              <span
+                className={`text-xs font-medium text-muted transition-opacity duration-200 ${
+                  shownStatus ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                {shownStatus || ''}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -543,31 +565,34 @@ export const Timer = memo(function Timer({
         )}
       </div>
 
+      {/* Keyboard shortcuts row: stable layout without jumps */}
       <div
-        className={`flex flex-wrap items-center justify-center gap-3 text-[11px] text-muted transition-opacity duration-300 [@media(hover:none)]:hidden ${
+        className={`flex min-h-[32px] flex-wrap items-center justify-center gap-2.5 sm:gap-3 select-none text-[11px] text-muted transition-opacity duration-200 [@media(hover:none)]:hidden ${
           running ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >
-        <span className="flex items-center gap-1">
+        <span className="inline-flex items-center gap-1">
           <kbd className="kbd">Space</kbd> {t.shortcuts.startPause}
         </span>
         {isFlow ? (
-          flowStatus !== 'idle' && (
-            <>
-              <span className="flex items-center gap-1">
-                <kbd className="kbd">R</kbd> {t.flow.discardShortcut}
-              </span>
-              <span className="flex items-center gap-1">
-                <kbd className="kbd">F</kbd> {t.flow.finishShortcut}
-              </span>
-            </>
-          )
+          <span
+            className={`inline-flex items-center gap-2.5 sm:gap-3 transition-opacity duration-200 ${
+              flowStatus !== 'idle' ? 'opacity-100' : 'pointer-events-none opacity-0'
+            }`}
+          >
+            <span className="inline-flex items-center gap-1">
+              <kbd className="kbd">R</kbd> {t.flow.discardShortcut}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <kbd className="kbd">F</kbd> {t.flow.finishShortcut}
+            </span>
+          </span>
         ) : (
           <>
-            <span className="flex items-center gap-1">
+            <span className="inline-flex items-center gap-1">
               <kbd className="kbd">R</kbd> {t.shortcuts.reset}
             </span>
-            <span className="flex items-center gap-1">
+            <span className="inline-flex items-center gap-1">
               <kbd className="kbd">N</kbd> {t.shortcuts.skip}
             </span>
           </>
@@ -577,14 +602,14 @@ export const Timer = memo(function Timer({
           onClick={onToggleZen}
           title={isZenMode ? t.zen.exitHint : t.zen.enterHint}
           aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
-          className="flex items-center gap-1 transition-colors hover:text-fg"
+          className="inline-flex items-center gap-1 transition-colors hover:text-fg"
         >
           <kbd className="kbd">Z</kbd> {t.shortcuts.zen}
         </button>
       </div>
 
       {pipSupported && (
-        <div className="group/pip absolute bottom-4 right-4 z-10">
+        <div className="group/pip absolute bottom-3 right-3 z-10 sm:bottom-4 sm:right-4">
           <button
             type="button"
             onClick={onPipToggle}
