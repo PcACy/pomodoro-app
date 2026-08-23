@@ -1,5 +1,6 @@
 import { memo, useEffect, useMemo, useState } from 'react'
 import type { MouseEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { Clock } from 'lucide-react'
 import type { Session } from '../types'
 import { fmtDuration, sameDay } from '../lib/time'
@@ -179,29 +180,32 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
       </div>
 
       {/* Floating Glass Tooltip */}
-      {tip && (
-        <div
-          className="pointer-events-none fixed z-50 flex flex-col gap-1 rounded-card border border-line bg-surface/95 px-3 py-2 text-xs font-medium text-fg shadow-2xl backdrop-blur-md"
-          style={{
-            left: Math.max(12, Math.min(tip.x - 100, window.innerWidth - 240)),
-            top: Math.max(12, tip.y - 75),
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-fg">{tip.session.task || t.phases.focus}</span>
-            {tip.session.tag && (
-              <span className="rounded-badge border border-tag-border bg-tag-bg px-1.5 py-0.5 text-[10px] font-medium text-tag-text">
-                {tip.session.tag}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2 text-[11px] font-mono tabular-nums text-muted">
-            <span>{tip.timeRange}</span>
-            <span>·</span>
-            <span className="font-semibold text-accent">{tip.durationStr}</span>
-          </div>
-        </div>
-      )}
+      {tip &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="pointer-events-none fixed z-[9999] flex flex-col gap-1 rounded-card border border-line bg-surface/95 px-3 py-2 text-xs font-medium text-fg shadow-2xl backdrop-blur-md"
+            style={{
+              left: Math.max(12, Math.min(tip.x - 100, window.innerWidth - 240)),
+              top: Math.max(12, tip.y - 75),
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-fg">{tip.session.task || t.phases.focus}</span>
+              {tip.session.tag && (
+                <span className="rounded-badge border border-tag-border bg-tag-bg px-1.5 py-0.5 text-[10px] font-medium text-tag-text">
+                  {tip.session.tag}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 text-[11px] font-mono tabular-nums text-muted">
+              <span>{tip.timeRange}</span>
+              <span>·</span>
+              <span className="font-semibold text-accent">{tip.durationStr}</span>
+            </div>
+          </div>,
+          document.body,
+        )}
     </section>
   )
 })

@@ -1,5 +1,6 @@
 import { memo, useMemo, useState } from 'react'
 import type { MouseEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { WEEKDAY_SHORT } from '../lib/time'
 import type { HeatmapCell, HeatmapWeek } from '../lib/stats'
 import { useTranslation } from '../hooks/useTranslation'
@@ -135,39 +136,42 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
         <span>{t.heatmap.more}</span>
       </div>
 
-      {tip && (
-        <div
-          className="pointer-events-none fixed z-50 flex flex-col gap-0.5 rounded-card border border-line bg-surface/95 px-3 py-2 text-xs font-medium text-fg shadow-xl backdrop-blur-md"
-          style={{
-            left: Math.max(12, Math.min(tip.x + 14, window.innerWidth - 230)),
-            top: Math.max(12, tip.y - 60),
-          }}
-        >
-          <span className="font-semibold text-fg">{getFormattedDate(tip.cell)}</span>
-          <span className="text-[11px] font-mono tabular-nums text-muted">
-            {tip.cell.minutes > 0 ? (
-              <>
-                <span className="font-semibold text-accent">
-                  {tip.cell.minutes} {lang === 'de' ? 'Min. Fokus' : 'min focus'}
-                </span>
-                <span> · </span>
-                <span>
-                  {tip.cell.count}{' '}
-                  {tip.cell.count === 1
-                    ? lang === 'de'
-                      ? 'Session'
-                      : 'session'
-                    : lang === 'de'
-                      ? 'Sessions'
-                      : 'sessions'}
-                </span>
-              </>
-            ) : (
-              <span>{lang === 'de' ? 'Keine Fokuszeit (0 Sessions)' : 'No focus time (0 sessions)'}</span>
-            )}
-          </span>
-        </div>
-      )}
+      {tip &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="pointer-events-none fixed z-[9999] flex flex-col gap-0.5 rounded-card border border-line bg-surface/95 px-3 py-2 text-xs font-medium text-fg shadow-2xl backdrop-blur-md transition-opacity duration-100"
+            style={{
+              left: Math.max(12, Math.min(tip.x - 100, window.innerWidth - 220)),
+              top: Math.max(12, tip.y - 68),
+            }}
+          >
+            <span className="font-semibold text-fg">{getFormattedDate(tip.cell)}</span>
+            <span className="text-[11px] font-mono tabular-nums text-muted">
+              {tip.cell.minutes > 0 ? (
+                <>
+                  <span className="font-semibold text-accent">
+                    {tip.cell.minutes} {lang === 'de' ? 'Min. Fokus' : 'min focus'}
+                  </span>
+                  <span> · </span>
+                  <span>
+                    {tip.cell.count}{' '}
+                    {tip.cell.count === 1
+                      ? lang === 'de'
+                        ? 'Session'
+                        : 'session'
+                      : lang === 'de'
+                        ? 'Sessions'
+                        : 'sessions'}
+                  </span>
+                </>
+              ) : (
+                <span>{lang === 'de' ? 'Keine Fokuszeit (0 Sessions)' : 'No focus time (0 sessions)'}</span>
+              )}
+            </span>
+          </div>,
+          document.body,
+        )}
     </>
   )
 })
