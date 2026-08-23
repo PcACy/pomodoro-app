@@ -234,7 +234,7 @@ export const Timer = memo(function Timer({
 
   return (
     <section
-      className={`group relative flex w-full flex-col items-center transition-all duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+      className={`group relative flex w-full flex-col items-center transition-[background-color,border-color,box-shadow,border-radius,opacity] duration-300 ${
         borderless
           ? 'max-w-xl gap-8 p-0 bg-transparent border-0 shadow-none'
           : 'card max-w-md 2xl:max-w-lg gap-6 2xl:gap-8 p-6 sm:p-8 2xl:p-10'
