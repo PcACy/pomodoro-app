@@ -271,8 +271,24 @@ export const SettingsPanel = memo(function SettingsPanel({
   const colors = useThemeColors(themeId, colorMode)
   const [newTag, setNewTag] = useState('')
   const [tagError, setTagError] = useState<string | null>(null)
-  const [shake, setShake] = useState(false)
+  // Increments on every failed attempt so the error message remounts and its
+  // fade-in animation replays instead of staying frozen after the first run.
+  const [errorNonce, setErrorNonce] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  /**
+   * Deterministically restarts the CSS shake animation. A boolean class-toggle
+   * alone fails when the animation is already running (rapid duplicate
+   * attempts) — removing the class, forcing a reflow and re-adding it always
+   * replays from frame 0 without remounting the input (focus is preserved).
+   */
+  const triggerShake = useCallback(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.classList.remove('animate-shake')
+    void el.offsetWidth
+    el.classList.add('animate-shake')
+  }, [])
 
   const todayKey = new Date().toISOString().slice(0, 10)
 
@@ -324,8 +340,8 @@ export const SettingsPanel = memo(function SettingsPanel({
     }
     if (settings.tags.includes(trimmed)) {
       setTagError(t.settings.tagAlreadyExists)
-      setShake(true)
-      setTimeout(() => setShake(false), 400)
+      setErrorNonce((n) => n + 1)
+      triggerShake()
       inputRef.current?.focus()
       return
     }
@@ -781,11 +797,14 @@ export const SettingsPanel = memo(function SettingsPanel({
                 addTag()
               }
             }}
+            onAnimationEnd={(e) => {
+              // Drop the class as soon as the shake finishes so the next
+              // trigger can re-apply it and replay the animation cleanly.
+              if (e.animationName === 'shake') e.currentTarget.classList.remove('animate-shake')
+            }}
             placeholder={t.settings.newTagPlaceholder}
-            className={`w-full rounded-btn border bg-raised/50 px-3.5 py-2 pr-10 font-mono text-sm text-fg placeholder:text-muted transition-all focus:outline-none ${
-              shake || tagError
-                ? 'border-accent-strong ring-1 ring-accent-strong/40 animate-shake'
-                : 'border-line focus:border-accent'
+            className={`w-full rounded-btn border bg-raised/50 px-3.5 py-2 pr-10 font-mono text-sm text-fg placeholder:text-muted transition-colors focus:outline-none ${
+              tagError ? 'border-accent-strong ring-1 ring-accent-strong/40' : 'border-line focus:border-accent'
             }`}
             maxLength={30}
           />
@@ -802,7 +821,7 @@ export const SettingsPanel = memo(function SettingsPanel({
         </div>
 
         {tagError && (
-          <p className="mt-1.5 text-xs font-medium text-accent-strong animate-fade-in">
+          <p key={errorNonce} className="mt-1.5 text-xs font-medium text-accent-strong animate-fade-in">
             {tagError}
           </p>
         )}
@@ -817,7 +836,7 @@ export const SettingsPanel = memo(function SettingsPanel({
               return (
                 <span
                   key={tag}
-                  className="tag-badge group flex items-center gap-1.5 rounded-badge border px-2.5 py-1 font-mono text-xs font-medium transition-all hover:brightness-105"
+                  className="tag-badge group flex animate-chip-in items-center gap-1.5 rounded-badge border px-2.5 py-1 font-mono text-xs font-medium transition-[background-color,border-color,color,filter] hover:brightness-105"
                   style={{
                     backgroundColor: `${color}18`,
                     color: color,

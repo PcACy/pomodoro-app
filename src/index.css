@@ -768,6 +768,22 @@ textarea:focus:not(:focus-visible) {
   will-change: transform;
 }
 
+/* Settings tag chip entrance: soft rise-and-settle when a tag is created. */
+@keyframes chip-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-chip-in {
+  animation: chip-in 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform, opacity;
+}
+
 /* --- Elastic button physics ---------------------------------------------- */
 /* Natural click compression; spring-out on release. Applied to interactive
    controls that don't already carry Tailwind active:scale utilities. */
