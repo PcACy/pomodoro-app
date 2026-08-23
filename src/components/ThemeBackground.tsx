@@ -5,15 +5,13 @@ import type { PhaseId } from '../types'
 interface ThemeBackgroundProps {
   themeId: ThemeId
   colorMode: ColorMode
-  phase: PhaseId
-  isRunning: boolean
+  phase?: PhaseId
+  isRunning?: boolean
 }
 
 export const ThemeBackground = memo(function ThemeBackground({
   themeId,
   colorMode,
-  phase,
-  isRunning,
 }: ThemeBackgroundProps) {
   const isDark = colorMode === 'dark'
 
@@ -46,45 +44,18 @@ export const ThemeBackground = memo(function ThemeBackground({
         </>
       )}
 
-      {/* 2. iOS 26: Liquid Glass Ambient Aurora-Blobs & Vignette */}
+      {/* 2. iOS 26: Studio Silver Slate Canvas */}
       {themeId === 'ios-26' && (
-        <>
-          {/* Subtle Viewport Edge Vignette */}
-          <div
-            className="absolute inset-0 transition-opacity duration-700"
-            style={{
-              background: isDark
-                ? 'radial-gradient(ellipse 110% 90% at 50% 30%, rgba(20, 24, 38, 0.7) 0%, rgba(8, 9, 14, 1) 100%)'
-                : 'radial-gradient(ellipse 110% 90% at 50% 30%, rgba(255, 255, 255, 0.95) 0%, rgba(242, 242, 247, 1) 100%)',
-            }}
-          />
-
-          {/* Floating Aurora Orb 1 (Top Left / Primary Accent) */}
-          <div
-            className="absolute -top-24 -left-20 h-[500px] w-[500px] rounded-full blur-[120px] opacity-20 transition-all duration-1000 animate-aurora-1"
-            style={{
-              backgroundColor: 'rgb(var(--c-accent))',
-            }}
-          />
-
-          {/* Floating Aurora Orb 2 (Middle Right / Secondary Phase Color) */}
-          <div
-            className="absolute top-1/4 -right-24 h-[520px] w-[520px] rounded-full blur-[130px] opacity-15 transition-all duration-1000 animate-aurora-2"
-            style={{
-              backgroundColor: phase === 'focus' ? 'rgb(var(--c-break))' : 'rgb(var(--c-long))',
-            }}
-          />
-
-          {/* Floating Aurora Orb 3 (Bottom Center / Breathing Pulse) */}
-          <div
-            className={`absolute -bottom-36 left-1/4 h-[460px] w-[460px] rounded-full blur-[140px] transition-all duration-1000 animate-aurora-3 ${
-              isRunning ? 'opacity-25' : 'opacity-10'
-            }`}
-            style={{
-              backgroundColor: 'rgb(var(--c-accent))',
-            }}
-          />
-        </>
+        <div
+          className="absolute inset-0 transition-opacity duration-700"
+          style={{
+            background: isDark
+              ? `radial-gradient(circle at 50% 40%, rgba(255, 107, 0, 0.06) 0%, transparent 60%),
+                 radial-gradient(120% 120% at 50% 0%, #1c1d21 0%, #121316 50%, #0a0a0c 100%)`
+              : `radial-gradient(circle at 50% 40%, rgba(255, 107, 0, 0.04) 0%, transparent 60%),
+                 radial-gradient(120% 120% at 50% 0%, #ffffff 0%, #f4f5f7 50%, #e5e8eb 100%)`,
+          }}
+        />
       )}
 
       {/* 3. MATERIAL YOU (M3): Clean Tonal Matte & Spotlight Depth */}

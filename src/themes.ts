@@ -18,8 +18,8 @@ export const THEMES: ThemeDef[] = [
   {
     id: 'ios-26',
     label: 'iOS 26 Liquid Glass',
-    swatchDark: ['#ff6b00', '#30d158', '#0a84ff'],
-    swatchLight: ['#ff6b00', '#34c759', '#007aff'],
+    swatchDark: ['#ff6b00', '#1c1d21', '#0a0a0c'],
+    swatchLight: ['#ff6b00', '#f4f5f7', '#e5e8eb'],
   },
   {
     id: 'material-you',
