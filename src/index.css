@@ -459,6 +459,27 @@ textarea:focus:not(:focus-visible) {
       inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
   }
 
+  /* 5. Navigation header active segment glass finish */
+  :root[data-theme='ios-26'][data-mode='dark'] .ios-nav-active,
+  :root[data-theme='ios-26']:not([data-mode='light']) .ios-nav-active {
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  :root[data-theme='ios-26'][data-mode='light'] .ios-nav-active {
+    background-color: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+
   /* Hide number spin buttons across all modern browsers */
   input[type='number']::-webkit-outer-spin-button,
   input[type='number']::-webkit-inner-spin-button {

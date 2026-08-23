@@ -481,7 +481,7 @@ export const SettingsPanel = memo(function SettingsPanel({
         {/* Theme Families */}
         <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.theme}</h3>
         <p className="mb-4 text-xs text-muted">{t.settings.themeHint}</p>
-        <div className="grid gap-2.5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
           {THEMES.map((theme) => {
             const swatches = colorMode === 'dark' ? theme.swatchDark : theme.swatchLight
             const isSelected = themeId === theme.id
@@ -490,13 +490,13 @@ export const SettingsPanel = memo(function SettingsPanel({
                 key={theme.id}
                 type="button"
                 onClick={() => onThemeChange(theme.id)}
-                className={`flex items-center justify-between rounded-btn border px-4 py-3 text-left transition-all active:scale-[0.98] ${
+                className={`group relative flex flex-col justify-between rounded-card border p-3.5 text-left transition-all active:scale-[0.98] ${
                   isSelected
-                    ? 'border-accent bg-accent/10 shadow-sm shadow-accent/10'
-                    : 'border-line bg-canvas hover:bg-raised'
+                    ? 'border-accent bg-accent/10 shadow-sm shadow-accent/15 ring-1 ring-accent/30'
+                    : 'border-line/70 bg-canvas/80 hover:border-line hover:bg-raised/60'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="mb-3 flex items-center justify-between gap-2">
                   <span className="flex -space-x-1.5">
                     {swatches.map((c, i) => (
                       <span
@@ -506,9 +506,17 @@ export const SettingsPanel = memo(function SettingsPanel({
                       />
                     ))}
                   </span>
-                  <span className="text-sm font-medium text-fg">{theme.label}</span>
+                  <div className="flex h-5 w-5 items-center justify-center">
+                    {isSelected ? (
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-on-accent shadow-sm">
+                        <Check size={12} strokeWidth={3} />
+                      </div>
+                    ) : (
+                      <div className="h-4 w-4 rounded-full border border-line/70" />
+                    )}
+                  </div>
                 </div>
-                {isSelected && <Check size={16} className="text-accent" />}
+                <span className="text-sm font-semibold text-fg tracking-tight">{theme.label}</span>
               </button>
             )
           })}
@@ -526,7 +534,7 @@ export const SettingsPanel = memo(function SettingsPanel({
             onClick={() => update((s) => ({ ...s, layoutMode: 'split' }))}
             className={`group relative flex flex-col rounded-card border p-4 text-left transition-all active:scale-[0.98] ${
               settings.layoutMode === 'split'
-                ? 'border-accent bg-accent/10 shadow-sm shadow-accent/10 ring-1 ring-accent/30'
+                ? 'border-accent bg-accent/10 shadow-sm shadow-accent/15 ring-1 ring-accent/30'
                 : 'border-line/70 bg-canvas/80 hover:border-line hover:bg-raised/60'
             }`}
           >
@@ -537,21 +545,22 @@ export const SettingsPanel = memo(function SettingsPanel({
                   <Check size={12} strokeWidth={3} />
                 </div>
               ) : (
-                <div className="h-4 w-4 rounded-full border border-line" />
+                <div className="h-4 w-4 rounded-full border border-line/70" />
               )}
             </div>
 
             {/* Wireframe Preview Graphic */}
-            <div className="mb-3.5 flex h-24 w-full items-center justify-center overflow-hidden rounded-btn border border-line/60 bg-surface/80 p-3 shadow-inner">
-              <div className="flex items-center gap-3.5">
-                {/* Left Mini Dial */}
-                <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-accent/60 bg-accent/10 shadow-sm">
-                  <div className="h-1.5 w-1.5 rounded-full bg-accent" />
+            <div className="mb-3.5 flex h-24 sm:h-28 w-full items-center justify-center overflow-hidden rounded-btn border border-line/70 bg-raised/40 p-3 shadow-inner">
+              <div className="flex items-center gap-4">
+                {/* Left Column: Mini Dial */}
+                <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-accent bg-accent/15 shadow-sm">
+                  <div className="h-2 w-2 rounded-full bg-accent" />
                 </div>
-                {/* Right Mini Task Bars */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="h-2 w-14 rounded-full bg-fg/25" />
-                  <div className="h-2 w-10 rounded-full bg-fg/15" />
+                {/* Right Column: Mini Task & Stats Bars */}
+                <div className="flex flex-col gap-2">
+                  <div className="h-2 w-16 rounded-full border border-fg/20 bg-fg/25" />
+                  <div className="h-2 w-12 rounded-full border border-fg/15 bg-fg/15" />
+                  <div className="h-1.5 w-14 rounded-full border border-accent/40 bg-accent/20" />
                 </div>
               </div>
             </div>
@@ -573,7 +582,7 @@ export const SettingsPanel = memo(function SettingsPanel({
             onClick={() => update((s) => ({ ...s, layoutMode: 'single' }))}
             className={`group relative flex flex-col rounded-card border p-4 text-left transition-all active:scale-[0.98] ${
               settings.layoutMode === 'single'
-                ? 'border-accent bg-accent/10 shadow-sm shadow-accent/10 ring-1 ring-accent/30'
+                ? 'border-accent bg-accent/10 shadow-sm shadow-accent/15 ring-1 ring-accent/30'
                 : 'border-line/70 bg-canvas/80 hover:border-line hover:bg-raised/60'
             }`}
           >
@@ -584,19 +593,20 @@ export const SettingsPanel = memo(function SettingsPanel({
                   <Check size={12} strokeWidth={3} />
                 </div>
               ) : (
-                <div className="h-4 w-4 rounded-full border border-line" />
+                <div className="h-4 w-4 rounded-full border border-line/70" />
               )}
             </div>
 
             {/* Wireframe Preview Graphic */}
-            <div className="mb-3.5 flex h-24 w-full items-center justify-center overflow-hidden rounded-btn border border-line/60 bg-surface/80 p-3 shadow-inner">
-              <div className="flex flex-col items-center gap-1.5">
+            <div className="mb-3.5 flex h-24 sm:h-28 w-full items-center justify-center overflow-hidden rounded-btn border border-line/70 bg-raised/40 p-3 shadow-inner">
+              <div className="flex flex-col items-center gap-2">
                 {/* Centered Large Mini Dial */}
-                <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-accent/60 bg-accent/10 shadow-sm">
+                <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-accent bg-accent/15 shadow-sm">
                   <div className="h-2 w-2 rounded-full bg-accent" />
                 </div>
-                {/* Centered Mini Bar */}
-                <div className="h-1.5 w-10 rounded-full bg-fg/20" />
+                {/* Centered Mini Task Bars */}
+                <div className="h-2 w-14 rounded-full border border-fg/20 bg-fg/25" />
+                <div className="h-1.5 w-10 rounded-full border border-fg/15 bg-fg/15" />
               </div>
             </div>
 

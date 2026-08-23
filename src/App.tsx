@@ -324,7 +324,7 @@ export default function App() {
         >
           {/* Sliding Pill Indicator */}
           <div
-            className="pointer-events-none absolute bottom-1 top-1 rounded-btn bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-nav-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
             style={{
               width: 'calc((100% - 8px - 8px) / 3)',
               left: '4px',
