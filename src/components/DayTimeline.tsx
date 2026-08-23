@@ -189,7 +189,7 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
           <div className="flex items-center gap-2">
             <span className="font-semibold text-fg">{tip.session.task || t.phases.focus}</span>
             {tip.session.tag && (
-              <span className="rounded-badge border border-accent/25 bg-accent/10 px-1.5 py-0.5 text-[10px] font-medium text-accent">
+              <span className="rounded-badge border border-tag-border bg-tag-bg px-1.5 py-0.5 text-[10px] font-medium text-tag-text">
                 {tip.session.tag}
               </span>
             )}

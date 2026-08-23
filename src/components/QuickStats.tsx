@@ -44,7 +44,7 @@ export const QuickStats = memo(function QuickStats({ sessions, settings }: Props
 
       <div className="grid grid-cols-2 gap-3">
         <div className="flex items-center gap-2.5 rounded-btn border border-line/60 bg-raised/30 px-3 py-2.5 transition-colors hover:bg-raised/50">
-          <Flame size={18} className="shrink-0 text-accent" />
+          <Flame size={18} className="shrink-0 text-streak" />
           <div className="min-w-0">
             <p className="text-[11px] font-medium uppercase tracking-wider text-muted">{t.dashboard.streak}</p>
             <p className="truncate text-base font-bold tabular-nums leading-tight text-fg">
@@ -68,7 +68,7 @@ export const QuickStats = memo(function QuickStats({ sessions, settings }: Props
             {tags.map((ts) => (
               <span
                 key={ts.tag}
-                className="inline-flex items-center gap-1.5 rounded-badge border border-line/60 bg-raised/40 px-2.5 py-1 text-xs text-fg"
+                className="inline-flex items-center gap-1.5 rounded-badge border border-tag-border bg-tag-bg px-2.5 py-1 text-xs text-tag-text"
               >
                 <span className="font-medium">{ts.tag}</span>
                 <span className="font-mono text-muted tabular-nums">{ts.minutes} min</span>

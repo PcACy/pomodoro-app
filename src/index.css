@@ -46,6 +46,14 @@
   --card-blur: 0px;
   --card-bg-opacity: 1;
 
+  /* Semantic Tokens: Gruvbox Aqua, Yellow, Green, Matte no-glow */
+  --color-tag-bg: rgba(142, 192, 124, 0.15);
+  --color-tag-text: #8ec07c;
+  --color-tag-border: rgba(142, 192, 124, 0.3);
+  --color-streak: #fabd2f;
+  --color-success: #b8bb26;
+  --glow-opacity: 0;
+
   --ease-ios-spring: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-ios-smooth: cubic-bezier(0.2, 0, 0, 1);
 }
@@ -87,6 +95,14 @@
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   --card-blur: 0px;
   --card-bg-opacity: 1;
+
+  /* Semantic Tokens */
+  --color-tag-bg: rgba(104, 157, 106, 0.15);
+  --color-tag-text: #689d6a;
+  --color-tag-border: rgba(104, 157, 106, 0.3);
+  --color-streak: #d79921;
+  --color-success: #98971a;
+  --glow-opacity: 0;
 
   --ease-ios-spring: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-ios-smooth: cubic-bezier(0.2, 0, 0, 1);
@@ -132,6 +148,14 @@
   --card-shadow: none;
   --card-blur: 0px;
   --card-bg-opacity: 1;
+
+  /* Semantic Tokens */
+  --color-tag-bg: rgba(255, 255, 255, 0.1);
+  --color-tag-text: #ffffff;
+  --color-tag-border: rgba(255, 255, 255, 0.25);
+  --color-streak: #eb0028;
+  --color-success: #ffffff;
+  --glow-opacity: 0;
 }
 
 :root[data-theme='nothing'][data-mode='light'] {
@@ -170,6 +194,14 @@
   --card-shadow: none;
   --card-blur: 0px;
   --card-bg-opacity: 1;
+
+  /* Semantic Tokens */
+  --color-tag-bg: rgba(0, 0, 0, 0.08);
+  --color-tag-text: #000000;
+  --color-tag-border: rgba(0, 0, 0, 0.2);
+  --color-streak: #eb0028;
+  --color-success: #000000;
+  --glow-opacity: 0;
 }
 
 /* =========================================================================
@@ -212,6 +244,14 @@
   --card-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.45);
   --card-blur: 24px;
   --card-bg-opacity: 0.72;
+
+  /* Semantic Tokens */
+  --color-tag-bg: rgba(10, 132, 255, 0.15);
+  --color-tag-text: #0a84ff;
+  --color-tag-border: rgba(10, 132, 255, 0.3);
+  --color-streak: #ff9f0a;
+  --color-success: #30d158;
+  --glow-opacity: 0.35;
 }
 
 :root[data-theme='ios-26'][data-mode='light'] {
@@ -250,6 +290,14 @@
   --card-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.08);
   --card-blur: 24px;
   --card-bg-opacity: 0.78;
+
+  /* Semantic Tokens */
+  --color-tag-bg: rgba(0, 122, 255, 0.12);
+  --color-tag-text: #007aff;
+  --color-tag-border: rgba(0, 122, 255, 0.25);
+  --color-streak: #ff9500;
+  --color-success: #34c759;
+  --glow-opacity: 0.25;
 }
 
 /* =========================================================================
@@ -292,6 +340,14 @@
   --card-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.28), 0 1px 3px 0 rgba(0, 0, 0, 0.35);
   --card-blur: 0px;
   --card-bg-opacity: 1;
+
+  /* Semantic Tokens */
+  --color-tag-bg: rgba(168, 199, 250, 0.15);
+  --color-tag-text: #a8c7fa;
+  --color-tag-border: transparent;
+  --color-streak: #ffd966;
+  --color-success: #c4eed0;
+  --glow-opacity: 0.2;
 }
 
 :root[data-theme='material-you'][data-mode='light'] {
@@ -330,6 +386,14 @@
   --card-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.12);
   --card-blur: 0px;
   --card-bg-opacity: 1;
+
+  /* Semantic Tokens */
+  --color-tag-bg: rgba(0, 99, 155, 0.12);
+  --color-tag-text: #00639b;
+  --color-tag-border: transparent;
+  --color-streak: #8a6a00;
+  --color-success: #386a20;
+  --glow-opacity: 0.15;
 }
 
 html,

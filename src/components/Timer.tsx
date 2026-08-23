@@ -203,10 +203,10 @@ export const Timer = memo(function Timer({
 
   const playBtnColor =
     isFlow || phase === 'focus'
-      ? 'bg-accent text-on-accent shadow-accent/25 hover:shadow-[0_0_24px_rgb(var(--c-accent)/0.45)]'
+      ? 'bg-accent text-on-accent border border-white/10 active:border-accent/60 shadow-[0_0_24px_rgb(var(--c-accent)/calc(var(--glow-opacity,0.25)*1.5))]'
       : phase === 'shortBreak'
-        ? 'bg-break text-on-accent shadow-break/25 hover:shadow-[0_0_24px_rgb(var(--c-break)/0.45)]'
-        : 'bg-long text-on-accent shadow-long/25 hover:shadow-[0_0_24px_rgb(var(--c-long)/0.45)]'
+        ? 'bg-break text-on-accent border border-white/10 active:border-break/60 shadow-[0_0_24px_rgb(var(--c-break)/calc(var(--glow-opacity,0.25)*1.5))]'
+        : 'bg-long text-on-accent border border-white/10 active:border-long/60 shadow-[0_0_24px_rgb(var(--c-long)/calc(var(--glow-opacity,0.25)*1.5))]'
 
   return (
     <section
@@ -223,7 +223,7 @@ export const Timer = memo(function Timer({
             {task}
           </span>
           {tag && (
-            <span className="shrink-0 rounded-badge border border-accent/30 bg-accent/15 px-1.5 py-0.5 text-[11px] font-medium text-accent leading-none">
+            <span className="shrink-0 rounded-badge border border-tag-border bg-tag-bg px-1.5 py-0.5 text-[11px] font-medium text-tag-text leading-none">
               #{tag}
             </span>
           )}
@@ -297,9 +297,14 @@ export const Timer = memo(function Timer({
         {/* Ambient Breathing Glow */}
         <div
           className={`pointer-events-none absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle,var(--primary-color)_0%,transparent_70%)] blur-3xl transition-all duration-700 ${
-            running ? 'animate-ambient-breath' : 'opacity-10 scale-95'
+            running ? 'animate-ambient-breath' : 'scale-95'
           }`}
-          style={{ '--primary-color': `rgb(var(${glowVar}))` } as React.CSSProperties}
+          style={
+            {
+              '--primary-color': `rgb(var(${glowVar}))`,
+              opacity: running ? 'var(--glow-opacity, 0.25)' : 'calc(var(--glow-opacity, 0.25) * 0.4)',
+            } as React.CSSProperties
+          }
         />
 
         <div

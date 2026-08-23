@@ -12,8 +12,8 @@ export const THEMES: ThemeDef[] = [
   {
     id: 'gruvbox',
     label: 'Gruvbox',
-    swatchDark: ['#fe8019', '#b8bb26', '#83a598'],
-    swatchLight: ['#af3a03', '#79740e', '#076678'],
+    swatchDark: ['#fe8019', '#8ec07c', '#fabd2f'],
+    swatchLight: ['#af3a03', '#689d6a', '#d79921'],
   },
   {
     id: 'nothing',

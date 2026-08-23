@@ -124,7 +124,7 @@ export const TodoList = memo(function TodoList({
                 title={t.done ? tr.todo.reopen : tr.todo.done}
                 aria-label={t.done ? tr.todo.reopen : tr.todo.done}
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border transition-all duration-150 active:scale-90 ${
-                  t.done ? 'border-accent bg-accent text-on-accent' : 'border-line text-transparent hover:border-accent'
+                  t.done ? 'border-success bg-success text-on-accent' : 'border-line text-transparent hover:border-accent'
                 }`}
               >
                 <Check size={13} className={`transition-transform duration-150 ${t.done ? 'scale-100' : 'scale-0'}`} />
@@ -189,7 +189,7 @@ export const TodoList = memo(function TodoList({
                     <span className="font-mono text-[11px] tabular-nums text-muted">🍅 x{t.pomodoros}</span>
                   </div>
                   {t.tag && (
-                    <span className="shrink-0 rounded-badge border border-accent/25 bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
+                    <span className="shrink-0 rounded-badge border border-tag-border bg-tag-bg px-2 py-0.5 text-[10px] font-medium text-tag-text">
                       {t.tag}
                     </span>
                   )}

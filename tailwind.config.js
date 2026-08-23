@@ -28,6 +28,14 @@ export default {
         break: 'rgb(var(--c-break) / <alpha-value>)',
         long: 'rgb(var(--c-long) / <alpha-value>)',
         track: 'rgb(var(--c-track) / <alpha-value>)',
+        streak: 'var(--color-streak)',
+        success: 'var(--color-success)',
+        'tag-bg': 'var(--color-tag-bg)',
+        'tag-text': 'var(--color-tag-text)',
+        'tag-border': 'var(--color-tag-border)',
+      },
+      opacity: {
+        glow: 'var(--glow-opacity)',
       },
       keyframes: {
         'fade-in': {
