@@ -52,31 +52,39 @@ const GLOW_VAR: Record<PhaseId, string> = {
 const MODES: TimerMode[] = ['pomodoro', 'flow']
 
 const FLOW_BARS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+// Pre-computed continuous harmonic phase offsets (negative delays)
+// Ensures the animation is already in continuous motion instantly without initial jumping
+const FLOW_DELAYS = [
+  '-0.00s',
+  '-0.25s',
+  '-0.50s',
+  '-0.75s',
+  '-1.00s',
+  '-1.25s',
+  '-1.00s',
+  '-0.75s',
+  '-0.50s',
+  '-0.25s',
+  '-0.00s',
+]
 
 /** 11-bar organic equalizer waveform for flow mode (GPU-composited). */
 function Waveform({ status }: { status: TimerStatus }) {
   return (
     <div className="my-2.5 flex h-8 items-center justify-center gap-1.5 select-none" aria-hidden="true">
-      {FLOW_BARS.map((i) => {
-        const delay = (Math.sin((i / 10) * Math.PI) * 0.45 + i * 0.08).toFixed(2)
-        const duration = (1.1 + (i % 4) * 0.2).toFixed(2)
-        return (
-          <span
-            key={i}
-            className={`flow-bar ${
-              status === 'running'
-                ? 'flow-bar--running bg-accent'
-                : status === 'paused'
-                  ? 'flow-bar--paused bg-accent/70'
-                  : 'flow-bar--idle bg-accent/30'
-            }`}
-            style={{
-              animationDelay: `${delay}s`,
-              animationDuration: `${duration}s`,
-            }}
-          />
-        )
-      })}
+      {FLOW_BARS.map((i) => (
+        <span
+          key={i}
+          className={`flow-bar ${
+            status === 'running'
+              ? 'flow-bar--running bg-accent'
+              : status === 'paused'
+                ? 'flow-bar--paused bg-accent/70'
+                : 'flow-bar--idle bg-accent/30'
+          }`}
+          style={status === 'running' ? { animationDelay: FLOW_DELAYS[i] } : undefined}
+        />
+      ))}
     </div>
   )
 }
