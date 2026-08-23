@@ -1,5 +1,5 @@
 import { memo, useCallback, useRef, useState } from 'react'
-import { Flag, Pause, PictureInPicture2, Play, RotateCcw, SkipForward, X } from 'lucide-react'
+import { Check, Pause, PictureInPicture2, Play, RotateCcw, SkipForward } from 'lucide-react'
 import type { TimerStatus, PhaseId, TimerMode } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
 
@@ -51,19 +51,32 @@ const GLOW_VAR: Record<PhaseId, string> = {
 
 const MODES: TimerMode[] = ['pomodoro', 'flow']
 
-const FLOW_BARS = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+const FLOW_BARS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-/** Minimal equalizer waveform for the flow mode (transform-only, GPU-composited). */
-function Waveform({ active }: { active: boolean }) {
+/** 11-bar organic equalizer waveform for flow mode (GPU-composited). */
+function Waveform({ status }: { status: TimerStatus }) {
   return (
-    <div className="flex h-8 items-center justify-center gap-1.5" aria-hidden="true">
-      {FLOW_BARS.map((i) => (
-        <span
-          key={i}
-          className={`flow-bar bg-accent ${active ? 'flow-bar--active' : ''}`}
-          style={{ animationDelay: `${i * 0.11}s` }}
-        />
-      ))}
+    <div className="my-2.5 flex h-8 items-center justify-center gap-1.5 select-none" aria-hidden="true">
+      {FLOW_BARS.map((i) => {
+        const delay = (Math.sin((i / 10) * Math.PI) * 0.45 + i * 0.08).toFixed(2)
+        const duration = (1.1 + (i % 4) * 0.2).toFixed(2)
+        return (
+          <span
+            key={i}
+            className={`flow-bar ${
+              status === 'running'
+                ? 'flow-bar--running bg-accent'
+                : status === 'paused'
+                  ? 'flow-bar--paused bg-accent/70'
+                  : 'flow-bar--idle bg-accent/30'
+            }`}
+            style={{
+              animationDelay: `${delay}s`,
+              animationDuration: `${duration}s`,
+            }}
+          />
+        )
+      })}
     </div>
   )
 }
@@ -351,59 +364,55 @@ export const Timer = memo(function Timer({
         </div>
 
         <div
-          className={`absolute inset-0 flex flex-col items-center justify-center gap-4 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+          className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
             isFlow ? 'opacity-100 scale-100 translate-y-0' : 'pointer-events-none opacity-0 scale-95 translate-y-2'
           }`}
         >
-          <span className="text-xs font-semibold uppercase tracking-[0.35em] text-accent/80">
+          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/80">
             {shownLabel}
           </span>
           <span
-            className={`font-mono font-bold leading-none tracking-tight tabular-nums text-fg transition-all duration-300 ${
-              large ? 'text-7xl sm:text-8xl 2xl:text-9xl' : 'text-6xl sm:text-7xl 2xl:text-8xl'
+            className={`font-mono font-bold leading-none tracking-tight tabular-nums text-fg transition-all duration-300 my-1 ${
+              large
+                ? isFlow && shownTime.length > 5
+                  ? 'text-6xl sm:text-7xl 2xl:text-8xl'
+                  : 'text-7xl sm:text-8xl 2xl:text-9xl'
+                : isFlow && shownTime.length > 5
+                  ? 'text-5xl 2xl:text-6xl'
+                  : 'text-6xl 2xl:text-7xl'
             }`}
           >
             {shownTime}
           </span>
-          <div className={`transition-all duration-300 delay-75 ${isFlow ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-            <Waveform active={running} />
-          </div>
+          <Waveform status={flowStatus} />
           {shownStatus ? (
             <span className="text-xs font-medium text-muted">{shownStatus}</span>
           ) : task ? (
-            <span className="mt-1 max-w-[180px] truncate text-xs font-medium text-muted">
+            <span className="mt-0.5 max-w-[180px] truncate text-xs font-medium text-muted">
               {task}
             </span>
-          ) : null}
+          ) : (
+            <span className="h-4" />
+          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-3 2xl:gap-4">
-        {isFlow ? (
-          flowStatus !== 'idle' ? (
-            <button
-              type="button"
-              onClick={onReset}
-              title={`${t.flow.discard} (R)`}
-              aria-label={t.flow.discard}
-              className="flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-xl border border-line text-muted transition-all duration-100 hover:bg-raised hover:text-fg active:scale-[0.94]"
-            >
-              <X size={18} />
-            </button>
-          ) : (
-            <div className="h-12 w-12 2xl:h-14 2xl:w-14" />
-          )
-        ) : (
-          <button
-            type="button"
-            onClick={onReset}
-            title={`${t.shortcuts.reset} (R)`}
-            aria-label={t.shortcuts.reset}
-            className="btn-ghost h-12 w-12 2xl:h-14 2xl:w-14 active:scale-[0.94]"
-          >
-            <RotateCcw size={18} />
-          </button>
-        )}
+      <div className="flex items-center gap-3.5 2xl:gap-5">
+        {/* Left Action: Reset */}
+        <button
+          type="button"
+          onClick={onReset}
+          disabled={isFlow ? flowStatus === 'idle' : false}
+          title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
+          aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
+          className={`btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92] ${
+            isFlow && flowStatus === 'idle' ? 'pointer-events-none opacity-20' : 'opacity-100'
+          }`}
+        >
+          <RotateCcw size={18} />
+        </button>
+
+        {/* Central Play/Pause Action */}
         <button
           type="button"
           onClick={onToggle}
@@ -419,27 +428,28 @@ export const Timer = memo(function Timer({
             <Play size={large ? 32 : 26} className="translate-x-0.5" />
           )}
         </button>
+
+        {/* Right Action: Finish & Save (Flow) or Skip (Pomodoro) */}
         {isFlow ? (
-          flowStatus !== 'idle' ? (
-            <button
-              type="button"
-              onClick={onSkip}
-              title={`${t.flow.finish} (F)`}
-              aria-label={t.flow.finish}
-              className="flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-xl border border-accent/60 bg-accent/15 text-accent shadow-sm shadow-accent/20 transition-all duration-100 hover:bg-accent/25 active:scale-[0.94]"
-            >
-              <Flag size={20} />
-            </button>
-          ) : (
-            <div className="h-12 w-12 2xl:h-14 2xl:w-14" />
-          )
+          <button
+            type="button"
+            onClick={onSkip}
+            disabled={flowStatus === 'idle'}
+            title={`${t.flow.finish} (F)`}
+            aria-label={t.flow.finish}
+            className={`flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full border border-accent/50 bg-accent/15 text-accent shadow-sm shadow-accent/15 transition-all duration-200 hover:bg-accent/25 active:scale-[0.92] ${
+              flowStatus === 'idle' ? 'pointer-events-none opacity-20' : 'opacity-100'
+            }`}
+          >
+            <Check size={20} strokeWidth={2.5} />
+          </button>
         ) : (
           <button
             type="button"
             onClick={onSkip}
             title={`${t.shortcuts.skip} (N)`}
             aria-label={t.shortcuts.skip}
-            className="btn-ghost h-12 w-12 2xl:h-14 2xl:w-14 active:scale-[0.94]"
+            className="btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full active:scale-[0.92]"
           >
             <SkipForward size={18} />
           </button>

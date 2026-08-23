@@ -370,34 +370,44 @@ body {
   will-change: transform, opacity;
 }
 
-/* Flow-mode equalizer bars: transform-only animation (GPU-composited). */
+/* Flow-mode organic equalizer waveform: GPU-accelerated */
 .flow-bar {
   height: 28px;
-  width: 4px;
+  width: 3.5px;
   border-radius: 9999px;
-  transform: scaleY(0.35);
   transform-origin: center;
-  transition: transform 600ms ease-in-out;
+  transition: transform 300ms ease-in-out, opacity 300ms ease-in-out, background-color 300ms ease-in-out;
   will-change: transform;
 }
 
-.flow-bar--active {
-  animation: flow-eq 1.6s ease-in-out infinite;
+.flow-bar--idle {
+  transform: scaleY(0.18);
 }
 
-@keyframes flow-eq {
-  0%,
-  100% {
-    transform: scaleY(0.4);
+.flow-bar--paused {
+  transform: scaleY(0.45);
+}
+
+.flow-bar--running {
+  animation: flow-wave ease-in-out infinite alternate;
+}
+
+@keyframes flow-wave {
+  0% {
+    transform: scaleY(0.18);
   }
   50% {
-    transform: scaleY(1);
+    transform: scaleY(0.95);
+  }
+  100% {
+    transform: scaleY(0.32);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .flow-bar--active {
+  .flow-bar--running {
     animation: none;
+    transform: scaleY(0.5);
   }
 }
 

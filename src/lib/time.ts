@@ -20,6 +20,17 @@ export const fmtElapsed = (ms: number): string => {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
+/** Adaptive Flow time format: MM:SS under 60 min, H:MM:SS at or above 60 min. */
+export const fmtFlowTime = (ms: number): string => {
+  const totalSec = Math.max(0, Math.floor(ms / 1000))
+  const h = Math.floor(totalSec / 3600)
+  const m = Math.floor((totalSec % 3600) / 60)
+  const s = totalSec % 60
+  const mm = String(m).padStart(2, '0')
+  const ss = String(s).padStart(2, '0')
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`
+}
+
 export const fmtDuration = (ms: number, lang: 'de' | 'en' = 'de'): string => {
   const min = Math.round(ms / MS_PER_MINUTE)
   if (min < 60) return `${min} min`

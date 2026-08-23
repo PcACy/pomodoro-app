@@ -9,6 +9,7 @@ import {
   fmtDateTime,
   fmtDuration,
   fmtElapsed,
+  fmtFlowTime,
   fmtTime,
   sameDay,
   startOfDay,
@@ -166,6 +167,21 @@ describe('time lib', () => {
       expect(fmtElapsed(65_000)).toBe('00:01:05')
       expect(fmtElapsed(3600_000 + 120_000 + 3_000)).toBe('01:02:03')
       expect(fmtElapsed(25 * 3600_000)).toBe('25:00:00')
+    })
+  })
+
+  describe('fmtFlowTime', () => {
+    it('formats times under 60 minutes as MM:SS', () => {
+      expect(fmtFlowTime(0)).toBe('00:00')
+      expect(fmtFlowTime(59_000)).toBe('00:59')
+      expect(fmtFlowTime((24 * 60 + 15) * 1000)).toBe('24:15')
+      expect(fmtFlowTime(59 * 60_000 + 59_000)).toBe('59:59')
+    })
+
+    it('formats times at or above 60 minutes with hours as H:MM:SS', () => {
+      expect(fmtFlowTime(60 * 60_000)).toBe('1:00:00')
+      expect(fmtFlowTime(3600_000 + 120_000 + 3_000)).toBe('1:02:03')
+      expect(fmtFlowTime(10 * 3600_000 + 5 * 60_000 + 9_000)).toBe('10:05:09')
     })
   })
 

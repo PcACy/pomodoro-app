@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Session, TimerStatus } from '../types'
 import { getTickerWorker } from '../lib/tickerWorker'
-import { fmtElapsed } from '../lib/time'
+import { fmtFlowTime } from '../lib/time'
 
 export const MIN_FLOW_SESSION_MS = 60_000
 
@@ -125,5 +125,5 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
     return () => w.removeEventListener('message', handler)
   }, [])
 
-  return { status, elapsedMs, time: fmtElapsed(elapsedMs), start, pause, toggle, finishSession, resetTimer }
+  return { status, elapsedMs, time: fmtFlowTime(elapsedMs), start, pause, toggle, finishSession, resetTimer }
 }
