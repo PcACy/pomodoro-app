@@ -264,7 +264,7 @@ export const Timer = memo(function Timer({
         >
           {/* Sliding Pill Indicator */}
           <div
-            className="pointer-events-none absolute bottom-1 top-1 rounded-btn bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="pointer-events-none absolute bottom-1 top-1 rounded-btn bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
             style={{
               width: 'calc(50% - 4px)',
               left: '4px',
@@ -468,7 +468,7 @@ export const Timer = memo(function Timer({
         <button
           type="button"
           onClick={handleToggleClick}
-          className={`flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-[0.94] ${
+          className={`ios-play-lens flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-[0.94] ${
             large ? 'h-20 w-20 2xl:h-22 2xl:w-22 shadow-2xl' : 'h-16 w-16 2xl:h-18 2xl:w-18 shadow-lg'
           } ${playBtnColor}`}
           title={running ? t.timer.pause : t.timer.start}

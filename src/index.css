@@ -172,7 +172,7 @@
   --c-raised: 232 232 238;
   --c-line: 216 216 222;
   --c-fg: 28 28 30;
-  --c-muted: 142 142 147;
+  --c-muted: 99 99 102;
   --c-accent: 255 107 0;
   --c-accent-strong: 224 94 0;
   --c-on-accent: 255 255 255;
@@ -398,6 +398,57 @@ textarea:focus:not(:focus-visible) {
     border-style: var(--border-card-style, solid);
     border-color: rgb(var(--c-line));
     @apply bg-raised px-1.5 py-0.5 font-mono text-[10px] text-muted;
+  }
+
+  /* ---- iOS 26 Liquid Glass: Specular Highlights & Contrast Hardening ---- */
+
+  /* 1. Card Specular Light Edge (top border highlight + inner shadow refraction) */
+  :root[data-theme='ios-26'][data-mode='light'] .card {
+    border-top: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow:
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.6),
+      var(--card-shadow);
+  }
+  :root[data-theme='ios-26'][data-mode='dark'] .card,
+  :root[data-theme='ios-26']:not([data-mode='light']) .card {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.08),
+      var(--card-shadow);
+  }
+
+  /* 2. Kbd / Shortcut pills: sharper glass look on iOS 26 */
+  :root[data-theme='ios-26'] .kbd {
+    background-color: rgba(var(--c-fg), 0.06);
+    border-color: rgba(var(--c-line), 0.5);
+    color: rgb(var(--c-fg) / 0.7);
+    font-weight: 500;
+  }
+  :root[data-theme='ios-26'][data-mode='light'] .kbd {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.72);
+  }
+
+  /* 3. Play button lens effect: inner glass sheen */
+  :root[data-theme='ios-26'] .ios-play-lens {
+    box-shadow:
+      inset 0 1px 2px rgba(255, 255, 255, 0.35),
+      0 8px 20px -4px rgba(var(--c-accent), 0.4);
+  }
+
+  /* 4. Segmented control active pill: frosted glass highlight */
+  :root[data-theme='ios-26'][data-mode='light'] .ios-seg-active {
+    background-color: rgba(255, 255, 255, 0.88);
+    box-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+  :root[data-theme='ios-26'][data-mode='dark'] .ios-seg-active,
+  :root[data-theme='ios-26']:not([data-mode='light']) .ios-seg-active {
+    background-color: rgba(255, 255, 255, 0.14);
+    box-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
   }
 
   /* Hide number spin buttons across all modern browsers */
