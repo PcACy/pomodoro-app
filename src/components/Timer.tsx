@@ -322,17 +322,31 @@ export const Timer = memo(function Timer({
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
       >
-        {/* Ambient Breathing Glow */}
+        {/* Ambient Breathing Glow behind Timer */}
         <div
-          className={`pointer-events-none absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle,var(--primary-color)_0%,transparent_70%)] blur-3xl transition-all duration-700 ${
-            running ? 'animate-ambient-breath' : 'scale-95'
+          className={`pointer-events-none absolute inset-0 -z-10 rounded-full blur-3xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+            running
+              ? 'opacity-28 scale-105'
+              : paused
+                ? 'opacity-14 scale-100'
+                : 'opacity-0 scale-95'
           }`}
           style={
             {
-              '--primary-color': `rgb(var(${glowVar}))`,
+              background: `radial-gradient(circle at center, rgb(var(${glowVar})) 0%, transparent 68%)`,
             } as React.CSSProperties
           }
-        />
+        >
+          {/* Inner Organic Breathing Layer while running */}
+          <div
+            className={`h-full w-full rounded-full transition-opacity duration-1000 ${
+              running ? 'animate-ambient-breath opacity-100' : 'opacity-0'
+            }`}
+            style={{
+              background: `radial-gradient(circle at center, rgb(var(${glowVar})) 0%, transparent 58%)`,
+            }}
+          />
+        </div>
 
         <div
           className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
