@@ -3,7 +3,7 @@ import type { MouseEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { Clock } from 'lucide-react'
 import type { Session } from '../types'
-import { fmtDuration, sameDay } from '../lib/time'
+import { fmtDuration, MS_PER_DAY, startOfDay } from '../lib/time'
 import { useTranslation } from '../hooks/useTranslation'
 
 interface Props {
@@ -36,13 +36,19 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
     return () => clearInterval(interval)
   }, [])
 
-  const todaySessions = useMemo(
-    () =>
-      sessions
-        .filter((s) => sameDay(new Date(s.start), now))
+  // Sessions overlapping today's window [00:00, 24:00). A session started at
+  // 23:50 that ends 00:15 must stay visible on both sides of midnight, clamped
+  // to the visible range instead of disappearing once its start day has passed.
+  const { todaySessions, dayStartMs } = useMemo(() => {
+    const dayStart = startOfDay(now).getTime()
+    const dayEnd = dayStart + MS_PER_DAY
+    return {
+      todaySessions: sessions
+        .filter((s) => s.start < dayEnd && s.end >= dayStart)
         .sort((a, b) => a.start - b.start),
-    [sessions, now],
-  )
+      dayStartMs: dayStart,
+    }
+  }, [sessions, now])
 
   // Dynamic start & end hours based on today's sessions and current time
   const { startHour, endHour, hourTicks } = useMemo(() => {
@@ -55,7 +61,10 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
 
     for (const s of todaySessions) {
       const sStartH = new Date(s.start).getHours()
-      const sEndH = new Date(s.end).getHours() + 1
+      // Clamp to the current day: an end past midnight must not stretch the
+      // axis of the previous day beyond 24:00.
+      const sEndDate = Math.min(new Date(s.end).getTime(), startOfDay(now).getTime() + MS_PER_DAY)
+      const sEndH = new Date(sEndDate).getHours() + 1
       if (sStartH < minH) minH = Math.max(0, sStartH)
       if (sEndH > maxH) maxH = Math.min(24, sEndH)
     }
@@ -120,8 +129,13 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
           {todaySessions.map((s) => {
             const sStart = new Date(s.start)
             const sEnd = new Date(s.end)
-            const sStartMin = sStart.getHours() * 60 + sStart.getMinutes() + sStart.getSeconds() / 60 - startHour * 60
-            const sEndMin = sEnd.getHours() * 60 + sEnd.getMinutes() + sEnd.getSeconds() / 60 - startHour * 60
+            // Clamp to the visible day window so sessions crossing midnight
+            // render only their portion inside [00:00, 24:00]. Wall-clock
+            // components keep positions stable across DST transitions.
+            const visStart = new Date(Math.max(s.start, dayStartMs))
+            const visEnd = new Date(Math.min(s.end, dayStartMs + MS_PER_DAY))
+            const sStartMin = visStart.getHours() * 60 + visStart.getMinutes() + visStart.getSeconds() / 60 - startHour * 60
+            const sEndMin = visEnd.getHours() * 60 + visEnd.getMinutes() + visEnd.getSeconds() / 60 - startHour * 60
 
             const left = Math.max(0, Math.min(100, (sStartMin / totalDayMinutes) * 100))
             const width = Math.max(0.8, Math.min(100 - left, ((sEndMin - sStartMin) / totalDayMinutes) * 100))

@@ -1,12 +1,33 @@
 import { useCallback, useMemo } from 'react'
 import { useLocalState } from './useLocalState'
-import { DEFAULT_SETTINGS, STORAGE_KEYS, type Settings } from '../types'
+import { DEFAULT_SETTINGS, STORAGE_KEYS, type PhaseConfig, type Settings } from '../types'
+
+/** Coerce unknown values to a finite positive number; fall back otherwise. */
+const positiveNumber = (value: unknown, fallback: number): number =>
+  typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : fallback
 
 function mergeWithDefaults(stored: Partial<Settings> | undefined): Settings {
-  const phases = { ...DEFAULT_SETTINGS.phases, ...(stored?.phases ?? {}) }
+  // Imported settings files are merged blind (`s as Settings`) and may contain
+  // 0/NaN/negative phase durations which would render the timer unusable.
+  const rawPhases: Partial<PhaseConfig> = stored?.phases ?? {}
+  const phases = {
+    focus: positiveNumber(rawPhases.focus, DEFAULT_SETTINGS.phases.focus),
+    shortBreak: positiveNumber(rawPhases.shortBreak, DEFAULT_SETTINGS.phases.shortBreak),
+    longBreak: positiveNumber(rawPhases.longBreak, DEFAULT_SETTINGS.phases.longBreak),
+    roundsBeforeLongBreak: Math.max(
+      1,
+      Math.round(positiveNumber(rawPhases.roundsBeforeLongBreak, DEFAULT_SETTINGS.phases.roundsBeforeLongBreak)),
+    ),
+  }
+  const weeklyGoalMinutes = Math.max(
+    0,
+    typeof stored?.weeklyGoalMinutes === 'number' && Number.isFinite(stored.weeklyGoalMinutes)
+      ? stored.weeklyGoalMinutes
+      : DEFAULT_SETTINGS.weeklyGoalMinutes,
+  )
   return {
     phases,
-    weeklyGoalMinutes: stored?.weeklyGoalMinutes ?? DEFAULT_SETTINGS.weeklyGoalMinutes,
+    weeklyGoalMinutes,
     tags: stored?.tags?.length ? stored.tags : DEFAULT_SETTINGS.tags,
     layoutMode: stored?.layoutMode ?? DEFAULT_SETTINGS.layoutMode,
   }

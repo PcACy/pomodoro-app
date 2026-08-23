@@ -108,7 +108,9 @@ export default function App() {
 
   const handleFlowFinished = useCallback(
     (session: Omit<Session, 'id' | 'notes'>) => {
-      void addSession(session).then((id) => setPendingSessionId(id))
+      void addSession(session)
+        .then((id) => setPendingSessionId(id))
+        .catch(() => showToast(t.errors.saveFailed))
       showToast(t.flow.finishedToast(Math.max(1, Math.round(session.durationMs / 60_000))))
     },
     [showToast, t],
@@ -119,18 +121,22 @@ export default function App() {
   const { incrementPomodoros } = todosApi
   const handleFocusComplete = useCallback(
     (s: Omit<Session, 'id' | 'notes'>) => {
-      void addSession(s).then((id) => setPendingSessionId(id))
+      void addSession(s)
+        .then((id) => setPendingSessionId(id))
+        .catch(() => showToast(t.errors.saveFailed))
       incrementPomodoros(activeTodoId)
     },
-    [activeTodoId, incrementPomodoros],
+    [activeTodoId, incrementPomodoros, showToast, t],
   )
 
   const handleSaveNote = useCallback(
     (notes: string) => {
-      if (pendingSessionId != null) void updateSessionNotes(pendingSessionId, notes)
+      if (pendingSessionId != null) {
+        void updateSessionNotes(pendingSessionId, notes).catch(() => showToast(t.errors.saveFailed))
+      }
       setPendingSessionId(null)
     },
-    [pendingSessionId],
+    [pendingSessionId, showToast, t],
   )
 
   const handleSkipNote = useCallback(() => setPendingSessionId(null), [])

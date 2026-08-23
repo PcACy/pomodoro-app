@@ -76,7 +76,10 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
           { action: 'add-5', title: nn.add5Min },
         ])
       }
-      nextPhase = (nextCycle > 0 && nextCycle % phases.roundsBeforeLongBreak === 0) ? 'longBreak' : 'shortBreak'
+      // Guard against invalid imported settings (0/NaN would make `nextCycle % r`
+      // NaN and skip long breaks forever).
+      const rounds = Math.max(1, Math.round(phases.roundsBeforeLongBreak) || 1)
+      nextPhase = nextCycle % rounds === 0 ? 'longBreak' : 'shortBreak'
     } else {
       const isLong = m.phase === 'longBreak'
       nextPhase = 'focus'

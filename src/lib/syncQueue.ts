@@ -39,6 +39,30 @@ export function enqueue(op: SyncOp): void {
   write([...filtered, op])
 }
 
+const opKey = (op: SyncOp): string =>
+  op.kind === 'replace' ? `${op.table}:*` : `${op.table}:${op.id}`
+
+/**
+ * Re-enqueue ops that failed to push, without clobbering newer ops that were
+ * enqueued while the failed sync was in flight. Existing queue entries win:
+ * e.g. a `delete` recorded mid-sync must not be resurrected by re-adding the
+ * stale `upsert` from the drained batch.
+ */
+export function requeue(ops: SyncOp[]): void {
+  if (ops.length === 0) return
+  const current = read()
+  const keys = new Set(current.map(opKey))
+  const merged = [...current]
+  for (let i = ops.length - 1; i >= 0; i--) {
+    const key = opKey(ops[i])
+    if (!keys.has(key)) {
+      merged.unshift(ops[i])
+      keys.add(key)
+    }
+  }
+  write(merged)
+}
+
 /** Atomically take the whole queue (or a slice) for processing. */
 export function drainQueue(): SyncOp[] {
   const ops = read()

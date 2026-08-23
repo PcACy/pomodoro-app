@@ -276,14 +276,18 @@ export function rangeBarStats(
 
   const out: RangeBarStat[] = []
   let cursor = startMonth
+  // Future-dated sessions (clock skew / bad imports) must not yield an empty
+  // chart: span from the earlier to the later of the two boundary months.
   const monthsDiff =
     (currentMonth.getFullYear() - startMonth.getFullYear()) * 12 +
     (currentMonth.getMonth() - startMonth.getMonth())
   if (monthsDiff > 24) {
     cursor = new Date(today.getFullYear(), today.getMonth() - 23, 1)
   }
+  const endMonth = monthsDiff >= 0 ? currentMonth : startMonth
+  if (monthsDiff < 0) cursor = currentMonth
 
-  while (cursor <= currentMonth) {
+  while (cursor <= endMonth) {
     const nextMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1)
     const monthSessions = sessions.filter(
       (s) => s.start >= cursor.getTime() && s.start < nextMonth.getTime(),

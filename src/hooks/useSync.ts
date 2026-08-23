@@ -4,7 +4,7 @@ import type { Session, TodoItem } from '../types'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { db } from '../lib/db'
 import { readTodosLocal } from '../lib/localTodos'
-import { drainQueue, enqueue, hasPendingOps } from '../lib/syncQueue'
+import { drainQueue, hasPendingOps, requeue } from '../lib/syncQueue'
 
 export type SyncStatus = 'unsupported' | 'signed-out' | 'syncing' | 'synced' | 'offline' | 'error'
 
@@ -197,7 +197,8 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
       return true
     } catch (e) {
       console.error('[sync] push failed:', e)
-      for (const op of ops) enqueue(op)
+      // Merge failed ops back without clobbering ops enqueued mid-sync.
+      requeue(ops)
       return false
     }
   }, [])

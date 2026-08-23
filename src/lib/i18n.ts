@@ -3,6 +3,7 @@ export type Lang = 'de' | 'en'
 export interface Messages {
   nav: { timer: string; statistics: string; settings: string }
   update: { available: string; reload: string }
+  errors: { saveFailed: string }
   phases: { focus: string; shortBreak: string; longBreak: string }
   paused: string
   timer: {
@@ -190,6 +191,7 @@ export interface Messages {
 const de: Messages = {
   nav: { timer: 'Timer', statistics: 'Statistik', settings: 'Einstellungen' },
   update: { available: 'Neue Version verfügbar', reload: 'Neu laden' },
+  errors: { saveFailed: 'Speichern fehlgeschlagen – Speicher nicht verfügbar?' },
   phases: { focus: 'Fokus', shortBreak: 'Kurze Pause', longBreak: 'Lange Pause' },
   weekdays: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
   paused: 'pausiert',
@@ -394,6 +396,7 @@ const de: Messages = {
 const en: Messages = {
   nav: { timer: 'Timer', statistics: 'Statistics', settings: 'Settings' },
   update: { available: 'New version available', reload: 'Reload' },
+  errors: { saveFailed: 'Saving failed – storage unavailable?' },
   phases: { focus: 'Focus', shortBreak: 'Short Break', longBreak: 'Long Break' },
   weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   paused: 'paused',

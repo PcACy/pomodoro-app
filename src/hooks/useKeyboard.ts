@@ -29,6 +29,9 @@ export function useKeyboard(handlers: ShortcutHandlers): void {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (isEditableTarget(e.target)) return
+      // Never hijack browser/OS shortcuts (Ctrl/Cmd+R reload, Cmd+Z undo, …)
+      // and ignore auto-repeat so holding a key does not toggle rapidly.
+      if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return
       const h = handlersRef.current
       if (e.key === ' ') {
         e.preventDefault()

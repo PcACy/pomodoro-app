@@ -22,8 +22,10 @@ export function useWakeLock(active: boolean): void {
       if (!activeRef.current || sentinelRef.current) return
       try {
         const sentinel = await navigator.wakeLock.request('screen')
-        if (!activeRef.current) {
-          void sentinel.release()
+        // Another acquire() may have resolved first while we were awaiting –
+        // release the surplus sentinel instead of leaking an untracked lock.
+        if (!activeRef.current || sentinelRef.current) {
+          void sentinel.release().catch(() => {})
           return
         }
         sentinelRef.current = sentinel
