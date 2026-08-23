@@ -27,9 +27,13 @@ export function useWakeLock(active: boolean): void {
           return
         }
         sentinelRef.current = sentinel
-        sentinel.addEventListener('release', () => {
-          if (sentinelRef.current === sentinel) sentinelRef.current = null
-        })
+        sentinel.addEventListener(
+          'release',
+          () => {
+            if (sentinelRef.current === sentinel) sentinelRef.current = null
+          },
+          { once: true },
+        )
       } catch {
         /* wake lock denied / unavailable – non-fatal */
       }

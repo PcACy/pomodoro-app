@@ -12,10 +12,10 @@ interface Props {
 
 export const QuickStats = memo(function QuickStats({ sessions, settings }: Props) {
   const { t, lang } = useTranslation()
-  const today = todayMinutes(sessions)
-  const dailyGoal = Math.max(1, Math.round(settings.weeklyGoalMinutes / 7))
-  const pct = Math.min(100, Math.round((today / dailyGoal) * 100))
-  const streak = currentStreakDays(sessions)
+  const today = useMemo(() => todayMinutes(sessions), [sessions])
+  const dailyGoal = Math.max(1, Math.round((settings.weeklyGoalMinutes || 700) / 7))
+  const pct = Math.min(100, Math.max(0, Math.round((today / dailyGoal) * 100)))
+  const streak = useMemo(() => currentStreakDays(sessions), [sessions])
   const roundsToday = useMemo(
     () => sessions.filter((s) => sameDay(new Date(s.start), new Date())).length,
     [sessions],

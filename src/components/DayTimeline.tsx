@@ -163,7 +163,8 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
         {/* Hour Ticks & Labels */}
         <div className="pointer-events-none absolute inset-x-0 top-7 flex justify-between text-[11px] font-medium text-muted tracking-normal">
           {hourTicks.map((h) => {
-            const pct = ((h - startHour) / (endHour - startHour)) * 100
+            const hourRange = Math.max(1, endHour - startHour)
+            const pct = ((h - startHour) / hourRange) * 100
             return (
               <span
                 key={h}

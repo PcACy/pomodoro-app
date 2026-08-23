@@ -83,10 +83,14 @@ export function usePictureInPicture(): PictureInPictureState {
           height: PIP_HEIGHT,
         })
         copyStyles(win)
-        win.addEventListener('pagehide', () => {
-          setPipWindow(null)
-          setMode('none')
-        })
+        win.addEventListener(
+          'pagehide',
+          () => {
+            setPipWindow(null)
+            setMode('none')
+          },
+          { once: true },
+        )
         setPipWindow(win)
         setMode('document')
         return

@@ -221,6 +221,9 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
     }
   }, [])
 
+  const retryCountRef = useRef(0)
+  const retryTimeoutRef = useRef<number | null>(null)
+
   const sync = useCallback(
     async (showSyncing = false) => {
       if (busyRef.current) return
@@ -228,18 +231,31 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
         setStatus(isSupabaseConfigured ? 'signed-out' : 'unsupported')
         return
       }
+      if (retryTimeoutRef.current != null) {
+        window.clearTimeout(retryTimeoutRef.current)
+        retryTimeoutRef.current = null
+      }
       busyRef.current = true
       try {
         if (showSyncing) setStatus('syncing')
         const pushed = await pushQueue()
         let ok = pushed
         if (ok) ok = await pullAndMerge()
-        setPending(hasPendingOps())
+        const stillPending = hasPendingOps()
+        setPending(stillPending)
         if (ok) {
+          retryCountRef.current = 0
           setLastSyncAt(Date.now())
           setStatus('synced')
         } else {
           setStatus('offline')
+          if (stillPending && typeof window !== 'undefined') {
+            const backoffMs = Math.min(30_000, 1000 * Math.pow(2, retryCountRef.current))
+            retryCountRef.current = Math.min(retryCountRef.current + 1, 5)
+            retryTimeoutRef.current = window.setTimeout(() => {
+              void sync(false)
+            }, backoffMs)
+          }
         }
       } finally {
         busyRef.current = false
@@ -255,7 +271,10 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
       return
     }
     void sync(true)
-    const onOnline = () => void sync(true)
+    const onOnline = () => {
+      retryCountRef.current = 0
+      void sync(true)
+    }
     const onVisible = () => {
       if (document.visibilityState === 'visible') void sync(true)
     }
@@ -264,6 +283,10 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
     return () => {
       window.removeEventListener('online', onOnline)
       document.removeEventListener('visibilitychange', onVisible)
+      if (retryTimeoutRef.current != null) {
+        window.clearTimeout(retryTimeoutRef.current)
+        retryTimeoutRef.current = null
+      }
     }
   }, [user, sync])
 

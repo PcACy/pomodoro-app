@@ -202,7 +202,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     })
   }, [settings])
 
-  const progress = machine.totalMs > 0 ? machine.remainingMs / machine.totalMs : 0
+  const progress = machine.totalMs > 0 ? Math.max(0, Math.min(1, machine.remainingMs / machine.totalMs)) : 0
   const roundsBeforeLongBreak = settings.phases.roundsBeforeLongBreak
 
   return {

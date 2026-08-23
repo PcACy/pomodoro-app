@@ -56,11 +56,11 @@ function MetricCard({
 export const Dashboard = memo(function Dashboard({ sessions, settings, themeId, colorMode = 'dark', todos, onImportSettings }: Props) {
   const { t, lang } = useTranslation()
   const colors = useThemeColors(themeId, colorMode)
-  const today = todayMinutes(sessions)
-  const streak = currentStreakDays(sessions)
-  const week = weekMinutes(sessions)
-  const goal = settings.weeklyGoalMinutes
-  const goalPct = Math.min(100, Math.round((week / goal) * 100))
+  const today = useMemo(() => todayMinutes(sessions), [sessions])
+  const streak = useMemo(() => currentStreakDays(sessions), [sessions])
+  const week = useMemo(() => weekMinutes(sessions), [sessions])
+  const goal = settings.weeklyGoalMinutes > 0 ? settings.weeklyGoalMinutes : 700
+  const goalPct = goal > 0 ? Math.min(100, Math.max(0, Math.round((week / goal) * 100))) : 0
 
   const tooltipStyle = useMemo(
     () => ({
