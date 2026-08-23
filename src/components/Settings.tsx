@@ -204,6 +204,29 @@ const PRESETS: Preset[] = [
   { id: 'ultradian', labelKey: 'presetUltradian', focus: 90, shortBreak: 20, longBreak: 30 },
 ]
 
+function ProfileAvatar({ avatarUrl, name }: { avatarUrl?: string; name: string }) {
+  const [failed, setFailed] = useState(false)
+
+  if (!avatarUrl || failed) {
+    return (
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-raised text-xs font-bold text-fg border border-line">
+        {name ? name.slice(0, 1).toUpperCase() : '?'}
+      </span>
+    )
+  }
+
+  return (
+    <img
+      src={avatarUrl}
+      alt={name}
+      referrerPolicy="no-referrer"
+      crossOrigin="anonymous"
+      onError={() => setFailed(true)}
+      className="h-8 w-8 shrink-0 rounded-full border border-line object-cover"
+    />
+  )
+}
+
 interface Props {
   settings: Settings
   update: (updater: (s: Settings) => Settings) => void
@@ -344,17 +367,7 @@ export const SettingsPanel = memo(function SettingsPanel({
           </div>
         ) : syncProfile ? (
           <div className="flex flex-wrap items-center gap-3">
-            {syncProfile.avatarUrl ? (
-              <img
-                src={syncProfile.avatarUrl}
-                alt={syncProfile.name}
-                className="h-8 w-8 rounded-full border border-line"
-              />
-            ) : (
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-raised text-xs font-bold text-fg">
-                {syncProfile.name.slice(0, 1).toUpperCase()}
-              </span>
-            )}
+            <ProfileAvatar avatarUrl={syncProfile.avatarUrl} name={syncProfile.name} />
             <span className="text-sm font-medium text-fg">{syncProfile.name}</span>
             {syncPending ? (
               <span className="rounded-full bg-raised px-2.5 py-1 text-xs text-muted">{t.sync.pending}</span>

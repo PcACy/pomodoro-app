@@ -59,10 +59,18 @@ export function useAuth() {
               user.user_metadata?.user_name ??
                 user.user_metadata?.name ??
                 user.user_metadata?.full_name ??
+                user.identities?.[0]?.identity_data?.user_name ??
+                user.identities?.[0]?.identity_data?.name ??
                 user.email ??
                 '',
             ),
-            avatarUrl: String(user.user_metadata?.avatar_url ?? ''),
+            avatarUrl: String(
+              user.user_metadata?.avatar_url ??
+                user.user_metadata?.avatarUrl ??
+                user.user_metadata?.picture ??
+                user.identities?.[0]?.identity_data?.avatar_url ??
+                '',
+            ),
           }
         : null,
     [user],
