@@ -313,17 +313,18 @@
 }
 
 html {
-  min-height: 100dvh;
-  overscroll-behavior-y: none;
+  min-height: 100%;
   scrollbar-gutter: stable;
-  overflow-y: scroll;
   overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y;
 }
 
 body {
-  min-height: 100dvh;
-  overscroll-behavior-y: none;
+  min-height: 100%;
   overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y;
   @apply bg-canvas text-fg antialiased;
   font-family: var(--font-body, system-ui, sans-serif);
   padding-top: env(safe-area-inset-top, 0px);
