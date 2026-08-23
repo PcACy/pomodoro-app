@@ -2,9 +2,35 @@ import { useCallback, useMemo, useState } from 'react'
 import { DEFAULT_MODE, DEFAULT_THEME, MODE_KEY, THEME_KEY } from '../themes'
 import type { ColorMode, ThemeId } from '../themes'
 
+const THEME_BG_HEX: Record<ThemeId, Record<ColorMode, string>> = {
+  gruvbox: {
+    dark: '#282828',
+    light: '#fbf1c7',
+  },
+  'ios-26': {
+    dark: '#000000',
+    light: '#f2f2f7',
+  },
+  'material-you': {
+    dark: '#141218',
+    light: '#fdf8fd',
+  },
+}
+
 const applyTheme = (id: ThemeId, mode: ColorMode): void => {
+  if (typeof document === 'undefined') return
   document.documentElement.dataset.theme = id
   document.documentElement.dataset.mode = mode
+
+  // Dynamically synchronize OS status bar & browser chrome theme-color
+  const hex = THEME_BG_HEX[id]?.[mode] ?? (mode === 'dark' ? '#282828' : '#fbf1c7')
+  let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+  if (!meta) {
+    meta = document.createElement('meta')
+    meta.setAttribute('name', 'theme-color')
+    document.head.appendChild(meta)
+  }
+  meta.setAttribute('content', hex)
 }
 
 const VALID_THEMES: Record<string, ThemeId> = {

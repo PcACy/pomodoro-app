@@ -274,8 +274,30 @@ export default function App() {
   const syncNow = sync.sync
   const handleSyncNow = useCallback(() => void syncNow(true), [syncNow])
 
+  const [liveAnnouncement, setLiveAnnouncement] = useState('')
+  const prevPhaseRef = useRef(timer.phase)
+  const prevStatusRef = useRef(timer.status)
+
+  useEffect(() => {
+    if (prevPhaseRef.current !== timer.phase) {
+      prevPhaseRef.current = timer.phase
+      const phaseName = t.phases[timer.phase]
+      const durationMins = Math.round(timer.totalMs / 60_000)
+      setLiveAnnouncement(`${phaseName} gestartet (${durationMins} Minuten).`)
+    } else if (prevStatusRef.current !== timer.status) {
+      prevStatusRef.current = timer.status
+      if (timer.status === 'paused') setLiveAnnouncement(`${t.phases[timer.phase]} pausiert.`)
+      else if (timer.status === 'running') setLiveAnnouncement(`${t.phases[timer.phase]} fortgesetzt.`)
+    }
+  }, [timer.phase, timer.status, timer.totalMs, t.phases])
+
   return (
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl 2xl:max-w-6xl flex-col items-center gap-8 2xl:gap-10 px-4 py-8">
+      {/* Screen Reader Live Region for WCAG 2.1 AA Announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {liveAnnouncement}
+      </div>
+
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div
           className="ambient-grid absolute inset-0"
@@ -311,6 +333,8 @@ export default function App() {
         </div>
 
         <nav
+          role="tablist"
+          aria-label="Navigation"
           className={`relative grid grid-cols-3 items-center gap-1 rounded-btn border border-line/60 bg-surface/90 p-1 backdrop-blur-md transition-opacity duration-500 ${
             zenRunning ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
           }`}
@@ -328,6 +352,9 @@ export default function App() {
             <button
               key={tb.id}
               type="button"
+              role="tab"
+              aria-selected={tab === tb.id}
+              aria-label={t.nav[TAB_LABEL_KEYS[tb.id]]}
               onClick={() => handleTabChange(tb.id)}
               className={`relative z-10 flex min-h-[44px] items-center justify-center gap-2 rounded-btn px-3.5 py-2 text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
                 tab === tb.id ? 'text-fg font-semibold' : 'text-muted hover:text-fg'

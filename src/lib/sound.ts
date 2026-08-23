@@ -54,6 +54,16 @@ function getBuffer(audio: AudioContext, kind: ChimeKind): AudioBuffer | null {
   return rendered
 }
 
+export function playHaptic(pattern: number | number[] = 25): void {
+  try {
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      navigator.vibrate(pattern)
+    }
+  } catch {
+    /* vibration not permitted or supported on device */
+  }
+}
+
 /**
  * Must be called from a user gesture (pointer/keydown/start). Creates and unlocks
  * the AudioContext and pre-renders both chimes into buffers so the phase-end
@@ -67,7 +77,21 @@ export function initAudio(): void {
   initialized = true
 }
 
+// Global auto-unlock on first user interaction in browser
+if (typeof window !== 'undefined') {
+  const unlockAudio = () => {
+    initAudio()
+    window.removeEventListener('pointerdown', unlockAudio)
+    window.removeEventListener('keydown', unlockAudio)
+    window.removeEventListener('touchstart', unlockAudio)
+  }
+  window.addEventListener('pointerdown', unlockAudio, { passive: true })
+  window.addEventListener('keydown', unlockAudio, { passive: true })
+  window.addEventListener('touchstart', unlockAudio, { passive: true })
+}
+
 export function playChime(kind: ChimeKind = 'focus'): void {
+  playHaptic(kind === 'focus' ? [40, 60, 80] : [50, 50])
   try {
     const audio = ensureCtx()
     if (!audio) return

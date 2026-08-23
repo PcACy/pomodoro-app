@@ -8,6 +8,8 @@ import { fmtTime } from '../lib/time'
 import { getLang, translations } from '../lib/i18n'
 import { useTranslation } from './useTranslation'
 
+import { broadcastTimerState, subscribeBroadcast } from '../lib/broadcast'
+
 interface Options {
   settings: Settings
   task: string
@@ -101,6 +103,14 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       remainingMs: d,
       completedFocusInCycle: nextCycle,
     })
+    broadcastTimerState({
+      status: 'running',
+      phase: nextPhase,
+      totalMs: d,
+      remainingMs: d,
+      targetEnd: now + d,
+      completedFocusInCycle: nextCycle,
+    })
   }, [])
 
   const handleTick = useCallback(
@@ -123,8 +133,17 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     initAudio()
     const now = Date.now()
     if (m.status === 'idle') phaseStartedAtRef.current = now
-    endRef.current = now + Math.max(0, m.remainingMs)
+    const targetEnd = now + Math.max(0, m.remainingMs)
+    endRef.current = targetEnd
     setMachine((prev) => (prev.status === 'running' ? prev : { ...prev, status: 'running' }))
+    broadcastTimerState({
+      status: 'running',
+      phase: m.phase,
+      totalMs: m.totalMs,
+      remainingMs: m.remainingMs,
+      targetEnd,
+      completedFocusInCycle: m.completedFocusInCycle,
+    })
   }, [])
 
   const pause = useCallback(() => {
@@ -133,6 +152,14 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     const remaining = Math.max(0, (endRef.current ?? Date.now()) - Date.now())
     endRef.current = null
     setMachine((prev) => ({ ...prev, status: 'paused', remainingMs: remaining }))
+    broadcastTimerState({
+      status: 'paused',
+      phase: m.phase,
+      totalMs: m.totalMs,
+      remainingMs: remaining,
+      targetEnd: null,
+      completedFocusInCycle: m.completedFocusInCycle,
+    })
   }, [])
 
   const toggle = useCallback(() => {
@@ -149,7 +176,16 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
 
   const reset = useCallback(() => {
     endRef.current = null
+    const m = machineRef.current
     setMachine((prev) => ({ ...prev, status: 'idle', remainingMs: prev.totalMs }))
+    broadcastTimerState({
+      status: 'idle',
+      phase: m.phase,
+      totalMs: m.totalMs,
+      remainingMs: m.totalMs,
+      targetEnd: null,
+      completedFocusInCycle: m.completedFocusInCycle,
+    })
   }, [])
 
   /** Extend the current phase (running or paused) by `ms`. */
@@ -163,6 +199,32 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       totalMs: prev.totalMs + safeMs,
       remainingMs: prev.remainingMs + safeMs,
     }))
+    broadcastTimerState({
+      status: m.status,
+      phase: m.phase,
+      totalMs: m.totalMs + safeMs,
+      remainingMs: m.remainingMs + safeMs,
+      targetEnd: endRef.current,
+      completedFocusInCycle: m.completedFocusInCycle,
+    })
+  }, [])
+
+  // Listen for multi-tab BroadcastChannel sync updates
+  useEffect(() => {
+    return subscribeBroadcast((msg) => {
+      if (msg.type === 'timer_state') {
+        const p = msg.payload
+        endRef.current = p.targetEnd
+        cycleRef.current = p.completedFocusInCycle
+        setMachine({
+          status: p.status,
+          phase: p.phase,
+          totalMs: p.totalMs,
+          remainingMs: p.remainingMs,
+          completedFocusInCycle: p.completedFocusInCycle,
+        })
+      }
+    })
   }, [])
 
   // Keep the worker running only while the timer runs.

@@ -6,8 +6,21 @@
   "scope": ".",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0b0d12",
-  "theme_color": "#0b0d12",
+  "background_color": "#282828",
+  "theme_color": "#282828",
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Start Timer",
+      "url": "./#timer",
+      "description": "Start Pomodoro session"
+    },
+    {
+      "name": "Statistics",
+      "url": "./#dashboard",
+      "description": "View focus statistics"
+    }
+  ],
   "icons": [
     {
       "src": "icon-192.svg",

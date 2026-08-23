@@ -10,14 +10,37 @@ export function ReflectionModal({ onSave, onSkip }: Props) {
   const { t } = useTranslation()
   const [value, setValue] = useState('')
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const modalRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
+    previousFocusRef.current = document.activeElement as HTMLElement | null
     inputRef.current?.focus()
+    return () => {
+      previousFocusRef.current?.focus?.()
+    }
   }, [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onSkip()
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onSkip()
+      } else if (e.key === 'Tab' && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        )
+        if (!focusables.length) return
+        const first = focusables[0]
+        const last = focusables[focusables.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -33,7 +56,7 @@ export function ReflectionModal({ onSave, onSkip }: Props) {
       }}
       className="fixed inset-0 z-40 flex items-start justify-center bg-black/40 p-4 pt-[15vh]"
     >
-      <div className="card w-full max-w-sm p-5">
+      <div ref={modalRef} className="card w-full max-w-sm p-5">
         <h3 id="reflection-title" className="text-sm font-semibold text-fg">{t.reflection.title}</h3>
         <p className="mt-1 text-xs text-muted">{t.reflection.prompt}</p>
         <textarea
@@ -50,15 +73,22 @@ export function ReflectionModal({ onSave, onSkip }: Props) {
           rows={3}
           maxLength={500}
           className="input mt-3 resize-none"
+          aria-label={t.reflection.prompt}
         />
         <div className="mt-3 flex justify-end gap-2">
-          <button type="button" onClick={onSkip} className="btn-ghost text-xs">
+          <button
+            type="button"
+            onClick={onSkip}
+            className="btn-ghost text-xs"
+            aria-label={`${t.reflection.skip} (Escape)`}
+          >
             {t.reflection.skip} <span className="kbd">Esc</span>
           </button>
           <button
             type="button"
             onClick={() => onSave(value.trim())}
             className="btn-primary text-xs"
+            aria-label={`${t.reflection.save} (Enter)`}
           >
             {t.reflection.save} <span className="kbd text-on-accent/70">Enter</span>
           </button>
