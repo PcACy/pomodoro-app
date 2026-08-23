@@ -128,6 +128,7 @@ export const Timer = memo(function Timer({
   const ringRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
   const [scrubbingMinutes, setScrubbingMinutes] = useState<number | null>(null)
+  const isScrubbing = scrubbingMinutes != null
 
   const activeDuration = scrubbingMinutes ?? durationMinutes
   const scrubFraction = Math.max(5, Math.min(60, activeDuration)) / 60
@@ -137,7 +138,8 @@ export const Timer = memo(function Timer({
   const r = (size - stroke) / 2
   const circ = 2 * Math.PI * r
 
-  const effectiveProgress = isIdle && !isFlow ? scrubFraction : Math.min(1, Math.max(0, progress))
+  // When scrubbing in idle, preview the fraction of 60m; otherwise render smooth 1.0 -> 0.0 session countdown
+  const effectiveProgress = isScrubbing ? scrubFraction : Math.min(1, Math.max(0, progress))
   const offset = circ * (1 - effectiveProgress)
   const glowVar = isFlow ? '--c-accent' : GLOW_VAR[phase]
 
@@ -176,8 +178,9 @@ export const Timer = memo(function Timer({
   }, [])
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (!isIdle || isFlow) return
+    if (!isIdle || isFlow || !onDurationChange) return
     isDraggingRef.current = true
+    playMicroClick('tick')
     const mins = calcMinutesFromPointer(e)
     if (mins) setScrubbingMinutes(mins)
     e.currentTarget.setPointerCapture?.(e.pointerId)
@@ -186,12 +189,16 @@ export const Timer = memo(function Timer({
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDraggingRef.current) return
     const mins = calcMinutesFromPointer(e)
-    if (mins) setScrubbingMinutes(mins)
+    if (mins && mins !== scrubbingMinutes) {
+      playMicroClick('tick')
+      setScrubbingMinutes(mins)
+    }
   }
 
   const handlePointerUp = (e: React.PointerEvent) => {
     if (!isDraggingRef.current) return
     isDraggingRef.current = false
+    playMicroClick('pop')
     const mins = calcMinutesFromPointer(e)
     const finalMins = mins ?? scrubbingMinutes
     if (finalMins != null && onDurationChange) {
@@ -259,7 +266,7 @@ export const Timer = memo(function Timer({
           <div
             className="pointer-events-none absolute bottom-1 top-1 rounded-btn bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
             style={{
-              width: 'calc((100% - 8px - 4px) / 2)',
+              width: 'calc(50% - 4px)',
               left: '4px',
               transform: `translateX(calc(${MODES.indexOf(mode)} * (100% + 4px)))`,
             }}
@@ -308,8 +315,12 @@ export const Timer = memo(function Timer({
 
       <div
         ref={ringRef}
-        className="relative isolate touch-none select-none"
+        className={`relative isolate touch-none select-none ${isIdle && !isFlow ? 'cursor-grab active:cursor-grabbing' : ''}`}
         style={{ width: size, height: size }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
       >
         {/* Ambient Breathing Glow */}
         <div
@@ -351,20 +362,24 @@ export const Timer = memo(function Timer({
               strokeLinecap="round"
               strokeDasharray={circ}
               strokeDashoffset={offset}
-              className={`${RING[phase]} transition-all duration-500 ease-linear`}
+              style={{ willChange: 'stroke-dashoffset' }}
+              className={`${RING[phase]} ${
+                isScrubbing
+                  ? 'transition-none'
+                  : running
+                    ? 'transition-[stroke-dashoffset] duration-1000 ease-linear'
+                    : 'transition-[stroke-dashoffset] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]'
+              }`}
             />
           </svg>
 
-          {isIdle && !isFlow && (
+          {/* Scrubbing Knob indicator only while active dragging */}
+          {isScrubbing && !isFlow && (
             <div
-              className="absolute z-20 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center cursor-grab active:cursor-grabbing"
+              className="pointer-events-none absolute z-20 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center animate-fade-in"
               style={{ left: `${knobX}px`, top: `${knobY}px` }}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerLeave={handlePointerUp}
             >
-              <div className="h-4 w-4 rounded-full border-2 border-white bg-accent shadow-md shadow-accent/50 transition-transform duration-150 group-hover/knob:scale-125 group-active/knob:scale-110" />
+              <div className="h-4 w-4 rounded-full border-2 border-white bg-accent shadow-md shadow-accent/50 scale-125 transition-transform duration-100" />
             </div>
           )}
 
