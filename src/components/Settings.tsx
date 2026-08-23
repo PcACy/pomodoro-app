@@ -1,4 +1,4 @@
-import { memo, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import {
   Check,
   Download,
@@ -7,6 +7,7 @@ import {
   Github,
   Loader2,
   LogOut,
+  Minus,
   Moon,
   Plus,
   RefreshCw,
@@ -21,6 +22,186 @@ import { downloadText, sessionsToCsv, sessionsToJson, todosToCsv, todosToJson } 
 import { useTranslation } from '../hooks/useTranslation'
 import type { SyncStatus } from '../hooks/useSync'
 import type { GitHubProfile } from '../hooks/useAuth'
+
+interface NumberStepperProps {
+  value: number
+  onChange: (value: number) => void
+  min: number
+  max: number
+  step?: number
+  suffix?: string
+  ariaLabel?: string
+  className?: string
+}
+
+function useHoldToRepeat(callback: () => void, disabled: boolean) {
+  const callbackRef = useRef(callback)
+  callbackRef.current = callback
+
+  const timerRef = useRef<number | null>(null)
+  const intervalRef = useRef<number | null>(null)
+
+  const stop = useCallback(() => {
+    if (timerRef.current != null) {
+      window.clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+    if (intervalRef.current != null) {
+      window.clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+  }, [])
+
+  const start = useCallback(
+    (e: React.PointerEvent) => {
+      if (disabled || e.button !== 0) return
+      callbackRef.current()
+      stop()
+      timerRef.current = window.setTimeout(() => {
+        intervalRef.current = window.setInterval(() => {
+          callbackRef.current()
+        }, 75)
+      }, 350)
+    },
+    [disabled, stop],
+  )
+
+  useEffect(() => () => stop(), [stop])
+
+  return {
+    onPointerDown: start,
+    onPointerUp: stop,
+    onPointerLeave: stop,
+    onPointerCancel: stop,
+  }
+}
+
+function StepperButton({
+  icon: Icon,
+  onClick,
+  disabled,
+  ariaLabel,
+}: {
+  icon: typeof Minus
+  onClick: () => void
+  disabled: boolean
+  ariaLabel: string
+}) {
+  const holdHandlers = useHoldToRepeat(onClick, disabled)
+
+  return (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      disabled={disabled}
+      onClick={(e) => {
+        e.preventDefault()
+      }}
+      {...holdHandlers}
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-all hover:bg-raised hover:text-fg active:scale-90 disabled:pointer-events-none disabled:opacity-25"
+    >
+      <Icon size={14} />
+    </button>
+  )
+}
+
+function NumberStepper({
+  value,
+  onChange,
+  min,
+  max,
+  step = 1,
+  suffix,
+  ariaLabel,
+  className = '',
+}: NumberStepperProps) {
+  const [localStr, setLocalStr] = useState<string | null>(null)
+
+  const handleDecrement = useCallback(() => {
+    const next = Math.max(min, value - step)
+    onChange(next)
+    setLocalStr(null)
+  }, [min, onChange, step, value])
+
+  const handleIncrement = useCallback(() => {
+    const next = Math.min(max, value + step)
+    onChange(next)
+    setLocalStr(null)
+  }, [max, onChange, step, value])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value
+    setLocalStr(raw)
+    const parsed = Number(raw)
+    if (!Number.isNaN(parsed) && parsed >= min && parsed <= max) {
+      onChange(parsed)
+    }
+  }
+
+  const handleBlur = () => {
+    if (localStr != null) {
+      const parsed = Number(localStr)
+      if (Number.isNaN(parsed) || parsed < min) {
+        onChange(min)
+      } else if (parsed > max) {
+        onChange(max)
+      } else {
+        onChange(parsed)
+      }
+      setLocalStr(null)
+    }
+  }
+
+  const displayVal = localStr !== null ? localStr : String(value)
+
+  return (
+    <div
+      className={`flex items-center justify-between rounded-xl border border-line bg-canvas/80 p-1 transition-colors focus-within:border-accent/60 focus-within:ring-1 focus-within:ring-accent/40 ${className}`}
+    >
+      <StepperButton
+        icon={Minus}
+        onClick={handleDecrement}
+        disabled={value <= min}
+        ariaLabel={`${ariaLabel ?? 'Wert'} verringern`}
+      />
+
+      <div className="flex min-w-0 flex-1 items-center justify-center gap-1 px-1">
+        <input
+          type="number"
+          min={min}
+          max={max}
+          value={displayVal}
+          onChange={handleInputChange}
+          onBlur={handleBlur}
+          aria-label={ariaLabel}
+          className="w-12 bg-transparent text-right font-mono text-sm font-semibold tabular-nums text-fg focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        />
+        {suffix && <span className="select-none text-xs font-medium text-muted">{suffix}</span>}
+      </div>
+
+      <StepperButton
+        icon={Plus}
+        onClick={handleIncrement}
+        disabled={value >= max}
+        ariaLabel={`${ariaLabel ?? 'Wert'} erhöhen`}
+      />
+    </div>
+  )
+}
+
+interface Preset {
+  id: 'classic' | 'deepWork' | 'ultradian'
+  labelKey: 'presetClassic' | 'presetDeepWork' | 'presetUltradian'
+  focus: number
+  shortBreak: number
+  longBreak: number
+}
+
+const PRESETS: Preset[] = [
+  { id: 'classic', labelKey: 'presetClassic', focus: 25, shortBreak: 5, longBreak: 15 },
+  { id: 'deepWork', labelKey: 'presetDeepWork', focus: 50, shortBreak: 10, longBreak: 30 },
+  { id: 'ultradian', labelKey: 'presetUltradian', focus: 90, shortBreak: 20, longBreak: 30 },
+]
 
 interface Props {
   settings: Settings
@@ -41,12 +222,6 @@ interface Props {
   onSyncLogout: () => void
   onSyncNow: () => void
 }
-
-const PHASE_KEYS: Array<keyof Pick<Settings['phases'], 'focus' | 'shortBreak' | 'longBreak'>> = [
-  'focus',
-  'shortBreak',
-  'longBreak',
-]
 
 export const SettingsPanel = memo(function SettingsPanel({
   settings,
@@ -293,61 +468,140 @@ export const SettingsPanel = memo(function SettingsPanel({
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.phases}</h3>
-        <p className="mb-4 text-xs text-muted">{t.settings.phasesHint}</p>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {PHASE_KEYS.map((key) => (
-            <label key={key} className="flex flex-col gap-1.5">
-              <span className="text-xs text-muted">{t.phases[key]}</span>
-              <input
-                type="number"
-                min={1}
-                max={180}
-                value={settings.phases[key]}
-                onChange={(e) => setPhaseDuration(key, Number(e.target.value))}
-                className="input font-mono"
-              />
-              <span className="text-[10px] text-muted">{t.settings.minutes}</span>
-            </label>
-          ))}
+        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.timerIntervals}</h3>
+        <p className="mb-5 text-xs text-muted">{t.settings.timerIntervalsHint}</p>
+
+        {/* Quick Presets */}
+        <div className="mb-6">
+          <div className="mb-2 text-xs font-medium text-muted">
+            {t.settings.presets}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {PRESETS.map((p) => {
+              const active =
+                settings.phases.focus === p.focus &&
+                settings.phases.shortBreak === p.shortBreak &&
+                settings.phases.longBreak === p.longBreak
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() =>
+                    update((s) => ({
+                      ...s,
+                      phases: {
+                        ...s.phases,
+                        focus: p.focus,
+                        shortBreak: p.shortBreak,
+                        longBreak: p.longBreak,
+                      },
+                    }))
+                  }
+                  className={`rounded-xl border px-3.5 py-1.5 text-xs font-medium transition-all active:scale-95 ${
+                    active
+                      ? 'border-accent bg-accent/15 text-accent shadow-sm shadow-accent/10 font-semibold'
+                      : 'border-line bg-canvas/80 text-muted hover:border-line hover:bg-raised hover:text-fg'
+                  }`}
+                >
+                  {t.settings[p.labelKey]}
+                </button>
+              )
+            })}
+          </div>
         </div>
-      </div>
 
-      <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.cycle}</h3>
-        <p className="mb-4 text-xs text-muted">{t.settings.cycleHint}</p>
-        <input
-          type="number"
-          min={1}
-          max={12}
-          value={settings.phases.roundsBeforeLongBreak}
-          onChange={(e) =>
-            update((s) => ({
-              ...s,
-              phases: { ...s.phases, roundsBeforeLongBreak: Math.max(1, Math.min(12, Number(e.target.value) || 1)) },
-            }))
-          }
-          className="input w-32 font-mono"
-        />
-      </div>
+        {/* 3-Column Phases Grid */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-muted">{t.phases.focus}</span>
+            <NumberStepper
+              value={settings.phases.focus}
+              min={1}
+              max={180}
+              step={5}
+              suffix={t.settings.minutes}
+              ariaLabel={t.phases.focus}
+              onChange={(val) => setPhaseDuration('focus', val)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-muted">{t.phases.shortBreak}</span>
+            <NumberStepper
+              value={settings.phases.shortBreak}
+              min={1}
+              max={60}
+              step={1}
+              suffix={t.settings.minutes}
+              ariaLabel={t.phases.shortBreak}
+              onChange={(val) => setPhaseDuration('shortBreak', val)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-muted">{t.phases.longBreak}</span>
+            <NumberStepper
+              value={settings.phases.longBreak}
+              min={1}
+              max={90}
+              step={1}
+              suffix={t.settings.minutes}
+              ariaLabel={t.phases.longBreak}
+              onChange={(val) => setPhaseDuration('longBreak', val)}
+            />
+          </div>
+        </div>
 
-      <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.weeklyGoal}</h3>
-        <p className="mb-4 text-xs text-muted">{t.settings.weeklyGoalHint}</p>
-        <input
-          type="number"
-          min={1}
-          max={24 * 60}
-          value={settings.weeklyGoalMinutes}
-          onChange={(e) =>
-            update((s) => ({
-              ...s,
-              weeklyGoalMinutes: Math.max(1, Math.min(24 * 60, Number(e.target.value) || 1)),
-            }))
-          }
-          className="input w-40 font-mono"
-        />
-        <span className="ml-2 text-xs text-muted">{t.settings.minutes}</span>
+        {/* Subtle Divider */}
+        <div className="my-6 border-t border-line/50" />
+
+        {/* Cycle & Weekly Goal in 2 Columns */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="flex flex-col justify-between gap-2">
+            <div>
+              <span className="text-xs font-semibold text-fg">{t.settings.cycle}</span>
+              <p className="text-[11px] text-muted">{t.settings.cycleHint}</p>
+            </div>
+            <NumberStepper
+              value={settings.phases.roundsBeforeLongBreak}
+              min={1}
+              max={12}
+              step={1}
+              suffix={t.settings.roundsUnit}
+              ariaLabel={t.settings.cycle}
+              onChange={(val) =>
+                update((s) => ({
+                  ...s,
+                  phases: { ...s.phases, roundsBeforeLongBreak: val },
+                }))
+              }
+            />
+          </div>
+
+          <div className="flex flex-col justify-between gap-2">
+            <div>
+              <span className="text-xs font-semibold text-fg">{t.settings.weeklyGoal}</span>
+              <p className="text-[11px] text-muted">{t.settings.weeklyGoalHint}</p>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <NumberStepper
+                value={settings.weeklyGoalMinutes}
+                min={15}
+                max={24 * 60}
+                step={30}
+                suffix={t.settings.minutes}
+                ariaLabel={t.settings.weeklyGoal}
+                onChange={(val) =>
+                  update((s) => ({
+                    ...s,
+                    weeklyGoalMinutes: val,
+                  }))
+                }
+              />
+              <span className="text-[11px] font-medium text-accent">
+                {t.settings.weeklyGoalHours(settings.weeklyGoalMinutes / 60)}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="card p-6">

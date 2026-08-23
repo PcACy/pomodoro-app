@@ -105,6 +105,14 @@ export interface Messages {
     colorModeHint: string
     dark: string
     light: string
+    timerIntervals: string
+    timerIntervalsHint: string
+    presets: string
+    presetClassic: string
+    presetDeepWork: string
+    presetUltradian: string
+    roundsUnit: string
+    weeklyGoalHours: (hours: number) => string
     phases: string
     phasesHint: string
     cycle: string
@@ -271,6 +279,14 @@ const de: Messages = {
     colorModeHint: 'Wähle zwischen dunklem und hellem Erscheinungsbild.',
     dark: 'Dunkel',
     light: 'Hell',
+    timerIntervals: 'Timer & Intervalle',
+    timerIntervalsHint: 'Passe Fokus- und Pausendauern, Zykluslänge sowie dein Wochenziel an.',
+    presets: 'Fokus-Rhythmen',
+    presetClassic: 'Klassisch (25 / 5 min)',
+    presetDeepWork: 'Deep Work (50 / 10 min)',
+    presetUltradian: 'Ultradian (90 / 20 min)',
+    roundsUnit: 'Runden',
+    weeklyGoalHours: (h) => `≈ ${h.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Std. pro Woche`,
     phases: 'Phasen',
     phasesHint: 'Dauern in Minuten, zwischen 1 und 180.',
     cycle: 'Zyklus',
@@ -443,6 +459,14 @@ const en: Messages = {
     colorModeHint: 'Choose between dark and light appearance.',
     dark: 'Dark',
     light: 'Light',
+    timerIntervals: 'Timer & Intervals',
+    timerIntervalsHint: 'Customize focus and break durations, cycle length, and weekly goal.',
+    presets: 'Focus Rhythms',
+    presetClassic: 'Classic (25 / 5 min)',
+    presetDeepWork: 'Deep Work (50 / 10 min)',
+    presetUltradian: 'Ultradian (90 / 20 min)',
+    roundsUnit: 'rounds',
+    weeklyGoalHours: (h) => `≈ ${h.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} hrs per week`,
     phases: 'Phases',
     phasesHint: 'Durations in minutes, between 1 and 180.',
     cycle: 'Cycle',

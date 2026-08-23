@@ -261,6 +261,17 @@ body {
   .kbd {
     @apply rounded border border-line bg-raised px-1.5 py-0.5 font-mono text-[10px] text-muted;
   }
+
+  /* Hide number spin buttons across all modern browsers */
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
 }
 
 /* Design System Specific Overrides */
