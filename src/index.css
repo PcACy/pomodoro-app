@@ -215,19 +215,26 @@
 /* =========================================================================
    4. MATERIAL YOU (M3)
    ========================================================================= */
+/* =========================================================================
+   4. MATERIAL YOU (M3)
+   ========================================================================= */
 :root[data-theme='material-you'][data-mode='dark'],
 :root[data-theme='material-you']:not([data-mode='light']) {
-  /* Material You Dark */
+  /* Material You Dark (Official M3 Color Scheme & Roles) */
   color-scheme: dark;
-  --c-canvas: 20 18 24;
-  --c-surface: 33 31 38;
-  --c-raised: 43 41 48;
-  --c-line: 73 69 79;
-  --c-fg: 230 224 233;
-  --c-muted: 180 173 186;
-  --c-accent: 208 188 255;
-  --c-accent-strong: 232 222 248;
-  --c-on-accent: 56 30 114;
+  --c-canvas: 20 18 24;              /* #141218 Surface (Canvas) */
+  --c-surface: 33 31 38;             /* #211F26 Surface Container */
+  --c-raised: 43 41 48;              /* #2B2930 Surface Container High */
+  --c-line: 73 69 79;                /* #49454F Outline Variant */
+  --c-fg: 230 224 233;               /* #E6E0E9 On Surface */
+  --c-muted: 202 196 208;            /* #CAC4D0 On Surface Variant */
+  --c-accent: 208 188 255;           /* #D0BCFF Primary */
+  --c-accent-strong: 79 55 139;      /* #4F378B Primary Container */
+  --c-on-accent: 56 30 114;          /* #381E72 On Primary */
+  --c-primary-container: 79 55 139;  /* #4F378B Primary Container */
+  --c-on-primary-container: 234 221 255; /* #EADDFF On Primary Container */
+  --c-secondary-container: 74 68 88; /* #4A4458 Secondary Container */
+  --c-on-secondary-container: 232 222 248; /* #E8DEF8 On Secondary Container */
   --c-break: 168 199 250;
   --c-long: 196 238 208;
   --c-track: 73 69 79;
@@ -240,42 +247,46 @@
   --c-chart-7: 232 222 248;
   --c-chart-8: 182 196 255;
 
-  /* Material You Structural Tokens: Tonal Elevation, zero borders */
-  --radius-card: 24px;
+  /* Material You Structural Tokens: Tonal Elevation, 0px border */
+  --radius-card: 28px;
   --radius-btn: 9999px;
   --radius-sm: 12px;
   --badge-radius: 8px;
   --border-card-width: 0px;
   --border-card-style: none;
-  --font-display: 'Roboto', 'Google Sans', system-ui, sans-serif;
-  --font-body: 'Roboto', 'Google Sans', system-ui, sans-serif;
-  --card-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.28), 0 1px 3px 0 rgba(0, 0, 0, 0.35);
+  --font-display: 'Google Sans', 'Roboto', system-ui, -apple-system, sans-serif;
+  --font-body: 'Google Sans', 'Roboto', system-ui, -apple-system, sans-serif;
+  --card-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.15), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --card-blur: 0px;
   --card-bg-opacity: 1;
 
   /* Semantic Tokens */
-  --color-tag-bg: rgba(168, 199, 250, 0.15);
-  --color-tag-text: #a8c7fa;
+  --color-tag-bg: rgba(74, 68, 88, 0.6);
+  --color-tag-text: #e8def8;
   --color-tag-border: transparent;
   --color-streak: #ffd966;
   --color-success: #c4eed0;
-  --glow-opacity: 0.2;
+  --glow-opacity: 0.18;
   --heatmap-l0: rgba(230, 224, 233, 0.06);
-  --heatmap-l0-border: rgba(73, 69, 79, 0.3);
+  --heatmap-l0-border: transparent;
 }
 
 :root[data-theme='material-you'][data-mode='light'] {
-  /* Material You Light */
+  /* Material You Light (Official M3 Color Scheme & Roles) */
   color-scheme: light;
-  --c-canvas: 253 248 253;
-  --c-surface: 247 242 250;
-  --c-raised: 236 230 238;
-  --c-line: 202 196 208;
-  --c-fg: 29 27 32;
-  --c-muted: 121 116 126;
-  --c-accent: 103 80 164;
-  --c-accent-strong: 127 103 190;
-  --c-on-accent: 255 255 255;
+  --c-canvas: 254 247 255;           /* #FEF7FF Surface */
+  --c-surface: 243 237 247;          /* #F3EDF7 Surface Container */
+  --c-raised: 236 230 240;           /* #ECE6F0 Surface Container High */
+  --c-line: 202 196 208;             /* #CAC4D0 Outline Variant */
+  --c-fg: 29 27 32;                  /* #1D1B20 On Surface */
+  --c-muted: 73 69 79;               /* #49454F On Surface Variant */
+  --c-accent: 103 80 164;            /* #6750A4 Primary */
+  --c-accent-strong: 234 221 255;    /* #EADDFF Primary Container */
+  --c-on-accent: 255 255 255;        /* #FFFFFF On Primary */
+  --c-primary-container: 234 221 255; /* #EADDFF Primary Container */
+  --c-on-primary-container: 33 0 93; /* #21005D On Primary Container */
+  --c-secondary-container: 232 222 248; /* #E8DEF8 Secondary Container */
+  --c-on-secondary-container: 29 25 43; /* #1D192B On Secondary Container */
   --c-break: 0 99 155;
   --c-long: 56 106 32;
   --c-track: 202 196 208;
@@ -289,27 +300,27 @@
   --c-chart-8: 67 90 159;
 
   /* Material You Structural Tokens */
-  --radius-card: 24px;
+  --radius-card: 28px;
   --radius-btn: 9999px;
   --radius-sm: 12px;
   --badge-radius: 8px;
   --border-card-width: 0px;
   --border-card-style: none;
-  --font-display: 'Roboto', 'Google Sans', system-ui, sans-serif;
-  --font-body: 'Roboto', 'Google Sans', system-ui, sans-serif;
-  --card-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+  --font-display: 'Google Sans', 'Roboto', system-ui, -apple-system, sans-serif;
+  --font-body: 'Google Sans', 'Roboto', system-ui, -apple-system, sans-serif;
+  --card-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.08), 0 1px 3px 1px rgba(0, 0, 0, 0.05);
   --card-blur: 0px;
   --card-bg-opacity: 1;
 
   /* Semantic Tokens */
-  --color-tag-bg: rgba(0, 99, 155, 0.12);
-  --color-tag-text: #00639b;
+  --color-tag-bg: rgba(232, 222, 248, 0.7);
+  --color-tag-text: #1d192b;
   --color-tag-border: transparent;
   --color-streak: #8a6a00;
   --color-success: #386a20;
-  --glow-opacity: 0.15;
+  --glow-opacity: 0.12;
   --heatmap-l0: rgba(29, 27, 32, 0.06);
-  --heatmap-l0-border: rgba(202, 196, 208, 0.5);
+  --heatmap-l0-border: transparent;
 }
 
 html {
@@ -479,6 +490,81 @@ textarea:focus:not(:focus-visible) {
       0 1px 4px rgba(0, 0, 0, 0.06),
       inset 0 1px 0 rgba(255, 255, 255, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+
+  /* ---- Material Design 3 (Material You) Theme Specialization ---- */
+
+  /* 1. M3 Tonal Surface Cards & Zero-Border Architecture */
+  :root[data-theme='material-you'] .card {
+    border-width: 0 !important;
+    border-style: none !important;
+    border-color: transparent !important;
+    background-color: rgb(var(--c-surface));
+    box-shadow: var(--card-shadow);
+  }
+
+  /* 2. M3 Connected Segmented Button (Mode Switcher) */
+  :root[data-theme='material-you'] .ios-seg-active {
+    background-color: rgb(var(--c-secondary-container));
+    color: rgb(var(--c-on-secondary-container));
+    box-shadow: none;
+    border: none;
+  }
+  :root[data-theme='material-you'] .m3-seg-check {
+    display: inline-block;
+  }
+
+  /* 3. M3 Large Squircle FAB (Play/Pause Button) */
+  :root[data-theme='material-you'] .play-spring {
+    border-radius: 28px !important;
+    background-color: rgb(var(--c-primary-container)) !important;
+    color: rgb(var(--c-on-primary-container)) !important;
+    border: none !important;
+    box-shadow:
+      0 3px 6px 0 rgba(0, 0, 0, 0.18),
+      0 1px 3px 0 rgba(0, 0, 0, 0.24) !important;
+  }
+  :root[data-theme='material-you'] .play-spring:hover {
+    box-shadow:
+      0 6px 12px 0 rgba(0, 0, 0, 0.22),
+      0 2px 4px 0 rgba(0, 0, 0, 0.28) !important;
+  }
+
+  /* 4. M3 Secondary Action Buttons (Tonal Circular Buttons) */
+  :root[data-theme='material-you'] .btn-ghost {
+    background-color: rgb(var(--c-raised));
+    border-color: transparent !important;
+    color: rgb(var(--c-muted));
+  }
+  :root[data-theme='material-you'] .btn-ghost:hover {
+    background-color: rgb(var(--c-surface));
+    color: rgb(var(--c-fg));
+  }
+
+  /* 5. M3 Navigation Bar Active Indicator Pill */
+  :root[data-theme='material-you'] .ios-nav-active {
+    background-color: rgb(var(--c-secondary-container));
+    color: rgb(var(--c-on-secondary-container));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+    border: none !important;
+  }
+
+  /* 6. M3 Input & Tonal Widgets */
+  :root[data-theme='material-you'] .input {
+    background-color: rgb(var(--c-raised));
+    border: 1px solid rgb(var(--c-line));
+    border-radius: var(--radius-btn);
+  }
+  :root[data-theme='material-you'] .input:focus {
+    border-color: rgb(var(--c-accent));
+    box-shadow: 0 0 0 1px rgb(var(--c-accent));
+  }
+  :root[data-theme='material-you'] .btn-primary {
+    background-color: rgb(var(--c-accent));
+    color: rgb(var(--c-on-accent));
+    border-radius: var(--radius-btn);
   }
 
   /* Hide number spin buttons across all modern browsers */

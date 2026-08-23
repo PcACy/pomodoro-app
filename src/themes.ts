@@ -24,8 +24,8 @@ export const THEMES: ThemeDef[] = [
   {
     id: 'material-you',
     label: 'Material You (M3)',
-    swatchDark: ['#d0bcff', '#a8c7fa', '#c4eed0'],
-    swatchLight: ['#6750a4', '#00639b', '#386a20'],
+    swatchDark: ['#d0bcff', '#4f378b', '#211f26'],
+    swatchLight: ['#6750a4', '#eaddff', '#f3edf7'],
   },
 ]
 

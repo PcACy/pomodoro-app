@@ -302,11 +302,14 @@ export const Timer = memo(function Timer({
               key={m}
               type="button"
               onClick={() => onModeChange(m)}
-              className={`relative z-10 flex w-full items-center justify-center rounded-[calc(var(--radius-btn)-4px)] py-1.5 font-display text-xs uppercase tracking-wider transition-colors duration-200 active:scale-[0.97] ${
+              className={`relative z-10 flex w-full items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] py-1.5 font-display text-xs uppercase tracking-wider transition-colors duration-200 active:scale-[0.97] ${
                 mode === m ? 'text-fg font-bold' : 'text-muted hover:text-fg'
               }`}
             >
-              {t.timer[m]}
+              {mode === m && (
+                <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
+              )}
+              <span>{t.timer[m]}</span>
             </button>
           ))}
         </div>
