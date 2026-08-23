@@ -575,18 +575,14 @@ export const Timer = memo(function Timer({
           <kbd className="kbd">Space</kbd> {t.shortcuts.startPause}
         </span>
         {isFlow ? (
-          <span
-            className={`inline-flex items-center gap-2.5 sm:gap-3 transition-opacity duration-200 ${
-              flowStatus !== 'idle' ? 'opacity-100' : 'pointer-events-none opacity-0'
-            }`}
-          >
+          <>
             <span className="inline-flex items-center gap-1">
               <kbd className="kbd">R</kbd> {t.flow.discardShortcut}
             </span>
             <span className="inline-flex items-center gap-1">
               <kbd className="kbd">F</kbd> {t.flow.finishShortcut}
             </span>
-          </span>
+          </>
         ) : (
           <>
             <span className="inline-flex items-center gap-1">
@@ -602,7 +598,7 @@ export const Timer = memo(function Timer({
           onClick={onToggleZen}
           title={isZenMode ? t.zen.exitHint : t.zen.enterHint}
           aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
-          className="inline-flex items-center gap-1 transition-colors hover:text-fg"
+          className="inline-flex items-center gap-1 transition-colors hover:text-fg cursor-pointer"
         >
           <kbd className="kbd">Z</kbd> {t.shortcuts.zen}
         </button>
