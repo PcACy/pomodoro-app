@@ -152,6 +152,7 @@ export interface Messages {
     clearSessions: string
     backup: string
     language: string
+    languageHint: string
     appearance: string
     layoutHint: string
     layoutTwoColumns: string
@@ -349,6 +350,7 @@ const de: Messages = {
     clearSessions: 'Sessions löschen',
     backup: 'Komplett-Backup (.json)',
     language: 'Sprache',
+    languageHint: 'Wähle deine bevorzugte Sprache für UI und Benachrichtigungen.',
     appearance: 'Darstellung & Layout',
     layoutHint: 'Wähle die Anordnung von Timer, Aufgaben und Statistiken.',
     layoutTwoColumns: 'Zwei Spalten',
@@ -552,6 +554,7 @@ const en: Messages = {
     clearSessions: 'Delete sessions',
     backup: 'Full backup (.json)',
     language: 'Language',
+    languageHint: 'Select your preferred language for the interface and notifications.',
     appearance: 'Appearance & Layout',
     layoutHint: 'Choose how timer, tasks and stats are arranged.',
     layoutTwoColumns: 'Two columns',

@@ -5,6 +5,7 @@ import {
   FileDown,
   FileJson,
   Github,
+  Languages,
   Loader2,
   LogOut,
   Minus,
@@ -394,20 +395,47 @@ export const SettingsPanel = memo(function SettingsPanel({
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.language}</h3>
-        <div className="flex gap-2">
-          {(['de', 'en'] as const).map((l) => (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-btn bg-accent/10 text-accent">
+              <Languages size={18} />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-fg">{t.settings.language}</h3>
+              <p className="text-xs text-muted">{t.settings.languageHint}</p>
+            </div>
+          </div>
+
+          <div className="relative grid grid-cols-2 w-full sm:w-56 items-center gap-1 rounded-btn border border-line/60 bg-canvas/80 p-1 backdrop-blur-md">
+            <div
+              className="pointer-events-none absolute bottom-1 top-1 rounded-btn bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              style={{
+                width: 'calc((100% - 8px - 4px) / 2)',
+                left: '4px',
+                transform: `translateX(calc(${lang === 'de' ? 0 : 1} * (100% + 4px)))`,
+              }}
+            />
             <button
-              key={l}
               type="button"
-              onClick={() => setLang(l)}
-              className={`rounded-btn border px-4 py-2 text-sm font-medium transition-colors ${
-                lang === l ? 'border-accent bg-accent/10 text-fg' : 'border-line bg-canvas text-muted hover:bg-raised'
+              onClick={() => setLang('de')}
+              className={`relative z-10 flex items-center justify-center gap-1.5 rounded-btn px-3 py-1.5 text-xs font-medium transition-colors duration-200 active:scale-95 cursor-pointer ${
+                lang === 'de' ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
-              {l === 'de' ? 'Deutsch 🇩🇪' : 'English 🇬🇧'}
+              <span className="font-mono text-[10px] font-bold tracking-wider opacity-60">DE</span>
+              <span>Deutsch</span>
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => setLang('en')}
+              className={`relative z-10 flex items-center justify-center gap-1.5 rounded-btn px-3 py-1.5 text-xs font-medium transition-colors duration-200 active:scale-95 cursor-pointer ${
+                lang === 'en' ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
+              }`}
+            >
+              <span className="font-mono text-[10px] font-bold tracking-wider opacity-60">EN</span>
+              <span>English</span>
+            </button>
+          </div>
         </div>
       </div>
 
