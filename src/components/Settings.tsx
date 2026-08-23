@@ -100,7 +100,7 @@ function StepperButton({
         e.preventDefault()
       }}
       {...holdHandlers}
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-btn text-muted transition-all hover:bg-raised hover:text-fg active:scale-95 disabled:pointer-events-none disabled:opacity-25"
+      className="tap-spring flex h-8 w-8 shrink-0 items-center justify-center rounded-btn text-muted hover:bg-raised hover:text-fg disabled:pointer-events-none disabled:opacity-25"
     >
       <Icon size={14} />
     </button>

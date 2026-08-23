@@ -641,3 +641,230 @@ textarea:focus:not(:focus-visible) {
 .animate-zzz {
   animation: zzz 2.4s ease-in-out infinite;
 }
+
+/* =========================================================================
+   MOTION SYSTEM — GPU-composited micro-interactions
+   Only transform / opacity / filter are ever animated (no layout thrash).
+   ========================================================================= */
+
+/* --- Timer progress ring ------------------------------------------------ */
+/* Soft eased catch-up between second ticks (brief-specified curve). */
+.ring-progress {
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: stroke-dashoffset;
+}
+/* While running the ring tracks a continuously ticking countdown; linear is
+   the only easing that stays visually exact per tick (no rubber-banding). */
+.ring-progress--running {
+  transition: stroke-dashoffset 1s linear;
+  will-change: stroke-dashoffset;
+}
+/* Direct manipulation (scrubbing) must feel 1:1 — no transition at all. */
+.ring-progress--none {
+  transition: none;
+}
+
+/* --- Session completion relief impulse (scale 1 -> 1.02 -> 1, ~300ms) --- */
+@keyframes complete-pulse {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-complete-pulse {
+  animation: complete-pulse 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+/* --- Mascot phase morph (FOCUS <-> BREAK crossfade-scale) --------------- */
+@keyframes mascot-morph {
+  0% {
+    opacity: 0.2;
+    transform: scale(0.88);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-mascot-morph {
+  animation: mascot-morph 280ms cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform, opacity;
+}
+
+/* --- Todo list choreography --------------------------------------------- */
+@keyframes todo-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-todo-in {
+  animation: todo-in 260ms cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform, opacity;
+}
+
+@keyframes todo-exit {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+.animate-todo-exit {
+  animation: todo-exit 170ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Checkbox icon spring pop on completion */
+@keyframes check-pop {
+  0% {
+    transform: scale(0.3);
+  }
+  55% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-check-pop {
+  animation: check-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+/* Delayed horizontal strike-through expansion (plays after the pop lands). */
+.todo-strike {
+  position: absolute;
+  left: -1%;
+  right: -1%;
+  top: 50%;
+  height: 1.5px;
+  border-radius: 9999px;
+  background: currentColor;
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 240ms cubic-bezier(0.4, 0, 0.2, 1) 140ms;
+}
+.todo-strike--done {
+  transform: scaleX(1);
+}
+
+/* Sibling rows glide into place after a delete (FLIP, transform-only). */
+.todo-flip {
+  will-change: transform;
+}
+
+/* --- Elastic button physics ---------------------------------------------- */
+/* Natural click compression; spring-out on release. Applied to interactive
+   controls that don't already carry Tailwind active:scale utilities. */
+.tap-spring {
+  transition:
+    transform 120ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    opacity 150ms ease;
+}
+.tap-spring:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+/* Primary play/pause lens: grows gently on hover, compresses on press,
+   springs back on release — faster than generic buttons for prominence. */
+.play-spring {
+  transition:
+    transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 250ms ease;
+}
+.play-spring:hover {
+  transform: scale(1.05);
+}
+.play-spring:active {
+  transform: scale(0.94);
+}
+
+/* --- Dialog entrance / exit ----------------------------------------------
+   Open: backdrop fade + centered scale-spring rise.
+   Close: inverse, faster (150ms) for a snappy feel. */
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes modal-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.modal-backdrop {
+  animation: modal-backdrop-in 200ms cubic-bezier(0.2, 0, 0, 1);
+  will-change: opacity;
+}
+.modal-panel {
+  animation: modal-panel-in 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;
+}
+@keyframes modal-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes modal-panel-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
+  }
+}
+.modal-backdrop--closing {
+  animation: modal-backdrop-out 150ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+.modal-panel--closing {
+  animation: modal-panel-out 150ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* --- Accessibility guardrail ---------------------------------------------
+   Kill all motion for users with vestibular sensitivity. Kept as the LAST
+   word so it overrides every animation/transition defined above and any
+   utility class. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .flow-bar--running {
+    transform: scaleY(0.5);
+  }
+}

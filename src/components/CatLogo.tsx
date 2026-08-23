@@ -32,8 +32,15 @@ export const CatLogo: FC<CatLogoProps> = ({
     )
   }
 
+  const variant = isBreak ? 'break' : isComplete ? 'complete' : isFocus ? 'focus' : 'idle'
+
   return (
-    <div className={`relative inline-flex items-center justify-center ${isComplete ? 'animate-mascot-hop' : ''}`}>
+    <div
+      key={variant}
+      className={`relative inline-flex items-center justify-center ${
+        isComplete ? 'animate-mascot-hop' : 'animate-mascot-morph'
+      }`}
+    >
       {/* Animated zZz particles for Break/Sleeping mode */}
       {isBreak && (
         <span

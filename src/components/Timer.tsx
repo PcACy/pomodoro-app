@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { Check, Pause, PictureInPicture2, Play, RotateCcw, SkipForward } from 'lucide-react'
 import type { TimerStatus, PhaseId, TimerMode } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
@@ -129,6 +129,32 @@ export const Timer = memo(function Timer({
   const isDraggingRef = useRef(false)
   const [scrubbingMinutes, setScrubbingMinutes] = useState<number | null>(null)
   const isScrubbing = scrubbingMinutes != null
+
+  // Completion relief impulse: a short, well-proportioned spring scale
+  // (1 -> 1.02 -> 1) whenever the timer reaches 00:00 and advances the phase.
+  const [pulseActive, setPulseActive] = useState(false)
+  const prevPhaseRef = useRef(phase)
+  const prevCycleRef = useRef(completedFocusInCycle)
+  const pulseTimerRef = useRef<number | null>(null)
+  useEffect(() => {
+    const phaseChanged = prevPhaseRef.current !== phase
+    const cycleChanged = prevCycleRef.current !== completedFocusInCycle
+    prevPhaseRef.current = phase
+    prevCycleRef.current = completedFocusInCycle
+    if (!phaseChanged && !cycleChanged) return
+    setPulseActive(false)
+    // Re-trigger on the next frame so back-to-back completions replay cleanly.
+    const raf = requestAnimationFrame(() => setPulseActive(true))
+    if (pulseTimerRef.current != null) window.clearTimeout(pulseTimerRef.current)
+    pulseTimerRef.current = window.setTimeout(() => setPulseActive(false), 340)
+    return () => cancelAnimationFrame(raf)
+  }, [phase, completedFocusInCycle])
+  useEffect(
+    () => () => {
+      if (pulseTimerRef.current != null) window.clearTimeout(pulseTimerRef.current)
+    },
+    [],
+  )
 
   const activeDuration = scrubbingMinutes ?? durationMinutes
   const scrubFraction = Math.max(5, Math.min(60, activeDuration)) / 60
@@ -263,12 +289,12 @@ export const Timer = memo(function Timer({
             running && borderless ? 'opacity-30 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
           }`}
         >
-          {/* Sliding Pill */}
+          {/* Sliding Pill — transform-based so the glide stays on the compositor */}
           <div
-            className="pointer-events-none absolute inset-y-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised ios-seg-active transition-[left] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="pointer-events-none absolute inset-y-1 left-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
             style={{
               width: 'calc(50% - 4px)',
-              left: mode === 'pomodoro' ? '4px' : 'calc(50% + 0px)',
+              transform: mode === 'pomodoro' ? 'translateX(0)' : 'translateX(100%)',
             }}
           />
           {MODES.map((m) => (
@@ -315,7 +341,9 @@ export const Timer = memo(function Timer({
 
       <div
         ref={ringRef}
-        className={`relative isolate touch-none select-none ${isIdle && !isFlow ? 'cursor-grab active:cursor-grabbing' : ''}`}
+        className={`relative isolate touch-none select-none ${pulseActive ? 'animate-complete-pulse' : ''} ${
+          isIdle && !isFlow ? 'cursor-grab active:cursor-grabbing' : ''
+        }`}
         style={{ width: size, height: size }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -376,13 +404,12 @@ export const Timer = memo(function Timer({
               strokeLinecap="round"
               strokeDasharray={circ}
               strokeDashoffset={offset}
-              style={{ willChange: 'stroke-dashoffset' }}
               className={`${RING[phase]} ${
                 isScrubbing
-                  ? 'transition-none'
+                  ? 'ring-progress--none'
                   : running
-                    ? 'transition-[stroke-dashoffset] duration-1000 ease-linear'
-                    : 'transition-[stroke-dashoffset] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]'
+                    ? 'ring-progress--running'
+                    : 'ring-progress'
               }`}
             />
           </svg>
@@ -468,7 +495,7 @@ export const Timer = memo(function Timer({
         <button
           type="button"
           onClick={handleToggleClick}
-          className={`ios-play-lens flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-[0.94] ${
+          className={`ios-play-lens play-spring flex items-center justify-center rounded-full ${
             large ? 'h-20 w-20 2xl:h-22 2xl:w-22 shadow-2xl' : 'h-16 w-16 2xl:h-18 2xl:w-18 shadow-lg'
           } ${playBtnColor}`}
           title={running ? t.timer.pause : t.timer.start}

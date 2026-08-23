@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Check, ChevronDown, Pencil, Plus, Target, Timer, Trash2, X } from 'lucide-react'
 import type { TodoItem } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
@@ -75,7 +75,7 @@ const TagSelect = memo(function TagSelect({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`flex h-[38px] items-center gap-1.5 px-2.5 rounded-btn border text-xs font-mono font-medium transition-all cursor-pointer select-none ${
+        className={`tap-spring flex h-[38px] cursor-pointer items-center gap-1.5 px-2.5 rounded-btn border text-xs font-mono font-medium select-none ${
           value
             ? 'border-line/80 bg-raised/70 text-fg hover:border-accent/50'
             : 'border-line/60 bg-raised/40 text-muted hover:border-line hover:text-fg'
@@ -193,6 +193,87 @@ export const TodoList = memo(function TodoList({
 
   const activeTag = tag && tags.includes(tag) ? tag : ''
 
+  // --- Delete choreography: exit animation + FLIP glide for siblings -------
+  // The removed row fades/slides out (transform+opacity only); after it is
+  // unmounted, remaining rows are inverted by their vertical delta and eased
+  // back to identity so the list closes the gap without a visible jump.
+  const listRef = useRef<HTMLUListElement>(null)
+  const prevTopsRef = useRef<Map<string, number>>(new Map())
+  const [exitingIds, setExitingIds] = useState<Set<string>>(() => new Set())
+  const cleanupTimersRef = useRef<number[]>([])
+  useLayoutEffect(() => {
+    return () => {
+      cleanupTimersRef.current.forEach((id) => window.clearTimeout(id))
+      cleanupTimersRef.current = []
+    }
+  }, [])
+
+  const captureRowTops = useCallback(() => {
+    const ul = listRef.current
+    if (!ul) return
+    prevTopsRef.current = new Map(
+      Array.from(ul.querySelectorAll<HTMLElement>('[data-todo-id]')).map((el) => [
+        el.dataset.todoId as string,
+        el.getBoundingClientRect().top,
+      ]),
+    )
+  }, [])
+
+  const handleRemove = useCallback(
+    (id: string) => {
+      if (exitingIds.has(id)) return
+      captureRowTops()
+      setExitingIds((prev) => {
+        const next = new Set(prev)
+        next.add(id)
+        return next
+      })
+      const timer = window.setTimeout(() => {
+        onRemove(id)
+        setExitingIds((prev) => {
+          const next = new Set(prev)
+          next.delete(id)
+          return next
+        })
+      }, 170)
+      cleanupTimersRef.current.push(timer)
+    },
+    [exitingIds, onRemove, captureRowTops],
+  )
+
+  // FLIP: after React commits the removal, translate siblings to their old
+  // positions and release them with a spring ease (compositor-only).
+  useLayoutEffect(() => {
+    const prevTops = prevTopsRef.current
+    if (prevTops.size === 0 || !listRef.current) return
+    prevTopsRef.current = new Map()
+    const rows = Array.from(listRef.current.querySelectorAll<HTMLElement>('[data-todo-id]'))
+    const moved: HTMLElement[] = []
+    for (const row of rows) {
+      const before = prevTops.get(row.dataset.todoId as string)
+      if (before == null) continue
+      const dy = before - row.getBoundingClientRect().top
+      if (Math.abs(dy) <= 1) continue
+      moved.push(row)
+      row.style.transition = 'none'
+      row.style.transform = `translateY(${dy}px)`
+    }
+    if (moved.length === 0) return
+    void listRef.current.offsetHeight // single reflow, then hand off to compositor
+    for (const row of moved) {
+      row.classList.add('todo-flip')
+      row.style.transition = 'transform 260ms cubic-bezier(0.32, 0.72, 0, 1)'
+      row.style.transform = ''
+    }
+    const settle = window.setTimeout(() => {
+      for (const row of moved) {
+        row.style.transition = ''
+        row.classList.remove('todo-flip')
+      }
+    }, 300)
+    cleanupTimersRef.current.push(settle)
+  }, [todos])
+
   const submitAdd = () => {
     const trimmed = title.trim()
     if (!trimmed) return
@@ -265,17 +346,18 @@ export const TodoList = memo(function TodoList({
       {todos.length === 0 ? (
         <p className="py-6 text-center text-sm text-muted">{tr.todo.empty}</p>
       ) : (
-        <ul className="flex flex-col gap-1.5 2xl:gap-2">
+        <ul ref={listRef} className="flex flex-col gap-1.5 2xl:gap-2">
           {todos.map((t) => (
             <li
               key={t.id}
+              data-todo-id={t.id}
               onClick={(e) => {
                 const target = e.target as HTMLElement
                 if (target.closest('button, input, select, textarea') || editingId === t.id) return
                 onFocus(t.id)
               }}
-              className={`group flex items-center gap-2 rounded-btn border px-3 py-2 2xl:px-4 2xl:py-3 transition-all ${
-                editingId !== t.id ? 'cursor-pointer' : ''
+              className={`group flex items-center gap-2 rounded-btn border px-3 py-2 2xl:px-4 2xl:py-3 transition-colors ${
+                exitingIds.has(t.id) ? 'animate-todo-exit' : 'animate-todo-in'
               } ${
                 activeTodoId === t.id
                   ? 'border-line border-l-2 border-l-accent bg-accent/[0.04] shadow-sm'
@@ -290,11 +372,14 @@ export const TodoList = memo(function TodoList({
                 }}
                 title={t.done ? tr.todo.reopen : tr.todo.done}
                 aria-label={t.done ? tr.todo.reopen : tr.todo.done}
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border transition-all duration-150 active:scale-90 ${
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border transition-colors duration-150 active:scale-90 ${
                   t.done ? 'border-success bg-success text-on-accent' : 'border-line text-transparent hover:border-accent'
                 }`}
               >
-                <Check size={13} className={`transition-transform duration-150 ${t.done ? 'scale-100' : 'scale-0'}`} />
+                <Check
+                  size={13}
+                  className={`transition-transform duration-150 ${t.done ? 'scale-100 animate-check-pop' : 'scale-0'}`}
+                />
               </button>
 
               {editingId === t.id ? (
@@ -321,7 +406,7 @@ export const TodoList = memo(function TodoList({
                   <button
                     type="button"
                     onClick={() => submitEdit(t.id)}
-                    className="btn-primary flex h-8 w-8 shrink-0 items-center justify-center p-0"
+                    className="btn-primary tap-spring flex h-8 w-8 shrink-0 items-center justify-center p-0"
                     title={tr.todo.save}
                     aria-label={tr.todo.save}
                   >
@@ -330,7 +415,7 @@ export const TodoList = memo(function TodoList({
                   <button
                     type="button"
                     onClick={() => setEditingId(null)}
-                    className="btn-ghost flex h-8 w-8 shrink-0 items-center justify-center p-0"
+                    className="btn-ghost tap-spring flex h-8 w-8 shrink-0 items-center justify-center p-0"
                     title={tr.todo.cancel}
                     aria-label={tr.todo.cancel}
                   >
@@ -342,11 +427,12 @@ export const TodoList = memo(function TodoList({
                   <div className="flex min-w-0 flex-1 flex-col">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`truncate text-sm transition-all ${
-                          t.done ? 'line-through text-muted opacity-60' : 'font-medium text-fg'
+                        className={`relative truncate text-sm transition-colors duration-300 ${
+                          t.done ? 'text-muted opacity-60' : 'font-medium text-fg'
                         }`}
                       >
                         {t.title}
+                        <span aria-hidden="true" className={`todo-strike ${t.done ? 'todo-strike--done' : ''}`} />
                       </span>
                       {activeTodoId === t.id && timerRunning && !t.done && (
                         <span className="flex h-1.5 w-1.5 items-center justify-center shrink-0">
@@ -411,11 +497,11 @@ export const TodoList = memo(function TodoList({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation()
-                      onRemove(t.id)
+                      handleRemove(t.id)
                     }}
                     title={tr.todo.delete}
                     aria-label={tr.todo.delete}
-                    className="rounded-sm p-1.5 text-muted transition-colors hover:bg-raised hover:text-accent"
+                    className="tap-spring rounded-sm p-1.5 text-muted transition-colors hover:bg-raised hover:text-accent"
                   >
                     <Trash2 size={14} />
                   </button>
