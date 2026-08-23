@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../types'
 import { THEMES, type ColorMode, type ThemeId } from '../themes'
+import { useThemeColors } from '../hooks/useTheme'
 import { clearSessions, exportAll } from '../lib/db'
 import { downloadText, sessionsToCsv, sessionsToJson, todosToCsv, todosToJson } from '../lib/dataExport'
 import { useTranslation } from '../hooks/useTranslation'
@@ -243,9 +244,26 @@ export const SettingsPanel = memo(function SettingsPanel({
   onSyncNow,
 }: Props) {
   const { t, lang, setLang } = useTranslation()
+  const colors = useThemeColors(themeId, colorMode)
   const [newTag, setNewTag] = useState('')
+  const [tagError, setTagError] = useState<string | null>(null)
+  const [shake, setShake] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const todayKey = new Date().toISOString().slice(0, 10)
+
+  const getTagColor = useCallback(
+    (tag: string): string => {
+      let hash = 0
+      for (let i = 0; i < tag.length; i++) {
+        hash = (hash << 5) - hash + tag.charCodeAt(i)
+        hash |= 0
+      }
+      const index = Math.abs(hash) % colors.chart.length
+      return colors.chart[index]
+    },
+    [colors.chart],
+  )
 
   const handleBackup = () => {
     void exportAll().then((data) => {
@@ -275,14 +293,25 @@ export const SettingsPanel = memo(function SettingsPanel({
   }
 
   const addTag = () => {
-    const t = newTag.trim()
-    if (!t || settings.tags.includes(t)) return
-    update((s) => ({ ...s, tags: [...s.tags, t] }))
+    const trimmed = newTag.trim()
+    if (!trimmed) {
+      inputRef.current?.focus()
+      return
+    }
+    if (settings.tags.includes(trimmed)) {
+      setTagError(t.settings.tagAlreadyExists)
+      setShake(true)
+      setTimeout(() => setShake(false), 400)
+      inputRef.current?.focus()
+      return
+    }
+    update((s) => ({ ...s, tags: [...s.tags, trimmed] }))
     setNewTag('')
+    setTagError(null)
+    inputRef.current?.focus()
   }
 
   const removeTag = (tag: string) => {
-    if (settings.tags.length <= 1) return
     update((s) => ({ ...s, tags: s.tags.filter((t) => t !== tag) }))
   }
 
@@ -683,38 +712,82 @@ export const SettingsPanel = memo(function SettingsPanel({
       <div className="card p-6">
         <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.tags}</h3>
         <p className="mb-4 text-xs text-muted">{t.settings.tagsHint}</p>
-        <div className="flex gap-2">
+
+        {/* Integrated Single-Line Input Row */}
+        <div className="relative flex w-full max-w-md items-center">
           <input
+            ref={inputRef}
             type="text"
             value={newTag}
-            onChange={(e) => setNewTag(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addTag()}
-            placeholder={t.settings.newTag}
-            className="input max-w-xs"
+            onChange={(e) => {
+              setNewTag(e.target.value)
+              if (tagError) setTagError(null)
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                addTag()
+              }
+            }}
+            placeholder={t.settings.newTagPlaceholder}
+            className={`w-full rounded-btn border bg-raised/50 px-3.5 py-2 pr-10 font-mono text-sm text-fg placeholder:text-muted transition-all focus:outline-none ${
+              shake || tagError
+                ? 'border-accent-strong ring-1 ring-accent-strong/40 animate-shake'
+                : 'border-line focus:border-accent'
+            }`}
             maxLength={30}
           />
-          <button type="button" onClick={addTag} className="btn-primary">
-            <Plus size={15} /> {t.settings.addTag}
+          <button
+            type="button"
+            onClick={addTag}
+            disabled={!newTag.trim()}
+            title={t.settings.addTag}
+            aria-label={t.settings.addTag}
+            className="absolute right-1.5 flex h-7 w-7 items-center justify-center rounded-sm bg-accent text-on-accent transition-all hover:opacity-90 active:scale-95 disabled:pointer-events-none disabled:opacity-30"
+          >
+            <Plus size={16} />
           </button>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {settings.tags.map((tag) => (
-            <span
-              key={tag}
-              className="flex items-center gap-1.5 rounded-full border border-line bg-raised px-3 py-1 text-xs text-fg"
-            >
-              {tag}
-              <button
-                type="button"
-                onClick={() => removeTag(tag)}
-                className="text-muted transition-colors hover:text-accent"
-                title={t.settings.removeTag(tag)}
-              >
-                <X size={13} />
-              </button>
-            </span>
-          ))}
-        </div>
+
+        {tagError && (
+          <p className="mt-1.5 text-xs font-medium text-accent-strong animate-fade-in">
+            {tagError}
+          </p>
+        )}
+
+        {/* Tag Chips Flex-Wrap List */}
+        {settings.tags.length === 0 ? (
+          <p className="mt-3 text-xs italic text-muted">{t.settings.noTagsYet}</p>
+        ) : (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {settings.tags.map((tag) => {
+              const color = getTagColor(tag)
+              return (
+                <span
+                  key={tag}
+                  className="group flex items-center gap-1.5 rounded-badge border px-2.5 py-1 font-mono text-xs font-medium transition-all hover:brightness-105"
+                  style={{
+                    backgroundColor: `${color}18`,
+                    color: color,
+                    borderColor: `${color}40`,
+                  }}
+                >
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+                  <span className="max-w-[160px] truncate">{tag}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="cursor-pointer rounded-sm p-0.5 text-current transition-colors hover:bg-black/10 dark:hover:bg-white/20"
+                    title={t.settings.removeTag(tag)}
+                    aria-label={t.settings.removeTag(tag)}
+                  >
+                    <X size={13} />
+                  </button>
+                </span>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       <div className="card border-accent-strong/40 p-6">

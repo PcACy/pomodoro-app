@@ -124,8 +124,11 @@ export interface Messages {
     tags: string
     tagsHint: string
     newTag: string
+    newTagPlaceholder: string
     addTag: string
     removeTag: (tag: string) => string
+    noTagsYet: string
+    tagAlreadyExists: string
     data: string
     dataHint: string
     confirmClear: string
@@ -301,8 +304,11 @@ const de: Messages = {
     tags: 'Tags',
     tagsHint: 'Kategorien für die Aufgaben-Zuweisung.',
     newTag: 'Neuer Tag …',
-    addTag: 'Hinzufügen',
+    newTagPlaceholder: 'Neuen Tag eingeben …',
+    addTag: 'Tag hinzufügen',
     removeTag: (tag) => `Tag "${tag}" entfernen`,
+    noTagsYet: 'Keine Tags vorhanden. Erstelle Kategorien für deine Fokus-Sessions.',
+    tagAlreadyExists: 'Dieser Tag existiert bereits.',
     data: 'Daten & Backup',
     dataHint: 'Exportiere ein Komplett-Backup oder deine Daten als CSV/JSON. Das Löschen aller Sessions ist unwiderruflich.',
     confirmClear: 'Wirklich ALLE Sessions löschen?',
@@ -484,8 +490,11 @@ const en: Messages = {
     tags: 'Tags',
     tagsHint: 'Categories for task assignment.',
     newTag: 'New tag …',
-    addTag: 'Add',
+    newTagPlaceholder: 'Enter new tag …',
+    addTag: 'Add tag',
     removeTag: (tag) => `Remove tag "${tag}"`,
+    noTagsYet: 'No tags yet. Create categories for your focus sessions.',
+    tagAlreadyExists: 'This tag already exists.',
     data: 'Data & Backup',
     dataHint: 'Export a full backup or your data as CSV/JSON. Deleting all sessions is irreversible.',
     confirmClear: 'Really delete ALL sessions?',
