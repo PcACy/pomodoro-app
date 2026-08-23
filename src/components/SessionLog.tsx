@@ -33,7 +33,7 @@ function SessionRow({ s, locale }: { s: Session; locale: string }) {
               type="button"
               onClick={() => setOpen((o) => !o)}
               title={open ? 'Notiz ausblenden' : 'Notiz anzeigen'}
-              className={`rounded-md border p-1.5 transition-colors ${
+              className={`rounded-sm border p-1.5 transition-colors ${
                 open
                   ? 'border-accent/60 bg-accent/10 text-accent'
                   : 'border-line text-muted hover:bg-raised hover:text-fg'
@@ -42,7 +42,7 @@ function SessionRow({ s, locale }: { s: Session; locale: string }) {
               <StickyNote size={14} />
             </button>
           )}
-          <span className="rounded-full bg-raised px-2 py-0.5 text-[10px] font-medium text-fg">
+          <span className="rounded-badge bg-raised px-2 py-0.5 text-[10px] font-medium text-fg">
             {s.tag || '—'}
           </span>
           <span className="w-16 text-right font-mono text-xs tabular-nums text-accent">
@@ -51,7 +51,7 @@ function SessionRow({ s, locale }: { s: Session; locale: string }) {
         </div>
       </div>
       {open && s.notes && (
-        <p className="mt-2 whitespace-pre-wrap rounded-lg border border-line bg-canvas px-3 py-2 text-xs leading-relaxed text-fg">
+        <p className="mt-2 whitespace-pre-wrap rounded-sm border border-line bg-canvas px-3 py-2 text-xs leading-relaxed text-fg">
           {s.notes}
         </p>
       )}

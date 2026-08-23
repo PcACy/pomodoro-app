@@ -98,7 +98,7 @@ function StepperButton({
         e.preventDefault()
       }}
       {...holdHandlers}
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-all hover:bg-raised hover:text-fg active:scale-90 disabled:pointer-events-none disabled:opacity-25"
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm text-muted transition-all hover:bg-raised hover:text-fg active:scale-90 disabled:pointer-events-none disabled:opacity-25"
     >
       <Icon size={14} />
     </button>
@@ -156,7 +156,7 @@ function NumberStepper({
 
   return (
     <div
-      className={`flex items-center justify-between rounded-xl border border-line bg-canvas/80 p-1 transition-colors focus-within:border-accent/60 focus-within:ring-1 focus-within:ring-accent/40 ${className}`}
+      className={`flex items-center justify-between rounded-btn border border-line bg-canvas/80 p-1 transition-colors focus-within:border-accent/60 focus-within:ring-1 focus-within:ring-accent/40 ${className}`}
     >
       <StepperButton
         icon={Minus}
@@ -359,7 +359,7 @@ export const SettingsPanel = memo(function SettingsPanel({
               key={l}
               type="button"
               onClick={() => setLang(l)}
-              className={`rounded-xl border px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-btn border px-4 py-2 text-sm font-medium transition-colors ${
                 lang === l ? 'border-accent bg-accent/10 text-fg' : 'border-line bg-canvas text-muted hover:bg-raised'
               }`}
             >
@@ -376,9 +376,9 @@ export const SettingsPanel = memo(function SettingsPanel({
             <h3 className="text-sm font-semibold text-fg">{t.settings.colorMode}</h3>
             <p className="text-xs text-muted">{t.settings.colorModeHint}</p>
           </div>
-          <div className="relative grid grid-cols-2 w-full sm:w-56 items-center gap-1 rounded-xl border border-line/60 bg-canvas/80 p-1 backdrop-blur-md">
+          <div className="relative grid grid-cols-2 w-full sm:w-56 items-center gap-1 rounded-btn border border-line/60 bg-canvas/80 p-1 backdrop-blur-md">
             <div
-              className="pointer-events-none absolute bottom-1 top-1 rounded-lg bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              className="pointer-events-none absolute bottom-1 top-1 rounded-btn bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
               style={{
                 width: 'calc((100% - 8px - 4px) / 2)',
                 left: '4px',
@@ -388,8 +388,8 @@ export const SettingsPanel = memo(function SettingsPanel({
             <button
               type="button"
               onClick={() => onColorModeChange('dark')}
-              className={`relative z-10 flex items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors duration-200 active:scale-95 ${
-                colorMode === 'dark' ? 'text-fg' : 'text-muted hover:text-fg'
+              className={`relative z-10 flex items-center justify-center gap-2 rounded-btn px-3 py-1.5 text-xs font-medium transition-colors duration-200 active:scale-95 ${
+                colorMode === 'dark' ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
               <Moon size={14} />
@@ -398,8 +398,8 @@ export const SettingsPanel = memo(function SettingsPanel({
             <button
               type="button"
               onClick={() => onColorModeChange('light')}
-              className={`relative z-10 flex items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors duration-200 active:scale-95 ${
-                colorMode === 'light' ? 'text-fg' : 'text-muted hover:text-fg'
+              className={`relative z-10 flex items-center justify-center gap-2 rounded-btn px-3 py-1.5 text-xs font-medium transition-colors duration-200 active:scale-95 ${
+                colorMode === 'light' ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
               <Sun size={14} />
@@ -420,7 +420,7 @@ export const SettingsPanel = memo(function SettingsPanel({
                 key={theme.id}
                 type="button"
                 onClick={() => onThemeChange(theme.id)}
-                className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-all active:scale-[0.98] ${
+                className={`flex items-center justify-between rounded-btn border px-4 py-3 text-left transition-all active:scale-[0.98] ${
                   isSelected
                     ? 'border-accent bg-accent/10 shadow-sm shadow-accent/10'
                     : 'border-line bg-canvas hover:bg-raised'
@@ -454,7 +454,7 @@ export const SettingsPanel = memo(function SettingsPanel({
           <button
             type="button"
             onClick={() => update((s) => ({ ...s, layoutMode: 'split' }))}
-            className={`group relative flex flex-col rounded-2xl border p-4 text-left transition-all active:scale-[0.98] ${
+            className={`group relative flex flex-col rounded-card border p-4 text-left transition-all active:scale-[0.98] ${
               settings.layoutMode === 'split'
                 ? 'border-accent bg-accent/10 shadow-sm shadow-accent/10 ring-1 ring-accent/30'
                 : 'border-line/70 bg-canvas/80 hover:border-line hover:bg-raised/60'
@@ -472,17 +472,16 @@ export const SettingsPanel = memo(function SettingsPanel({
             </div>
 
             {/* Wireframe Preview Graphic */}
-            <div className="mb-3.5 flex h-24 w-full items-center justify-center overflow-hidden rounded-xl border border-line/60 bg-surface/80 p-3 shadow-inner">
+            <div className="mb-3.5 flex h-24 w-full items-center justify-center overflow-hidden rounded-btn border border-line/60 bg-surface/80 p-3 shadow-inner">
               <div className="flex items-center gap-3.5">
                 {/* Left Mini Dial */}
                 <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-accent/60 bg-accent/10 shadow-sm">
                   <div className="h-1.5 w-1.5 rounded-full bg-accent" />
                 </div>
-                {/* Right Mini Task List Stack */}
+                {/* Right Mini Task Bars */}
                 <div className="flex flex-col gap-1.5">
                   <div className="h-2 w-14 rounded-full bg-fg/25" />
                   <div className="h-2 w-10 rounded-full bg-fg/15" />
-                  <div className="h-1.5 w-12 rounded-full bg-fg/10" />
                 </div>
               </div>
             </div>
@@ -502,7 +501,7 @@ export const SettingsPanel = memo(function SettingsPanel({
           <button
             type="button"
             onClick={() => update((s) => ({ ...s, layoutMode: 'single' }))}
-            className={`group relative flex flex-col rounded-2xl border p-4 text-left transition-all active:scale-[0.98] ${
+            className={`group relative flex flex-col rounded-card border p-4 text-left transition-all active:scale-[0.98] ${
               settings.layoutMode === 'single'
                 ? 'border-accent bg-accent/10 shadow-sm shadow-accent/10 ring-1 ring-accent/30'
                 : 'border-line/70 bg-canvas/80 hover:border-line hover:bg-raised/60'
@@ -520,7 +519,7 @@ export const SettingsPanel = memo(function SettingsPanel({
             </div>
 
             {/* Wireframe Preview Graphic */}
-            <div className="mb-3.5 flex h-24 w-full items-center justify-center overflow-hidden rounded-xl border border-line/60 bg-surface/80 p-3 shadow-inner">
+            <div className="mb-3.5 flex h-24 w-full items-center justify-center overflow-hidden rounded-btn border border-line/60 bg-surface/80 p-3 shadow-inner">
               <div className="flex flex-col items-center gap-1.5">
                 {/* Centered Large Mini Dial */}
                 <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-accent/60 bg-accent/10 shadow-sm">
@@ -574,7 +573,7 @@ export const SettingsPanel = memo(function SettingsPanel({
                       },
                     }))
                   }
-                  className={`rounded-xl border px-3.5 py-1.5 text-xs font-medium transition-all active:scale-95 ${
+                  className={`rounded-btn border px-3.5 py-1.5 text-xs font-medium transition-all active:scale-95 ${
                     active
                       ? 'border-accent bg-accent/15 text-accent shadow-sm shadow-accent/10 font-semibold'
                       : 'border-line bg-canvas/80 text-muted hover:border-line hover:bg-raised hover:text-fg'

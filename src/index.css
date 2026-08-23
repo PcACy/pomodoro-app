@@ -14,24 +14,38 @@
   color-scheme: dark;
   --c-canvas: 40 40 40;
   --c-surface: 60 56 54;
-  --c-raised: 102 92 84;
-  --c-line: 80 73 69;
+  --c-raised: 80 73 69;
+  --c-line: 102 92 84;
   --c-fg: 235 219 178;
   --c-muted: 168 153 132;
   --c-accent: 254 128 25;
   --c-accent-strong: 251 73 52;
   --c-on-accent: 40 40 40;
   --c-break: 184 187 38;
-  --c-long: 131 165 152;
+  --c-long: 142 192 124;
   --c-track: 80 73 69;
   --c-chart-1: 254 128 25;
   --c-chart-2: 251 73 52;
   --c-chart-3: 250 189 47;
   --c-chart-4: 184 187 38;
-  --c-chart-5: 131 165 152;
+  --c-chart-5: 142 192 124;
   --c-chart-6: 211 134 155;
-  --c-chart-7: 142 192 124;
+  --c-chart-7: 131 165 152;
   --c-chart-8: 146 131 116;
+
+  /* Gruvbox Structural Tokens: Solid matte retro terminal */
+  --radius-card: 10px;
+  --radius-btn: 6px;
+  --radius-sm: 4px;
+  --badge-radius: 4px;
+  --border-card-width: 1px;
+  --border-card-style: solid;
+  --font-display: 'Space Grotesk', 'JetBrains Mono', monospace;
+  --font-body: 'JetBrains Mono', monospace;
+  --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  --card-blur: 0px;
+  --card-bg-opacity: 1;
+
   --ease-ios-spring: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-ios-smooth: cubic-bezier(0.2, 0, 0, 1);
 }
@@ -41,25 +55,39 @@
   /* Gruvbox Light */
   color-scheme: light;
   --c-canvas: 251 241 199;
-  --c-surface: 235 219 178;
-  --c-raised: 213 196 161;
-  --c-line: 189 174 147;
+  --c-surface: 242 229 188;
+  --c-raised: 235 219 178;
+  --c-line: 213 196 161;
   --c-fg: 60 56 54;
   --c-muted: 124 111 100;
   --c-accent: 175 58 3;
   --c-accent-strong: 157 0 6;
   --c-on-accent: 251 241 199;
   --c-break: 121 116 14;
-  --c-long: 7 102 120;
+  --c-long: 66 123 88;
   --c-track: 213 196 161;
   --c-chart-1: 175 58 3;
   --c-chart-2: 214 93 14;
   --c-chart-3: 181 118 20;
   --c-chart-4: 121 116 14;
-  --c-chart-5: 7 102 120;
+  --c-chart-5: 66 123 88;
   --c-chart-6: 143 63 113;
-  --c-chart-7: 66 123 88;
+  --c-chart-7: 7 102 120;
   --c-chart-8: 124 111 100;
+
+  /* Gruvbox Structural Tokens */
+  --radius-card: 10px;
+  --radius-btn: 6px;
+  --radius-sm: 4px;
+  --badge-radius: 4px;
+  --border-card-width: 1px;
+  --border-card-style: solid;
+  --font-display: 'Space Grotesk', 'JetBrains Mono', monospace;
+  --font-body: 'JetBrains Mono', monospace;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --card-blur: 0px;
+  --card-bg-opacity: 1;
+
   --ease-ios-spring: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-ios-smooth: cubic-bezier(0.2, 0, 0, 1);
 }
@@ -69,12 +97,12 @@
    ========================================================================= */
 :root[data-theme='nothing'][data-mode='dark'],
 :root[data-theme='nothing']:not([data-mode='light']) {
-  /* Nothing OS Dark: Pure pitch black, monochrome contrast, signature Nothing Red */
+  /* Nothing OS Dark */
   color-scheme: dark;
   --c-canvas: 0 0 0;
-  --c-surface: 14 14 14;
-  --c-raised: 28 28 28;
-  --c-line: 48 48 48;
+  --c-surface: 12 12 12;
+  --c-raised: 24 24 24;
+  --c-line: 44 44 44;
   --c-fg: 255 255 255;
   --c-muted: 150 150 150;
   --c-accent: 235 0 40;
@@ -82,7 +110,7 @@
   --c-on-accent: 255 255 255;
   --c-break: 220 220 220;
   --c-long: 160 160 160;
-  --c-track: 48 48 48;
+  --c-track: 44 44 44;
   --c-chart-1: 235 0 40;
   --c-chart-2: 255 255 255;
   --c-chart-3: 200 200 200;
@@ -91,10 +119,23 @@
   --c-chart-6: 255 80 80;
   --c-chart-7: 230 230 230;
   --c-chart-8: 80 80 80;
+
+  /* Nothing OS Structural Tokens: strict angular geometry, dot-matrix aesthetic */
+  --radius-card: 4px;
+  --radius-btn: 2px;
+  --radius-sm: 2px;
+  --badge-radius: 2px;
+  --border-card-width: 1px;
+  --border-card-style: solid;
+  --font-display: 'JetBrains Mono', ui-monospace, monospace;
+  --font-body: 'JetBrains Mono', ui-monospace, monospace;
+  --card-shadow: none;
+  --card-blur: 0px;
+  --card-bg-opacity: 1;
 }
 
 :root[data-theme='nothing'][data-mode='light'] {
-  /* Nothing OS Light: Pure sterile white, monochrome contrast, Nothing Red */
+  /* Nothing OS Light */
   color-scheme: light;
   --c-canvas: 248 248 248;
   --c-surface: 255 255 255;
@@ -116,6 +157,19 @@
   --c-chart-6: 196 0 34;
   --c-chart-7: 156 163 175;
   --c-chart-8: 209 213 219;
+
+  /* Nothing OS Structural Tokens */
+  --radius-card: 4px;
+  --radius-btn: 2px;
+  --radius-sm: 2px;
+  --badge-radius: 2px;
+  --border-card-width: 1px;
+  --border-card-style: solid;
+  --font-display: 'JetBrains Mono', ui-monospace, monospace;
+  --font-body: 'JetBrains Mono', ui-monospace, monospace;
+  --card-shadow: none;
+  --card-blur: 0px;
+  --card-bg-opacity: 1;
 }
 
 /* =========================================================================
@@ -123,12 +177,12 @@
    ========================================================================= */
 :root[data-theme='ios-26'][data-mode='dark'],
 :root[data-theme='ios-26']:not([data-mode='light']) {
-  /* iOS 26 Dark: Deep night graphite, frosted dark glass, Apple Orange */
+  /* iOS 26 Dark */
   color-scheme: dark;
   --c-canvas: 8 9 14;
-  --c-surface: 16 19 28;
-  --c-raised: 28 33 48;
-  --c-line: 42 49 70;
+  --c-surface: 18 21 32;
+  --c-raised: 30 35 52;
+  --c-line: 45 52 75;
   --c-fg: 242 245 250;
   --c-muted: 138 148 172;
   --c-accent: 255 107 0;
@@ -136,7 +190,7 @@
   --c-on-accent: 255 255 255;
   --c-break: 48 209 88;
   --c-long: 10 132 255;
-  --c-track: 42 49 70;
+  --c-track: 45 52 75;
   --c-chart-1: 255 107 0;
   --c-chart-2: 10 132 255;
   --c-chart-3: 48 209 88;
@@ -145,15 +199,28 @@
   --c-chart-6: 100 210 255;
   --c-chart-7: 255 55 95;
   --c-chart-8: 172 142 104;
+
+  /* iOS 26 Structural Tokens: Liquid Glass & Squircles */
+  --radius-card: 28px;
+  --radius-btn: 9999px;
+  --radius-sm: 14px;
+  --badge-radius: 9999px;
+  --border-card-width: 1px;
+  --border-card-style: solid;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
+  --card-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.45);
+  --card-blur: 24px;
+  --card-bg-opacity: 0.72;
 }
 
 :root[data-theme='ios-26'][data-mode='light'] {
-  /* iOS 26 Light: Cupertino light grey/white, translucent frosted glass, Apple Orange */
+  /* iOS 26 Light */
   color-scheme: light;
   --c-canvas: 242 242 247;
   --c-surface: 255 255 255;
-  --c-raised: 229 229 234;
-  --c-line: 209 209 214;
+  --c-raised: 232 232 238;
+  --c-line: 216 216 222;
   --c-fg: 28 28 30;
   --c-muted: 142 142 147;
   --c-accent: 255 107 0;
@@ -161,7 +228,7 @@
   --c-on-accent: 255 255 255;
   --c-break: 52 199 89;
   --c-long: 0 122 255;
-  --c-track: 209 209 214;
+  --c-track: 216 216 222;
   --c-chart-1: 255 107 0;
   --c-chart-2: 0 122 255;
   --c-chart-3: 52 199 89;
@@ -170,6 +237,19 @@
   --c-chart-6: 90 200 250;
   --c-chart-7: 255 45 85;
   --c-chart-8: 162 132 94;
+
+  /* iOS 26 Structural Tokens */
+  --radius-card: 28px;
+  --radius-btn: 9999px;
+  --radius-sm: 14px;
+  --badge-radius: 9999px;
+  --border-card-width: 1px;
+  --border-card-style: solid;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
+  --card-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.08);
+  --card-blur: 24px;
+  --card-bg-opacity: 0.78;
 }
 
 /* =========================================================================
@@ -177,7 +257,7 @@
    ========================================================================= */
 :root[data-theme='material-you'][data-mode='dark'],
 :root[data-theme='material-you']:not([data-mode='light']) {
-  /* Material You Dark: Tonal dark palette, Lavender primary */
+  /* Material You Dark */
   color-scheme: dark;
   --c-canvas: 20 18 24;
   --c-surface: 33 31 38;
@@ -199,10 +279,23 @@
   --c-chart-6: 242 184 181;
   --c-chart-7: 232 222 248;
   --c-chart-8: 182 196 255;
+
+  /* Material You Structural Tokens: Tonal Elevation, zero borders */
+  --radius-card: 24px;
+  --radius-btn: 9999px;
+  --radius-sm: 12px;
+  --badge-radius: 8px;
+  --border-card-width: 0px;
+  --border-card-style: none;
+  --font-display: 'Roboto', 'Google Sans', system-ui, sans-serif;
+  --font-body: 'Roboto', 'Google Sans', system-ui, sans-serif;
+  --card-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.28), 0 1px 3px 0 rgba(0, 0, 0, 0.35);
+  --card-blur: 0px;
+  --card-bg-opacity: 1;
 }
 
 :root[data-theme='material-you'][data-mode='light'] {
-  /* Material You Light: Tonal elevation light, warm lilac surfaces, deep purple primary */
+  /* Material You Light */
   color-scheme: light;
   --c-canvas: 253 248 253;
   --c-surface: 247 242 250;
@@ -224,6 +317,19 @@
   --c-chart-6: 125 82 96;
   --c-chart-7: 127 103 190;
   --c-chart-8: 67 90 159;
+
+  /* Material You Structural Tokens */
+  --radius-card: 24px;
+  --radius-btn: 9999px;
+  --radius-sm: 12px;
+  --badge-radius: 8px;
+  --border-card-width: 0px;
+  --border-card-style: none;
+  --font-display: 'Roboto', 'Google Sans', system-ui, sans-serif;
+  --font-body: 'Roboto', 'Google Sans', system-ui, sans-serif;
+  --card-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+  --card-blur: 0px;
+  --card-bg-opacity: 1;
 }
 
 html,
@@ -234,16 +340,28 @@ body,
 
 body {
   @apply bg-canvas text-fg antialiased;
+  font-family: var(--font-body, system-ui, sans-serif);
 }
 
 @layer components {
   .card {
-    @apply relative overflow-hidden rounded-2xl border border-line bg-surface/90 shadow-sm backdrop-blur-sm;
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.025), transparent);
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    border-width: var(--border-card-width);
+    border-style: var(--border-card-style, solid);
+    border-color: rgb(var(--c-line));
+    background-color: rgba(var(--c-surface), var(--card-bg-opacity, 1));
+    box-shadow: var(--card-shadow);
+    backdrop-filter: blur(var(--card-blur, 0px));
+    -webkit-backdrop-filter: blur(var(--card-blur, 0px));
+    transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, border-radius 200ms ease;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 active:scale-[0.96] disabled:pointer-events-none disabled:opacity-40;
+    border-radius: var(--radius-btn);
+    transition: all 150ms ease-out;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 active:scale-[0.96] disabled:pointer-events-none disabled:opacity-40;
   }
 
   .btn-primary {
@@ -251,15 +369,28 @@ body {
   }
 
   .btn-ghost {
-    @apply btn border border-line bg-transparent text-fg hover:bg-raised/60 hover:text-fg;
+    border-radius: var(--radius-btn);
+    border-width: var(--border-card-width, 1px);
+    border-style: var(--border-card-style, solid);
+    border-color: rgb(var(--c-line));
+    @apply btn bg-transparent text-fg hover:bg-raised/60 hover:text-fg;
   }
 
   .input {
-    @apply w-full rounded-xl border border-line bg-canvas/80 px-3 py-2 text-sm text-fg placeholder-muted transition-colors focus:border-accent/60 focus:outline-none focus:ring-1 focus:ring-accent/40;
+    border-radius: var(--radius-sm);
+    border-width: var(--border-card-width, 1px);
+    border-style: var(--border-card-style, solid);
+    border-color: rgb(var(--c-line));
+    background-color: rgb(var(--c-canvas));
+    @apply w-full px-3 py-2 text-sm text-fg placeholder-muted transition-colors focus:border-accent/60 focus:outline-none focus:ring-1 focus:ring-accent/40;
   }
 
   .kbd {
-    @apply rounded border border-line bg-raised px-1.5 py-0.5 font-mono text-[10px] text-muted;
+    border-radius: var(--radius-sm);
+    border-width: var(--border-card-width, 1px);
+    border-style: var(--border-card-style, solid);
+    border-color: rgb(var(--c-line));
+    @apply bg-raised px-1.5 py-0.5 font-mono text-[10px] text-muted;
   }
 
   /* Hide number spin buttons across all modern browsers */
@@ -272,65 +403,6 @@ body {
     -moz-appearance: textfield;
     appearance: textfield;
   }
-}
-
-/* Design System Specific Overrides */
-:root[data-theme='nothing'] body {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
-}
-
-:root[data-theme='nothing'] .card {
-  border-radius: 0.75rem;
-  border-color: rgb(var(--c-line));
-}
-:root[data-theme='nothing'][data-mode='dark'] .card,
-:root[data-theme='nothing']:not([data-mode='light']) .card {
-  background-color: rgba(14, 14, 14, 0.95);
-}
-:root[data-theme='nothing'][data-mode='light'] .card {
-  background-color: rgba(255, 255, 255, 0.95);
-}
-
-:root[data-theme='nothing'] .btn,
-:root[data-theme='nothing'] .input {
-  border-radius: 0.5rem;
-}
-
-:root[data-theme='ios-26'] .card {
-  border-radius: 1.5rem;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-}
-:root[data-theme='ios-26'][data-mode='dark'] .card,
-:root[data-theme='ios-26']:not([data-mode='light']) .card {
-  background-color: rgba(16, 19, 28, 0.75);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-:root[data-theme='ios-26'][data-mode='light'] .card {
-  background-color: rgba(255, 255, 255, 0.75);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-:root[data-theme='ios-26'] .btn,
-:root[data-theme='ios-26'] .input {
-  border-radius: 1rem;
-}
-
-:root[data-theme='material-you'] .card {
-  border-radius: 1.75rem;
-  background-color: rgb(var(--c-surface));
-}
-:root[data-theme='material-you'][data-mode='dark'] .card,
-:root[data-theme='material-you']:not([data-mode='light']) .card {
-  border-color: rgba(73, 69, 79, 0.45);
-}
-:root[data-theme='material-you'][data-mode='light'] .card {
-  border-color: rgba(202, 196, 208, 0.6);
-}
-
-:root[data-theme='material-you'] .btn,
-:root[data-theme='material-you'] .input {
-  border-radius: 9999px;
 }
 
 /* Ambient background: phase-colored glow with smooth crossfade between phases. */

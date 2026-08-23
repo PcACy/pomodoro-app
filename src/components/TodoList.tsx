@@ -107,7 +107,7 @@ export const TodoList = memo(function TodoList({
                 if (target.closest('button, input, select, textarea') || editingId === t.id) return
                 onFocus(t.id)
               }}
-              className={`group flex items-center gap-2 rounded-xl border px-3 py-2 2xl:px-4 2xl:py-3 transition-all ${
+              className={`group flex items-center gap-2 rounded-btn border px-3 py-2 2xl:px-4 2xl:py-3 transition-all ${
                 editingId !== t.id ? 'cursor-pointer' : ''
               } ${
                 activeTodoId === t.id
@@ -123,7 +123,7 @@ export const TodoList = memo(function TodoList({
                 }}
                 title={t.done ? tr.todo.reopen : tr.todo.done}
                 aria-label={t.done ? tr.todo.reopen : tr.todo.done}
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all duration-150 active:scale-90 ${
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border transition-all duration-150 active:scale-90 ${
                   t.done ? 'border-accent bg-accent text-on-accent' : 'border-line text-transparent hover:border-accent'
                 }`}
               >
@@ -189,7 +189,7 @@ export const TodoList = memo(function TodoList({
                     <span className="font-mono text-[11px] tabular-nums text-muted">🍅 x{t.pomodoros}</span>
                   </div>
                   {t.tag && (
-                    <span className="shrink-0 rounded-md border border-accent/25 bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
+                    <span className="shrink-0 rounded-badge border border-accent/25 bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
                       {t.tag}
                     </span>
                   )}
@@ -206,7 +206,7 @@ export const TodoList = memo(function TodoList({
                     }}
                     title={activeTodoId === t.id ? tr.todo.unselectFocus : tr.todo.selectFocus}
                     aria-label={activeTodoId === t.id ? tr.todo.unselectFocus : tr.todo.selectFocus}
-                    className={`rounded-md p-1.5 transition-colors ${
+                    className={`rounded-sm p-1.5 transition-colors ${
                       activeTodoId === t.id
                         ? 'bg-accent/20 text-accent'
                         : 'text-muted hover:bg-raised hover:text-fg'
@@ -222,7 +222,7 @@ export const TodoList = memo(function TodoList({
                     }}
                     title={tr.todo.edit}
                     aria-label={tr.todo.edit}
-                    className="rounded-md p-1.5 text-muted transition-colors hover:bg-raised hover:text-fg"
+                    className="rounded-sm p-1.5 text-muted transition-colors hover:bg-raised hover:text-fg"
                   >
                     <Pencil size={14} />
                   </button>
@@ -234,7 +234,7 @@ export const TodoList = memo(function TodoList({
                     }}
                     title={tr.todo.delete}
                     aria-label={tr.todo.delete}
-                    className="rounded-md p-1.5 text-muted transition-colors hover:bg-raised hover:text-accent"
+                    className="rounded-sm p-1.5 text-muted transition-colors hover:bg-raised hover:text-accent"
                   >
                     <Trash2 size={14} />
                   </button>

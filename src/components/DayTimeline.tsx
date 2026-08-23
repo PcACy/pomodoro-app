@@ -180,7 +180,7 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
       {/* Floating Glass Tooltip */}
       {tip && (
         <div
-          className="pointer-events-none fixed z-50 flex flex-col gap-1 rounded-xl border border-line bg-surface/95 px-3 py-2 text-xs font-medium text-fg shadow-2xl backdrop-blur-md"
+          className="pointer-events-none fixed z-50 flex flex-col gap-1 rounded-card border border-line bg-surface/95 px-3 py-2 text-xs font-medium text-fg shadow-2xl backdrop-blur-md"
           style={{
             left: Math.max(12, Math.min(tip.x - 100, window.innerWidth - 240)),
             top: Math.max(12, tip.y - 75),
@@ -189,7 +189,7 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
           <div className="flex items-center gap-2">
             <span className="font-semibold text-fg">{tip.session.task || t.phases.focus}</span>
             {tip.session.tag && (
-              <span className="rounded-md border border-accent/25 bg-accent/10 px-1.5 py-0.5 text-[10px] font-medium text-accent">
+              <span className="rounded-badge border border-accent/25 bg-accent/10 px-1.5 py-0.5 text-[10px] font-medium text-accent">
                 {tip.session.tag}
               </span>
             )}

@@ -217,13 +217,13 @@ export const Timer = memo(function Timer({
       }`}
     >
       {task && (
-        <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-line/70 bg-surface/80 px-3.5 py-1.5 text-xs shadow-sm backdrop-blur-md transition-all duration-300">
+        <div className="inline-flex max-w-full items-center gap-2 rounded-badge border border-line/70 bg-surface/80 px-3.5 py-1.5 text-xs shadow-sm backdrop-blur-md transition-all duration-300">
           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
           <span className="max-w-[180px] sm:max-w-[280px] truncate font-medium text-fg leading-none">
             {task}
           </span>
           {tag && (
-            <span className="shrink-0 rounded-md border border-accent/30 bg-accent/15 px-1.5 py-0.5 text-[11px] font-medium text-accent leading-none">
+            <span className="shrink-0 rounded-badge border border-accent/30 bg-accent/15 px-1.5 py-0.5 text-[11px] font-medium text-accent leading-none">
               #{tag}
             </span>
           )}
@@ -234,13 +234,13 @@ export const Timer = memo(function Timer({
         <div
           className={`relative grid grid-cols-2 ${
             borderless ? 'w-64 sm:w-72' : 'w-full'
-          } items-center gap-1 rounded-xl border border-line/60 bg-canvas/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
+          } items-center gap-1 rounded-btn border border-line/60 bg-canvas/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
             running && borderless ? 'opacity-30 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
           }`}
         >
-          {/* iOS-typical Sliding Pill Indicator */}
+          {/* Sliding Pill Indicator */}
           <div
-            className="pointer-events-none absolute bottom-1 top-1 rounded-lg bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="pointer-events-none absolute bottom-1 top-1 rounded-btn bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
             style={{
               width: 'calc((100% - 8px - 4px) / 2)',
               left: '4px',
@@ -252,8 +252,8 @@ export const Timer = memo(function Timer({
               key={m}
               type="button"
               onClick={() => onModeChange(m)}
-              className={`relative z-10 flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200 active:scale-95 ${
-                mode === m ? 'text-fg' : 'text-muted hover:text-fg'
+              className={`relative z-10 flex-1 rounded-btn px-3 py-1.5 text-sm font-medium transition-colors duration-200 active:scale-95 ${
+                mode === m ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
               {t.timer[m]}

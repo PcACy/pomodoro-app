@@ -41,7 +41,7 @@ function MetricCard({
 }) {
   return (
     <div className="card flex items-center gap-4 p-5 transition-colors hover:border-line">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-btn bg-accent/15 text-accent">
         {icon}
       </div>
       <div className="min-w-0">
@@ -66,7 +66,7 @@ export const Dashboard = memo(function Dashboard({ sessions, settings, themeId, 
     () => ({
       backgroundColor: colors.surface,
       border: `1px solid ${colors.line}`,
-      borderRadius: '10px',
+      borderRadius: 'var(--radius-card)',
       color: colors.fg,
       fontSize: '12px',
     }),

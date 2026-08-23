@@ -304,20 +304,20 @@ export default function App() {
       </div>
       <header className="flex w-full items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-accent/20 bg-accent/10 text-accent shadow-sm transition-all hover:scale-105 active:scale-95">
+          <div className="flex h-9 w-9 items-center justify-center rounded-btn border border-accent/20 bg-accent/10 text-accent shadow-sm transition-all hover:scale-105 active:scale-95">
             <CatLogo className="text-accent" size={20} />
           </div>
           <h1 className="text-lg font-bold text-fg">Pomau</h1>
         </div>
 
         <nav
-          className={`relative grid grid-cols-3 items-center gap-1 rounded-2xl border border-line/60 bg-surface/90 p-1 backdrop-blur-md transition-opacity duration-500 ${
+          className={`relative grid grid-cols-3 items-center gap-1 rounded-btn border border-line/60 bg-surface/90 p-1 backdrop-blur-md transition-opacity duration-500 ${
             zenRunning ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
           }`}
         >
-          {/* iOS-typical Sliding Pill Indicator */}
+          {/* Sliding Pill Indicator */}
           <div
-            className="pointer-events-none absolute bottom-1 top-1 rounded-xl bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="pointer-events-none absolute bottom-1 top-1 rounded-btn bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
             style={{
               width: 'calc((100% - 8px - 8px) / 3)',
               left: '4px',
@@ -329,8 +329,8 @@ export default function App() {
               key={tb.id}
               type="button"
               onClick={() => handleTabChange(tb.id)}
-              className={`relative z-10 flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors duration-200 active:scale-95 ${
-                tab === tb.id ? 'text-fg' : 'text-muted hover:text-fg'
+              className={`relative z-10 flex items-center justify-center gap-2 rounded-btn px-3.5 py-2 text-sm font-medium transition-colors duration-200 active:scale-95 ${
+                tab === tb.id ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
               }`}
             >
               {tb.icon}
