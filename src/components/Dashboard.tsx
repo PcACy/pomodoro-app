@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { Calendar, Clock, Flame, Layers, PieChart as PieIcon } from 'lucide-react'
+import { Calendar, Check, Clock, Flame, Layers, PieChart as PieIcon } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../types'
 import type { ColorMode, ThemeId } from '../themes'
 import { useThemeColors } from '../hooks/useTheme'
@@ -38,6 +38,8 @@ import { useTranslation } from '../hooks/useTranslation'
 import type { Messages } from '../lib/i18n'
 
 type ThemeColors = ReturnType<typeof useThemeColors>
+
+const TIME_RANGES: TimeRange[] = ['week', 'month', 'all']
 
 interface Props {
   sessions: Session[]
@@ -235,8 +237,21 @@ export const Dashboard = memo(function Dashboard({
       {/* Dashboard Top Header with Segmented Range Filter */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-bold tracking-tight text-fg">{t.dashboard.periodOverview}</h2>
-        <div className="flex items-center gap-1 rounded-btn border border-line bg-raised/80 p-1 shadow-sm">
-          {(['week', 'month', 'all'] as const).map((r) => {
+        <div
+          role="tablist"
+          aria-label={t.dashboard.periodOverview}
+          className="seg-track relative grid grid-cols-3 w-full sm:w-auto min-w-[240px] sm:min-w-[270px] items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md"
+        >
+          {/* Sliding Pill Indicator */}
+          <div
+            className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
+            style={{
+              width: 'calc((100% - 8px - 8px) / 3)',
+              left: '4px',
+              transform: `translateX(calc(${TIME_RANGES.indexOf(timeRange)} * (100% + 4px)))`,
+            }}
+          />
+          {TIME_RANGES.map((r) => {
             const label =
               r === 'week'
                 ? t.dashboard.rangeWeek
@@ -248,14 +263,19 @@ export const Dashboard = memo(function Dashboard({
               <button
                 key={r}
                 type="button"
+                role="tab"
+                aria-selected={isActive}
                 onClick={() => setTimeRange(r)}
-                className={`rounded-sm px-3 py-1 font-mono text-xs font-medium transition-all cursor-pointer ${
+                className={`relative z-10 flex min-h-[32px] sm:min-h-[34px] items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1 text-xs font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
                   isActive
-                    ? 'bg-accent text-on-accent shadow-sm'
+                    ? 'text-fg font-semibold'
                     : 'text-muted hover:text-fg'
                 }`}
               >
-                {label}
+                {isActive && (
+                  <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
+                )}
+                <span>{label}</span>
               </button>
             )
           })}
