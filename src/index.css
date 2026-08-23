@@ -436,19 +436,19 @@ textarea:focus:not(:focus-visible) {
       0 8px 20px -4px rgba(var(--c-accent), 0.4);
   }
 
-  /* 4. Segmented control active pill: frosted glass highlight */
+  /* 4. Segmented control active pill: subtle frosted tint */
   :root[data-theme='ios-26'][data-mode='light'] .ios-seg-active {
-    background-color: rgba(255, 255, 255, 0.88);
+    background-color: rgba(255, 255, 255, 0.55);
     box-shadow:
-      0 1px 4px rgba(0, 0, 0, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      0 0.5px 2px rgba(0, 0, 0, 0.06),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.5);
   }
   :root[data-theme='ios-26'][data-mode='dark'] .ios-seg-active,
   :root[data-theme='ios-26']:not([data-mode='light']) .ios-seg-active {
-    background-color: rgba(255, 255, 255, 0.14);
+    background-color: rgba(255, 255, 255, 0.1);
     box-shadow:
-      0 1px 4px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      0 0.5px 2px rgba(0, 0, 0, 0.15),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
   }
 
   /* Hide number spin buttons across all modern browsers */
