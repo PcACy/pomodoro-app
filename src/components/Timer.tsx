@@ -255,20 +255,20 @@ export const Timer = memo(function Timer({
       )}
 
       <div className="flex w-full flex-col items-center">
+        {/* Segmented Control Track */}
         <div
           className={`relative grid grid-cols-2 ${
-            borderless ? 'w-64 sm:w-72' : 'w-full'
-          } items-center gap-1 rounded-btn border border-line/60 bg-canvas/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
+            borderless ? 'w-64 sm:w-72' : 'w-full max-w-xs'
+          } mx-auto select-none rounded-[var(--radius-btn)] border border-line/60 bg-canvas/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
             running && borderless ? 'opacity-30 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
           }`}
         >
-          {/* Sliding Pill Indicator */}
+          {/* Sliding Pill */}
           <div
-            className="pointer-events-none absolute bottom-1 top-1 rounded-btn bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="pointer-events-none absolute inset-y-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised ios-seg-active transition-[left] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
             style={{
               width: 'calc(50% - 4px)',
-              left: '4px',
-              transform: `translateX(calc(${MODES.indexOf(mode)} * (100% + 4px)))`,
+              left: mode === 'pomodoro' ? '4px' : 'calc(50% + 0px)',
             }}
           />
           {MODES.map((m) => (
@@ -276,8 +276,8 @@ export const Timer = memo(function Timer({
               key={m}
               type="button"
               onClick={() => onModeChange(m)}
-              className={`relative z-10 flex-1 rounded-btn px-3 py-1.5 font-display text-xs uppercase tracking-wider transition-colors duration-200 active:scale-95 ${
-                mode === m ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
+              className={`relative z-10 flex w-full items-center justify-center rounded-[calc(var(--radius-btn)-4px)] py-1.5 font-display text-xs uppercase tracking-wider transition-colors duration-200 active:scale-[0.97] ${
+                mode === m ? 'text-fg font-bold' : 'text-muted hover:text-fg'
               }`}
             >
               {t.timer[m]}
