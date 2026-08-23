@@ -37,10 +37,6 @@ function pwaVersionPlugin(): Plugin {
 
 export default defineConfig({
   plugins: [react(), pwaVersionPlugin()],
-  esbuild: {
-    pure: ['console.log', 'console.debug'],
-    legalComments: 'none',
-  },
   build: {
     target: 'es2020',
     cssCodeSplit: true,
