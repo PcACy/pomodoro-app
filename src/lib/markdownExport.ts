@@ -32,13 +32,28 @@ export function buildDayExport(sessions: Session[], date: Date): DayExport {
   return { date, key, sessions: list, totalMinutes, completedCount: list.length }
 }
 
+/** Escapes Markdown special characters, HTML tags, and line breaks for safe rendering in Markdown readers. */
+export function sanitizeMarkdownText(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\r?\n+/g, ' ')
+    .trim()
+}
+
+/** Escapes table cell delimiters (|) and characters that could corrupt Markdown table formatting. */
+export function sanitizeTableCell(text: string): string {
+  return sanitizeMarkdownText(text).replace(/\|/g, '\\|')
+}
+
 /** Obsidian-optimiertes Markdown (Frontmatter + Daily-Note-Struktur). */
 export function buildDailyMarkdown(exportData: DayExport, todos?: TodoItem[]): string {
   const { key, sessions, totalMinutes, completedCount } = exportData
 
   const byTag = new Map<string, { count: number; minutes: number }>()
   for (const s of sessions) {
-    const tag = s.tag || 'Ohne Tag'
+    const tag = s.tag ? sanitizeMarkdownText(s.tag) : 'Ohne Tag'
     const cur = byTag.get(tag) ?? { count: 0, minutes: 0 }
     cur.count += 1
     cur.minutes += minutesOf(s)
@@ -54,8 +69,8 @@ export function buildDailyMarkdown(exportData: DayExport, todos?: TodoItem[]): s
   const rows = sessions.map((s) => {
     const start = fmtClock(new Date(s.start))
     const end = fmtClock(new Date(s.end))
-    const task = s.task || 'Ohne Aufgabe'
-    const tag = s.tag || '—'
+    const task = s.task ? sanitizeTableCell(s.task) : 'Ohne Aufgabe'
+    const tag = s.tag ? sanitizeTableCell(s.tag) : '—'
     return `| ${start} - ${end} | ${task} | ${tag} | ${minutesOf(s)}m | Abgeschlossen |`
   })
 
@@ -63,8 +78,10 @@ export function buildDailyMarkdown(exportData: DayExport, todos?: TodoItem[]): s
     .filter((s) => s.notes?.trim())
     .map((s) => {
       const time = fmtClock(new Date(s.start))
-      const task = s.task || 'Ohne Aufgabe'
-      return `- **${time}** (${task}): ${s.notes!.trim().replace(/\s*\n+\s*/g, ' · ')}`
+      const task = s.task ? sanitizeMarkdownText(s.task) : 'Ohne Aufgabe'
+      const formattedNotes = s.notes!.trim().replace(/(\r\n|\r|\n)+/g, ' · ')
+      const sanitizedNotes = sanitizeMarkdownText(formattedNotes)
+      return `- **${time}** (${task}): ${sanitizedNotes}`
     })
 
   const doneToday = (todos ?? [])
@@ -72,8 +89,9 @@ export function buildDailyMarkdown(exportData: DayExport, todos?: TodoItem[]): s
     .sort((a, b) => (a.completedAt ?? 0) - (b.completedAt ?? 0))
   const todoLines = doneToday.map((t) => {
     const time = fmtClock(new Date(t.completedAt!))
-    const tag = t.tag ? ` (${t.tag})` : ''
-    return `- [x] ${t.title}${tag} – erledigt um ${time}`
+    const title = sanitizeMarkdownText(t.title)
+    const tag = t.tag ? ` (${sanitizeMarkdownText(t.tag)})` : ''
+    return `- [x] ${title}${tag} – erledigt um ${time}`
   })
 
   return [

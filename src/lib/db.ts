@@ -76,8 +76,9 @@ export function sanitizeImportedSession(raw: unknown): Session | null {
       : typeof s.updated_at === 'number' && Number.isFinite(s.updated_at)
         ? s.updated_at
         : Date.now()
+  const mode = s.mode === 'flow' || s.mode === 'pomodoro' ? s.mode : undefined
 
-  return { id, start, end, durationMs, task, tag, notes, updatedAt }
+  return { id, start, end, durationMs, task, tag, notes, mode, updatedAt }
 }
 
 export async function importSessions(sessions: unknown[]): Promise<void> {

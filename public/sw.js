@@ -1,40 +1,41 @@
 const CACHE = '__CACHE_VERSION__'
-const API_CACHE = 'pomodoro-api-v1'
+
+const STATIC_ASSETS = [
+  './',
+  '/index.html',
+  '/manifest.webmanifest',
+  '/icon-192.svg',
+  '/icon-512.svg',
+]
 
 function isSupabaseUrl(url) {
   try {
-    const host = new URL(url).hostname
+    const parsed = new URL(url)
+    const host = parsed.hostname
     return (
-      host.includes('supabase.co') ||
-      host.includes('supabase.in') ||
-      url.includes('/rest/v1/') ||
-      url.includes('/auth/v1/')
+      host.endsWith('supabase.co') ||
+      host.endsWith('supabase.in') ||
+      parsed.pathname.startsWith('/rest/v1/') ||
+      parsed.pathname.startsWith('/auth/v1/')
     )
   } catch {
     return false
   }
 }
 
-function simpleHash(str) {
-  let h = 2166136261
-  for (let i = 0; i < str.length; i++) {
-    h = Math.imul(h ^ str.charCodeAt(i), 16777619) >>> 0
-  }
-  return h.toString(16)
-}
-
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(['./', '/index.html', '/manifest.webmanifest'])),
+    caches.open(CACHE).then((c) => c.addAll(STATIC_ASSETS)),
   )
 })
 
 self.addEventListener('activate', (event) => {
+  // Purge any legacy or previous version caches (including old API_CACHE)
   event.waitUntil(
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.filter((k) => k !== CACHE && k !== API_CACHE).map((k) => caches.delete(k))),
+        Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))),
       ),
   )
   self.clients.claim()
@@ -74,47 +75,34 @@ async function staleWhileRevalidate(request) {
   return fresh || new Response('Offline', { status: 503, statusText: 'Offline' })
 }
 
-// Supabase responses are per-user, so key the cache by URL + auth headers.
-function apiCacheKey(request) {
-  const url = new URL(request.url)
-  const auth = request.headers.get('authorization') || ''
-  const key = request.headers.get('apikey') || ''
-  url.searchParams.set('__auth', simpleHash(auth + '|' + key))
-  return url.toString()
-}
-
-/** Network-first for Supabase GETs with an offline fallback to cached data. */
-async function apiNetworkFirst(request) {
-  const cache = await caches.open(API_CACHE)
-  const key = apiCacheKey(request)
-  try {
-    const response = await fetch(request)
-    if (response && response.ok) cache.put(key, response.clone())
-    return response
-  } catch {
-    const cached = await cache.match(key)
-    if (cached) return cached
-    return new Response(null, { status: 503, statusText: 'Offline' })
-  }
-}
-
 self.addEventListener('fetch', (event) => {
   const { request } = event
-  // Writes (upsert/delete) go straight to the network so the sync queue
-  // observes real failures instead of faked successes.
+
+  // Only handle standard GET requests
   if (request.method !== 'GET') return
+
+  // Skip browser extensions, chrome-extension schemes, or non-http(s)
+  if (!request.url.startsWith('http')) return
+
+  // Version and service worker files should always be fetched fresh
   if (request.url.includes('/version.json') || request.url.includes('/sw.js')) {
     event.respondWith(fetch(request))
     return
   }
+
+  // Security: Supabase API & Auth requests must NEVER be stored in Service Worker CacheStorage
   if (isSupabaseUrl(request.url)) {
-    event.respondWith(apiNetworkFirst(request))
+    event.respondWith(fetch(request))
     return
   }
+
+  // Navigation requests: Network-first with offline fallback
   if (request.mode === 'navigate') {
     event.respondWith(networkFirst(request))
     return
   }
+
+  // Static assets: Stale-while-revalidate
   event.respondWith(staleWhileRevalidate(request))
 })
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { sanitizeImportedSession } from './db'
+import { sanitizeTodoItem } from './localTodos'
 
 describe('sanitizeImportedSession', () => {
   it('returns null for non-objects or missing start timestamp', () => {
@@ -61,6 +62,45 @@ describe('sanitizeImportedSession', () => {
     expect(session?.task.length).toBe(200)
     expect(session?.tag.length).toBe(50)
     expect(session?.notes?.length).toBe(2000)
+  })
+
+  it('validates and preserves valid mode values', () => {
+    const pomodoro = sanitizeImportedSession({ start: 1000, mode: 'pomodoro' })
+    expect(pomodoro?.mode).toBe('pomodoro')
+
+    const flow = sanitizeImportedSession({ start: 1000, mode: 'flow' })
+    expect(flow?.mode).toBe('flow')
+
+    const invalid = sanitizeImportedSession({ start: 1000, mode: 'malicious' })
+    expect(invalid?.mode).toBeUndefined()
+  })
+})
+
+describe('sanitizeTodoItem', () => {
+  it('returns null for invalid todos missing id or title', () => {
+    expect(sanitizeTodoItem(null)).toBeNull()
+    expect(sanitizeTodoItem({})).toBeNull()
+    expect(sanitizeTodoItem({ id: 't1', title: '   ' })).toBeNull()
+    expect(sanitizeTodoItem({ title: 'Task' })).toBeNull()
+  })
+
+  it('sanitizes valid todo items and clamps fields safely', () => {
+    const valid = sanitizeTodoItem({
+      id: 'todo-123',
+      title: 'Valid Task',
+      tag: 'Work',
+      done: true,
+      pomodoros: 4.8,
+      createdAt: 1700000000000,
+      completedAt: 1700001500000,
+    })
+
+    expect(valid).not.toBeNull()
+    expect(valid?.id).toBe('todo-123')
+    expect(valid?.title).toBe('Valid Task')
+    expect(valid?.pomodoros).toBe(4) // floor integer
+    expect(valid?.done).toBe(true)
+    expect(valid?.completedAt).toBe(1700001500000)
   })
 })
 
