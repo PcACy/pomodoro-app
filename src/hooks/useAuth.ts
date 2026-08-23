@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { isSupabaseConfigured, supabase } from '../lib/supabase'
+import { getSupabase, isSupabaseConfigured } from '../lib/supabase'
 
 export interface GitHubProfile {
   name: string
@@ -12,33 +12,39 @@ export function useAuth() {
   const [loading, setLoading] = useState(isSupabaseConfigured)
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false)
-      return
-    }
     let disposed = false
-    void supabase.auth
-      .getSession()
-      .then(({ data }) => {
-        if (!disposed) setUser(data.session?.user ?? null)
-      })
-      .finally(() => {
-        if (!disposed) setLoading(false)
-      })
+    let unsubscribe: (() => void) | null = null
+    void getSupabase().then((sb) => {
+      if (disposed) return
+      if (!sb) {
+        setLoading(false)
+        return
+      }
+      void sb.auth
+        .getSession()
+        .then(({ data }) => {
+          if (!disposed) setUser(data.session?.user ?? null)
+        })
+        .finally(() => {
+          if (!disposed) setLoading(false)
+        })
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      const { data: sub } = sb.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user ?? null)
+      })
+      unsubscribe = () => sub.subscription.unsubscribe()
     })
 
     return () => {
       disposed = true
-      sub.subscription.unsubscribe()
+      unsubscribe?.()
     }
   }, [])
 
   const login = useCallback(async () => {
-    if (!supabase) return
-    const { error } = await supabase.auth.signInWithOAuth({
+    const sb = await getSupabase()
+    if (!sb) return
+    const { error } = await sb.auth.signInWithOAuth({
       provider: 'github',
       options: { redirectTo: window.location.origin },
     })
@@ -46,8 +52,9 @@ export function useAuth() {
   }, [])
 
   const logout = useCallback(async () => {
-    if (!supabase) return
-    const { error } = await supabase.auth.signOut()
+    const sb = await getSupabase()
+    if (!sb) return
+    const { error } = await sb.auth.signOut()
     if (error) console.error('[auth] logout failed:', error.message)
   }, [])
 

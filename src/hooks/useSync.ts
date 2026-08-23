@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Session, TodoItem } from '../types'
-import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { getSupabase, isSupabaseConfigured } from '../lib/supabase'
 import { db } from '../lib/db'
 import { readTodosLocal } from '../lib/localTodos'
 import { drainQueue, hasPendingOps, requeue } from '../lib/syncQueue'
@@ -118,8 +119,8 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
   const mergeRef = useRef(mergeRemoteTodos)
   mergeRef.current = mergeRemoteTodos
 
-  const pushQueue = useCallback(async (): Promise<boolean> => {
-    if (!supabase || !userRef.current) return true
+  const pushQueue = useCallback(async (supabase: SupabaseClient): Promise<boolean> => {
+    if (!userRef.current) return true
     const ops = drainQueue()
     if (ops.length === 0) return true
     const userId = userRef.current.id
@@ -203,8 +204,8 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
     }
   }, [])
 
-  const pullAndMerge = useCallback(async (): Promise<boolean> => {
-    if (!supabase || !userRef.current) return false
+  const pullAndMerge = useCallback(async (supabase: SupabaseClient): Promise<boolean> => {
+    if (!userRef.current) return false
     const userId = userRef.current.id
     try {
       const [sess, todos] = await Promise.all([
@@ -228,6 +229,7 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
   const sync = useCallback(
     async (showSyncing = false) => {
       if (busyRef.current) return
+      const supabase = await getSupabase()
       if (!supabase || !userRef.current) {
         setStatus(isSupabaseConfigured ? 'signed-out' : 'unsupported')
         return
@@ -239,9 +241,9 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
       busyRef.current = true
       try {
         if (showSyncing) setStatus('syncing')
-        const pushed = await pushQueue()
+        const pushed = await pushQueue(supabase)
         let ok = pushed
-        if (ok) ok = await pullAndMerge()
+        if (ok) ok = await pullAndMerge(supabase)
         const stillPending = hasPendingOps()
         setPending(stillPending)
         if (ok) {
@@ -266,24 +268,33 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
   )
 
   useEffect(() => {
-    if (!supabase) return
-    if (!user) {
-      setStatus('signed-out')
-      return
-    }
-    void sync(true)
-    const onOnline = () => {
-      retryCountRef.current = 0
+    let disposed = false
+    let detach: (() => void) | null = null
+    void getSupabase().then((supabase) => {
+      if (disposed) return
+      if (!supabase) return // unsupported – stay in initial 'unsupported' state
+      if (!user) {
+        setStatus('signed-out')
+        return
+      }
       void sync(true)
-    }
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') void sync(true)
-    }
-    window.addEventListener('online', onOnline)
-    document.addEventListener('visibilitychange', onVisible)
+      const onOnline = () => {
+        retryCountRef.current = 0
+        void sync(true)
+      }
+      const onVisible = () => {
+        if (document.visibilityState === 'visible') void sync(true)
+      }
+      window.addEventListener('online', onOnline)
+      document.addEventListener('visibilitychange', onVisible)
+      detach = () => {
+        window.removeEventListener('online', onOnline)
+        document.removeEventListener('visibilitychange', onVisible)
+      }
+    })
     return () => {
-      window.removeEventListener('online', onOnline)
-      document.removeEventListener('visibilitychange', onVisible)
+      disposed = true
+      detach?.()
       if (retryTimeoutRef.current != null) {
         window.clearTimeout(retryTimeoutRef.current)
         retryTimeoutRef.current = null
@@ -292,7 +303,8 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
   }, [user, sync])
 
   useEffect(() => {
-    if (!user || !supabase) return
+    // A non-null user implies the client is loaded and a session exists.
+    if (!user) return
     const interval = window.setInterval(() => {
       setPending(hasPendingOps())
       void sync(false)

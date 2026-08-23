@@ -35,8 +35,18 @@ function pwaVersionPlugin(): Plugin {
   }
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react(), pwaVersionPlugin()],
+  // Production hygiene: strip debug statements; keep console.error/warn so
+  // field failures ([sync] push failed, chime errors) remain diagnosable.
+  ...(mode === 'production'
+    ? {
+        esbuild: {
+          drop: ['debugger'],
+          pure: ['console.log', 'console.info', 'console.debug', 'console.trace'],
+        },
+      }
+    : {}),
   build: {
     target: 'es2020',
     cssCodeSplit: true,
@@ -50,7 +60,7 @@ export default defineConfig({
           if (id.includes('node_modules/recharts/') || id.includes('node_modules/d3-') || id.includes('node_modules/victory-vendor/')) {
             return 'vendor-charts'
           }
-          if (id.includes('node_modules/dexie') || id.includes('node_modules/@supabase/')) {
+          if (id.includes('node_modules/dexie')) {
             return 'vendor-db'
           }
           if (id.includes('node_modules/lucide-react/')) {
@@ -60,4 +70,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

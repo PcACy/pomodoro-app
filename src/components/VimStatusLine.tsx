@@ -1,4 +1,4 @@
-import type { FC } from 'react'
+import { memo } from 'react'
 import type { PhaseId, TimerStatus } from '../types'
 import type { ColorMode, ThemeId } from '../themes'
 
@@ -16,7 +16,9 @@ interface VimStatusLineProps {
   totalRounds: number
 }
 
-export const VimStatusLine: FC<VimStatusLineProps> = ({
+// Memoized: all props are primitives, so this leaf only re-renders when its
+// own inputs change — not on unrelated App-level updates.
+export const VimStatusLine = memo(function VimStatusLine({
   themeId,
   colorMode,
   mode,
@@ -28,7 +30,7 @@ export const VimStatusLine: FC<VimStatusLineProps> = ({
   tag,
   completedRounds,
   totalRounds,
-}) => {
+}: VimStatusLineProps) {
   if (themeId !== 'gruvbox') return null
 
   const isRunning = status === 'running'
@@ -93,4 +95,4 @@ export const VimStatusLine: FC<VimStatusLineProps> = ({
       </div>
     </footer>
   )
-}
+})

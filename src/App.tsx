@@ -36,6 +36,8 @@ const ReflectionModal = lazy(() => import('./components/ReflectionModal').then((
 
 type Tab = 'timer' | 'dashboard' | 'settings'
 
+// Module-scope constant: recreating these icon elements on every render
+// (including every 250ms timer tick) is wasted allocation work.
 const TABS: { id: Tab; icon: React.ReactNode }[] = [
   { id: 'timer', icon: <TimerIcon size={16} /> },
   { id: 'dashboard', icon: <BarChart3 size={16} /> },
