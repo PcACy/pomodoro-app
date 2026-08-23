@@ -128,7 +128,7 @@ export const Timer = memo(function Timer({
     ? t.timer.status.running
     : paused
       ? t.timer.status.paused
-      : t.timer.status.ready
+      : null
 
   // Calculate Knob position on the circular arc (0 = top / 12 o'clock)
   const knobAngle = scrubFraction * 2 * Math.PI - Math.PI / 2
@@ -242,7 +242,7 @@ export const Timer = memo(function Timer({
 
         <div
           className={`flex items-center justify-center gap-1.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden ${
-            isFlow ? 'max-h-0 opacity-0 -translate-y-2 pointer-events-none mt-0 mb-0' : 'max-h-8 opacity-100 translate-y-0 mt-3 mb-1'
+            isFlow ? 'max-h-0 opacity-0 -translate-y-2 pointer-events-none mt-0 mb-0' : 'max-h-8 opacity-100 translate-y-0 my-4'
           }`}
           aria-hidden={isFlow}
           aria-label={`Runde ${currentRoundIndex + 1} von ${roundsBeforeLongBreak}`}
@@ -334,13 +334,19 @@ export const Timer = memo(function Timer({
               {shownLabel}
             </span>
             <span
-              className={`font-mono font-bold tabular-nums leading-none tracking-wider text-fg transition-all duration-300 ${
+              className={`font-mono font-bold tabular-nums leading-none tracking-tight text-fg transition-all duration-300 ${
                 large ? 'text-6xl sm:text-7xl 2xl:text-8xl' : 'text-5xl 2xl:text-6xl'
               }`}
             >
               {shownTime}
             </span>
-            <span className="text-xs font-medium text-muted">{shownStatus}</span>
+            {shownStatus ? (
+              <span className="text-xs font-medium text-muted">{shownStatus}</span>
+            ) : task ? (
+              <span className="mt-1 max-w-[180px] truncate text-xs font-medium text-muted">
+                {task}
+              </span>
+            ) : null}
           </div>
         </div>
 
@@ -362,7 +368,13 @@ export const Timer = memo(function Timer({
           <div className={`transition-all duration-300 delay-75 ${isFlow ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
             <Waveform active={running} />
           </div>
-          <span className="text-xs font-medium text-muted">{shownStatus}</span>
+          {shownStatus ? (
+            <span className="text-xs font-medium text-muted">{shownStatus}</span>
+          ) : task ? (
+            <span className="mt-1 max-w-[180px] truncate text-xs font-medium text-muted">
+              {task}
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -435,8 +447,8 @@ export const Timer = memo(function Timer({
       </div>
 
       <div
-        className={`flex flex-wrap items-center justify-center gap-3 text-[11px] text-muted transition-opacity duration-500 ${
-          running ? 'opacity-20 hover:opacity-100' : 'opacity-100'
+        className={`flex flex-wrap items-center justify-center gap-3 text-[11px] text-muted transition-opacity duration-300 [@media(hover:none)]:hidden ${
+          running ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >
         <span className="flex items-center gap-1">
