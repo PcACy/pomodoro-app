@@ -7,11 +7,24 @@ export type SyncOp =
 
 const STORAGE_KEY = 'pomodoro.sync.queue'
 
+function isValidSyncOp(op: unknown): op is SyncOp {
+  if (!op || typeof op !== 'object') return false
+  const o = op as Record<string, unknown>
+  if (o.table !== 'sessions' && o.table !== 'todos') return false
+  if (o.kind === 'replace') return true
+  if (o.kind === 'upsert' || o.kind === 'delete') {
+    return typeof o.id === 'string' && o.id.length > 0 && o.id.length <= 128
+  }
+  return false
+}
+
 function read(): SyncOp[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? (JSON.parse(raw) as SyncOp[]) : []
-    return Array.isArray(parsed) ? parsed : []
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(isValidSyncOp)
   } catch {
     return []
   }

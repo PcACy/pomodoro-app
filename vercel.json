@@ -5,7 +5,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https: https://avatars.githubusercontent.com https://*.githubusercontent.com https://github.com; media-src 'self' data: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.github.com; worker-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none';"
+          "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https: https://avatars.githubusercontent.com https://*.githubusercontent.com https://github.com; media-src 'self' data: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.github.com; worker-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none';"
         },
         {
           "key": "X-Frame-Options",

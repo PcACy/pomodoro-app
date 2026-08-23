@@ -1,12 +1,13 @@
 import type { Session, TodoItem } from '../types'
 import { dayKey } from './time'
 
-const FORMULA_REGEX = /^[\=\+\-\@\t\r]/
+const FORMULA_PREFIX = /^[\=\+\-\@\t\r\|\%]/
 
-function sanitizeCell(value: unknown): string {
+export function sanitizeCell(value: unknown): string {
   let s = String(value ?? '')
-  // Prevent CSV Formula Injection while preserving pure numeric strings
-  if (FORMULA_REGEX.test(s) && !/^-?\d+(\.\d+)?$/.test(s)) {
+  const trimmed = s.trimStart()
+  // Prevent CSV / Spreadsheet Formula Injection while preserving genuine numeric strings
+  if (FORMULA_PREFIX.test(trimmed) && !/^[+-]?\d+(\.\d+)?$/.test(trimmed)) {
     s = `'${s}`
   }
   return s

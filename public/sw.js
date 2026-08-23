@@ -8,22 +8,45 @@ const STATIC_ASSETS = [
   '/icon-512.svg',
 ]
 
-function isSupabaseUrl(url) {
+/**
+ * Security: Checks if a request targets Supabase, Auth, OAuth, or external APIs
+ * and must NEVER be stored in Service Worker CacheStorage.
+ */
+function isNonCacheableRequest(request) {
   try {
-    const parsed = new URL(url)
-    const host = parsed.hostname
-    const isSupabaseHost =
+    const url = typeof request === 'string' ? new URL(request) : new URL(request.url)
+    const host = url.hostname
+
+    // Explicit Supabase infrastructure
+    const isSupabase =
       host === 'supabase.co' ||
       host.endsWith('.supabase.co') ||
       host === 'supabase.in' ||
-      host.endsWith('.supabase.in')
-    return (
-      isSupabaseHost ||
-      parsed.pathname.startsWith('/rest/v1/') ||
-      parsed.pathname.startsWith('/auth/v1/')
-    )
+      host.endsWith('.supabase.in') ||
+      url.pathname.startsWith('/rest/v1/') ||
+      url.pathname.startsWith('/auth/v1/') ||
+      url.pathname.startsWith('/storage/v1/') ||
+      url.pathname.startsWith('/functions/v1/') ||
+      url.pathname.startsWith('/realtime/v1/')
+
+    // Third-party APIs & OAuth
+    const isExternalApi =
+      host === 'api.github.com' ||
+      host === 'github.com' ||
+      url.pathname.includes('/oauth/')
+
+    // Request-level Auth headers (if Request object provided)
+    let hasAuthHeader = false
+    if (typeof request === 'object' && request.headers) {
+      hasAuthHeader =
+        request.headers.has('authorization') ||
+        request.headers.has('apikey') ||
+        request.headers.has('x-client-info')
+    }
+
+    return isSupabase || isExternalApi || hasAuthHeader
   } catch {
-    return false
+    return true // Fail-safe: don't cache on URL parse error
   }
 }
 
@@ -117,7 +140,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Security: Supabase API & Auth requests must NEVER be stored in Service Worker CacheStorage
-  if (isSupabaseUrl(request.url)) {
+  if (isNonCacheableRequest(request)) {
     event.respondWith(fetch(request))
     return
   }
@@ -144,8 +167,12 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // General static assets: Stale-while-revalidate
-  event.respondWith(staleWhileRevalidate(request))
+  // Only cache same-origin static assets; pass external requests directly
+  if (url.origin === self.location.origin) {
+    event.respondWith(staleWhileRevalidate(request))
+  } else {
+    event.respondWith(fetch(request))
+  }
 })
 
 // Notification action buttons -> forward to the running app (works in the background).

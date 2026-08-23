@@ -5,7 +5,7 @@ import type { Session, TodoItem } from '../types'
 
 describe('dataExport', () => {
   describe('CSV formula injection prevention', () => {
-    it('escapes cells starting with =, +, -, @, \\t, \\r', () => {
+    it('escapes cells starting with =, +, -, @, \\t, \\r, |, % including with leading whitespace', () => {
       const maliciousSessions: Session[] = [
         {
           id: '123e4567-e89b-12d3-a456-426614174000',
@@ -14,7 +14,17 @@ describe('dataExport', () => {
           durationMs: 1500000,
           task: '=SUM(1+1)*cmd|',
           tag: '+admin',
-          notes: '@malicious_site',
+          notes: '   =cmd|\' /C calc\'!A0',
+          updatedAt: 1700001500000,
+        },
+        {
+          id: '123e4567-e89b-12d3-a456-426614174001',
+          start: 1700000000000,
+          end: 1700001500000,
+          durationMs: 1500000,
+          task: '@malicious_site',
+          tag: '|DDE_EXEC',
+          notes: '%COMSPEC%',
           updatedAt: 1700001500000,
         },
       ]
@@ -22,7 +32,10 @@ describe('dataExport', () => {
       const csv = sessionsToCsv(maliciousSessions)
       expect(csv).toContain("'=SUM(1+1)*cmd|")
       expect(csv).toContain("'+admin")
+      expect(csv).toContain("'   =cmd|' /C calc'!A0")
       expect(csv).toContain("'@malicious_site")
+      expect(csv).toContain("'|DDE_EXEC")
+      expect(csv).toContain("'%COMSPEC%")
     })
 
     it('does not prefix normal numbers in numeric columns', () => {
