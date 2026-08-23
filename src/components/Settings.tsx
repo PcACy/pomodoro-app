@@ -100,7 +100,7 @@ function StepperButton({
         e.preventDefault()
       }}
       {...holdHandlers}
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm text-muted transition-all hover:bg-raised hover:text-fg active:scale-90 disabled:pointer-events-none disabled:opacity-25"
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-btn text-muted transition-all hover:bg-raised hover:text-fg active:scale-95 disabled:pointer-events-none disabled:opacity-25"
     >
       <Icon size={14} />
     </button>
@@ -709,9 +709,9 @@ export const SettingsPanel = memo(function SettingsPanel({
         {/* Subtle Divider */}
         <div className="my-6 border-t border-line/50" />
 
-        {/* Cycle & Weekly Goal in 2 Columns with Equalized Headers */}
+        {/* Cycle & Weekly Goal in 2 Columns with Equalized Heights */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col justify-between gap-2">
             <div className="flex min-h-[38px] flex-col justify-center">
               <span className="text-xs font-semibold text-fg">{t.settings.cycle}</span>
               <p className="text-[11px] text-muted line-clamp-1">{t.settings.cycleHint}</p>
@@ -730,16 +730,12 @@ export const SettingsPanel = memo(function SettingsPanel({
                 }))
               }
             />
+            <div className="h-4" /> {/* Height balancer */}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col justify-between gap-2">
             <div className="flex min-h-[38px] flex-col justify-center">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-semibold text-fg">{t.settings.weeklyGoal}</span>
-                <span className="rounded-md border border-accent/25 bg-accent/10 px-1.5 py-0.5 text-[10px] font-medium text-accent">
-                  {t.settings.weeklyGoalHours(settings.weeklyGoalMinutes / 60)}
-                </span>
-              </div>
+              <span className="text-xs font-semibold text-fg">{t.settings.weeklyGoal}</span>
               <p className="text-[11px] text-muted line-clamp-1">{t.settings.weeklyGoalHint}</p>
             </div>
             <NumberStepper
@@ -756,6 +752,11 @@ export const SettingsPanel = memo(function SettingsPanel({
                 }))
               }
             />
+            <div className="flex items-center justify-center">
+              <span className="text-[11px] font-medium text-muted">
+                {t.settings.weeklyGoalHours(settings.weeklyGoalMinutes / 60)}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -841,35 +842,71 @@ export const SettingsPanel = memo(function SettingsPanel({
         )}
       </div>
 
-      <div className="card border-accent-strong/40 p-6">
-        <h3 className="mb-1 text-sm font-semibold text-accent-strong">{t.settings.data}</h3>
+      <div className="card p-6">
+        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.data}</h3>
         <p className="mb-4 text-xs text-muted">{t.settings.dataHint}</p>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={handleBackup} className="btn-ghost text-xs">
-            <Download size={14} /> {t.settings.backup}
+
+        {/* Primary Backup Action (Full Width) */}
+        <button
+          type="button"
+          onClick={handleBackup}
+          className="flex w-full items-center justify-center gap-2 rounded-btn border border-line/80 bg-raised/60 px-4 py-2.5 text-sm font-medium text-fg shadow-sm transition-all hover:border-muted/40 hover:bg-raised active:scale-[0.98]"
+        >
+          <Download size={16} className="text-accent" />
+          <span>{t.settings.backup}</span>
+        </button>
+
+        {/* Granular Exports (Symmetrical 2x2 Grid) */}
+        <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={handleSessionsCsv}
+            className="btn-ghost flex w-full items-center justify-center gap-2 rounded-btn px-3 py-2 text-xs"
+            title={t.dashboard.sessionsCsvTitle}
+          >
+            <FileDown size={14} className="text-muted" />
+            <span>{t.dashboard.sessionsCsv}</span>
           </button>
-          <button type="button" onClick={handleSessionsCsv} className="btn-ghost text-xs" title={t.dashboard.sessionsCsvTitle}>
-            <FileDown size={14} /> {t.dashboard.sessionsCsv}
+          <button
+            type="button"
+            onClick={handleSessionsJson}
+            className="btn-ghost flex w-full items-center justify-center gap-2 rounded-btn px-3 py-2 text-xs"
+            title={t.dashboard.sessionsJsonTitle}
+          >
+            <FileJson size={14} className="text-muted" />
+            <span>{t.dashboard.sessionsJson}</span>
           </button>
-          <button type="button" onClick={handleSessionsJson} className="btn-ghost text-xs" title={t.dashboard.sessionsJsonTitle}>
-            <FileJson size={14} /> {t.dashboard.sessionsJson}
+          <button
+            type="button"
+            onClick={handleTodosCsv}
+            className="btn-ghost flex w-full items-center justify-center gap-2 rounded-btn px-3 py-2 text-xs"
+            title={t.dashboard.todosCsvTitle}
+          >
+            <FileDown size={14} className="text-muted" />
+            <span>{t.dashboard.todosCsv}</span>
           </button>
-          <button type="button" onClick={handleTodosCsv} className="btn-ghost text-xs" title={t.dashboard.todosCsvTitle}>
-            <FileDown size={14} /> {t.dashboard.todosCsv}
-          </button>
-          <button type="button" onClick={handleTodosJson} className="btn-ghost text-xs" title={t.dashboard.todosJsonTitle}>
-            <FileJson size={14} /> {t.dashboard.todosJson}
+          <button
+            type="button"
+            onClick={handleTodosJson}
+            className="btn-ghost flex w-full items-center justify-center gap-2 rounded-btn px-3 py-2 text-xs"
+            title={t.dashboard.todosJsonTitle}
+          >
+            <FileJson size={14} className="text-muted" />
+            <span>{t.dashboard.todosJson}</span>
           </button>
         </div>
-        <div className="mt-5 border-t border-line pt-4">
+
+        {/* Destructive Section (Danger Zone) */}
+        <div className="mt-6 border-t border-line/50 pt-4">
           <button
             type="button"
             onClick={() => {
               if (window.confirm(t.settings.confirmClear)) void clearSessions()
             }}
-            className="btn border border-accent-strong/60 bg-accent-strong/10 text-accent-strong hover:bg-accent-strong/20"
+            className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-btn border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs sm:text-sm font-medium text-red-400/90 transition-all hover:bg-red-500/20 hover:border-red-500/60 active:scale-[0.98]"
           >
-            <Trash2 size={15} /> {t.settings.clearSessions}
+            <Trash2 size={15} />
+            <span>{t.settings.clearSessions}</span>
           </button>
         </div>
       </div>
