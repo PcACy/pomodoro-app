@@ -579,8 +579,10 @@ export default function App() {
         onSkip={handleSkip}
       />
 
-      <canvas ref={canvasRef} width={480} height={320} className="hidden" aria-hidden="true" />
-      <video ref={videoRef} className="hidden" aria-hidden="true" muted playsInline />
+      <div className="fixed -left-[9999px] -top-[9999px] pointer-events-none opacity-0" aria-hidden="true">
+        <canvas ref={canvasRef} width={480} height={320} style={{ width: 240, height: 160 }} />
+        <video ref={videoRef} muted playsInline autoPlay style={{ width: 240, height: 160 }} />
+      </div>
       <PipCanvas
         canvasRef={canvasRef}
         phaseLabel={mode === 'flow' ? 'Flow' : timer.phaseLabel}

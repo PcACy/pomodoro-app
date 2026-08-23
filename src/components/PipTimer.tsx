@@ -30,13 +30,13 @@ export function PipTimer({ mode, pipWindow, phase, phaseLabel, status, time, act
   const running = status === 'running'
 
   return createPortal(
-    <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center gap-2 bg-canvas p-3 text-fg">
+    <div className="flex h-full min-h-screen w-full flex-col items-center justify-center gap-2 bg-canvas p-3 text-fg select-none">
       <span
         className={`rounded-full border border-line px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest ${BADGE[phase]}`}
       >
         {phaseLabel}
       </span>
-      <span className="font-mono text-4xl font-bold tabular-nums leading-none text-fg">{time}</span>
+      <span className="font-display font-bold text-4xl tabular-nums leading-none text-fg">{time}</span>
 
       {activeTodo && (
         <span className="max-w-full truncate text-xs text-muted" title={activeTodo}>
@@ -49,17 +49,17 @@ export function PipTimer({ mode, pipWindow, phase, phaseLabel, status, time, act
           type="button"
           onClick={onToggle}
           title={running ? t.timer.pause : t.timer.start}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-on-accent transition-colors hover:bg-accent-strong active:scale-95"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-on-accent transition-colors hover:bg-accent/80 active:scale-95 cursor-pointer shadow-md"
         >
-          {running ? <Pause size={20} /> : <Play size={20} className="translate-x-0.5" />}
+          {running ? <Pause size={18} /> : <Play size={18} className="translate-x-0.5" />}
         </button>
         <button
           type="button"
           onClick={onSkip}
           title={`${t.shortcuts.skip} (N)`}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-fg transition-colors hover:bg-raised"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors hover:bg-raised active:scale-95 cursor-pointer"
         >
-          <SkipForward size={16} />
+          <SkipForward size={14} />
         </button>
       </div>
     </div>,
@@ -75,36 +75,55 @@ interface CanvasProps {
   enabled?: boolean
 }
 
-const CANVAS_BG = '#0b0d12'
+const CANVAS_BG = '#121418'
 const CANVAS_FG = '#f5f5f5'
+
+export function renderPipCanvas(
+  canvas: HTMLCanvasElement,
+  phaseLabel: string,
+  status: TimerStatus,
+  time: string,
+) {
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+  const dpr = Math.max(window.devicePixelRatio || 1, 2)
+  const w = canvas.width / dpr
+  const h = canvas.height / dpr
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  ctx.fillStyle = CANVAS_BG
+  ctx.fillRect(0, 0, w, h)
+
+  ctx.textAlign = 'center'
+  ctx.fillStyle = '#83a598'
+  ctx.font = '600 13px system-ui, -apple-system, sans-serif'
+  ctx.fillText(phaseLabel.toUpperCase(), w / 2, h / 2 - 28)
+
+  ctx.fillStyle = CANVAS_FG
+  ctx.font = '700 36px ui-monospace, SFMono-Regular, monospace'
+  ctx.fillText(time, w / 2, h / 2 + 8)
+
+  ctx.fillStyle = status === 'running' ? '#8ec07c' : '#fabd2f'
+  ctx.font = '500 12px system-ui, -apple-system, sans-serif'
+  ctx.fillText(status === 'running' ? '● RUNNING' : '❚❚ PAUSED', w / 2, h / 2 + 34)
+}
 
 /** Renders the timer onto the hidden canvas that feeds the video-PiP fallback stream. */
 export function PipCanvas({ canvasRef, phaseLabel, status, time, enabled = true }: CanvasProps) {
-  // Bolt Optimization: Skip offscreen 2D canvas drawing when video PiP is inactive.
-  // When video PiP is disabled (default state), rendering onto canvas on every 250ms tick
-  // wastes CPU/GPU resources and triggers unnecessary 2D context updates.
   useEffect(() => {
-    if (!enabled) return
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const dpr = window.devicePixelRatio || 1
-    const w = canvas.width / dpr
-    const h = canvas.height / dpr
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    ctx.fillStyle = CANVAS_BG
-    ctx.fillRect(0, 0, w, h)
-    ctx.textAlign = 'center'
-    ctx.fillStyle = '#83a598'
-    ctx.font = '600 14px system-ui, sans-serif'
-    ctx.fillText(phaseLabel.toUpperCase(), w / 2, h / 2 - 26)
-    ctx.fillStyle = CANVAS_FG
-    ctx.font = '700 34px ui-monospace, monospace'
-    ctx.fillText(time, w / 2, h / 2 + 10)
-    ctx.fillStyle = status === 'running' ? '#8ec07c' : '#928374'
-    ctx.font = '500 12px system-ui, sans-serif'
-    ctx.fillText(status === 'running' ? '●' : '❚❚', w / 2, h / 2 + 34)
+
+    renderPipCanvas(canvas, phaseLabel, status, time)
+
+    if (!enabled) return
+
+    let animId: number
+    const loop = () => {
+      renderPipCanvas(canvas, phaseLabel, status, time)
+      animId = requestAnimationFrame(loop)
+    }
+    animId = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(animId)
   }, [canvasRef, phaseLabel, status, time, enabled])
 
   return null
