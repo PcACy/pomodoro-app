@@ -393,76 +393,85 @@ export const Timer = memo(function Timer({
           </div>
         )}
 
-        <div
-          className="flex h-6 items-center justify-center my-2 transition-opacity duration-300"
-          aria-hidden={isFlow}
-          aria-label={`Runde ${currentRoundIndex + 1} von ${roundsBeforeLongBreak}`}
-        >
+        {!isTui && (
           <div
-            className={`flex items-center justify-center gap-1.5 transition-all duration-300 ${
-              isFlow ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
-            }`}
+            className="flex h-6 items-center justify-center my-2 transition-opacity duration-300"
+            aria-hidden={isFlow}
+            aria-label={`Runde ${currentRoundIndex + 1} von ${roundsBeforeLongBreak}`}
           >
-            {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => {
-              const isCompleted = i < currentRoundIndex
-              const isCurrent = i === currentRoundIndex
+            <div
+              className={`flex items-center justify-center gap-1.5 transition-all duration-300 ${
+                isFlow ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
+              }`}
+            >
+              {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => {
+                const isCompleted = i < currentRoundIndex
+                const isCurrent = i === currentRoundIndex
 
-              let pillStyle = 'bg-line'
-              if (isCompleted) {
-                pillStyle = 'bg-accent'
-              } else if (isCurrent) {
-                pillStyle = running ? 'bg-accent animate-pulse' : 'bg-accent/60'
-              }
+                let pillStyle = 'bg-line'
+                if (isCompleted) {
+                  pillStyle = 'bg-accent'
+                } else if (isCurrent) {
+                  pillStyle = running ? 'bg-accent animate-pulse' : 'bg-accent/60'
+                }
 
-              return (
-                <span
-                  key={i}
-                  className={`h-1 w-7 2xl:w-8 rounded-full transition-all duration-300 ${pillStyle}`}
-                />
-              )
-            })}
+                return (
+                  <span
+                    key={i}
+                    className={`h-1 w-7 2xl:w-8 rounded-full transition-all duration-300 ${pillStyle}`}
+                  />
+                )
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {isTui ? (
-        /* TUI Terminal Box with Clean Frame & Consolidated Milestones */
-        <div className="flex flex-col items-center justify-center p-6 sm:p-8 border-2 border-line bg-canvas font-mono w-full max-w-[340px] 2xl:max-w-[400px] min-h-[220px] mx-auto text-center select-none shadow-none my-2">
-          <div className="text-xs font-bold text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
+        /* TUI Terminal Box with Identical Height & Symmetric Geometry in Both Modes */
+        <div className="flex flex-col items-center justify-between p-6 sm:p-7 border-2 border-line bg-canvas font-mono w-full max-w-[340px] 2xl:max-w-[400px] h-[240px] sm:h-[250px] mx-auto text-center select-none shadow-none my-2">
+          {/* Row 1: Top Border with Mode / Phase Label */}
+          <div className="text-xs font-bold text-accent uppercase tracking-widest flex items-center gap-2">
             <span className="text-line">┌──</span>
             <span>[ {isFlow ? 'FLOW TIMER' : `POMODORO: ${shownLabel}`} ]</span>
             <span className="text-line">──┐</span>
           </div>
 
+          {/* Row 2: Giant Digits */}
           <span
-            className={`font-mono font-bold tabular-nums leading-none tracking-tight text-fg my-2 ${
+            className={`font-mono font-bold tabular-nums leading-none tracking-tight text-fg my-1 ${
               large ? 'text-6xl sm:text-7xl' : 'text-5xl sm:text-6xl'
             }`}
           >
             {shownTime}
           </span>
 
-          {/* Flow Mode: Milestones placed exclusively between time and activity status */}
-          {isFlow && (
-            <div className="flex items-center justify-center gap-2 text-[11px] font-mono text-muted my-1 min-h-[18px]">
-              {[25, 50, 75, 100].map((m) => {
-                const reached = flowMinutes >= m
-                return (
-                  <span
-                    key={m}
-                    className={`flex items-center gap-0.5 transition-colors ${
-                      reached ? 'text-accent font-bold' : 'text-muted/40'
-                    }`}
-                  >
-                    <span>{reached ? '★' : '☆'}</span>
-                    <span>{m}m</span>
-                  </span>
-                )
-              })}
-            </div>
-          )}
+          {/* Row 3: Sub-Status / Milestones (Fixed Height in both modes) */}
+          <div className="h-[20px] flex items-center justify-center font-mono text-[11px] text-muted select-none">
+            {isFlow ? (
+              <div className="flex items-center justify-center gap-2">
+                {[25, 50, 75, 100].map((m) => {
+                  const reached = flowMinutes >= m
+                  return (
+                    <span
+                      key={m}
+                      className={`flex items-center gap-0.5 transition-colors ${
+                        reached ? 'text-accent font-bold' : 'text-muted/40'
+                      }`}
+                    >
+                      <span>{reached ? '★' : '☆'}</span>
+                      <span>{m}m</span>
+                    </span>
+                  )
+                })}
+              </div>
+            ) : (
+              <span>[ ROUND: {currentRoundIndex + 1}/{roundsBeforeLongBreak} ]</span>
+            )}
+          </div>
 
-          <div className="text-xs sm:text-sm font-bold text-accent my-2 tracking-wider font-mono min-h-[24px] flex items-center justify-center">
+          {/* Row 4: Activity / Progress Bar (Fixed Height in both modes) */}
+          <div className="h-[24px] flex items-center justify-center text-xs sm:text-sm font-bold text-accent tracking-wider font-mono">
             {isFlow ? (
               <span className={running ? 'text-accent' : 'text-muted'}>
                 {flowAsciiStatus}
@@ -472,17 +481,9 @@ export const Timer = memo(function Timer({
             )}
           </div>
 
-          {/* Terminal Box Bottom Border: Clean line in Flow mode without duplicate status */}
-          <div className="text-xs text-muted flex items-center justify-center gap-2 mt-2 font-mono">
-            {isFlow ? (
-              <span className="text-line">└───────────────────────────────┘</span>
-            ) : (
-              <>
-                <span className="text-line">└──</span>
-                <span>[ ROUND: {currentRoundIndex + 1}/${roundsBeforeLongBreak} ]</span>
-                <span className="text-line">──┘</span>
-              </>
-            )}
+          {/* Row 5: Bottom Border */}
+          <div className="text-xs text-muted flex items-center justify-center font-mono">
+            <span className="text-line">└───────────────────────────────┘</span>
           </div>
         </div>
       ) : (
