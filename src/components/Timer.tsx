@@ -462,7 +462,7 @@ export const Timer = memo(function Timer({
 
           <div className="text-xs sm:text-sm font-bold text-accent my-2 tracking-wider font-mono min-h-[24px] flex items-center justify-center">
             {isFlow ? (
-              <span className={running ? 'text-accent animate-pulse' : 'text-muted'}>
+              <span className={running ? 'text-accent' : 'text-muted'}>
                 {flowAsciiStatus}
               </span>
             ) : (
