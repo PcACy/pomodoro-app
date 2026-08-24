@@ -268,10 +268,10 @@ export const Dashboard = memo(function Dashboard({
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setTimeRange(r)}
-                  className={`relative z-10 flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 text-xs sm:text-sm transition-all duration-150 active:scale-[0.98] cursor-pointer ${
+                  className={`relative z-10 flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-150 cursor-pointer ${
                     isActive
-                      ? 'text-zinc-950 dark:text-white font-semibold'
-                      : 'text-zinc-600 dark:text-white/60 hover:text-zinc-950 dark:hover:text-white font-medium'
+                      ? 'text-zinc-950 dark:text-white'
+                      : 'text-zinc-600 dark:text-white/60 hover:text-zinc-950 dark:hover:text-white'
                   }`}
                 >
                   <span>{label}</span>
@@ -312,7 +312,7 @@ export const Dashboard = memo(function Dashboard({
                   onClick={() => setTimeRange(r)}
                   className={`relative z-10 flex min-h-[32px] sm:min-h-[34px] items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1 text-xs font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
                     isActive
-                      ? 'text-fg font-semibold'
+                      ? 'text-fg'
                       : 'text-muted hover:text-fg'
                   }`}
                 >

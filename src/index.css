@@ -564,13 +564,11 @@ textarea:focus:not(:focus-visible) {
   :root[data-theme='ios-26'][data-mode='light'] .seg-track button[aria-selected='true'],
   :root[data-theme='ios-26'][data-mode='light'] nav[role='tablist'] button[aria-selected='true'] {
     color: #09090b !important;
-    font-weight: 600;
   }
   :root[data-theme='ios-26'][data-mode='light'] .nav-track button[aria-selected='false'],
   :root[data-theme='ios-26'][data-mode='light'] .seg-track button[aria-selected='false'],
   :root[data-theme='ios-26'][data-mode='light'] nav[role='tablist'] button[aria-selected='false'] {
     color: #52525b;
-    font-weight: 500;
   }
   :root[data-theme='ios-26'][data-mode='light'] .nav-track button[aria-selected='false']:hover,
   :root[data-theme='ios-26'][data-mode='light'] .seg-track button[aria-selected='false']:hover,
@@ -605,7 +603,6 @@ textarea:focus:not(:focus-visible) {
   :root[data-theme='ios-26'][data-mode='dark'] nav[role='tablist'] button[aria-selected='true'],
   :root[data-theme='ios-26']:not([data-mode='light']) nav[role='tablist'] button[aria-selected='true'] {
     color: #ffffff;
-    font-weight: 600;
   }
   :root[data-theme='ios-26'][data-mode='dark'] .nav-track button[aria-selected='false'],
   :root[data-theme='ios-26'][data-mode='dark'] .seg-track button[aria-selected='false'],
@@ -614,7 +611,6 @@ textarea:focus:not(:focus-visible) {
   :root[data-theme='ios-26'][data-mode='dark'] nav[role='tablist'] button[aria-selected='false'],
   :root[data-theme='ios-26']:not([data-mode='light']) nav[role='tablist'] button[aria-selected='false'] {
     color: rgba(255, 255, 255, 0.6);
-    font-weight: 500;
   }
   :root[data-theme='ios-26'][data-mode='dark'] .nav-track button[aria-selected='false']:hover,
   :root[data-theme='ios-26'][data-mode='dark'] .seg-track button[aria-selected='false']:hover,
@@ -630,10 +626,9 @@ textarea:focus:not(:focus-visible) {
 
   /* 1. M3 Tonal Surface Cards & Zero-Border Architecture */
   :root[data-theme='material-you'] .card {
-    border-width: 0 !important;
-    border-style: none !important;
-    border-color: transparent !important;
-    border-radius: 32px !important;
+    border-width: 0;
+    border-style: none;
+    border-radius: 32px;
     background-color: rgb(var(--c-surface));
     box-shadow: none !important;
   }

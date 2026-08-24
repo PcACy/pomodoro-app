@@ -461,7 +461,7 @@ export const SettingsPanel = memo(function SettingsPanel({
               aria-selected={lang === 'de'}
               onClick={() => setLang('de')}
               className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                lang === 'de' ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
+                lang === 'de' ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
               {lang === 'de' && (
@@ -476,7 +476,7 @@ export const SettingsPanel = memo(function SettingsPanel({
               aria-selected={lang === 'en'}
               onClick={() => setLang('en')}
               className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                lang === 'en' ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
+                lang === 'en' ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
               {lang === 'en' && (
@@ -515,7 +515,7 @@ export const SettingsPanel = memo(function SettingsPanel({
               aria-selected={colorMode === 'dark'}
               onClick={() => onColorModeChange('dark')}
               className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-2 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                colorMode === 'dark' ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
+                colorMode === 'dark' ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
               {colorMode === 'dark' && (
@@ -530,7 +530,7 @@ export const SettingsPanel = memo(function SettingsPanel({
               aria-selected={colorMode === 'light'}
               onClick={() => onColorModeChange('light')}
               className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-2 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                colorMode === 'light' ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
+                colorMode === 'light' ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
               {colorMode === 'light' && (

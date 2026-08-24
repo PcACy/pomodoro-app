@@ -350,10 +350,10 @@ export default function App() {
                 aria-selected={tab === tb.id}
                 aria-label={t.nav[TAB_LABEL_KEYS[tb.id]]}
                 onClick={() => handleTabChange(tb.id)}
-                className={`relative z-10 flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 text-xs sm:text-sm transition-all duration-150 active:scale-[0.98] cursor-pointer ${
+                className={`relative z-10 flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 rounded-full px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-150 cursor-pointer ${
                   tab === tb.id
-                    ? 'text-zinc-950 dark:text-white font-semibold'
-                    : 'text-zinc-600 dark:text-white/60 hover:text-zinc-950 dark:hover:text-white font-medium'
+                    ? 'text-zinc-950 dark:text-white'
+                    : 'text-zinc-600 dark:text-white/60 hover:text-zinc-950 dark:hover:text-white'
                 }`}
               >
                 {tb.icon}
@@ -387,8 +387,8 @@ export default function App() {
                 aria-selected={tab === tb.id}
                 aria-label={t.nav[TAB_LABEL_KEYS[tb.id]]}
                 onClick={() => handleTabChange(tb.id)}
-                className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-2 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                  tab === tb.id ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
+                className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-2 whitespace-nowrap shrink-0 rounded-[calc(var(--radius-btn)-4px)] px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-150 cursor-pointer ${
+                  tab === tb.id ? 'text-fg' : 'text-muted hover:text-fg'
                 }`}
               >
                 {tb.icon}
