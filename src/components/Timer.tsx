@@ -311,7 +311,7 @@ export const Timer = memo(function Timer({
         borderless
           ? 'max-w-xl gap-4 p-0 bg-transparent border-0 shadow-none'
           : isIos
-            ? 'rounded-[36px] bg-white/75 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/80 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-5 sm:p-6 relative overflow-hidden max-w-md 2xl:max-w-lg gap-3 sm:gap-4'
+            ? 'rounded-[36px] bg-white/75 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/80 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-6 sm:p-7 relative overflow-hidden max-w-md 2xl:max-w-lg gap-4'
             : 'card max-w-md 2xl:max-w-lg gap-3 sm:gap-4 p-5 sm:p-6'
       }`}
     >
@@ -980,34 +980,34 @@ export const Timer = memo(function Timer({
 
       {/* Keyboard shortcuts row: stable layout without jumps & zero wrap */}
       <div
-        className={`flex min-h-[28px] items-center justify-center gap-2 sm:gap-3 select-none text-xs font-mono ${
+        className={`flex min-h-[26px] items-center justify-center gap-1.5 sm:gap-2.5 select-none text-[11px] font-mono ${
           isIos ? 'text-zinc-600 dark:text-white/50 font-medium' : 'text-muted'
-        } transition-opacity duration-200 whitespace-nowrap mt-2 [@media(hover:none)]:hidden ${
+        } transition-opacity duration-200 whitespace-nowrap mt-1 [@media(hover:none)]:hidden ${
           running ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >
         <span className="inline-flex items-center gap-1 shrink-0">
-          <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>Space</kbd> Start/Pause
+          <kbd className={isIos ? 'inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd text-[10px] shrink-0'}>Space</kbd> Start/Pause
         </span>
         <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
         {isFlow ? (
           <>
             <span className="inline-flex items-center gap-1 shrink-0">
-              <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>R</kbd> Discard
+              <kbd className={isIos ? 'inline-flex items-center justify-center px-1.5 py-0.5 min-w-[18px] rounded text-[10px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd text-[10px] shrink-0'}>R</kbd> Discard
             </span>
             <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
             <span className="inline-flex items-center gap-1 shrink-0">
-              <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>F</kbd> Finish
+              <kbd className={isIos ? 'inline-flex items-center justify-center px-1.5 py-0.5 min-w-[18px] rounded text-[10px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd text-[10px] shrink-0'}>F</kbd> Finish
             </span>
           </>
         ) : (
           <>
             <span className="inline-flex items-center gap-1 shrink-0">
-              <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>R</kbd> Reset
+              <kbd className={isIos ? 'inline-flex items-center justify-center px-1.5 py-0.5 min-w-[18px] rounded text-[10px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd text-[10px] shrink-0'}>R</kbd> Reset
             </span>
             <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
             <span className="inline-flex items-center gap-1 shrink-0">
-              <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>N</kbd> Skip
+              <kbd className={isIos ? 'inline-flex items-center justify-center px-1.5 py-0.5 min-w-[18px] rounded text-[10px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd text-[10px] shrink-0'}>N</kbd> Skip
             </span>
           </>
         )}
@@ -1021,7 +1021,7 @@ export const Timer = memo(function Timer({
             isIos ? 'hover:text-zinc-950 dark:hover:text-white' : 'hover:text-fg'
           } cursor-pointer`}
         >
-          <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>Z</kbd> Zen
+          <kbd className={isIos ? 'inline-flex items-center justify-center px-1.5 py-0.5 min-w-[18px] rounded text-[10px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd text-[10px] shrink-0'}>Z</kbd> Zen
         </button>
       </div>
 
