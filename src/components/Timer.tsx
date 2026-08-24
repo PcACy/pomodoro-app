@@ -396,55 +396,37 @@ export const Timer = memo(function Timer({
         <div
           className="flex h-6 items-center justify-center my-2 transition-opacity duration-300"
           aria-hidden={isFlow}
-          aria-label={isFlow ? 'Fokus Meilensteine' : `Runde ${currentRoundIndex + 1} von ${roundsBeforeLongBreak}`}
+          aria-label={`Runde ${currentRoundIndex + 1} von ${roundsBeforeLongBreak}`}
         >
-          {isFlow ? (
-            /* Flow Mode: Focus Milestone Indicators with identical fixed container height */
-            <div className="flex items-center justify-center gap-2.5 text-[11px] font-mono select-none">
-              {[25, 50, 75, 100].map((m) => {
-                const reached = flowMinutes >= m
-                return (
-                  <span
-                    key={m}
-                    className={`flex items-center gap-0.5 transition-colors ${
-                      reached ? 'text-accent font-bold' : 'text-muted/40'
-                    }`}
-                  >
-                    <span>{reached ? '★' : '☆'}</span>
-                    <span>{m}m</span>
-                  </span>
-                )
-              })}
-            </div>
-          ) : (
-            <div
-              className="flex items-center justify-center gap-1.5 transition-all duration-300 opacity-100 scale-100"
-            >
-              {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => {
-                const isCompleted = i < currentRoundIndex
-                const isCurrent = i === currentRoundIndex
+          <div
+            className={`flex items-center justify-center gap-1.5 transition-all duration-300 ${
+              isFlow ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
+            }`}
+          >
+            {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => {
+              const isCompleted = i < currentRoundIndex
+              const isCurrent = i === currentRoundIndex
 
-                let pillStyle = 'bg-line'
-                if (isCompleted) {
-                  pillStyle = 'bg-accent'
-                } else if (isCurrent) {
-                  pillStyle = running ? 'bg-accent animate-pulse' : 'bg-accent/60'
-                }
+              let pillStyle = 'bg-line'
+              if (isCompleted) {
+                pillStyle = 'bg-accent'
+              } else if (isCurrent) {
+                pillStyle = running ? 'bg-accent animate-pulse' : 'bg-accent/60'
+              }
 
-                return (
-                  <span
-                    key={i}
-                    className={`h-1 w-7 2xl:w-8 rounded-full transition-all duration-300 ${pillStyle}`}
-                  />
-                )
-              })}
-            </div>
-          )}
+              return (
+                <span
+                  key={i}
+                  className={`h-1 w-7 2xl:w-8 rounded-full transition-all duration-300 ${pillStyle}`}
+                />
+              )
+            })}
+          </div>
         </div>
       </div>
 
       {isTui ? (
-        /* TUI Terminal Box with Decoupled Progress Bar / Flow Scanner */
+        /* TUI Terminal Box with Clean Frame & Consolidated Milestones */
         <div className="flex flex-col items-center justify-center p-6 sm:p-8 border-2 border-line bg-canvas font-mono w-full max-w-[340px] 2xl:max-w-[400px] min-h-[220px] mx-auto text-center select-none shadow-none my-2">
           <div className="text-xs font-bold text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
             <span className="text-line">┌──</span>
@@ -460,6 +442,26 @@ export const Timer = memo(function Timer({
             {shownTime}
           </span>
 
+          {/* Flow Mode: Milestones placed exclusively between time and activity status */}
+          {isFlow && (
+            <div className="flex items-center justify-center gap-2 text-[11px] font-mono text-muted my-1 min-h-[18px]">
+              {[25, 50, 75, 100].map((m) => {
+                const reached = flowMinutes >= m
+                return (
+                  <span
+                    key={m}
+                    className={`flex items-center gap-0.5 transition-colors ${
+                      reached ? 'text-accent font-bold' : 'text-muted/40'
+                    }`}
+                  >
+                    <span>{reached ? '★' : '☆'}</span>
+                    <span>{m}m</span>
+                  </span>
+                )
+              })}
+            </div>
+          )}
+
           <div className="text-xs sm:text-sm font-bold text-accent my-2 tracking-wider font-mono min-h-[24px] flex items-center justify-center">
             {isFlow ? (
               <span className={running ? 'text-accent' : 'text-muted'}>
@@ -470,22 +472,17 @@ export const Timer = memo(function Timer({
             )}
           </div>
 
-          {isFlow ? (
-            <div className="flex items-center justify-center gap-2 text-[11px] text-muted my-1 min-h-[18px]">
-              {[25, 50, 75].map((m) => (
-                <span key={m} className={flowMinutes >= m ? 'text-accent font-bold' : 'text-muted/40'}>
-                  {flowMinutes >= m ? '★' : '☆'}{m}m
-                </span>
-              ))}
-            </div>
-          ) : null}
-
-          <div className="text-xs text-muted flex items-center gap-2 mt-1 font-mono">
-            <span className="text-line">└──</span>
-            <span>
-              [ {isFlow ? (running ? 'ACTIVE' : paused ? 'PAUSED' : 'IDLE') : `ROUND: ${currentRoundIndex + 1}/${roundsBeforeLongBreak}`} ]
-            </span>
-            <span className="text-line">──┘</span>
+          {/* Terminal Box Bottom Border: Clean line in Flow mode without duplicate status */}
+          <div className="text-xs text-muted flex items-center justify-center gap-2 mt-2 font-mono">
+            {isFlow ? (
+              <span className="text-line">└───────────────────────────────┘</span>
+            ) : (
+              <>
+                <span className="text-line">└──</span>
+                <span>[ ROUND: {currentRoundIndex + 1}/${roundsBeforeLongBreak} ]</span>
+                <span className="text-line">──┘</span>
+              </>
+            )}
           </div>
         </div>
       ) : (
@@ -649,7 +646,7 @@ export const Timer = memo(function Timer({
       )}
 
       {isTui ? (
-        /* TUI Bracket Controls */
+        /* TUI Bracket Controls with WCAG-compliant Gruvbox Contrast */
         <div className="flex items-center gap-3 font-mono select-none my-1">
           <button
             type="button"
@@ -657,7 +654,7 @@ export const Timer = memo(function Timer({
             disabled={isFlow && flowStatus === 'idle'}
             title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
             aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className="tui-btn px-4 py-2 text-xs font-bold border border-line bg-surface text-muted hover:border-fg hover:text-fg hover:bg-raised transition-colors uppercase cursor-pointer disabled:opacity-30 disabled:pointer-events-none active:scale-95"
+            className="tui-btn px-4 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-fg hover:text-canvas hover:bg-fg transition-colors uppercase cursor-pointer disabled:opacity-70 disabled:pointer-events-none active:scale-95"
           >
             [ RESET ]
           </button>
@@ -665,7 +662,7 @@ export const Timer = memo(function Timer({
           <button
             type="button"
             onClick={handleToggleClick}
-            className="tui-btn px-6 py-2.5 text-sm font-bold border-2 border-accent bg-accent text-canvas hover:bg-fg hover:text-canvas transition-colors uppercase tracking-wider cursor-pointer active:scale-95 shadow-sm"
+            className="tui-btn tui-btn-primary px-6 py-2.5 text-sm font-bold border-2 border-accent bg-accent text-on-accent hover:bg-fg hover:text-canvas hover:border-fg transition-colors uppercase tracking-wider cursor-pointer active:scale-95 shadow-sm"
             title={running ? t.timer.pause : t.timer.start}
             aria-label={running ? t.timer.pause : t.timer.start}
           >
@@ -679,7 +676,7 @@ export const Timer = memo(function Timer({
               disabled={flowStatus === 'idle'}
               title={`${t.flow.finish} (F)`}
               aria-label={t.flow.finish}
-              className="tui-btn px-4 py-2 text-xs font-bold border border-accent/60 bg-accent/15 text-accent hover:bg-accent hover:text-canvas transition-colors uppercase cursor-pointer disabled:opacity-30 disabled:pointer-events-none active:scale-95"
+              className="tui-btn px-4 py-2 text-xs font-bold border border-accent/60 bg-accent/15 text-accent hover:bg-accent hover:text-on-accent transition-colors uppercase cursor-pointer disabled:opacity-70 disabled:pointer-events-none active:scale-95"
             >
               [ FINISH ]
             </button>

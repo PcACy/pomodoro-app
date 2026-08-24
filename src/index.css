@@ -127,6 +127,26 @@
   box-shadow: none !important;
 }
 
+:root[data-theme='gruvbox'] .tui-btn:disabled,
+:root:not([data-theme]) .tui-btn:disabled {
+  opacity: 0.7 !important;
+  cursor: not-allowed !important;
+}
+
+:root[data-theme='gruvbox'][data-mode='light'] .tui-btn:disabled,
+:root:not([data-theme])[data-mode='light'] .tui-btn:disabled {
+  color: #928374 !important;
+  border-color: #d5c4a1 !important;
+  background-color: transparent !important;
+}
+
+:root[data-theme='gruvbox'][data-mode='dark'] .tui-btn:disabled,
+:root:not([data-theme])[data-mode='dark'] .tui-btn:disabled {
+  color: #7c6f64 !important;
+  border-color: #504945 !important;
+  background-color: transparent !important;
+}
+
 /* =========================================================================
    2. iOS 26 LIQUID GLASS (Studio Silver Slate)
    ========================================================================= */
