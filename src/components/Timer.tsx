@@ -329,7 +329,7 @@ export const Timer = memo(function Timer({
         <div
           className={`inline-flex max-w-full items-center gap-2 px-3.5 py-1.5 text-xs shadow-sm backdrop-blur-md transition-all duration-300 ${
             isIos
-              ? 'rounded-full border border-black/[0.06] dark:border-white/15 bg-black/[0.04] dark:bg-white/10 text-zinc-700 dark:text-white/90 font-medium'
+              ? 'rounded-full border border-black/[0.08] dark:border-white/15 bg-black/[0.05] dark:bg-white/10 text-zinc-800 dark:text-white/90 font-medium'
               : 'rounded-badge border border-line/70 bg-surface/80 text-fg'
           }`}
         >
@@ -341,7 +341,7 @@ export const Timer = memo(function Timer({
             <span
               className={`shrink-0 px-1.5 py-0.5 text-[11px] font-medium leading-none ${
                 isIos
-                  ? 'rounded-full border border-black/[0.08] dark:border-white/20 bg-black/[0.04] dark:bg-white/10 text-zinc-600 dark:text-white/80'
+                  ? 'rounded-full border border-black/[0.08] dark:border-white/20 bg-black/[0.05] dark:bg-white/10 text-zinc-700 dark:text-white/80'
                   : 'rounded-badge border border-tag-border bg-tag-bg text-tag-text'
               }`}
             >
@@ -392,7 +392,7 @@ export const Timer = memo(function Timer({
           >
             {/* Sliding Glass Puck */}
             <div
-              className="pointer-events-none absolute bottom-1 top-1 rounded-full bg-white dark:bg-white/15 border border-black/[0.06] dark:border-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.25)] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
+              className="pointer-events-none absolute bottom-1 top-1 rounded-full bg-white dark:bg-white/15 border border-black/[0.04] dark:border-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.25)] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
               style={{
                 width: 'calc((100% - 8px - 4px) / 2)',
                 left: '4px',
@@ -774,7 +774,7 @@ export const Timer = memo(function Timer({
                         className={`flex items-center gap-1 transition-all duration-300 ${
                           reached
                             ? 'bg-primary/20 border border-primary/40 text-primary font-semibold rounded-full px-3 py-1 text-xs shadow-[0_0_12px_rgba(var(--primary-rgb),0.3)] animate-in zoom-in-95'
-                            : 'bg-black/[0.04] dark:bg-white/5 border border-black/[0.06] dark:border-white/10 text-zinc-600 dark:text-white/40 rounded-full px-3 py-1 text-xs backdrop-blur-sm'
+                            : 'bg-black/[0.05] dark:bg-white/5 border border-black/[0.08] dark:border-white/10 text-zinc-700 dark:text-white/40 rounded-full px-3 py-1 text-xs backdrop-blur-sm'
                         }`}
                       >
                         <span>{reached ? '★' : '☆'}</span>
@@ -809,7 +809,7 @@ export const Timer = memo(function Timer({
               <div className="flex min-h-[18px] items-center justify-center">
                 <span
                   className={`text-xs font-medium transition-opacity duration-200 ${
-                    isIos ? 'text-zinc-500 dark:text-white/60' : 'text-muted'
+                    isIos ? 'text-zinc-600 dark:text-white/60' : 'text-muted'
                   } ${
                     shownStatus ? 'opacity-100' : 'opacity-0'
                   }`}
