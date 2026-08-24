@@ -301,7 +301,7 @@ export const TodoList = memo(function TodoList({
   }
 
   return (
-    <section className="card flex w-full max-w-md 2xl:max-w-lg flex-col gap-3.5 sm:gap-4 p-5 sm:p-6">
+    <section className="card flex w-full max-w-md 2xl:max-w-lg min-h-[160px] sm:min-h-[180px] flex-col gap-3.5 sm:gap-4 p-5 sm:p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-fg">{tr.todo.title}</h3>
         <span className="text-xs text-muted">
@@ -352,7 +352,9 @@ export const TodoList = memo(function TodoList({
       </div>
 
       {todos.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted">{tr.todo.empty}</p>
+        <div className="flex flex-1 items-center justify-center py-4">
+          <p className="text-center text-sm text-muted">{tr.todo.empty}</p>
+        </div>
       ) : (
         <ul ref={listRef} className="flex flex-col gap-1.5 2xl:gap-2">
           {todos.map((t) => (

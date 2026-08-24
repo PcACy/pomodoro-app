@@ -57,9 +57,9 @@ export const GlassLiveActivityBar = memo(function GlassLiveActivityBar({
     <footer
       role="contentinfo"
       aria-label="Live Activity Status"
-      className="sticky bottom-0 z-30 flex w-full justify-center px-4 pb-3 sm:pb-4 pointer-events-none select-none"
+      className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 max-w-fit pointer-events-none select-none px-4"
     >
-      <div className="pointer-events-auto flex items-center justify-between gap-3 max-w-xl w-full mx-auto px-4 py-2 rounded-full bg-surface/80 border border-white/10 dark:border-white/15 light:border-black/10 backdrop-blur-2xl shadow-xl text-xs transition-all duration-300">
+      <div className="pointer-events-auto flex items-center justify-between gap-3 max-w-fit mx-auto px-4 py-2 rounded-full bg-surface/80 border border-white/10 dark:border-white/15 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] text-xs transition-all duration-300">
         {/* Left: Live indicator + Phase name */}
         <div className="flex items-center gap-2 shrink-0">
           <span className="relative flex h-2 w-2">

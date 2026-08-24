@@ -295,7 +295,7 @@ export default function App() {
   }, [timer.phase, timer.status, timer.totalMs, t.phases])
 
   return (
-    <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl 2xl:max-w-6xl flex-col items-center gap-8 2xl:gap-10 px-4 py-8">
+    <div className="min-h-screen min-h-[100dvh] flex flex-col justify-between py-4 px-4 sm:px-8 max-w-6xl mx-auto relative w-full">
       {/* Dynamic Document Title & Favicon Manager (Isolated from App re-renders) */}
       <DocumentChrome phase={chromePhase} status={chromeStatus} mode={mode} />
 
@@ -399,11 +399,11 @@ export default function App() {
         )}
       </header>
 
-      <main className="flex w-full flex-1 flex-col items-center gap-4 sm:gap-6 pb-6">
-        <div key={tab} className="animate-tab-enter flex w-full flex-col items-center">
+      <main className="flex w-full flex-1 flex-col items-center justify-center gap-6 py-4 sm:py-6 pb-20 sm:pb-24">
+        <div key={tab} className="animate-tab-enter flex w-full flex-1 flex-col items-center justify-center my-auto">
           {tab === 'timer' && (
             settings.layoutMode === 'single' ? (
-              <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-4 sm:gap-6">
+              <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-6">
                 <Timer
                   themeId={themeId}
                   large
@@ -442,7 +442,7 @@ export default function App() {
                 <DayTimeline sessions={sessions} />
               </div>
             ) : (
-              <div className="mx-auto grid w-full max-w-5xl 2xl:max-w-6xl grid-cols-1 items-start justify-items-center gap-4 sm:gap-6 lg:grid-cols-2">
+              <div className="mx-auto grid w-full max-w-5xl 2xl:max-w-6xl grid-cols-1 items-start justify-items-center gap-6 lg:grid-cols-2">
                 <Timer
                   themeId={themeId}
                   phase={timer.phase}
@@ -464,7 +464,7 @@ export default function App() {
                   isZenMode={isZenMode}
                   onToggleZen={handleToggleZen}
                 />
-                <div className="flex w-full max-w-md 2xl:max-w-lg flex-col gap-4 sm:gap-6">
+                <div className="flex w-full max-w-md 2xl:max-w-lg flex-col gap-6">
                   <TodoList
                     themeId={themeId}
                     todos={todosApi.todos}

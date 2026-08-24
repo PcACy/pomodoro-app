@@ -981,11 +981,11 @@ export const Timer = memo(function Timer({
         </div>
       )}
 
-      {/* Keyboard shortcuts row: stable layout without jumps & zero wrap */}
+      {/* Keyboard shortcuts row: flex-wrap without overflow or PiP overlap */}
       <div
-        className={`flex min-h-[28px] items-center justify-center gap-2 sm:gap-3 select-none text-xs font-mono ${
+        className={`flex min-h-[28px] flex-wrap items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 select-none text-xs font-mono ${
           isIos ? 'text-zinc-600 dark:text-white/50 font-medium' : 'text-muted'
-        } transition-opacity duration-200 whitespace-nowrap mt-2 [@media(hover:none)]:hidden ${
+        } transition-opacity duration-200 mt-2 [@media(hover:none)]:hidden ${
           running ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >

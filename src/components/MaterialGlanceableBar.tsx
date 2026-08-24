@@ -42,9 +42,9 @@ export const MaterialGlanceableBar = memo(function MaterialGlanceableBar({
     <footer
       role="contentinfo"
       aria-label="Material Glanceable Bar"
-      className="sticky bottom-0 z-30 flex w-full justify-center px-4 pb-3 sm:pb-4 pointer-events-none select-none"
+      className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 max-w-fit pointer-events-none select-none px-4"
     >
-      <div className="pointer-events-auto flex items-center justify-between gap-3 max-w-md w-full mx-auto px-4 sm:px-5 py-2.5 rounded-full bg-surface text-fg shadow-md text-xs transition-all duration-300">
+      <div className="pointer-events-auto flex items-center justify-between gap-3 max-w-fit mx-auto px-4 sm:px-5 py-2.5 rounded-full bg-surface text-fg shadow-[0_10px_30px_rgba(0,0,0,0.5)] text-xs transition-all duration-300">
         {/* Left: M3 Tonal Chip */}
         <div className="flex items-center gap-1.5 shrink-0">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container font-medium text-xs">
