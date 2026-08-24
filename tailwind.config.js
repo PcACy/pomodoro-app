@@ -29,6 +29,7 @@ export default {
         fg: 'rgb(var(--c-fg) / <alpha-value>)',
         muted: 'rgb(var(--c-muted) / <alpha-value>)',
         'text-muted': 'rgb(var(--c-muted) / <alpha-value>)',
+        'text-primary': 'rgb(var(--c-fg) / <alpha-value>)',
         accent: 'rgb(var(--c-accent) / <alpha-value>)',
         'accent-strong': 'rgb(var(--c-accent-strong) / <alpha-value>)',
         'on-accent': 'rgb(var(--c-on-accent) / <alpha-value>)',

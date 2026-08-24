@@ -319,7 +319,7 @@ export const Timer = memo(function Timer({
         borderless
           ? 'max-w-xl gap-4 p-0 bg-transparent border-0 shadow-none'
           : isIos
-            ? 'rounded-[36px] bg-white/75 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/80 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-5 sm:p-6 relative overflow-hidden max-w-md 2xl:max-w-lg gap-3 sm:gap-4'
+            ? 'rounded-[36px] bg-white/75 backdrop-blur-2xl border border-white/80 shadow-[0_12px_40px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] dark:bg-white/[0.04] dark:backdrop-blur-2xl dark:border dark:border-white/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.12)] p-5 sm:p-6 relative overflow-hidden max-w-md 2xl:max-w-lg gap-3 sm:gap-4'
             : 'card max-w-md 2xl:max-w-lg gap-3 sm:gap-4 p-5 sm:p-6'
       }`}
     >
@@ -1031,7 +1031,67 @@ export const Timer = memo(function Timer({
       )}
 
       {/* Keyboard shortcuts row */}
-      {isM3 ? (
+      {isIos ? (
+        <div
+          className={`flex items-center justify-center gap-2 sm:gap-2.5 text-xs text-text-muted mt-2 w-full flex-nowrap select-none transition-opacity duration-200 [@media(hover:none)]:hidden ${
+            running ? 'pointer-events-none opacity-0' : 'opacity-100'
+          }`}
+        >
+          <span className="inline-flex items-center gap-1 shrink-0">
+            <kbd className="px-1.5 py-0.5 min-w-[22px] rounded-md bg-white/10 border border-white/15 text-[10px] font-mono font-medium text-text-primary shrink-0">
+              Space
+            </kbd>
+            <span className="whitespace-nowrap text-[11px]">Start/Pause</span>
+          </span>
+          <span className="shrink-0 text-white/20">·</span>
+          {isFlow ? (
+            <>
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <kbd className="px-1.5 py-0.5 min-w-[22px] rounded-md bg-white/10 border border-white/15 text-[10px] font-mono font-medium text-text-primary shrink-0">
+                  R
+                </kbd>
+                <span className="whitespace-nowrap text-[11px]">Discard</span>
+              </span>
+              <span className="shrink-0 text-white/20">·</span>
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <kbd className="px-1.5 py-0.5 min-w-[22px] rounded-md bg-white/10 border border-white/15 text-[10px] font-mono font-medium text-text-primary shrink-0">
+                  F
+                </kbd>
+                <span className="whitespace-nowrap text-[11px]">Finish</span>
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <kbd className="px-1.5 py-0.5 min-w-[22px] rounded-md bg-white/10 border border-white/15 text-[10px] font-mono font-medium text-text-primary shrink-0">
+                  R
+                </kbd>
+                <span className="whitespace-nowrap text-[11px]">Reset</span>
+              </span>
+              <span className="shrink-0 text-white/20">·</span>
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <kbd className="px-1.5 py-0.5 min-w-[22px] rounded-md bg-white/10 border border-white/15 text-[10px] font-mono font-medium text-text-primary shrink-0">
+                  N
+                </kbd>
+                <span className="whitespace-nowrap text-[11px]">Skip</span>
+              </span>
+            </>
+          )}
+          <span className="shrink-0 text-white/20">·</span>
+          <button
+            type="button"
+            onClick={onToggleZen}
+            title={isZenMode ? t.zen.exitHint : t.zen.enterHint}
+            aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
+            className="inline-flex items-center gap-1 shrink-0 transition-colors hover:text-fg cursor-pointer"
+          >
+            <kbd className="px-1.5 py-0.5 min-w-[22px] rounded-md bg-white/10 border border-white/15 text-[10px] font-mono font-medium text-text-primary shrink-0">
+              Z
+            </kbd>
+            <span className="whitespace-nowrap text-[11px]">Zen</span>
+          </button>
+        </div>
+      ) : isM3 ? (
         <div
           className={`flex items-center justify-center gap-2 sm:gap-3 text-xs text-text-muted mt-3 w-full flex-nowrap select-none transition-opacity duration-200 [@media(hover:none)]:hidden ${
             running ? 'pointer-events-none opacity-0' : 'opacity-100'
