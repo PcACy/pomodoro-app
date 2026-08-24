@@ -21,6 +21,7 @@ const applyTheme = (id: ThemeId, mode: ColorMode): void => {
   if (typeof document === 'undefined') return
   document.documentElement.dataset.theme = id
   document.documentElement.dataset.mode = mode
+  document.documentElement.classList.toggle('dark', mode === 'dark')
 
   // Dynamically synchronize OS status bar & browser chrome theme-color
   const hex = THEME_BG_HEX[id]?.[mode] ?? (mode === 'dark' ? '#282828' : '#fbf1c7')
