@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-export function wakeLockSupported(): boolean {
+function wakeLockSupported(): boolean {
   return typeof navigator !== 'undefined' && 'wakeLock' in navigator
 }
 

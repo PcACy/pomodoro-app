@@ -3,7 +3,7 @@ import type { PhaseId, TimerStatus } from '../types'
 import type { ColorMode, ThemeId } from '../themes'
 import type { SyncStatus } from '../hooks/useSync'
 
-export interface VimStatusLineProps {
+interface VimStatusLineProps {
   themeId: ThemeId
   colorMode: ColorMode
   mode: 'pomodoro' | 'flow'

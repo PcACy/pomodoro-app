@@ -4,9 +4,9 @@ import { getTickerWorker } from '../lib/tickerWorker'
 import { fmtFlowTime } from '../lib/time'
 import { setFlowTickSnapshot } from '../lib/timerStore'
 
-export const MIN_FLOW_SESSION_MS = 60_000
+const MIN_FLOW_SESSION_MS = 60_000
 
-export interface FlowTimerApi {
+interface FlowTimerApi {
   status: TimerStatus
   elapsedMs: number
   time: string

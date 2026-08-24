@@ -34,7 +34,7 @@ const supportsVideoPip = (): boolean =>
   'pictureInPictureEnabled' in document &&
   'requestPictureInPicture' in HTMLVideoElement.prototype
 
-export interface PictureInPictureState {
+interface PictureInPictureState {
   mode: PipMode
   pipWindow: Window | null
   isSupported: boolean

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-export type NotificationActionId = 'start-break' | 'start-focus' | 'add-5'
+type NotificationActionId = 'start-break' | 'start-focus' | 'add-5'
 
 interface Handlers {
   onStartPhase: (action: NotificationActionId) => void

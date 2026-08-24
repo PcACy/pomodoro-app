@@ -5,7 +5,7 @@ const fmtClock = (d: Date): string =>
   `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 
 /** "125" -> "2h 5m", "50" -> "50m" */
-export const fmtMinutesCompact = (minutes: number): string => {
+const fmtMinutesCompact = (minutes: number): string => {
   const h = Math.floor(minutes / 60)
   const m = minutes % 60
   if (h > 0 && m > 0) return `${h}h ${m}m`
@@ -15,7 +15,7 @@ export const fmtMinutesCompact = (minutes: number): string => {
 
 const minutesOf = (s: Session): number => Math.round(s.durationMs / MS_PER_MINUTE)
 
-export interface DayExport {
+interface DayExport {
   date: Date
   key: string
   sessions: Session[]
@@ -33,7 +33,7 @@ export function buildDayExport(sessions: Session[], date: Date): DayExport {
 }
 
 /** Escapes Markdown special characters, HTML tags, and line breaks for safe rendering in Markdown readers. */
-export function sanitizeMarkdownText(text: string): string {
+function sanitizeMarkdownText(text: string): string {
   return text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -45,7 +45,7 @@ export function sanitizeMarkdownText(text: string): string {
 }
 
 /** Escapes table cell delimiters (|) and characters that could corrupt Markdown table formatting. */
-export function sanitizeTableCell(text: string): string {
+function sanitizeTableCell(text: string): string {
   return sanitizeMarkdownText(text)
     .replace(/\\/g, '\\\\')
     .replace(/\|/g, '\\|')

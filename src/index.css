@@ -29,7 +29,6 @@
   --c-long: 142 192 124;
   --c-track: 80 73 69;
   --primary-rgb: var(--c-accent);
-  --color-primary: rgb(var(--c-accent));
   --c-chart-1: 254 128 25;
   --c-chart-2: 251 73 52;
   --c-chart-3: 250 189 47;
@@ -62,8 +61,6 @@
   --heatmap-l0: rgba(255, 255, 255, 0.05);
   --heatmap-l0-border: rgba(102, 92, 84, 0.5);
 
-  --ease-ios-spring: cubic-bezier(0.32, 0.72, 0, 1);
-  --ease-ios-smooth: cubic-bezier(0.2, 0, 0, 1);
 }
 
 :root[data-theme='gruvbox'][data-mode='light'],
@@ -87,7 +84,6 @@
   --c-long: 66 123 88;
   --c-track: 213 196 161;
   --primary-rgb: var(--c-accent);
-  --color-primary: rgb(var(--c-accent));
   --c-chart-1: 175 58 3;
   --c-chart-2: 214 93 14;
   --c-chart-3: 181 118 20;
@@ -120,8 +116,6 @@
   --heatmap-l0: rgba(60, 56, 54, 0.06);
   --heatmap-l0-border: rgba(189, 174, 147, 0.6);
 
-  --ease-ios-spring: cubic-bezier(0.32, 0.72, 0, 1);
-  --ease-ios-smooth: cubic-bezier(0.2, 0, 0, 1);
 }
 
 /* =========================================================================
@@ -184,7 +178,6 @@
   --c-muted: 154 160 176;
   --c-accent: 255 107 0;
   --primary-rgb: var(--c-accent);
-  --color-primary: rgb(var(--c-accent));
   --c-accent-strong: 255 133 51;
   --c-on-accent: 255 255 255;
   --c-on-primary: 255 255 255;
@@ -238,7 +231,6 @@
   --c-muted: 99 99 102;
   --c-accent: 255 107 0;
   --primary-rgb: var(--c-accent);
-  --color-primary: rgb(var(--c-accent));
   --c-accent-strong: 224 94 0;
   --c-on-accent: 255 255 255;
   --c-on-primary: 255 255 255;
@@ -314,7 +306,6 @@
   --c-long: 196 238 208;
   --c-track: 73 69 79;
   --primary-rgb: var(--c-accent);
-  --color-primary: rgb(var(--c-accent));
   --c-chart-1: 208 188 255;
   --c-chart-2: 168 199 250;
   --c-chart-3: 196 238 208;
@@ -374,7 +365,6 @@
   --c-long: 56 106 32;
   --c-track: 202 196 208;
   --primary-rgb: var(--c-accent);
-  --color-primary: rgb(var(--c-accent));
   --c-chart-1: 103 80 164;
   --c-chart-2: 0 99 155;
   --c-chart-3: 56 106 32;
@@ -737,12 +727,6 @@ textarea:focus:not(:focus-visible) {
     -moz-appearance: textfield;
     appearance: textfield;
   }
-}
-
-/* Ambient background: phase-colored glow with smooth crossfade between phases. */
-.ambient-glow-layer {
-  transition: opacity 1000ms ease-in-out;
-  will-change: opacity;
 }
 
 /* Slow breathing pulse while a phase is running (opacity animated, cheap to composite). */

@@ -62,7 +62,7 @@ export function getTickerWorker(): Worker {
   return worker
 }
 
-export function terminateTickerWorker(): void {
+function terminateTickerWorker(): void {
   if (worker) {
     try {
       worker.terminate()

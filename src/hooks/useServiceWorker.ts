@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-export interface ServiceWorkerState {
+interface ServiceWorkerState {
   updateAvailable: boolean
   reload: () => void
 }

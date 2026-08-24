@@ -58,7 +58,7 @@ function getBuffer(audio: AudioContext, kind: ChimeKind): AudioBuffer | null {
   return rendered
 }
 
-export type ClickKind = 'tick' | 'tap' | 'toggle' | 'pop' | 'tab'
+type ClickKind = 'tick' | 'tap' | 'toggle' | 'pop' | 'tab'
 
 export function playMicroClick(kind: ClickKind = 'tick'): void {
   try {
@@ -111,7 +111,7 @@ export function playMicroClick(kind: ClickKind = 'tick'): void {
   }
 }
 
-export function playHaptic(pattern: number | number[] = 25): void {
+function playHaptic(pattern: number | number[] = 25): void {
   try {
     if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
       navigator.vibrate(pattern)

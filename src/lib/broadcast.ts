@@ -1,6 +1,6 @@
 import type { PhaseId, TimerStatus } from '../types'
 
-export interface TimerBroadcastPayload {
+interface TimerBroadcastPayload {
   status: TimerStatus
   phase: PhaseId
   totalMs: number
@@ -11,12 +11,12 @@ export interface TimerBroadcastPayload {
   senderId: string
 }
 
-export type BroadcastMessage =
+type BroadcastMessage =
   | { type: 'timer_state'; payload: TimerBroadcastPayload }
   | { type: 'session_recorded'; id: string; senderId: string }
 
 const CHANNEL_NAME = 'pomau_sync_channel'
-export const TAB_INSTANCE_ID = Math.random().toString(36).slice(2, 9)
+const TAB_INSTANCE_ID = Math.random().toString(36).slice(2, 9)
 
 let channel: BroadcastChannel | null = null
 

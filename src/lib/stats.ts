@@ -1,25 +1,25 @@
 import type { Session } from '../types'
 import { addDays, dayKey, sameDay, startOfDay, startOfWeek } from './time'
 
-export interface TagStat {
+interface TagStat {
   tag: string
   minutes: number
 }
 
-export interface DayStat {
+interface DayStat {
   key: string
   date: Date
   minutes: number
 }
 
-export interface HourStat {
+interface HourStat {
   hour: number
   count: number
 }
 
 export type TimeRange = 'week' | 'month' | 'all'
 
-export interface BarTagBreakdown {
+interface BarTagBreakdown {
   tag: string
   minutes: number
   color?: string

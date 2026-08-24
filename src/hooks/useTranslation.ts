@@ -8,7 +8,7 @@ import {
   type Messages,
 } from '../lib/i18n'
 
-export interface Translation {
+interface Translation {
   t: Messages
   lang: Lang
   setLang: (lang: Lang) => void

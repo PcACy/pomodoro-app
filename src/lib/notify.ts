@@ -1,9 +1,9 @@
-export interface NotificationActionConfig {
+interface NotificationActionConfig {
   action: string
   title: string
 }
 
-export function notificationsSupported(): boolean {
+function notificationsSupported(): boolean {
   return typeof window !== 'undefined' && 'Notification' in window
 }
 

@@ -1,7 +1,7 @@
 export type ThemeId = 'gruvbox' | 'ios-26' | 'material-you'
 export type ColorMode = 'dark' | 'light'
 
-export interface ThemeDef {
+interface ThemeDef {
   id: ThemeId
   label: string
   swatchDark: [string, string, string]

@@ -4,7 +4,7 @@ import { uid } from '../lib/uid'
 import { enqueue } from '../lib/syncQueue'
 import { readTodosLocal, writeTodosLocal } from '../lib/localTodos'
 
-export interface TodoPatch {
+interface TodoPatch {
   title?: string
   tag?: string
   done?: boolean

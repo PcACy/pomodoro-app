@@ -97,7 +97,7 @@ interface CanvasProps {
 const CANVAS_BG = '#121418'
 const CANVAS_FG = '#f5f5f5'
 
-export function renderPipCanvas(
+function renderPipCanvas(
   canvas: HTMLCanvasElement,
   phaseLabel: string,
   status: TimerStatus,

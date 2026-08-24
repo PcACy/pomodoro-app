@@ -1,6 +1,6 @@
 import type { FC, SVGProps } from 'react'
 
-export type CatMascotState = 'idle' | 'focus' | 'break' | 'shortBreak' | 'longBreak' | 'complete' | 'running'
+type CatMascotState = 'idle' | 'focus' | 'break' | 'shortBreak' | 'longBreak' | 'complete' | 'running'
 
 interface CatLogoProps extends SVGProps<SVGSVGElement> {
   className?: string

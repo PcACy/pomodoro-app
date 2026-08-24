@@ -7,7 +7,7 @@ import { GlassLiveActivityBar } from './GlassLiveActivityBar'
 import { MaterialGlanceableBar } from './MaterialGlanceableBar'
 import { useFlowTimerTick, useTimerTick } from '../hooks/useTimerTick'
 
-export interface ThemeStatusBarProps {
+interface ThemeStatusBarProps {
   themeId: ThemeId
   colorMode: ColorMode
   mode: 'pomodoro' | 'flow'

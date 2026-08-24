@@ -3,7 +3,7 @@ import { dayKey } from './time'
 
 const FORMULA_PREFIX = /^[\=\+\-\@\t\r\|\%]/
 
-export function sanitizeCell(value: unknown): string {
+function sanitizeCell(value: unknown): string {
   let s = String(value ?? '')
   const trimmed = s.trimStart()
   // Prevent CSV / Spreadsheet Formula Injection while preserving genuine numeric strings

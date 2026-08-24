@@ -1,8 +1,7 @@
 export type PhaseId = 'focus' | 'shortBreak' | 'longBreak'
 export type TimerStatus = 'idle' | 'running' | 'paused'
 export type TimerMode = 'pomodoro' | 'flow'
-export type LayoutMode = 'split' | 'single'
-export type { ThemeId, ColorMode } from './themes'
+type LayoutMode = 'split' | 'single'
 
 export interface PhaseConfig {
   focus: number
@@ -28,14 +27,6 @@ export interface Session {
   notes?: string
   updatedAt?: number
   mode?: TimerMode
-}
-
-export interface TimerState {
-  phase: PhaseId
-  status: TimerStatus
-  completedFocusInCycle: number
-  remainingMs: number
-  totalMs: number
 }
 
 export interface TodoItem {

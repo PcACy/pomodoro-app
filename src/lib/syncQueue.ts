@@ -1,4 +1,4 @@
-export type SyncTable = 'sessions' | 'todos'
+type SyncTable = 'sessions' | 'todos'
 
 export type SyncOp =
   | { kind: 'upsert'; table: SyncTable; id: string }

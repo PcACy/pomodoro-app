@@ -5,7 +5,7 @@ import type { ColorMode } from '../themes'
 import type { SyncStatus } from '../hooks/useSync'
 import { getTagColor } from './TodoList'
 
-export interface GlassLiveActivityBarProps {
+interface GlassLiveActivityBarProps {
   colorMode: ColorMode
   mode: 'pomodoro' | 'flow'
   phase: PhaseId

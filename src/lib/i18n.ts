@@ -633,7 +633,7 @@ export function getMessages(lang: Lang): Messages {
 
 const STORAGE_KEY = 'pomodoro.lang'
 
-export function isValidLang(l: unknown): l is Lang {
+function isValidLang(l: unknown): l is Lang {
   return l === 'de' || l === 'en'
 }
 
