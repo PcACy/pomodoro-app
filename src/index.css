@@ -21,6 +21,10 @@
   --c-accent: 254 128 25;
   --c-accent-strong: 251 73 52;
   --c-on-accent: 40 40 40;
+  --c-on-primary: 40 40 40;
+  --c-on-surface: 235 219 178;
+  --c-on-surface-variant: 168 153 132;
+  --c-surface-container-highest: 80 73 69;
   --c-break: 184 187 38;
   --c-long: 142 192 124;
   --c-track: 80 73 69;
@@ -75,6 +79,10 @@
   --c-accent: 175 58 3;
   --c-accent-strong: 157 0 6;
   --c-on-accent: 251 241 199;
+  --c-on-primary: 251 241 199;
+  --c-on-surface: 60 56 54;
+  --c-on-surface-variant: 124 111 100;
+  --c-surface-container-highest: 235 219 178;
   --c-break: 121 116 14;
   --c-long: 66 123 88;
   --c-track: 213 196 161;
@@ -179,6 +187,10 @@
   --color-primary: rgb(var(--c-accent));
   --c-accent-strong: 255 133 51;
   --c-on-accent: 255 255 255;
+  --c-on-primary: 255 255 255;
+  --c-on-surface: 242 245 250;
+  --c-on-surface-variant: 154 160 176;
+  --c-surface-container-highest: 38 40 46;
   --c-break: 48 209 88;
   --c-long: 10 132 255;
   --c-track: 38 40 46;
@@ -229,6 +241,10 @@
   --color-primary: rgb(var(--c-accent));
   --c-accent-strong: 224 94 0;
   --c-on-accent: 255 255 255;
+  --c-on-primary: 255 255 255;
+  --c-on-surface: 24 25 28;
+  --c-on-surface-variant: 99 99 102;
+  --c-surface-container-highest: 229 232 235;
   --c-break: 52 199 89;
   --c-long: 0 122 255;
   --c-track: 218 222 228;
@@ -278,12 +294,16 @@
   --c-canvas: 20 18 24;              /* #141218 Surface (Canvas) */
   --c-surface: 33 31 38;             /* #211F26 Surface Container */
   --c-raised: 43 41 48;              /* #2B2930 Surface Container High */
+  --c-surface-container-highest: 54 52 59; /* #36343B Surface Container Highest */
   --c-line: 73 69 79;                /* #49454F Outline Variant */
   --c-fg: 230 224 233;               /* #E6E0E9 On Surface */
+  --c-on-surface: 230 224 233;       /* #E6E0E9 On Surface */
   --c-muted: 202 196 208;            /* #CAC4D0 On Surface Variant */
+  --c-on-surface-variant: 202 196 208; /* #CAC4D0 On Surface Variant */
   --c-accent: 208 188 255;           /* #D0BCFF Primary */
   --c-accent-strong: 79 55 139;      /* #4F378B Primary Container */
   --c-on-accent: 56 30 114;          /* #381E72 On Primary */
+  --c-on-primary: 56 30 114;         /* #381E72 On Primary */
   --c-primary-container: 79 55 139;  /* #4F378B Primary Container */
   --c-on-primary-container: 234 221 255; /* #EADDFF On Primary Container */
   --c-secondary-container: 74 68 88; /* #4A4458 Secondary Container */
@@ -334,12 +354,16 @@
   --c-canvas: 254 247 255;           /* #FEF7FF Surface */
   --c-surface: 243 237 247;          /* #F3EDF7 Surface Container */
   --c-raised: 236 230 240;           /* #ECE6F0 Surface Container High */
+  --c-surface-container-highest: 230 224 233; /* #E6E0E9 Surface Container Highest */
   --c-line: 202 196 208;             /* #CAC4D0 Outline Variant */
   --c-fg: 29 27 32;                  /* #1D1B20 On Surface */
+  --c-on-surface: 29 27 32;          /* #1D1B20 On Surface */
   --c-muted: 73 69 79;               /* #49454F On Surface Variant */
+  --c-on-surface-variant: 73 69 79;  /* #49454F On Surface Variant */
   --c-accent: 103 80 164;            /* #6750A4 Primary */
   --c-accent-strong: 234 221 255;    /* #EADDFF Primary Container */
   --c-on-accent: 255 255 255;        /* #FFFFFF On Primary */
+  --c-on-primary: 255 255 255;       /* #FFFFFF On Primary */
   --c-primary-container: 234 221 255; /* #EADDFF Primary Container */
   --c-on-primary-container: 33 0 93; /* #21005D On Primary Container */
   --c-secondary-container: 232 222 248; /* #E8DEF8 Secondary Container */
@@ -645,7 +669,7 @@ textarea:focus:not(:focus-visible) {
 
   /* 3. M3 Large Squircle FAB (Play/Pause Button) */
   :root[data-theme='material-you'] .play-spring {
-    border-radius: 28px !important;
+    border-radius: 24px !important;
     background-color: rgb(var(--c-accent)) !important;
     color: rgb(var(--c-on-accent)) !important;
     border: none !important;

@@ -928,8 +928,57 @@ export const Timer = memo(function Timer({
             </button>
           )}
         </div>
+      ) : isM3 ? (
+        /* Material 3 Squircle Control Cluster */
+        <div className="flex items-center justify-center gap-3.5 sm:gap-5 mt-1">
+          <button
+            type="button"
+            onClick={handleResetClick}
+            title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
+            aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
+            className="btn-ghost flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92]"
+          >
+            <RotateCcw size={17} />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleToggleClick}
+            className="w-16 h-16 sm:w-18 sm:h-18 rounded-[24px] bg-primary text-on-primary flex items-center justify-center shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer"
+            title={running ? t.timer.pause : t.timer.start}
+            aria-label={running ? t.timer.pause : t.timer.start}
+          >
+            {running ? (
+              <Pause size={large ? 28 : 24} />
+            ) : (
+              <Play size={large ? 28 : 24} className="translate-x-0.5" />
+            )}
+          </button>
+
+          {isFlow ? (
+            <button
+              type="button"
+              onClick={handleSkipClick}
+              title={`${t.flow.finish} (F)`}
+              aria-label={t.flow.finish}
+              className="btn-ghost flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full active:scale-[0.92]"
+            >
+              <Check size={19} strokeWidth={2.5} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSkipClick}
+              title={`${t.shortcuts.skip} (N)`}
+              aria-label={t.shortcuts.skip}
+              className="btn-ghost flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full active:scale-[0.92]"
+            >
+              <SkipForward size={17} />
+            </button>
+          )}
+        </div>
       ) : (
-        /* Standard / M3 Control Cluster */
+        /* Standard Control Cluster */
         <div className="flex items-center justify-center gap-3.5 sm:gap-5 mt-1">
           <button
             type="button"
@@ -981,52 +1030,114 @@ export const Timer = memo(function Timer({
         </div>
       )}
 
-      {/* Keyboard shortcuts row: flex-wrap without overflow or PiP overlap */}
-      <div
-        className={`flex min-h-[28px] flex-wrap items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 select-none text-xs font-mono ${
-          isIos ? 'text-zinc-600 dark:text-white/50 font-medium' : 'text-muted'
-        } transition-opacity duration-200 mt-2 [@media(hover:none)]:hidden ${
-          running ? 'pointer-events-none opacity-0' : 'opacity-100'
-        }`}
-      >
-        <span className="inline-flex items-center gap-1 shrink-0">
-          <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>Space</kbd> Start/Pause
-        </span>
-        <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
-        {isFlow ? (
-          <>
-            <span className="inline-flex items-center gap-1 shrink-0">
-              <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>R</kbd> Discard
-            </span>
-            <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
-            <span className="inline-flex items-center gap-1 shrink-0">
-              <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>F</kbd> Finish
-            </span>
-          </>
-        ) : (
-          <>
-            <span className="inline-flex items-center gap-1 shrink-0">
-              <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>R</kbd> Reset
-            </span>
-            <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
-            <span className="inline-flex items-center gap-1 shrink-0">
-              <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>N</kbd> Skip
-            </span>
-          </>
-        )}
-        <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
-        <button
-          type="button"
-          onClick={onToggleZen}
-          title={isZenMode ? t.zen.exitHint : t.zen.enterHint}
-          aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
-          className={`inline-flex items-center gap-1 shrink-0 transition-colors ${
-            isIos ? 'hover:text-zinc-950 dark:hover:text-white' : 'hover:text-fg'
-          } cursor-pointer`}
+      {/* Keyboard shortcuts row */}
+      {isM3 ? (
+        <div
+          className={`flex items-center justify-center gap-2 sm:gap-3 text-xs text-text-muted mt-3 w-full flex-nowrap select-none transition-opacity duration-200 [@media(hover:none)]:hidden ${
+            running ? 'pointer-events-none opacity-0' : 'opacity-100'
+          }`}
         >
-          <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>Z</kbd> Zen
-        </button>
-      </div>
+          <span className="inline-flex items-center gap-1 shrink-0">
+            <kbd className="px-1.5 py-0.5 rounded-md bg-surface-container-highest text-on-surface text-[10px] font-mono font-medium shrink-0">
+              Space
+            </kbd>
+            <span className="whitespace-nowrap text-[11px]">Start/Pause</span>
+          </span>
+          <span className="shrink-0 text-muted/40">·</span>
+          {isFlow ? (
+            <>
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <kbd className="px-1.5 py-0.5 rounded-md bg-surface-container-highest text-on-surface text-[10px] font-mono font-medium shrink-0">
+                  R
+                </kbd>
+                <span className="whitespace-nowrap text-[11px]">Discard</span>
+              </span>
+              <span className="shrink-0 text-muted/40">·</span>
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <kbd className="px-1.5 py-0.5 rounded-md bg-surface-container-highest text-on-surface text-[10px] font-mono font-medium shrink-0">
+                  F
+                </kbd>
+                <span className="whitespace-nowrap text-[11px]">Finish</span>
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <kbd className="px-1.5 py-0.5 rounded-md bg-surface-container-highest text-on-surface text-[10px] font-mono font-medium shrink-0">
+                  R
+                </kbd>
+                <span className="whitespace-nowrap text-[11px]">Reset</span>
+              </span>
+              <span className="shrink-0 text-muted/40">·</span>
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <kbd className="px-1.5 py-0.5 rounded-md bg-surface-container-highest text-on-surface text-[10px] font-mono font-medium shrink-0">
+                  N
+                </kbd>
+                <span className="whitespace-nowrap text-[11px]">Skip</span>
+              </span>
+            </>
+          )}
+          <span className="shrink-0 text-muted/40">·</span>
+          <button
+            type="button"
+            onClick={onToggleZen}
+            title={isZenMode ? t.zen.exitHint : t.zen.enterHint}
+            aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
+            className="inline-flex items-center gap-1 shrink-0 transition-colors hover:text-fg cursor-pointer"
+          >
+            <kbd className="px-1.5 py-0.5 rounded-md bg-surface-container-highest text-on-surface text-[10px] font-mono font-medium shrink-0">
+              Z
+            </kbd>
+            <span className="whitespace-nowrap text-[11px]">Zen</span>
+          </button>
+        </div>
+      ) : (
+        <div
+          className={`flex min-h-[28px] flex-wrap items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 select-none text-xs font-mono ${
+            isIos ? 'text-zinc-600 dark:text-white/50 font-medium' : 'text-muted'
+          } transition-opacity duration-200 mt-2 [@media(hover:none)]:hidden ${
+            running ? 'pointer-events-none opacity-0' : 'opacity-100'
+          }`}
+        >
+          <span className="inline-flex items-center gap-1 shrink-0">
+            <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>Space</kbd> Start/Pause
+          </span>
+          <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
+          {isFlow ? (
+            <>
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>R</kbd> Discard
+              </span>
+              <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>F</kbd> Finish
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>R</kbd> Reset
+              </span>
+              <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>N</kbd> Skip
+              </span>
+            </>
+          )}
+          <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
+          <button
+            type="button"
+            onClick={onToggleZen}
+            title={isZenMode ? t.zen.exitHint : t.zen.enterHint}
+            aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
+            className={`inline-flex items-center gap-1 shrink-0 transition-colors ${
+              isIos ? 'hover:text-zinc-950 dark:hover:text-white' : 'hover:text-fg'
+            } cursor-pointer`}
+          >
+            <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>Z</kbd> Zen
+          </button>
+        </div>
+      )}
 
       {pipSupported && (
         <div className="group/pip absolute bottom-3 right-3 z-10 sm:bottom-4 sm:right-4">

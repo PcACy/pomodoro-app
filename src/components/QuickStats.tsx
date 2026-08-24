@@ -29,13 +29,13 @@ export const QuickStats = memo(function QuickStats({ sessions, settings }: Props
     <section className="card flex w-full max-w-md 2xl:max-w-lg flex-col gap-3.5 sm:gap-4 p-5 sm:p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-fg font-display uppercase tracking-wide">{t.dashboard.todayFocus}</h3>
-        <span className="text-xs font-mono text-muted">{t.dashboard.dailyGoal}</span>
+        <span className="text-xs font-medium text-on-surface-variant">{t.dashboard.dailyGoal}</span>
       </div>
 
       <div>
         <div className="flex items-baseline justify-between gap-2">
           <span className="text-2xl font-bold font-display tabular-nums text-fg">{fmtDuration(today * 60_000, lang)}</span>
-          <span className="text-xs font-semibold font-mono tabular-nums text-accent">{pct}%</span>
+          <span className="text-xs font-semibold text-primary">{pct}%</span>
         </div>
         <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-raised/70">
           <div
