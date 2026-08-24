@@ -27,7 +27,7 @@ import { DayTimeline } from './components/DayTimeline'
 import { PipTimer, PipCanvas } from './components/PipTimer'
 import { TodoList } from './components/TodoList'
 import { CatLogo } from './components/CatLogo'
-import { VimStatusLine } from './components/VimStatusLine'
+import { ThemeStatusBar } from './components/ThemeStatusBar'
 import { ThemeBackground } from './components/ThemeBackground'
 
 const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })))
@@ -597,8 +597,8 @@ export default function App() {
         </Suspense>
       )}
 
-      {/* Gruvbox Minimalist CLI / Vim Statusline */}
-      <VimStatusLine
+      {/* Theme-specific Dynamic Status Bar */}
+      <ThemeStatusBar
         themeId={themeId}
         colorMode={colorMode}
         mode={mode}
@@ -610,6 +610,7 @@ export default function App() {
         tag={sessionTag}
         completedRounds={timer.completedFocusInCycle}
         totalRounds={settings.phases.roundsBeforeLongBreak}
+        syncStatus={sync.status}
       />
     </div>
   )

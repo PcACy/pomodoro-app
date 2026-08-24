@@ -1,8 +1,9 @@
 import { memo } from 'react'
 import type { PhaseId, TimerStatus } from '../types'
 import type { ColorMode, ThemeId } from '../themes'
+import type { SyncStatus } from '../hooks/useSync'
 
-interface VimStatusLineProps {
+export interface VimStatusLineProps {
   themeId: ThemeId
   colorMode: ColorMode
   mode: 'pomodoro' | 'flow'
@@ -14,6 +15,7 @@ interface VimStatusLineProps {
   tag: string
   completedRounds: number
   totalRounds: number
+  syncStatus?: SyncStatus
 }
 
 // Memoized: all props are primitives, so this leaf only re-renders when its
@@ -30,6 +32,7 @@ export const VimStatusLine = memo(function VimStatusLine({
   tag,
   completedRounds,
   totalRounds,
+  syncStatus,
 }: VimStatusLineProps) {
   if (themeId !== 'gruvbox') return null
 
@@ -91,6 +94,7 @@ export const VimStatusLine = memo(function VimStatusLine({
         )}
         <span className="hidden md:inline text-muted/70">utf-8</span>
         <span className="text-accent font-medium tabular-nums">{pct}%</span>
+        {syncStatus && <span className="hidden xl:inline text-muted/60">sync:{syncStatus}</span>}
         <span className="hidden lg:inline text-muted/60">{themeId}-{colorMode}</span>
       </div>
     </footer>

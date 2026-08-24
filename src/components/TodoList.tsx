@@ -14,7 +14,7 @@ const TAG_PALETTE = [
   '#d65d0e', // Cinnamon
 ]
 
-function getTagColor(tag: string): string {
+export function getTagColor(tag: string): string {
   if (!tag) return '#928374'
   let hash = 0
   for (let i = 0; i < tag.length; i++) {
