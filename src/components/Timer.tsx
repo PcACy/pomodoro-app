@@ -166,13 +166,16 @@ export const Timer = memo(function Timer({
     '[ ─==█==───── ]',
     '[ ──==█==──── ]',
   ]
+  // Flow ASCII activity bar: fixed 11-char inner width in every state so the
+  // stage never shifts; the status lives only in the header row above.
   const animPos = flowSeconds % waveFrames.length
-  const flowAsciiStatus =
+  const FLOW_BAR_PAUSED = '[ ──███████── ]'
+  const flowAsciiBar =
     flowStatus === 'running'
-      ? `${waveFrames[animPos]} TRACKING`
+      ? waveFrames[animPos]
       : flowStatus === 'paused'
-        ? '[ ── PAUSED ── ]'
-        : '[ ─────────── ] IDLE'
+        ? FLOW_BAR_PAUSED
+        : `[ ${'─'.repeat(11)} ]`
   const running = isFlow ? flowStatus === 'running' : status === 'running'
   const paused = isFlow ? flowStatus === 'paused' : status === 'paused'
   const currentRoundIndex = completedFocusInCycle % roundsBeforeLongBreak
@@ -547,13 +550,21 @@ export const Timer = memo(function Timer({
           </div>
 
           {/* Row 4: Slot 2 (Progress / Activity) */}
-          <div className="h-[24px] flex items-center justify-center text-xs sm:text-sm font-bold text-accent tracking-wider font-mono">
+          <div className="flex items-center justify-center w-full font-mono text-xs select-none h-5 my-1">
             {isFlow ? (
-              <span className={running ? 'text-accent' : 'text-muted'}>
-                {flowAsciiStatus}
+              <span
+                className={`tracking-wider tabular-nums ${
+                  running
+                    ? 'text-primary'
+                    : paused
+                      ? 'text-accent/50 animate-pulse'
+                      : 'text-text-muted/40'
+                }`}
+              >
+                {flowAsciiBar}
               </span>
             ) : (
-              <span>{asciiBar}</span>
+              <span className="font-bold text-accent tracking-wider">{asciiBar}</span>
             )}
           </div>
 
