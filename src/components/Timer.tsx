@@ -311,14 +311,14 @@ export const Timer = memo(function Timer({
         borderless
           ? 'max-w-xl gap-8 p-0 bg-transparent border-0 shadow-none'
           : isIos
-            ? 'rounded-[36px] bg-white/70 dark:bg-black/30 backdrop-blur-2xl border border-white/60 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-6 sm:p-8 2xl:p-10 relative overflow-hidden max-w-md 2xl:max-w-lg gap-6 2xl:gap-8'
+            ? 'rounded-[36px] bg-white/75 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/80 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-6 sm:p-8 2xl:p-10 relative overflow-hidden max-w-md 2xl:max-w-lg gap-6 2xl:gap-8'
             : 'card max-w-md 2xl:max-w-lg gap-6 2xl:gap-8 p-6 sm:p-8 2xl:p-10'
       }`}
     >
       {/* iOS 26 Ambient Backlight (Centered soft breathing glow behind display) */}
       {isIos && (
         <div
-          className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-primary/10 dark:bg-primary/20 blur-2xl transition-all duration-1000 ${
+          className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-primary/10 blur-3xl transition-all duration-1000 ${
             running ? 'opacity-100 animate-pulse-slow' : paused ? 'opacity-40' : 'opacity-15'
           }`}
           aria-hidden="true"
@@ -978,7 +978,7 @@ export const Timer = memo(function Timer({
       {/* Keyboard shortcuts row: stable layout without jumps & zero wrap */}
       <div
         className={`flex min-h-[28px] items-center justify-center gap-2 sm:gap-2.5 select-none text-[11px] font-mono ${
-          isIos ? 'text-zinc-500 dark:text-white/60 font-normal' : 'text-muted'
+          isIos ? 'text-zinc-500 dark:text-white/50 font-normal' : 'text-muted'
         } transition-opacity duration-200 whitespace-nowrap [@media(hover:none)]:hidden ${
           running ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
