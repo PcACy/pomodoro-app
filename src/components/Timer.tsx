@@ -658,32 +658,32 @@ export const Timer = memo(function Timer({
               </div>
             )}
 
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+            <div className="absolute inset-0 flex flex-col items-center justify-center -translate-y-0.5">
               {isIos ? (
                 /* Live Round Capsule for iOS 26 */
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/[0.06] dark:bg-white/10 backdrop-blur-md border border-black/[0.08] dark:border-white/15 text-xs font-semibold tracking-wide text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
+                <div className="mb-3 sm:mb-3.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/10 backdrop-blur-md border border-black/[0.08] dark:border-white/15 text-[10px] sm:text-[11px] font-medium tracking-wide uppercase text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
+                  <CatLogo
+                    size={12}
+                    state={isIdle ? 'idle' : phase}
+                    className={`transition-colors duration-500 ${PHASE_TEXT[phase]}`}
+                  />
+                  <span className="tracking-widest">{shownLabel}</span>
+                  <span className="text-zinc-400 dark:text-white/30">·</span>
+                  <span className="tabular-nums text-zinc-800 dark:text-white/80 font-semibold">{`Runde ${currentRoundIndex + 1}/${roundsBeforeLongBreak}`}</span>
+                </div>
+              ) : isM3 ? (
+                <div className="mb-3 sm:mb-3.5 inline-flex items-center gap-1.5 rounded-full bg-secondary-container px-2.5 py-0.5 text-[10px] sm:text-[11px] font-medium text-on-secondary-container animate-fade-in shadow-none">
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                  <span>{`Runde ${currentRoundIndex + 1}/${roundsBeforeLongBreak}`}</span>
+                </div>
+              ) : (
+                <div className="mb-3 sm:mb-3.5 flex items-center gap-1.5 min-h-[20px]">
                   <CatLogo
                     size={14}
                     state={isIdle ? 'idle' : phase}
                     className={`transition-colors duration-500 ${PHASE_TEXT[phase]}`}
                   />
-                  <span className="uppercase tracking-widest">{shownLabel}</span>
-                  <span className="text-zinc-400 dark:text-white/30">·</span>
-                  <span className="tabular-nums text-zinc-800 dark:text-white/80 font-semibold">{`Runde ${currentRoundIndex + 1}/${roundsBeforeLongBreak}`}</span>
-                </div>
-              ) : isM3 ? (
-                <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-secondary-container px-3 py-0.5 text-xs font-medium text-on-secondary-container animate-fade-in shadow-none">
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                  <span>{`Runde ${currentRoundIndex + 1}/${roundsBeforeLongBreak}`}</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5 min-h-[20px]">
-                  <CatLogo
-                    size={16}
-                    state={isIdle ? 'idle' : phase}
-                    className={`transition-colors duration-500 ${PHASE_TEXT[phase]}`}
-                  />
-                  <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-500 ${PHASE_TEXT[phase]}`}>
+                  <span className={`text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest transition-colors duration-500 ${PHASE_TEXT[phase]}`}>
                     {shownLabel}
                   </span>
                 </div>
@@ -697,7 +697,7 @@ export const Timer = memo(function Timer({
               >
                 {shownTime}
               </span>
-              <div className="flex min-h-[20px] items-center justify-center">
+              <div className="mt-2 flex min-h-[20px] items-center justify-center">
                 <span
                   className={`text-xs font-medium transition-opacity duration-200 ${
                     isIos ? 'text-zinc-600 dark:text-white/60' : 'text-muted'
@@ -713,7 +713,7 @@ export const Timer = memo(function Timer({
 
           {/* Flow Mode View */}
           <div
-            className={`absolute inset-0 flex flex-col items-center justify-center gap-1 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+            className={`absolute inset-0 flex flex-col items-center justify-center -translate-y-0.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
               isFlow ? 'opacity-100 scale-100' : 'pointer-events-none opacity-0 scale-95'
             }`}
           >
@@ -729,24 +729,24 @@ export const Timer = memo(function Timer({
 
             {isIos ? (
               /* Live Round Capsule for iOS 26 Flow Mode */
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/[0.06] dark:bg-white/10 backdrop-blur-md border border-black/[0.08] dark:border-white/15 text-xs font-semibold tracking-wide text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
+              <div className="mb-3 sm:mb-3.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/10 backdrop-blur-md border border-black/[0.08] dark:border-white/15 text-[10px] sm:text-[11px] font-medium tracking-wide uppercase text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
                 <CatLogo
-                  size={14}
+                  size={12}
                   state={flowStatus === 'idle' ? 'idle' : 'focus'}
                   className="text-primary"
                 />
-                <span className="uppercase tracking-widest">{shownLabel}</span>
+                <span className="tracking-widest">{shownLabel}</span>
                 <span className="text-zinc-400 dark:text-white/30">·</span>
                 <span className="text-zinc-800 dark:text-white/80 font-semibold">{running ? 'TRACKING' : paused ? 'PAUSED' : 'IDLE'}</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 min-h-[20px]">
+              <div className="mb-3 sm:mb-3.5 flex items-center gap-1.5 min-h-[20px]">
                 <CatLogo
-                  size={16}
+                  size={14}
                   state={flowStatus === 'idle' ? 'idle' : 'focus'}
                   className="text-accent"
                 />
-                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/80">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.3em] text-accent/80">
                   {shownLabel}
                 </span>
               </div>
@@ -768,10 +768,10 @@ export const Timer = memo(function Timer({
               {shownTime}
             </span>
 
-            <div className="flex min-h-[50px] flex-col items-center justify-center">
+            <div className="mt-2 flex min-h-[50px] flex-col items-center justify-center">
               {isIos ? (
                 /* iOS 26 Floating Apple Milestone Live Activity Capsules */
-                <div className="my-2 flex items-center justify-center gap-1.5 select-none">
+                <div className="my-1 flex items-center justify-center gap-1.5 select-none">
                   {[25, 50, 75].map((m) => {
                     const reached = flowMinutes >= m
                     return (
@@ -790,7 +790,7 @@ export const Timer = memo(function Timer({
                   })}
                 </div>
               ) : isM3 ? (
-                <div className="my-2.5 flex items-center justify-center gap-2 select-none">
+                <div className="my-1 flex items-center justify-center gap-2 select-none">
                   {[25, 50, 75].map((m) => {
                     const reached = flowMinutes >= m
                     return (
