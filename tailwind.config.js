@@ -15,7 +15,12 @@ export default {
         sans: ['Geist', 'Outfit', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
         mono: ['JetBrains Mono', 'Geist Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
+      spacing: {
+        18: '4.5rem',
+        22: '5.5rem',
+      },
       colors: {
+        primary: 'rgb(var(--primary-rgb, var(--c-accent)) / <alpha-value>)',
         canvas: 'rgb(var(--c-canvas) / <alpha-value>)',
         surface: 'rgb(var(--c-surface) / <alpha-value>)',
         raised: 'rgb(var(--c-raised) / <alpha-value>)',
@@ -59,6 +64,7 @@ export default {
       animation: {
         'fade-in': 'fade-in 0.25s ease-out',
         shake: 'shake 0.35s ease-in-out',
+        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
     },
   },

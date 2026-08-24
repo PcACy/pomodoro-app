@@ -24,6 +24,8 @@
   --c-break: 184 187 38;
   --c-long: 142 192 124;
   --c-track: 80 73 69;
+  --primary-rgb: var(--c-accent);
+  --color-primary: rgb(var(--c-accent));
   --c-chart-1: 254 128 25;
   --c-chart-2: 251 73 52;
   --c-chart-3: 250 189 47;
@@ -76,6 +78,8 @@
   --c-break: 121 116 14;
   --c-long: 66 123 88;
   --c-track: 213 196 161;
+  --primary-rgb: var(--c-accent);
+  --color-primary: rgb(var(--c-accent));
   --c-chart-1: 175 58 3;
   --c-chart-2: 214 93 14;
   --c-chart-3: 181 118 20;
@@ -171,6 +175,8 @@
   --c-fg: 242 245 250;
   --c-muted: 154 160 176;
   --c-accent: 255 107 0;
+  --primary-rgb: var(--c-accent);
+  --color-primary: rgb(var(--c-accent));
   --c-accent-strong: 255 133 51;
   --c-on-accent: 255 255 255;
   --c-break: 48 209 88;
@@ -186,7 +192,7 @@
   --c-chart-8: 172 142 104;
 
   /* iOS 26 Structural Tokens: Liquid Glass & Squircles */
-  --radius-card: 28px;
+  --radius-card: 36px;
   --radius-btn: 9999px;
   --radius-sm: 14px;
   --badge-radius: 9999px;
@@ -194,9 +200,9 @@
   --border-card-style: solid;
   --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', 'Geist', system-ui, sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Outfit', 'Geist', system-ui, sans-serif;
-  --card-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.5);
-  --card-blur: 24px;
-  --card-bg-opacity: 0.65;
+  --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  --card-blur: 32px;
+  --card-bg-opacity: 0.04;
 
   /* Semantic Tokens */
   --color-tag-bg: rgba(10, 132, 255, 0.15);
@@ -219,6 +225,8 @@
   --c-fg: 24 25 28;
   --c-muted: 99 99 102;
   --c-accent: 255 107 0;
+  --primary-rgb: var(--c-accent);
+  --color-primary: rgb(var(--c-accent));
   --c-accent-strong: 224 94 0;
   --c-on-accent: 255 255 255;
   --c-break: 52 199 89;
@@ -234,7 +242,7 @@
   --c-chart-8: 162 132 94;
 
   /* iOS 26 Structural Tokens */
-  --radius-card: 28px;
+  --radius-card: 36px;
   --radius-btn: 9999px;
   --radius-sm: 14px;
   --badge-radius: 9999px;
@@ -242,9 +250,9 @@
   --border-card-style: solid;
   --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', 'Geist', system-ui, sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Outfit', 'Geist', system-ui, sans-serif;
-  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
-  --card-blur: 24px;
-  --card-bg-opacity: 0.70;
+  --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --card-blur: 32px;
+  --card-bg-opacity: 0.65;
 
   /* Semantic Tokens */
   --color-tag-bg: rgba(0, 122, 255, 0.12);
@@ -285,6 +293,8 @@
   --c-break: 168 199 250;
   --c-long: 196 238 208;
   --c-track: 73 69 79;
+  --primary-rgb: var(--c-accent);
+  --color-primary: rgb(var(--c-accent));
   --c-chart-1: 208 188 255;
   --c-chart-2: 168 199 250;
   --c-chart-3: 196 238 208;
@@ -339,6 +349,8 @@
   --c-break: 0 99 155;
   --c-long: 56 106 32;
   --c-track: 202 196 208;
+  --primary-rgb: var(--c-accent);
+  --color-primary: rgb(var(--c-accent));
   --c-chart-1: 103 80 164;
   --c-chart-2: 0 99 155;
   --c-chart-3: 56 106 32;
