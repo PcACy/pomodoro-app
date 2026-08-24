@@ -109,7 +109,7 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
   }
 
   return (
-    <section className="card flex w-full flex-col gap-4 p-5 2xl:p-6">
+    <section className="card flex w-full flex-col gap-3 p-4 sm:p-5">
       <div className="flex items-center gap-2">
         <Clock size={16} className="text-accent" />
         <h3 className="text-sm font-semibold text-fg">{t.timeline.title}</h3>

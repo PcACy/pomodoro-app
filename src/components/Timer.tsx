@@ -206,8 +206,8 @@ export const Timer = memo(function Timer({
   const activeDuration = scrubbingMinutes ?? durationMinutes
   const scrubFraction = Math.max(5, Math.min(60, activeDuration)) / 60
 
-  const size = large ? 380 : 300
-  const stroke = isM3 ? 12 : isIos ? 14 : large ? 16 : 14
+  const size = large ? 320 : 240
+  const stroke = isM3 ? 12 : isIos ? 12 : large ? 16 : 14
   const r = (size - stroke) / 2
   const circ = 2 * Math.PI * r
 
@@ -307,12 +307,12 @@ export const Timer = memo(function Timer({
 
   return (
     <section
-      className={`group relative flex w-full flex-col items-center transition-[background-color,border-color,box-shadow,border-radius,opacity] duration-300 ${
+      className={`group relative flex w-full flex-col items-center justify-between transition-[background-color,border-color,box-shadow,border-radius,opacity] duration-300 ${
         borderless
-          ? 'max-w-xl gap-8 p-0 bg-transparent border-0 shadow-none'
+          ? 'max-w-xl gap-4 p-0 bg-transparent border-0 shadow-none'
           : isIos
-            ? 'rounded-[36px] bg-white/75 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/80 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-6 sm:p-8 2xl:p-10 relative overflow-hidden max-w-md 2xl:max-w-lg gap-6 2xl:gap-8'
-            : 'card max-w-md 2xl:max-w-lg gap-6 2xl:gap-8 p-6 sm:p-8 2xl:p-10'
+            ? 'rounded-[36px] bg-white/75 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/80 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-5 sm:p-6 relative overflow-hidden max-w-md 2xl:max-w-lg gap-3 sm:gap-4'
+            : 'card max-w-md 2xl:max-w-lg gap-3 sm:gap-4 p-5 sm:p-6'
       }`}
     >
       {/* iOS 26 Ambient Backlight (Centered soft breathing glow behind display) */}
@@ -696,7 +696,7 @@ export const Timer = memo(function Timer({
                 className={`font-display font-bold tabular-nums leading-none tracking-tight transition-all duration-300 ${
                   isIos ? 'text-zinc-950 dark:text-white dark:drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)]' : 'text-fg'
                 } ${
-                  large ? 'text-6xl sm:text-7xl 2xl:text-8xl' : 'text-5xl 2xl:text-6xl'
+                  large ? 'text-6xl sm:text-7xl 2xl:text-8xl' : 'text-4xl sm:text-5xl'
                 }`}
               >
                 {shownTime}
@@ -752,11 +752,11 @@ export const Timer = memo(function Timer({
               } ${
                 large
                   ? isFlow && shownTime.length > 5
-                    ? 'text-6xl sm:text-7xl 2xl:text-8xl'
-                    : 'text-7xl sm:text-8xl 2xl:text-9xl'
+                    ? 'text-5xl sm:text-6xl 2xl:text-7xl'
+                    : 'text-6xl sm:text-7xl 2xl:text-8xl'
                   : isFlow && shownTime.length > 5
-                    ? 'text-5xl 2xl:text-6xl'
-                    : 'text-6xl 2xl:text-7xl'
+                    ? 'text-3xl sm:text-4xl'
+                    : 'text-4xl sm:text-5xl'
               }`}
             >
               {shownTime}
@@ -823,31 +823,28 @@ export const Timer = memo(function Timer({
       )}
 
       {isTui ? (
-        /* TUI Bracket Controls with 3-Column Grid System */
-        <div className="grid grid-cols-3 gap-2 w-full max-w-sm font-mono select-none my-1">
-          {/* Slot 1: Reset */}
+        /* TUI 3-Column Action Buttons */
+        <div className="grid grid-cols-3 gap-2 w-full max-w-sm mx-auto font-mono select-none">
           <button
             type="button"
             onClick={handleResetClick}
             title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
             aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-fg hover:text-canvas hover:bg-fg transition-colors uppercase cursor-pointer active:scale-95 text-center justify-center"
+            className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95 text-center justify-center"
           >
             [&nbsp;RESET&nbsp;]
           </button>
 
-          {/* Slot 2: Start / Pause */}
           <button
             type="button"
             onClick={handleToggleClick}
-            className="tui-btn tui-btn-primary w-full whitespace-nowrap px-2 py-2 text-xs sm:text-sm font-bold border-2 border-accent bg-accent text-on-accent hover:bg-fg hover:text-canvas hover:border-fg transition-colors uppercase tracking-wider cursor-pointer active:scale-95 shadow-sm text-center justify-center"
+            className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-accent bg-accent text-on-accent hover:opacity-90 transition-opacity uppercase cursor-pointer active:scale-95 text-center justify-center shadow-none"
             title={running ? t.timer.pause : t.timer.start}
             aria-label={running ? t.timer.pause : t.timer.start}
           >
-            {running ? '[\u00A0❚❚\u00A0PAUSE\u00A0]' : '[\u00A0▶\u00A0START\u00A0]'}
+            {running ? '[❚❚\u00A0PAUSE]' : '[▶\u00A0START]'}
           </button>
 
-          {/* Slot 3: Skip / Finish */}
           {isFlow ? (
             <button
               type="button"
@@ -872,30 +869,30 @@ export const Timer = memo(function Timer({
         </div>
       ) : isIos ? (
         /* iOS 26 Glass Lens Control Cluster */
-        <div className="flex items-center justify-center gap-4 sm:gap-5 2xl:gap-6 mt-2">
+        <div className="flex items-center justify-center gap-3.5 sm:gap-5 mt-1">
           {/* Secondary Action: Reset / Discard Frosted Mini-Pill */}
           <button
             type="button"
             onClick={handleResetClick}
             title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
             aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className="w-12 h-12 rounded-full bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.06] dark:border-white/10 backdrop-blur-xl flex items-center justify-center text-zinc-700 dark:text-white/80 transition-all cursor-pointer shadow-sm"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.06] dark:border-white/10 backdrop-blur-xl flex items-center justify-center text-zinc-700 dark:text-white/80 transition-all cursor-pointer shadow-sm"
           >
-            <RotateCcw size={18} />
+            <RotateCcw size={17} />
           </button>
 
           {/* Center Action: Play / Pause Optical Lens */}
           <button
             type="button"
             onClick={handleToggleClick}
-            className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-gradient-to-b from-primary/90 to-primary text-white flex items-center justify-center shadow-[0_10px_30px_rgba(var(--primary-rgb),0.4),inset_0_1px_1px_rgba(255,255,255,0.45)] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-primary/90 to-primary text-white flex items-center justify-center shadow-[0_8px_24px_rgba(var(--primary-rgb),0.35),inset_0_1px_1px_rgba(255,255,255,0.45)] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
             title={running ? t.timer.pause : t.timer.start}
             aria-label={running ? t.timer.pause : t.timer.start}
           >
             {running ? (
-              <Pause size={large ? 32 : 28} />
+              <Pause size={large ? 28 : 24} />
             ) : (
-              <Play size={large ? 32 : 28} className="translate-x-0.5" />
+              <Play size={large ? 28 : 24} className="translate-x-0.5" />
             )}
           </button>
 
@@ -906,9 +903,9 @@ export const Timer = memo(function Timer({
               onClick={handleSkipClick}
               title={`${t.flow.finish} (F)`}
               aria-label={t.flow.finish}
-              className="w-12 h-12 rounded-full bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.06] dark:border-white/10 backdrop-blur-xl flex items-center justify-center text-zinc-700 dark:text-white/80 transition-all cursor-pointer shadow-sm"
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.06] dark:border-white/10 backdrop-blur-xl flex items-center justify-center text-zinc-700 dark:text-white/80 transition-all cursor-pointer shadow-sm"
             >
-              <Check size={20} strokeWidth={2.5} />
+              <Check size={19} strokeWidth={2.5} />
             </button>
           ) : (
             <button
@@ -916,38 +913,38 @@ export const Timer = memo(function Timer({
               onClick={handleSkipClick}
               title={`${t.shortcuts.skip} (N)`}
               aria-label={t.shortcuts.skip}
-              className="w-12 h-12 rounded-full bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.06] dark:border-white/10 backdrop-blur-xl flex items-center justify-center text-zinc-700 dark:text-white/80 transition-all cursor-pointer shadow-sm"
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.06] dark:border-white/10 backdrop-blur-xl flex items-center justify-center text-zinc-700 dark:text-white/80 transition-all cursor-pointer shadow-sm"
             >
-              <SkipForward size={18} />
+              <SkipForward size={17} />
             </button>
           )}
         </div>
       ) : (
         /* Standard / M3 Control Cluster */
-        <div className="flex items-center justify-center gap-4 sm:gap-5 2xl:gap-6 mt-2">
+        <div className="flex items-center justify-center gap-3.5 sm:gap-5 mt-1">
           <button
             type="button"
             onClick={handleResetClick}
             title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
             aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className="btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92]"
+            className="btn-ghost flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92]"
           >
-            <RotateCcw size={18} />
+            <RotateCcw size={17} />
           </button>
 
           <button
             type="button"
             onClick={handleToggleClick}
             className={`ios-play-lens play-spring flex items-center justify-center rounded-full ${
-              large ? 'h-20 w-20 2xl:h-22 2xl:w-22 shadow-2xl' : 'h-16 w-16 2xl:h-18 2xl:w-18 shadow-lg'
+              large ? 'h-18 w-18 shadow-2xl' : 'h-14 w-14 sm:h-16 sm:w-16 shadow-lg'
             } ${playBtnColor}`}
             title={running ? t.timer.pause : t.timer.start}
             aria-label={running ? t.timer.pause : t.timer.start}
           >
             {running ? (
-              <Pause size={large ? 32 : 26} />
+              <Pause size={large ? 28 : 24} />
             ) : (
-              <Play size={large ? 32 : 26} className="translate-x-0.5" />
+              <Play size={large ? 28 : 24} className="translate-x-0.5" />
             )}
           </button>
 
@@ -957,9 +954,9 @@ export const Timer = memo(function Timer({
               onClick={handleSkipClick}
               title={`${t.flow.finish} (F)`}
               aria-label={t.flow.finish}
-              className="btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full active:scale-[0.92]"
+              className="btn-ghost flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full active:scale-[0.92]"
             >
-              <Check size={20} strokeWidth={2.5} />
+              <Check size={19} strokeWidth={2.5} />
             </button>
           ) : (
             <button
@@ -967,9 +964,9 @@ export const Timer = memo(function Timer({
               onClick={handleSkipClick}
               title={`${t.shortcuts.skip} (N)`}
               aria-label={t.shortcuts.skip}
-              className="btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full active:scale-[0.92]"
+              className="btn-ghost flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full active:scale-[0.92]"
             >
-              <SkipForward size={18} />
+              <SkipForward size={17} />
             </button>
           )}
         </div>

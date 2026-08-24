@@ -26,7 +26,7 @@ export const QuickStats = memo(function QuickStats({ sessions, settings }: Props
   )
 
   return (
-    <section className="card flex w-full max-w-md 2xl:max-w-lg flex-col gap-5 p-6 2xl:p-8">
+    <section className="card flex w-full max-w-md 2xl:max-w-lg flex-col gap-3.5 sm:gap-4 p-5 sm:p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-fg font-display uppercase tracking-wide">{t.dashboard.todayFocus}</h3>
         <span className="text-xs font-mono text-muted">{t.dashboard.dailyGoal}</span>

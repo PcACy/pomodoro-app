@@ -301,7 +301,7 @@ export const TodoList = memo(function TodoList({
   }
 
   return (
-    <section className="card flex w-full max-w-md 2xl:max-w-lg flex-col gap-4 p-6 2xl:p-8">
+    <section className="card flex w-full max-w-md 2xl:max-w-lg flex-col gap-3.5 sm:gap-4 p-5 sm:p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-fg">{tr.todo.title}</h3>
         <span className="text-xs text-muted">

@@ -358,11 +358,11 @@ export default function App() {
         </nav>
       </header>
 
-      <main className="flex w-full flex-1 flex-col items-center gap-8 2xl:gap-10 pb-8">
+      <main className="flex w-full flex-1 flex-col items-center gap-4 sm:gap-6 pb-6">
         <div key={tab} className="animate-tab-enter flex w-full flex-col items-center">
           {tab === 'timer' && (
             settings.layoutMode === 'single' ? (
-              <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-8 2xl:gap-10">
+              <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-4 sm:gap-6">
                 <Timer
                   themeId={themeId}
                   large
@@ -404,7 +404,7 @@ export default function App() {
                 <DayTimeline sessions={sessions} />
               </div>
             ) : (
-              <div className="mx-auto grid w-full max-w-5xl 2xl:max-w-6xl grid-cols-1 items-start justify-items-center gap-8 2xl:gap-10 lg:grid-cols-2">
+              <div className="mx-auto grid w-full max-w-5xl 2xl:max-w-6xl grid-cols-1 items-start justify-items-center gap-4 sm:gap-6 lg:grid-cols-2">
                 <Timer
                   themeId={themeId}
                   phase={timer.phase}
@@ -429,7 +429,7 @@ export default function App() {
                   isZenMode={isZenMode}
                   onToggleZen={handleToggleZen}
                 />
-                <div className="flex w-full max-w-md 2xl:max-w-lg flex-col gap-8 2xl:gap-10">
+                <div className="flex w-full max-w-md 2xl:max-w-lg flex-col gap-4 sm:gap-6">
                   <TodoList
                     themeId={themeId}
                     todos={todosApi.todos}
