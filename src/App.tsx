@@ -364,6 +364,7 @@ export default function App() {
             settings.layoutMode === 'single' ? (
               <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-8 2xl:gap-10">
                 <Timer
+                  themeId={themeId}
                   large
                   phase={timer.phase}
                   phaseLabel={timer.phaseLabel}
@@ -388,6 +389,7 @@ export default function App() {
                   onToggleZen={handleToggleZen}
                 />
                 <TodoList
+                  themeId={themeId}
                   todos={todosApi.todos}
                   tags={settings.tags}
                   activeTodoId={activeTodoId}
@@ -404,6 +406,7 @@ export default function App() {
             ) : (
               <div className="mx-auto grid w-full max-w-5xl 2xl:max-w-6xl grid-cols-1 items-start justify-items-center gap-8 2xl:gap-10 lg:grid-cols-2">
                 <Timer
+                  themeId={themeId}
                   phase={timer.phase}
                   phaseLabel={timer.phaseLabel}
                   status={timer.status}
@@ -428,6 +431,7 @@ export default function App() {
                 />
                 <div className="flex w-full max-w-md 2xl:max-w-lg flex-col gap-8 2xl:gap-10">
                   <TodoList
+                    themeId={themeId}
                     todos={todosApi.todos}
                     tags={settings.tags}
                     activeTodoId={activeTodoId}
@@ -519,6 +523,7 @@ export default function App() {
           {/* Heroic Borderless Timer */}
           <div className="relative z-10 flex flex-col items-center justify-center p-4">
             <Timer
+              themeId={themeId}
               large
               borderless
               phase={timer.phase}

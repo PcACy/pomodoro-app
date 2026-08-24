@@ -1,11 +1,13 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { Check, Pause, PictureInPicture2, Play, RotateCcw, SkipForward } from 'lucide-react'
 import type { TimerStatus, PhaseId, TimerMode } from '../types'
+import type { ThemeId } from '../themes'
 import { useTranslation } from '../hooks/useTranslation'
 import { CatLogo } from './CatLogo'
 import { playMicroClick } from '../lib/sound'
 
 interface Props {
+  themeId?: ThemeId
   phase: PhaseId
   phaseLabel: string
   status: TimerStatus
@@ -92,6 +94,7 @@ function Waveform({ status }: { status: TimerStatus }) {
 }
 
 export const Timer = memo(function Timer({
+  themeId,
   phase,
   phaseLabel,
   status,
@@ -121,6 +124,13 @@ export const Timer = memo(function Timer({
   const { t } = useTranslation()
   const isFlow = mode === 'flow'
   const isIdle = status === 'idle'
+  const isTui = themeId === 'gruvbox'
+
+  const totalBlocks = 20
+  const currentProgress = isFlow ? 1 : progress
+  const filledBlocks = Math.min(totalBlocks, Math.max(0, Math.round(currentProgress * totalBlocks)))
+  const emptyBlocks = totalBlocks - filledBlocks
+  const asciiBar = `[${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}] ${Math.round(currentProgress * 100)}%`
   const running = isFlow ? flowStatus === 'running' : status === 'running'
   const paused = isFlow ? flowStatus === 'paused' : status === 'paused'
   const currentRoundIndex = completedFocusInCycle % roundsBeforeLongBreak
@@ -281,44 +291,73 @@ export const Timer = memo(function Timer({
       )}
 
       <div className="flex w-full flex-col items-center">
-        {/* Segmented Control Track */}
-        <div
-          role="tablist"
-          aria-label="Timer Modus"
-          className={`seg-track relative grid grid-cols-2 ${
-            borderless ? 'w-60 sm:w-64' : 'w-full max-w-[260px]'
-          } mx-auto select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
-            running && borderless ? 'opacity-30 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
-          }`}
-        >
-          {/* Sliding Pill — transform-based so the glide stays on the compositor */}
+        {isTui ? (
+          /* TUI Mode Switcher */
           <div
-            className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
-            style={{
-              width: 'calc((100% - 8px - 4px) / 2)',
-              left: '4px',
-              transform: `translateX(calc(${mode === 'pomodoro' ? 0 : 1} * (100% + 4px)))`,
-            }}
-          />
-          {MODES.map((m) => (
-            <button
-              key={m}
-              type="button"
-              role="tab"
-              aria-selected={mode === m}
-              aria-label={t.timer[m]}
-              onClick={() => onModeChange(m)}
-              className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] w-full items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                mode === m ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
-              }`}
-            >
-              {mode === m && (
-                <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
-              )}
-              <span>{t.timer[m]}</span>
-            </button>
-          ))}
-        </div>
+            role="tablist"
+            aria-label="Timer Modus"
+            className="flex items-center justify-center gap-2 font-mono text-xs font-bold select-none"
+          >
+            {MODES.map((m) => {
+              const isSelected = mode === m
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => onModeChange(m)}
+                  className={`px-3 py-1.5 border transition-colors cursor-pointer uppercase ${
+                    isSelected
+                      ? 'border-accent bg-accent text-canvas font-bold'
+                      : 'border-line text-muted hover:border-fg hover:text-fg bg-surface'
+                  }`}
+                >
+                  &lt; {isSelected ? `[${m.toUpperCase()}]` : m.toUpperCase()} &gt;
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          /* Segmented Control Track */
+          <div
+            role="tablist"
+            aria-label="Timer Modus"
+            className={`seg-track relative grid grid-cols-2 ${
+              borderless ? 'w-60 sm:w-64' : 'w-full max-w-[260px]'
+            } mx-auto select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
+              running && borderless ? 'opacity-30 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
+            }`}
+          >
+            {/* Sliding Pill — transform-based so the glide stays on the compositor */}
+            <div
+              className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
+              style={{
+                width: 'calc((100% - 8px - 4px) / 2)',
+                left: '4px',
+                transform: `translateX(calc(${mode === 'pomodoro' ? 0 : 1} * (100% + 4px)))`,
+              }}
+            />
+            {MODES.map((m) => (
+              <button
+                key={m}
+                type="button"
+                role="tab"
+                aria-selected={mode === m}
+                aria-label={t.timer[m]}
+                onClick={() => onModeChange(m)}
+                className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] w-full items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
+                  mode === m ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
+                }`}
+              >
+                {mode === m && (
+                  <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
+                )}
+                <span>{t.timer[m]}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         <div
           className="flex h-6 items-center justify-center my-2 transition-opacity duration-300"
@@ -352,218 +391,298 @@ export const Timer = memo(function Timer({
         </div>
       </div>
 
-      <div
-        ref={ringRef}
-        className={`relative isolate touch-none select-none ${pulseActive ? 'animate-complete-pulse' : ''} ${
-          isIdle && !isFlow ? 'cursor-grab active:cursor-grabbing' : ''
-        }`}
-        style={{ width: size, height: size }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-      >
-        {/* Ambient Breathing Glow behind Timer */}
-        <div
-          className={`pointer-events-none absolute inset-0 -z-10 rounded-full blur-3xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-            running
-              ? 'opacity-28 scale-105'
-              : paused
-                ? 'opacity-14 scale-100'
-                : 'opacity-0 scale-95'
-          }`}
-          style={
-            {
-              background: `radial-gradient(circle at center, rgb(var(${glowVar})) 0%, transparent 68%)`,
-            } as React.CSSProperties
-          }
-        >
-          {/* Inner Organic Breathing Layer while running */}
-          <div
-            className={`h-full w-full rounded-full transition-opacity duration-1000 ${
-              running ? 'animate-ambient-breath opacity-100' : 'opacity-0'
-            }`}
-            style={{
-              background: `radial-gradient(circle at center, rgb(var(${glowVar})) 0%, transparent 58%)`,
-            }}
-          />
-        </div>
-
-        <div
-          className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-            isFlow ? 'pointer-events-none opacity-0 scale-95 -translate-y-2' : 'opacity-100 scale-100 translate-y-0'
-          }`}
-        >
-          <svg
-            width={size}
-            height={size}
-            className="-rotate-90 select-none overflow-visible"
-            aria-hidden="true"
-          >
-            <circle
-              cx={center}
-              cy={center}
-              r={r}
-              fill="none"
-              strokeWidth={stroke}
-              className="stroke-track"
-            />
-            <circle
-              cx={center}
-              cy={center}
-              r={r}
-              fill="none"
-              strokeWidth={stroke}
-              strokeLinecap="round"
-              strokeDasharray={circ}
-              strokeDashoffset={offset}
-              className={`${RING[phase]} ${
-                isScrubbing
-                  ? 'ring-progress--none'
-                  : running
-                    ? 'ring-progress--running'
-                    : 'ring-progress'
-              }`}
-            />
-          </svg>
-
-          {/* Scrubbing Knob indicator only while active dragging */}
-          {isScrubbing && !isFlow && (
-            <div
-              className="pointer-events-none absolute z-20 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center animate-fade-in"
-              style={{ left: `${knobX}px`, top: `${knobY}px` }}
-            >
-              <div className="h-4 w-4 rounded-full border-2 border-white bg-accent shadow-md shadow-accent/50 scale-125 transition-transform duration-100" />
-            </div>
-          )}
-
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-            <div className="flex items-center gap-1.5 min-h-[20px]">
-              <CatLogo
-                size={16}
-                state={isIdle ? 'idle' : phase}
-                className={`transition-colors duration-500 ${PHASE_TEXT[phase]}`}
-              />
-              <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-500 ${PHASE_TEXT[phase]}`}>
-                {shownLabel}
-              </span>
-            </div>
-            <span
-              className={`font-display font-bold tabular-nums leading-none tracking-tight text-fg transition-all duration-300 ${
-                large ? 'text-6xl sm:text-7xl 2xl:text-8xl' : 'text-5xl 2xl:text-6xl'
-              }`}
-            >
-              {shownTime}
-            </span>
-            <div className="flex min-h-[20px] items-center justify-center">
-              <span
-                className={`text-xs font-medium text-muted transition-opacity duration-200 ${
-                  shownStatus ? 'opacity-100' : 'opacity-0'
-                }`}
-              >
-                {shownStatus || ''}
-              </span>
-            </div>
+      {isTui ? (
+        /* TUI Terminal Box with ASCII Progress Bar */
+        <div className="flex flex-col items-center justify-center p-6 sm:p-8 border-2 border-line bg-canvas font-mono w-full max-w-[340px] 2xl:max-w-[400px] mx-auto text-center select-none shadow-none my-2">
+          <div className="text-xs font-bold text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
+            <span className="text-line">┌──</span>
+            <span>[ {isFlow ? 'FLOW TIMER' : `POMODORO: ${shownLabel}`} ]</span>
+            <span className="text-line">──┐</span>
           </div>
-        </div>
 
-        <div
-          className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-            isFlow ? 'opacity-100 scale-100 translate-y-0' : 'pointer-events-none opacity-0 scale-95 translate-y-2'
-          }`}
-        >
-          <div className="flex items-center gap-1.5 min-h-[20px]">
-            <CatLogo
-              size={16}
-              state={flowStatus === 'idle' ? 'idle' : 'focus'}
-              className="text-accent"
-            />
-            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/80">
-              {shownLabel}
-            </span>
-          </div>
           <span
-            className={`font-display font-bold leading-none tracking-tight tabular-nums text-fg transition-all duration-300 my-1 ${
-              large
-                ? isFlow && shownTime.length > 5
-                  ? 'text-6xl sm:text-7xl 2xl:text-8xl'
-                  : 'text-7xl sm:text-8xl 2xl:text-9xl'
-                : isFlow && shownTime.length > 5
-                  ? 'text-5xl 2xl:text-6xl'
-                  : 'text-6xl 2xl:text-7xl'
+            className={`font-mono font-bold tabular-nums leading-none tracking-tight text-fg my-3 ${
+              large ? 'text-6xl sm:text-7xl' : 'text-5xl sm:text-6xl'
             }`}
           >
             {shownTime}
           </span>
-          <div className="flex min-h-[50px] flex-col items-center justify-center">
-            <Waveform status={flowStatus} />
-            <div className="flex min-h-[18px] items-center justify-center">
+
+          <div className="text-xs sm:text-sm font-bold text-accent my-3 tracking-wider font-mono">
+            {asciiBar}
+          </div>
+
+          <div className="text-xs text-muted flex items-center gap-2 mt-2 font-mono">
+            <span className="text-line">└──</span>
+            <span>
+              [ {isFlow ? (running ? 'RUNNING' : 'IDLE') : `ROUND: ${currentRoundIndex + 1}/${roundsBeforeLongBreak}`} ]
+            </span>
+            <span className="text-line">──┘</span>
+          </div>
+        </div>
+      ) : (
+        <div
+          ref={ringRef}
+          className={`relative isolate touch-none select-none ${pulseActive ? 'animate-complete-pulse' : ''} ${
+            isIdle && !isFlow ? 'cursor-grab active:cursor-grabbing' : ''
+          }`}
+          style={{ width: size, height: size }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+        >
+          {/* Ambient Breathing Glow behind Timer */}
+          <div
+            className={`pointer-events-none absolute inset-0 -z-10 rounded-full blur-3xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+              running
+                ? 'opacity-28 scale-105'
+                : paused
+                  ? 'opacity-14 scale-100'
+                  : 'opacity-0 scale-95'
+            }`}
+            style={
+              {
+                background: `radial-gradient(circle at center, rgb(var(${glowVar})) 0%, transparent 68%)`,
+              } as React.CSSProperties
+            }
+          >
+            {/* Inner Organic Breathing Layer while running */}
+            <div
+              className={`h-full w-full rounded-full transition-opacity duration-1000 ${
+                running ? 'animate-ambient-breath opacity-100' : 'opacity-0'
+              }`}
+              style={{
+                background: `radial-gradient(circle at center, rgb(var(${glowVar})) 0%, transparent 58%)`,
+              }}
+            />
+          </div>
+
+          <div
+            className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+              isFlow ? 'pointer-events-none opacity-0 scale-95 -translate-y-2' : 'opacity-100 scale-100 translate-y-0'
+            }`}
+          >
+            <svg
+              width={size}
+              height={size}
+              className="-rotate-90 select-none overflow-visible"
+              aria-hidden="true"
+            >
+              <circle
+                cx={center}
+                cy={center}
+                r={r}
+                fill="none"
+                strokeWidth={stroke}
+                className="stroke-track"
+              />
+              <circle
+                cx={center}
+                cy={center}
+                r={r}
+                fill="none"
+                strokeWidth={stroke}
+                strokeLinecap="round"
+                strokeDasharray={circ}
+                strokeDashoffset={offset}
+                className={`${RING[phase]} ${
+                  isScrubbing
+                    ? 'ring-progress--none'
+                    : running
+                      ? 'ring-progress--running'
+                      : 'ring-progress'
+                }`}
+              />
+            </svg>
+
+            {/* Scrubbing Knob indicator only while active dragging */}
+            {isScrubbing && !isFlow && (
+              <div
+                className="pointer-events-none absolute z-20 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center animate-fade-in"
+                style={{ left: `${knobX}px`, top: `${knobY}px` }}
+              >
+                <div className="h-4 w-4 rounded-full border-2 border-white bg-accent shadow-md shadow-accent/50 scale-125 transition-transform duration-100" />
+              </div>
+            )}
+
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+              <div className="flex items-center gap-1.5 min-h-[20px]">
+                <CatLogo
+                  size={16}
+                  state={isIdle ? 'idle' : phase}
+                  className={`transition-colors duration-500 ${PHASE_TEXT[phase]}`}
+                />
+                <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-500 ${PHASE_TEXT[phase]}`}>
+                  {shownLabel}
+                </span>
+              </div>
               <span
-                className={`text-xs font-medium text-muted transition-opacity duration-200 ${
-                  shownStatus ? 'opacity-100' : 'opacity-0'
+                className={`font-display font-bold tabular-nums leading-none tracking-tight text-fg transition-all duration-300 ${
+                  large ? 'text-6xl sm:text-7xl 2xl:text-8xl' : 'text-5xl 2xl:text-6xl'
                 }`}
               >
-                {shownStatus || ''}
+                {shownTime}
               </span>
+              <div className="flex min-h-[20px] items-center justify-center">
+                <span
+                  className={`text-xs font-medium text-muted transition-opacity duration-200 ${
+                    shownStatus ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  {shownStatus || ''}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+              isFlow ? 'opacity-100 scale-100 translate-y-0' : 'pointer-events-none opacity-0 scale-95 translate-y-2'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 min-h-[20px]">
+              <CatLogo
+                size={16}
+                state={flowStatus === 'idle' ? 'idle' : 'focus'}
+                className="text-accent"
+              />
+              <span className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/80">
+                {shownLabel}
+              </span>
+            </div>
+            <span
+              className={`font-display font-bold leading-none tracking-tight tabular-nums text-fg transition-all duration-300 my-1 ${
+                large
+                  ? isFlow && shownTime.length > 5
+                    ? 'text-6xl sm:text-7xl 2xl:text-8xl'
+                    : 'text-7xl sm:text-8xl 2xl:text-9xl'
+                  : isFlow && shownTime.length > 5
+                    ? 'text-5xl 2xl:text-6xl'
+                    : 'text-6xl 2xl:text-7xl'
+              }`}
+            >
+              {shownTime}
+            </span>
+            <div className="flex min-h-[50px] flex-col items-center justify-center">
+              <Waveform status={flowStatus} />
+              <div className="flex min-h-[18px] items-center justify-center">
+                <span
+                  className={`text-xs font-medium text-muted transition-opacity duration-200 ${
+                    shownStatus ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  {shownStatus || ''}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="flex items-center gap-3.5 2xl:gap-5">
-        <button
-          type="button"
-          onClick={handleResetClick}
-          title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
-          aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-          className={`btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92] ${
-            isFlow && flowStatus === 'idle' ? 'pointer-events-none opacity-20' : 'opacity-100'
-          }`}
-        >
-          <RotateCcw size={18} />
-        </button>
-
-        <button
-          type="button"
-          onClick={handleToggleClick}
-          className={`ios-play-lens play-spring flex items-center justify-center rounded-full ${
-            large ? 'h-20 w-20 2xl:h-22 2xl:w-22 shadow-2xl' : 'h-16 w-16 2xl:h-18 2xl:w-18 shadow-lg'
-          } ${playBtnColor}`}
-          title={running ? t.timer.pause : t.timer.start}
-          aria-label={running ? t.timer.pause : t.timer.start}
-        >
-          {running ? (
-            <Pause size={large ? 32 : 26} />
-          ) : (
-            <Play size={large ? 32 : 26} className="translate-x-0.5" />
-          )}
-        </button>
-
-        {isFlow ? (
+      {isTui ? (
+        /* TUI Bracket Controls */
+        <div className="flex items-center gap-3 font-mono select-none my-1">
           <button
             type="button"
-            onClick={handleSkipClick}
-            disabled={flowStatus === 'idle'}
-            title={`${t.flow.finish} (F)`}
-            aria-label={t.flow.finish}
-            className={`flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full border border-accent/50 bg-accent/15 text-accent shadow-sm shadow-accent/15 transition-all duration-200 hover:bg-accent/25 active:scale-[0.92] ${
-              flowStatus === 'idle' ? 'pointer-events-none opacity-20' : 'opacity-100'
+            onClick={handleResetClick}
+            disabled={isFlow && flowStatus === 'idle'}
+            title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
+            aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
+            className="tui-btn px-4 py-2 text-xs font-bold border border-line bg-surface text-muted hover:border-fg hover:text-fg hover:bg-raised transition-colors uppercase cursor-pointer disabled:opacity-30 disabled:pointer-events-none active:scale-95"
+          >
+            [ RESET ]
+          </button>
+
+          <button
+            type="button"
+            onClick={handleToggleClick}
+            className="tui-btn px-6 py-2.5 text-sm font-bold border-2 border-accent bg-accent text-canvas hover:bg-fg hover:text-canvas transition-colors uppercase tracking-wider cursor-pointer active:scale-95 shadow-sm"
+            title={running ? t.timer.pause : t.timer.start}
+            aria-label={running ? t.timer.pause : t.timer.start}
+          >
+            {running ? '[ ❚❚ PAUSE ]' : '[ ▶ START ]'}
+          </button>
+
+          {isFlow ? (
+            <button
+              type="button"
+              onClick={handleSkipClick}
+              disabled={flowStatus === 'idle'}
+              title={`${t.flow.finish} (F)`}
+              aria-label={t.flow.finish}
+              className="tui-btn px-4 py-2 text-xs font-bold border border-accent/60 bg-accent/15 text-accent hover:bg-accent hover:text-canvas transition-colors uppercase cursor-pointer disabled:opacity-30 disabled:pointer-events-none active:scale-95"
+            >
+              [ FINISH ]
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSkipClick}
+              title={`${t.shortcuts.skip} (N)`}
+              aria-label={t.shortcuts.skip}
+              className="tui-btn px-4 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95"
+            >
+              [ SKIP ]
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-center gap-3.5 2xl:gap-5">
+          <button
+            type="button"
+            onClick={handleResetClick}
+            title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
+            aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
+            className={`btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92] ${
+              isFlow && flowStatus === 'idle' ? 'pointer-events-none opacity-20' : 'opacity-100'
             }`}
           >
-            <Check size={20} strokeWidth={2.5} />
+            <RotateCcw size={18} />
           </button>
-        ) : (
+
           <button
             type="button"
-            onClick={handleSkipClick}
-            title={`${t.shortcuts.skip} (N)`}
-            aria-label={t.shortcuts.skip}
-            className="btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full active:scale-[0.92]"
+            onClick={handleToggleClick}
+            className={`ios-play-lens play-spring flex items-center justify-center rounded-full ${
+              large ? 'h-20 w-20 2xl:h-22 2xl:w-22 shadow-2xl' : 'h-16 w-16 2xl:h-18 2xl:w-18 shadow-lg'
+            } ${playBtnColor}`}
+            title={running ? t.timer.pause : t.timer.start}
+            aria-label={running ? t.timer.pause : t.timer.start}
           >
-            <SkipForward size={18} />
+            {running ? (
+              <Pause size={large ? 32 : 26} />
+            ) : (
+              <Play size={large ? 32 : 26} className="translate-x-0.5" />
+            )}
           </button>
-        )}
-      </div>
+
+          {isFlow ? (
+            <button
+              type="button"
+              onClick={handleSkipClick}
+              disabled={flowStatus === 'idle'}
+              title={`${t.flow.finish} (F)`}
+              aria-label={t.flow.finish}
+              className={`flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full border border-accent/50 bg-accent/15 text-accent shadow-sm shadow-accent/15 transition-all duration-200 hover:bg-accent/25 active:scale-[0.92] ${
+                flowStatus === 'idle' ? 'pointer-events-none opacity-20' : 'opacity-100'
+              }`}
+            >
+              <Check size={20} strokeWidth={2.5} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSkipClick}
+              title={`${t.shortcuts.skip} (N)`}
+              aria-label={t.shortcuts.skip}
+              className="btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full active:scale-[0.92]"
+            >
+              <SkipForward size={18} />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Keyboard shortcuts row: stable layout without jumps */}
       <div

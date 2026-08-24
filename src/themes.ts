@@ -11,7 +11,7 @@ export interface ThemeDef {
 export const THEMES: ThemeDef[] = [
   {
     id: 'gruvbox',
-    label: 'Gruvbox',
+    label: 'Gruvbox (TUI)',
     swatchDark: ['#fe8019', '#8ec07c', '#fabd2f'],
     swatchLight: ['#af3a03', '#689d6a', '#d79921'],
   },

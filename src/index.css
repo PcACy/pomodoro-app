@@ -33,16 +33,16 @@
   --c-chart-7: 131 165 152;
   --c-chart-8: 146 131 116;
 
-  /* Gruvbox Structural Tokens: Solid matte retro terminal */
-  --radius-card: 10px;
-  --radius-btn: 6px;
-  --radius-sm: 4px;
-  --badge-radius: 4px;
+  /* Gruvbox Structural Tokens: Strict sharp terminal box-model */
+  --radius-card: 0px;
+  --radius-btn: 0px;
+  --radius-sm: 0px;
+  --badge-radius: 0px;
   --border-card-width: 1px;
   --border-card-style: solid;
-  --font-display: 'Space Grotesk', 'JetBrains Mono', monospace;
-  --font-body: 'JetBrains Mono', monospace;
-  --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  --font-display: 'JetBrains Mono', ui-monospace, monospace;
+  --font-body: 'JetBrains Mono', ui-monospace, monospace;
+  --card-shadow: none;
   --card-blur: 0px;
   --card-bg-opacity: 1;
 
@@ -86,15 +86,15 @@
   --c-chart-8: 124 111 100;
 
   /* Gruvbox Structural Tokens */
-  --radius-card: 10px;
-  --radius-btn: 6px;
-  --radius-sm: 4px;
-  --badge-radius: 4px;
+  --radius-card: 0px;
+  --radius-btn: 0px;
+  --radius-sm: 0px;
+  --badge-radius: 0px;
   --border-card-width: 1px;
   --border-card-style: solid;
-  --font-display: 'Space Grotesk', 'JetBrains Mono', monospace;
-  --font-body: 'JetBrains Mono', monospace;
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --font-display: 'JetBrains Mono', ui-monospace, monospace;
+  --font-body: 'JetBrains Mono', ui-monospace, monospace;
+  --card-shadow: none;
   --card-blur: 0px;
   --card-bg-opacity: 1;
 
@@ -110,6 +110,21 @@
 
   --ease-ios-spring: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-ios-smooth: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* =========================================================================
+   1.1 GRUVBOX TUI STRICT ENFORCEMENTS
+   ========================================================================= */
+:root[data-theme='gruvbox'] *,
+:root:not([data-theme]) * {
+  border-radius: 0px !important;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+:root[data-theme='gruvbox'] .card,
+:root:not([data-theme]) .card {
+  border: 1px solid rgb(var(--c-line)) !important;
+  box-shadow: none !important;
 }
 
 /* =========================================================================
