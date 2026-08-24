@@ -285,10 +285,10 @@ export const Timer = memo(function Timer({
 
   const playBtnColor =
     isFlow || phase === 'focus'
-      ? 'bg-accent text-on-accent border border-white/10 active:border-accent/60 shadow-[0_0_24px_rgb(var(--c-accent)/calc(var(--glow-opacity,0.25)*1.5))]'
+      ? 'bg-accent text-on-accent border border-black/10 dark:border-white/10 active:border-accent/60 shadow-[0_0_24px_rgb(var(--c-accent)/calc(var(--glow-opacity,0.25)*1.5))]'
       : phase === 'shortBreak'
-        ? 'bg-break text-on-accent border border-white/10 active:border-break/60 shadow-[0_0_24px_rgb(var(--c-break)/calc(var(--glow-opacity,0.25)*1.5))]'
-        : 'bg-long text-on-accent border border-white/10 active:border-long/60 shadow-[0_0_24px_rgb(var(--c-long)/calc(var(--glow-opacity,0.25)*1.5))]'
+        ? 'bg-break text-on-accent border border-black/10 dark:border-white/10 active:border-break/60 shadow-[0_0_24px_rgb(var(--c-break)/calc(var(--glow-opacity,0.25)*1.5))]'
+        : 'bg-long text-on-accent border border-black/10 dark:border-white/10 active:border-long/60 shadow-[0_0_24px_rgb(var(--c-long)/calc(var(--glow-opacity,0.25)*1.5))]'
 
   const handleToggleClick = () => {
     playMicroClick(running ? 'tick' : 'pop')
@@ -665,7 +665,7 @@ export const Timer = memo(function Timer({
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
               {isIos ? (
                 /* Live Round Capsule for iOS 26 */
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/[0.05] dark:bg-white/10 backdrop-blur-md border border-black/[0.08] dark:border-white/15 text-xs font-semibold tracking-wide text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/[0.06] dark:bg-white/10 backdrop-blur-md border border-black/[0.08] dark:border-white/15 text-xs font-semibold tracking-wide text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
                   <CatLogo
                     size={14}
                     state={isIdle ? 'idle' : phase}
@@ -723,7 +723,7 @@ export const Timer = memo(function Timer({
           >
             {isIos ? (
               /* Live Round Capsule for iOS 26 Flow Mode */
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/[0.05] dark:bg-white/10 backdrop-blur-md border border-black/[0.08] dark:border-white/15 text-xs font-semibold tracking-wide text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/[0.06] dark:bg-white/10 backdrop-blur-md border border-black/[0.08] dark:border-white/15 text-xs font-semibold tracking-wide text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
                 <CatLogo
                   size={14}
                   state={flowStatus === 'idle' ? 'idle' : 'focus'}
@@ -981,27 +981,27 @@ export const Timer = memo(function Timer({
         }`}
       >
         <span className="inline-flex items-center gap-1">
-          <kbd className="kbd text-[10px]">Space</kbd> Start/Pause
+          <kbd className={isIos ? 'rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white' : 'kbd text-[10px]'}>Space</kbd> Start/Pause
         </span>
         <span className={isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}>·</span>
         {isFlow ? (
           <>
             <span className="inline-flex items-center gap-1">
-              <kbd className="kbd text-[10px]">R</kbd> Discard
+              <kbd className={isIos ? 'rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white' : 'kbd text-[10px]'}>R</kbd> Discard
             </span>
             <span className={isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}>·</span>
             <span className="inline-flex items-center gap-1">
-              <kbd className="kbd text-[10px]">F</kbd> Finish
+              <kbd className={isIos ? 'rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white' : 'kbd text-[10px]'}>F</kbd> Finish
             </span>
           </>
         ) : (
           <>
             <span className="inline-flex items-center gap-1">
-              <kbd className="kbd text-[10px]">R</kbd> Reset
+              <kbd className={isIos ? 'rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white' : 'kbd text-[10px]'}>R</kbd> Reset
             </span>
             <span className={isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}>·</span>
             <span className="inline-flex items-center gap-1">
-              <kbd className="kbd text-[10px]">N</kbd> Skip
+              <kbd className={isIos ? 'rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white' : 'kbd text-[10px]'}>N</kbd> Skip
             </span>
           </>
         )}
@@ -1015,7 +1015,7 @@ export const Timer = memo(function Timer({
             isIos ? 'hover:text-zinc-950 dark:hover:text-white' : 'hover:text-fg'
           } cursor-pointer`}
         >
-          <kbd className="kbd text-[10px]">Z</kbd> Zen
+          <kbd className={isIos ? 'rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white' : 'kbd text-[10px]'}>Z</kbd> Zen
         </button>
       </div>
 
