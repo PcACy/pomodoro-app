@@ -506,9 +506,9 @@ textarea:focus:not(:focus-visible) {
     font-weight: 500;
   }
   :root[data-theme='ios-26'][data-mode='light'] .kbd {
-    background-color: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    color: #27272a;
+    background-color: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #18181b;
     font-weight: 600;
     box-shadow: none;
   }
