@@ -126,11 +126,45 @@ export const Timer = memo(function Timer({
   const isIdle = status === 'idle'
   const isTui = themeId === 'gruvbox'
 
-  const totalBlocks = 20
-  const currentProgress = isFlow ? 1 : progress
+  // Parse flow elapsed time for seconds & milestone calculations
+  const flowParts = (flowTime || '00:00').split(':').map(Number)
+  let flowSeconds = 0
+  if (flowParts.length === 3) {
+    flowSeconds = (flowParts[0] || 0) * 3600 + (flowParts[1] || 0) * 60 + (flowParts[2] || 0)
+  } else if (flowParts.length === 2) {
+    flowSeconds = (flowParts[0] || 0) * 60 + (flowParts[1] || 0)
+  }
+  const flowMinutes = Math.floor(flowSeconds / 60)
+
+  // Pomodoro ASCII progress bar (deterministic countdown)
+  const totalBlocks = 18
+  const currentProgress = Math.min(1, Math.max(0, progress))
   const filledBlocks = Math.min(totalBlocks, Math.max(0, Math.round(currentProgress * totalBlocks)))
   const emptyBlocks = totalBlocks - filledBlocks
   const asciiBar = `[${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}] ${Math.round(currentProgress * 100)}%`
+
+  // Flow ASCII status activity scanner
+  const waveFrames = [
+    '[ ───==█==─── ]',
+    '[ ────==█==── ]',
+    '[ ─────==█==─ ]',
+    '[ ──────==█== ]',
+    '[ ─────==█==─ ]',
+    '[ ────==█==── ]',
+    '[ ───==█==─── ]',
+    '[ ──==█==──── ]',
+    '[ ─==█==───── ]',
+    '[ ==█==────── ]',
+    '[ ─==█==───── ]',
+    '[ ──==█==──── ]',
+  ]
+  const animPos = flowSeconds % waveFrames.length
+  const flowAsciiStatus =
+    flowStatus === 'running'
+      ? `${waveFrames[animPos]} ACTIVE`
+      : flowStatus === 'paused'
+        ? '[ ── PAUSED ── ]'
+        : '[ ─────────── ] IDLE'
   const running = isFlow ? flowStatus === 'running' : status === 'running'
   const paused = isFlow ? flowStatus === 'paused' : status === 'paused'
   const currentRoundIndex = completedFocusInCycle % roundsBeforeLongBreak
@@ -362,38 +396,56 @@ export const Timer = memo(function Timer({
         <div
           className="flex h-6 items-center justify-center my-2 transition-opacity duration-300"
           aria-hidden={isFlow}
-          aria-label={`Runde ${currentRoundIndex + 1} von ${roundsBeforeLongBreak}`}
+          aria-label={isFlow ? 'Fokus Meilensteine' : `Runde ${currentRoundIndex + 1} von ${roundsBeforeLongBreak}`}
         >
-          <div
-            className={`flex items-center justify-center gap-1.5 transition-all duration-300 ${
-              isFlow ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
-            }`}
-          >
-            {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => {
-              const isCompleted = i < currentRoundIndex
-              const isCurrent = i === currentRoundIndex
+          {isFlow ? (
+            /* Flow Mode: Focus Milestone Indicators with identical fixed container height */
+            <div className="flex items-center justify-center gap-2.5 text-[11px] font-mono select-none">
+              {[25, 50, 75, 100].map((m) => {
+                const reached = flowMinutes >= m
+                return (
+                  <span
+                    key={m}
+                    className={`flex items-center gap-0.5 transition-colors ${
+                      reached ? 'text-accent font-bold' : 'text-muted/40'
+                    }`}
+                  >
+                    <span>{reached ? '★' : '☆'}</span>
+                    <span>{m}m</span>
+                  </span>
+                )
+              })}
+            </div>
+          ) : (
+            <div
+              className="flex items-center justify-center gap-1.5 transition-all duration-300 opacity-100 scale-100"
+            >
+              {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => {
+                const isCompleted = i < currentRoundIndex
+                const isCurrent = i === currentRoundIndex
 
-              let pillStyle = 'bg-line'
-              if (isCompleted) {
-                pillStyle = 'bg-accent'
-              } else if (isCurrent) {
-                pillStyle = running ? 'bg-accent animate-pulse' : 'bg-accent/60'
-              }
+                let pillStyle = 'bg-line'
+                if (isCompleted) {
+                  pillStyle = 'bg-accent'
+                } else if (isCurrent) {
+                  pillStyle = running ? 'bg-accent animate-pulse' : 'bg-accent/60'
+                }
 
-              return (
-                <span
-                  key={i}
-                  className={`h-1 w-7 2xl:w-8 rounded-full transition-all duration-300 ${pillStyle}`}
-                />
-              )
-            })}
-          </div>
+                return (
+                  <span
+                    key={i}
+                    className={`h-1 w-7 2xl:w-8 rounded-full transition-all duration-300 ${pillStyle}`}
+                  />
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
 
       {isTui ? (
-        /* TUI Terminal Box with ASCII Progress Bar */
-        <div className="flex flex-col items-center justify-center p-6 sm:p-8 border-2 border-line bg-canvas font-mono w-full max-w-[340px] 2xl:max-w-[400px] mx-auto text-center select-none shadow-none my-2">
+        /* TUI Terminal Box with Decoupled Progress Bar / Flow Scanner */
+        <div className="flex flex-col items-center justify-center p-6 sm:p-8 border-2 border-line bg-canvas font-mono w-full max-w-[340px] 2xl:max-w-[400px] min-h-[220px] mx-auto text-center select-none shadow-none my-2">
           <div className="text-xs font-bold text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
             <span className="text-line">┌──</span>
             <span>[ {isFlow ? 'FLOW TIMER' : `POMODORO: ${shownLabel}`} ]</span>
@@ -401,21 +453,37 @@ export const Timer = memo(function Timer({
           </div>
 
           <span
-            className={`font-mono font-bold tabular-nums leading-none tracking-tight text-fg my-3 ${
+            className={`font-mono font-bold tabular-nums leading-none tracking-tight text-fg my-2 ${
               large ? 'text-6xl sm:text-7xl' : 'text-5xl sm:text-6xl'
             }`}
           >
             {shownTime}
           </span>
 
-          <div className="text-xs sm:text-sm font-bold text-accent my-3 tracking-wider font-mono">
-            {asciiBar}
+          <div className="text-xs sm:text-sm font-bold text-accent my-2 tracking-wider font-mono min-h-[24px] flex items-center justify-center">
+            {isFlow ? (
+              <span className={running ? 'text-accent animate-pulse' : 'text-muted'}>
+                {flowAsciiStatus}
+              </span>
+            ) : (
+              <span>{asciiBar}</span>
+            )}
           </div>
 
-          <div className="text-xs text-muted flex items-center gap-2 mt-2 font-mono">
+          {isFlow ? (
+            <div className="flex items-center justify-center gap-2 text-[11px] text-muted my-1 min-h-[18px]">
+              {[25, 50, 75].map((m) => (
+                <span key={m} className={flowMinutes >= m ? 'text-accent font-bold' : 'text-muted/40'}>
+                  {flowMinutes >= m ? '★' : '☆'}{m}m
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="text-xs text-muted flex items-center gap-2 mt-1 font-mono">
             <span className="text-line">└──</span>
             <span>
-              [ {isFlow ? (running ? 'RUNNING' : 'IDLE') : `ROUND: ${currentRoundIndex + 1}/${roundsBeforeLongBreak}`} ]
+              [ {isFlow ? (running ? 'ACTIVE' : paused ? 'PAUSED' : 'IDLE') : `ROUND: ${currentRoundIndex + 1}/${roundsBeforeLongBreak}`} ]
             </span>
             <span className="text-line">──┘</span>
           </div>

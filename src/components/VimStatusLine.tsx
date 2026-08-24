@@ -93,7 +93,7 @@ export const VimStatusLine = memo(function VimStatusLine({
           </span>
         )}
         <span className="hidden md:inline text-muted/70">utf-8</span>
-        <span className="text-accent font-medium tabular-nums">{pct}%</span>
+        {mode === 'pomodoro' && <span className="text-accent font-medium tabular-nums">{pct}%</span>}
         {syncStatus && <span className="hidden xl:inline text-muted/60">sync:{syncStatus}</span>}
         <span className="hidden lg:inline text-muted/60">{themeId}-{colorMode}</span>
       </div>

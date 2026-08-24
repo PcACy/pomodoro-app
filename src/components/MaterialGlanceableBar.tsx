@@ -80,13 +80,20 @@ export const MaterialGlanceableBar = memo(function MaterialGlanceableBar({
           <span className="font-bold tabular-nums text-fg text-xs sm:text-sm">
             {time}
           </span>
-          {mode === 'pomodoro' && totalRounds > 0 ? (
-            <span className="text-muted text-[11px] tabular-nums" title={`Runde ${completedRounds}/${totalRounds}`}>
-              R:{completedRounds}/{totalRounds}
-            </span>
+          {mode === 'pomodoro' ? (
+            <>
+              {totalRounds > 0 && (
+                <span className="text-muted text-[11px] tabular-nums" title={`Runde ${completedRounds}/${totalRounds}`}>
+                  R:{completedRounds}/{totalRounds}
+                </span>
+              )}
+              <span className="text-muted text-[11px] tabular-nums">
+                {pct}%
+              </span>
+            </>
           ) : (
-            <span className="text-muted text-[11px] tabular-nums">
-              {pct}%
+            <span className="text-accent text-[11px] font-medium tracking-wide">
+              {status === 'running' ? 'ACTIVE' : status === 'paused' ? 'PAUSED' : 'IDLE'}
             </span>
           )}
 
