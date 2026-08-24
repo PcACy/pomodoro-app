@@ -323,39 +323,79 @@ export default function App() {
           <h1 className="text-lg font-bold text-fg">Pomau</h1>
         </div>
 
-        <nav
-          role="tablist"
-          aria-label="Navigation"
-          className={`nav-track relative grid grid-cols-3 items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
-            zenRunning ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
-          }`}
-        >
-          {/* Sliding Pill Indicator */}
-          <div
-            className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-nav-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-            style={{
-              width: 'calc((100% - 8px - 8px) / 3)',
-              left: '4px',
-              transform: `translateX(calc(${TABS.findIndex((tb) => tb.id === tab)} * (100% + 4px)))`,
-            }}
-          />
-          {TABS.map((tb) => (
-            <button
-              key={tb.id}
-              type="button"
-              role="tab"
-              aria-selected={tab === tb.id}
-              aria-label={t.nav[TAB_LABEL_KEYS[tb.id]]}
-              onClick={() => handleTabChange(tb.id)}
-              className={`relative z-10 flex min-h-[40px] sm:min-h-[42px] items-center justify-center gap-2 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                tab === tb.id ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
-              }`}
-            >
-              {tb.icon}
-              <span className="hidden sm:inline">{t.nav[TAB_LABEL_KEYS[tb.id]]}</span>
-            </button>
-          ))}
-        </nav>
+        {themeId === 'ios-26' ? (
+          /* iOS 26 Unified Glass Navigation */
+          <nav
+            role="tablist"
+            aria-label="Navigation"
+            className={`relative inline-grid grid-cols-3 items-center p-1 rounded-full bg-black/[0.05] dark:bg-black/35 border border-black/[0.06] dark:border-white/10 backdrop-blur-xl select-none transition-opacity duration-500 ${
+              zenRunning ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
+            }`}
+          >
+            {/* Sliding Glass Puck */}
+            <div
+              className="pointer-events-none absolute bottom-1 top-1 rounded-full bg-white dark:bg-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.2)] border border-black/[0.04] dark:border-white/15 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
+              style={{
+                width: 'calc((100% - 8px - 8px) / 3)',
+                left: '4px',
+                transform: `translateX(calc(${TABS.findIndex((tb) => tb.id === tab)} * (100% + 4px)))`,
+              }}
+            />
+            {TABS.map((tb) => (
+              <button
+                key={tb.id}
+                type="button"
+                role="tab"
+                aria-selected={tab === tb.id}
+                aria-label={t.nav[TAB_LABEL_KEYS[tb.id]]}
+                onClick={() => handleTabChange(tb.id)}
+                className={`relative z-10 flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 text-xs sm:text-sm transition-all duration-150 active:scale-[0.98] cursor-pointer ${
+                  tab === tb.id
+                    ? 'text-zinc-950 dark:text-white font-semibold'
+                    : 'text-zinc-600 dark:text-white/60 hover:text-zinc-950 dark:hover:text-white font-medium'
+                }`}
+              >
+                {tb.icon}
+                <span className="hidden sm:inline">{t.nav[TAB_LABEL_KEYS[tb.id]]}</span>
+              </button>
+            ))}
+          </nav>
+        ) : (
+          /* Standard / M3 / TUI Navigation */
+          <nav
+            role="tablist"
+            aria-label="Navigation"
+            className={`nav-track relative grid grid-cols-3 items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
+              zenRunning ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
+            }`}
+          >
+            {/* Sliding Pill Indicator */}
+            <div
+              className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-nav-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              style={{
+                width: 'calc((100% - 8px - 8px) / 3)',
+                left: '4px',
+                transform: `translateX(calc(${TABS.findIndex((tb) => tb.id === tab)} * (100% + 4px)))`,
+              }}
+            />
+            {TABS.map((tb) => (
+              <button
+                key={tb.id}
+                type="button"
+                role="tab"
+                aria-selected={tab === tb.id}
+                aria-label={t.nav[TAB_LABEL_KEYS[tb.id]]}
+                onClick={() => handleTabChange(tb.id)}
+                className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-2 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
+                  tab === tb.id ? 'text-fg font-semibold' : 'text-muted hover:text-fg'
+                }`}
+              >
+                {tb.icon}
+                <span className="hidden sm:inline">{t.nav[TAB_LABEL_KEYS[tb.id]]}</span>
+              </button>
+            ))}
+          </nav>
+        )}
       </header>
 
       <main className="flex w-full flex-1 flex-col items-center gap-4 sm:gap-6 pb-6">

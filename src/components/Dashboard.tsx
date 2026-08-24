@@ -237,49 +237,94 @@ export const Dashboard = memo(function Dashboard({
       {/* Dashboard Top Header with Segmented Range Filter */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-bold tracking-tight text-fg">{t.dashboard.periodOverview}</h2>
-        <div
-          role="tablist"
-          aria-label={t.dashboard.periodOverview}
-          className="seg-track relative grid grid-cols-3 w-full sm:w-auto min-w-[240px] sm:min-w-[270px] items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md"
-        >
-          {/* Sliding Pill Indicator */}
+        {themeId === 'ios-26' ? (
+          /* iOS 26 Unified Glass Segmented Range Filter */
           <div
-            className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
-            style={{
-              width: 'calc((100% - 8px - 8px) / 3)',
-              left: '4px',
-              transform: `translateX(calc(${TIME_RANGES.indexOf(timeRange)} * (100% + 4px)))`,
-            }}
-          />
-          {TIME_RANGES.map((r) => {
-            const label =
-              r === 'week'
-                ? t.dashboard.rangeWeek
-                : r === 'month'
-                ? t.dashboard.rangeMonth
-                : t.dashboard.rangeAllTime
-            const isActive = timeRange === r
-            return (
-              <button
-                key={r}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                onClick={() => setTimeRange(r)}
-                className={`relative z-10 flex min-h-[32px] sm:min-h-[34px] items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1 text-xs font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                  isActive
-                    ? 'text-fg font-semibold'
-                    : 'text-muted hover:text-fg'
-                }`}
-              >
-                {isActive && (
-                  <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
-                )}
-                <span>{label}</span>
-              </button>
-            )
-          })}
-        </div>
+            role="tablist"
+            aria-label={t.dashboard.periodOverview}
+            className="relative inline-grid grid-cols-3 w-full sm:w-auto min-w-[240px] sm:min-w-[270px] items-center p-1 rounded-full bg-black/[0.05] dark:bg-black/35 border border-black/[0.06] dark:border-white/10 backdrop-blur-xl select-none"
+          >
+            {/* Sliding Glass Puck */}
+            <div
+              className="pointer-events-none absolute bottom-1 top-1 rounded-full bg-white dark:bg-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.2)] border border-black/[0.04] dark:border-white/15 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
+              style={{
+                width: 'calc((100% - 8px - 8px) / 3)',
+                left: '4px',
+                transform: `translateX(calc(${TIME_RANGES.indexOf(timeRange)} * (100% + 4px)))`,
+              }}
+            />
+            {TIME_RANGES.map((r) => {
+              const label =
+                r === 'week'
+                  ? t.dashboard.rangeWeek
+                  : r === 'month'
+                  ? t.dashboard.rangeMonth
+                  : t.dashboard.rangeAllTime
+              const isActive = timeRange === r
+              return (
+                <button
+                  key={r}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setTimeRange(r)}
+                  className={`relative z-10 flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 text-xs sm:text-sm transition-all duration-150 active:scale-[0.98] cursor-pointer ${
+                    isActive
+                      ? 'text-zinc-950 dark:text-white font-semibold'
+                      : 'text-zinc-600 dark:text-white/60 hover:text-zinc-950 dark:hover:text-white font-medium'
+                  }`}
+                >
+                  <span>{label}</span>
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          /* Standard / M3 / TUI Segmented Range Track */
+          <div
+            role="tablist"
+            aria-label={t.dashboard.periodOverview}
+            className="seg-track relative grid grid-cols-3 w-full sm:w-auto min-w-[240px] sm:min-w-[270px] items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md"
+          >
+            {/* Sliding Pill Indicator */}
+            <div
+              className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
+              style={{
+                width: 'calc((100% - 8px - 8px) / 3)',
+                left: '4px',
+                transform: `translateX(calc(${TIME_RANGES.indexOf(timeRange)} * (100% + 4px)))`,
+              }}
+            />
+            {TIME_RANGES.map((r) => {
+              const label =
+                r === 'week'
+                  ? t.dashboard.rangeWeek
+                  : r === 'month'
+                  ? t.dashboard.rangeMonth
+                  : t.dashboard.rangeAllTime
+              const isActive = timeRange === r
+              return (
+                <button
+                  key={r}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setTimeRange(r)}
+                  className={`relative z-10 flex min-h-[32px] sm:min-h-[34px] items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1 text-xs font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
+                    isActive
+                      ? 'text-fg font-semibold'
+                      : 'text-muted hover:text-fg'
+                  }`}
+                >
+                  {isActive && (
+                    <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
+                  )}
+                  <span>{label}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* 4 Responsive KPI Metric Cards */}

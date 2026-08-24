@@ -380,19 +380,19 @@ export const Timer = memo(function Timer({
             })}
           </div>
         ) : isIos ? (
-          /* iOS 26 Apple Inset Segmented Control */
+          /* iOS 26 Unified Glass Segmented Control */
           <div
             role="tablist"
             aria-label="Timer Modus"
-            className={`bg-black/[0.05] dark:bg-black/40 p-1 rounded-full border border-black/[0.06] dark:border-white/10 backdrop-blur-xl inline-grid grid-cols-2 ${
+            className={`relative inline-grid grid-cols-2 ${
               borderless ? 'w-60 sm:w-64' : 'w-full max-w-[240px]'
-            } mx-auto relative select-none transition-opacity duration-500 ${
+            } mx-auto items-center p-1 rounded-full bg-black/[0.05] dark:bg-black/35 border border-black/[0.06] dark:border-white/10 backdrop-blur-xl select-none transition-opacity duration-500 ${
               running && borderless ? 'opacity-30 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
             }`}
           >
             {/* Sliding Glass Puck */}
             <div
-              className="pointer-events-none absolute bottom-1 top-1 rounded-full bg-white dark:bg-white/15 border border-black/[0.04] dark:border-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.25)] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
+              className="pointer-events-none absolute bottom-1 top-1 rounded-full bg-white dark:bg-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.2)] border border-black/[0.04] dark:border-white/15 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
               style={{
                 width: 'calc((100% - 8px - 4px) / 2)',
                 left: '4px',
@@ -407,10 +407,10 @@ export const Timer = memo(function Timer({
                 aria-selected={mode === m}
                 aria-label={t.timer[m]}
                 onClick={() => onModeChange(m)}
-                className={`relative z-10 flex min-h-[36px] items-center justify-center rounded-full py-1.5 text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer ${
+                className={`relative z-10 flex items-center justify-center rounded-full px-4 py-1.5 text-xs sm:text-sm transition-all duration-150 active:scale-[0.98] cursor-pointer ${
                   mode === m
                     ? 'text-zinc-950 dark:text-white font-semibold'
-                    : 'text-zinc-600 dark:text-white/60 hover:text-zinc-950 dark:hover:text-white'
+                    : 'text-zinc-600 dark:text-white/60 hover:text-zinc-950 dark:hover:text-white font-medium'
                 }`}
               >
                 <span>{t.timer[m]}</span>
