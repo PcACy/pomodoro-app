@@ -598,14 +598,49 @@ const en: Messages = {
   },
 }
 
-export const translations: Record<Lang, Messages> = { de, en }
+const rawTranslations: Record<Lang, Messages> = { de, en }
+
+function createFallbackProxy<T extends object>(target: T, fallback: T): T {
+  return new Proxy(target, {
+    get(obj, prop, receiver) {
+      const val = Reflect.get(obj, prop, receiver)
+      const fbVal = Reflect.get(fallback as object, prop)
+      if (val === undefined) {
+        if (typeof fbVal === 'object' && fbVal !== null) {
+          return createFallbackProxy(fbVal, fbVal)
+        }
+        return fbVal
+      }
+      if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+        if (typeof fbVal === 'object' && fbVal !== null && !Array.isArray(fbVal)) {
+          return createFallbackProxy(val, fbVal)
+        }
+      }
+      return val
+    },
+  })
+}
+
+export const translations: Record<Lang, Messages> = {
+  de: createFallbackProxy(de, de),
+  en: createFallbackProxy(en, de),
+}
+
+export function getMessages(lang: Lang): Messages {
+  const target = rawTranslations[lang] ?? rawTranslations.de
+  return createFallbackProxy(target, rawTranslations.de)
+}
 
 const STORAGE_KEY = 'pomodoro.lang'
+
+export function isValidLang(l: unknown): l is Lang {
+  return l === 'de' || l === 'en'
+}
 
 function detectLang(): Lang {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved === 'de' || saved === 'en') return saved
+    if (isValidLang(saved)) return saved
   } catch {
     /* storage unavailable */
   }
@@ -622,7 +657,7 @@ export function getLang(): Lang {
 }
 
 export function setLang(lang: Lang): void {
-  if (lang === currentLang) return
+  if (!isValidLang(lang) || lang === currentLang) return
   currentLang = lang
   try {
     localStorage.setItem(STORAGE_KEY, lang)

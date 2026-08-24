@@ -17,7 +17,7 @@ class PomodoroDB extends Dexie {
         const existing = await table.toArray()
         if (existing.length) {
           await table.clear()
-          await table.bulkAdd(existing.map((r) => ({ ...r, id: typeof r.id === 'string' ? r.id : uid() })))
+          await table.bulkPut(existing.map((r) => ({ ...r, id: typeof r.id === 'string' ? r.id : uid() })))
         }
       })
   }
@@ -29,7 +29,7 @@ export async function addSession(session: Omit<Session, 'id'>): Promise<string> 
   const id = uid()
   const now = Date.now()
   const record: Session = { ...session, id, updatedAt: now }
-  await db.sessions.add(record)
+  await db.sessions.put(record)
   enqueue({ kind: 'upsert', table: 'sessions', id })
   return id
 }
@@ -90,7 +90,7 @@ export async function importSessions(sessions: unknown[]): Promise<void> {
   }
   await db.transaction('rw', db.sessions, async () => {
     await db.sessions.clear()
-    if (cleaned.length) await db.sessions.bulkAdd(cleaned)
+    if (cleaned.length) await db.sessions.bulkPut(cleaned)
   })
   enqueue({ kind: 'replace', table: 'sessions' })
 }

@@ -541,8 +541,6 @@ textarea:focus:not(:focus-visible) {
   :root[data-theme='ios-26'][data-mode='light'] .ios-seg-active {
     background-color: #ffffff;
     color: #09090b;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.04);
   }
@@ -579,8 +577,6 @@ textarea:focus:not(:focus-visible) {
   :root[data-theme='ios-26'][data-mode='dark'] .ios-seg-active,
   :root[data-theme='ios-26']:not([data-mode='light']) .ios-seg-active {
     background-color: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     box-shadow:
       0 2px 8px rgba(0, 0, 0, 0.25),
       inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -762,7 +758,6 @@ textarea:focus:not(:focus-visible) {
   width: 3.5px;
   border-radius: 9999px;
   transform-origin: center;
-  will-change: transform;
 }
 
 .flow-bar--idle {
@@ -778,6 +773,8 @@ textarea:focus:not(:focus-visible) {
 .flow-bar--running {
   animation: flow-wave 1.4s ease-in-out infinite;
   transition: opacity 300ms ease-in-out;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 @keyframes flow-wave {
@@ -822,7 +819,6 @@ textarea:focus:not(:focus-visible) {
 
 .animate-tab-enter {
   animation: tab-enter 250ms cubic-bezier(0.2, 0, 0, 1) forwards;
-  will-change: opacity, transform;
 }
 
 /* Mascot context-reactive animations */
@@ -877,13 +873,11 @@ textarea:focus:not(:focus-visible) {
 /* Soft eased catch-up between second ticks (brief-specified curve). */
 .ring-progress {
   transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: stroke-dashoffset;
 }
 /* While running the ring tracks a continuously ticking countdown; linear is
    the only easing that stays visually exact per tick (no rubber-banding). */
 .ring-progress--running {
   transition: stroke-dashoffset 1s linear;
-  will-change: stroke-dashoffset;
 }
 /* Direct manipulation (scrubbing) must feel 1:1 — no transition at all. */
 .ring-progress--none {
@@ -904,7 +898,6 @@ textarea:focus:not(:focus-visible) {
 }
 .animate-complete-pulse {
   animation: complete-pulse 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  will-change: transform;
 }
 
 /* --- Mascot phase morph (FOCUS <-> BREAK crossfade-scale) --------------- */
@@ -920,7 +913,6 @@ textarea:focus:not(:focus-visible) {
 }
 .animate-mascot-morph {
   animation: mascot-morph 280ms cubic-bezier(0.32, 0.72, 0, 1);
-  will-change: transform, opacity;
 }
 
 /* --- Todo list choreography --------------------------------------------- */
@@ -936,7 +928,6 @@ textarea:focus:not(:focus-visible) {
 }
 .animate-todo-in {
   animation: todo-in 260ms cubic-bezier(0.32, 0.72, 0, 1);
-  will-change: transform, opacity;
 }
 
 @keyframes todo-exit {
@@ -951,7 +942,6 @@ textarea:focus:not(:focus-visible) {
 }
 .animate-todo-exit {
   animation: todo-exit 170ms cubic-bezier(0.4, 0, 1, 1) forwards;
-  will-change: transform, opacity;
 }
 
 /* Checkbox icon spring pop on completion */
@@ -968,7 +958,6 @@ textarea:focus:not(:focus-visible) {
 }
 .animate-check-pop {
   animation: check-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  will-change: transform;
 }
 
 /* Delayed horizontal strike-through expansion (plays after the pop lands). */
@@ -1007,7 +996,6 @@ textarea:focus:not(:focus-visible) {
 }
 .animate-chip-in {
   animation: chip-in 220ms cubic-bezier(0.32, 0.72, 0, 1);
-  will-change: transform, opacity;
 }
 
 /* --- Tag manager (Settings) ---------------------------------------------- */
@@ -1049,7 +1037,6 @@ textarea:focus:not(:focus-visible) {
 }
 .animate-add-pop {
   animation: add-pop 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  will-change: transform, opacity;
 }
 
 /* --- Elastic button physics ---------------------------------------------- */
@@ -1104,11 +1091,9 @@ textarea:focus:not(:focus-visible) {
 }
 .modal-backdrop {
   animation: modal-backdrop-in 200ms cubic-bezier(0.2, 0, 0, 1);
-  will-change: opacity;
 }
 .modal-panel {
   animation: modal-panel-in 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  will-change: transform, opacity;
 }
 @keyframes modal-backdrop-out {
   from {

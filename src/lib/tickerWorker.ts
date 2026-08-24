@@ -54,6 +54,21 @@ export function getTickerWorker(): Worker {
     const blobUrl = URL.createObjectURL(blob)
     worker = new Worker(blobUrl)
     URL.revokeObjectURL(blobUrl)
+    worker.onerror = (err) => {
+      console.warn('[tickerWorker] Worker error encountered, resetting instance:', err)
+      terminateTickerWorker()
+    }
   }
   return worker
+}
+
+export function terminateTickerWorker(): void {
+  if (worker) {
+    try {
+      worker.terminate()
+    } catch {
+      /* ignore */
+    }
+    worker = null
+  }
 }

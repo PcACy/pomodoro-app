@@ -15,7 +15,7 @@ interface Props {
   onImportSettings: (s: unknown) => void
 }
 
-function SessionRow({ s, locale }: { s: Session; locale: string }) {
+const SessionRow = memo(function SessionRow({ s, locale }: { s: Session; locale: string }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const hasNote = Boolean(s.notes?.trim())
@@ -57,7 +57,7 @@ function SessionRow({ s, locale }: { s: Session; locale: string }) {
       )}
     </li>
   )
-}
+})
 
 export const SessionLog = memo(function SessionLog({ sessions, todos, title, onClear, onImportSettings }: Props) {
   const { t, lang } = useTranslation()

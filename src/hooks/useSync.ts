@@ -86,25 +86,23 @@ async function mergeSessionsIntoDb(remote: Session[]): Promise<void> {
   if (remote.length === 0) return
   const local = await db.sessions.toArray()
   const localById = new Map(local.map((s) => [s.id, s]))
-  const toAdd: Session[] = []
-  const toPut: Session[] = []
+  const toUpsert: Session[] = []
   for (const r of remote) {
     const l = localById.get(r.id)
     if (!l) {
-      toAdd.push(r)
+      toUpsert.push(r)
       continue
     }
     if (sessionTs(r) > sessionTs(l)) {
-      toPut.push(r)
+      toUpsert.push(r)
     } else if (sessionTs(r) === sessionTs(l) && !l.notes && r.notes) {
       // Same timestamp, equal data – keep the local record but fill a remote note.
-      toPut.push({ ...l, notes: r.notes })
+      toUpsert.push({ ...l, notes: r.notes })
     }
   }
-  if (toAdd.length || toPut.length) {
+  if (toUpsert.length) {
     await db.transaction('rw', db.sessions, async () => {
-      if (toAdd.length) await db.sessions.bulkAdd(toAdd)
-      if (toPut.length) await db.sessions.bulkPut(toPut)
+      await db.sessions.bulkPut(toUpsert)
     })
   }
 }
@@ -114,6 +112,7 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
   const [lastSyncAt, setLastSyncAt] = useState<number | null>(null)
   const [pending, setPending] = useState(false)
   const busyRef = useRef(false)
+  const syncAgainRef = useRef(false)
   const userRef = useRef(user)
   userRef.current = user
   const mergeRef = useRef(mergeRemoteTodos)
@@ -121,6 +120,9 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
 
   const pushQueue = useCallback(async (supabase: SupabaseClient): Promise<boolean> => {
     if (!userRef.current) return true
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      return false
+    }
     const ops = drainQueue()
     if (ops.length === 0) return true
     const userId = userRef.current.id
@@ -206,6 +208,9 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
 
   const pullAndMerge = useCallback(async (supabase: SupabaseClient): Promise<boolean> => {
     if (!userRef.current) return false
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      return false
+    }
     const userId = userRef.current.id
     try {
       const [sess, todos] = await Promise.all([
@@ -228,7 +233,10 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
 
   const sync = useCallback(
     async (showSyncing = false) => {
-      if (busyRef.current) return
+      if (busyRef.current) {
+        syncAgainRef.current = true
+        return
+      }
       const supabase = await getSupabase()
       if (!supabase || !userRef.current) {
         setStatus(isSupabaseConfigured ? 'signed-out' : 'unsupported')
@@ -252,7 +260,7 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
           setStatus('synced')
         } else {
           setStatus('offline')
-          if (stillPending && typeof window !== 'undefined') {
+          if (typeof window !== 'undefined') {
             const backoffMs = Math.min(30_000, 1000 * Math.pow(2, retryCountRef.current))
             retryCountRef.current = Math.min(retryCountRef.current + 1, 5)
             retryTimeoutRef.current = window.setTimeout(() => {
@@ -262,6 +270,12 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
         }
       } finally {
         busyRef.current = false
+        if (syncAgainRef.current) {
+          syncAgainRef.current = false
+          window.setTimeout(() => {
+            void sync(false)
+          }, 50)
+        }
       }
     },
     [pushQueue, pullAndMerge],
@@ -282,13 +296,18 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
         retryCountRef.current = 0
         void sync(true)
       }
+      const onOffline = () => {
+        setStatus('offline')
+      }
       const onVisible = () => {
         if (document.visibilityState === 'visible') void sync(true)
       }
       window.addEventListener('online', onOnline)
+      window.addEventListener('offline', onOffline)
       document.addEventListener('visibilitychange', onVisible)
       detach = () => {
         window.removeEventListener('online', onOnline)
+        window.removeEventListener('offline', onOffline)
         document.removeEventListener('visibilitychange', onVisible)
       }
     })

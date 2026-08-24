@@ -7,6 +7,7 @@ export interface TimerBroadcastPayload {
   remainingMs: number
   targetEnd: number | null
   completedFocusInCycle: number
+  phaseStartedAt?: number
   senderId: string
 }
 
@@ -49,10 +50,18 @@ export function subscribeBroadcast(callback: (msg: BroadcastMessage) => void): (
 
   const handler = (e: MessageEvent<BroadcastMessage>) => {
     if (e.data && typeof e.data === 'object' && 'type' in e.data) {
-      if ('payload' in e.data && e.data.payload.senderId === TAB_INSTANCE_ID) {
+      const data = e.data
+      const sender =
+        'payload' in data && data.payload && typeof data.payload === 'object'
+          ? (data.payload as { senderId?: string }).senderId
+          : 'senderId' in data
+            ? (data as { senderId?: string }).senderId
+            : null
+
+      if (sender === TAB_INSTANCE_ID) {
         return // Ignore own messages
       }
-      callback(e.data)
+      callback(data)
     }
   }
 

@@ -12,14 +12,26 @@ interface ShortcutHandlers {
 const isEditableTarget = (el: EventTarget | null): boolean => {
   const node = el as HTMLElement | null
   if (!node || !node.tagName) return false
-  const tag = node.tagName
-  return (
+  const tag = node.tagName.toUpperCase()
+  if (
     tag === 'INPUT' ||
     tag === 'TEXTAREA' ||
     tag === 'SELECT' ||
     tag === 'BUTTON' ||
     node.isContentEditable
-  )
+  ) {
+    return true
+  }
+  if (typeof node.closest === 'function') {
+    if (
+      node.closest(
+        'input, textarea, select, button, [contenteditable="true"], [role="textbox"], [role="combobox"], [role="searchbox"], [role="menuitem"], [role="option"]',
+      )
+    ) {
+      return true
+    }
+  }
+  return false
 }
 
 export function useKeyboard(handlers: ShortcutHandlers): void {

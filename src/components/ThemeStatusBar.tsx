@@ -5,6 +5,7 @@ import type { SyncStatus } from '../hooks/useSync'
 import { VimStatusLine } from './VimStatusLine'
 import { GlassLiveActivityBar } from './GlassLiveActivityBar'
 import { MaterialGlanceableBar } from './MaterialGlanceableBar'
+import { useFlowTimerTick, useTimerTick } from '../hooks/useTimerTick'
 
 export interface ThemeStatusBarProps {
   themeId: ThemeId
@@ -12,8 +13,8 @@ export interface ThemeStatusBarProps {
   mode: 'pomodoro' | 'flow'
   phase: PhaseId
   status: TimerStatus
-  time: string
-  progress: number
+  time?: string
+  progress?: number
   task: string
   tag: string
   completedRounds: number
@@ -22,14 +23,26 @@ export interface ThemeStatusBarProps {
 }
 
 export const ThemeStatusBar = memo(function ThemeStatusBar(props: ThemeStatusBarProps) {
+  const timerTick = useTimerTick()
+  const flowTick = useFlowTimerTick()
+
+  const activeTime = props.time ?? (props.mode === 'flow' ? flowTick.time : timerTick.time)
+  const activeProgress = props.progress ?? (props.mode === 'flow' ? 1 : timerTick.progress)
+
+  const resolvedProps = {
+    ...props,
+    time: activeTime,
+    progress: activeProgress,
+  }
+
   switch (props.themeId) {
     case 'gruvbox':
-      return <VimStatusLine {...props} />
+      return <VimStatusLine {...resolvedProps} />
     case 'ios-26':
-      return <GlassLiveActivityBar {...props} />
+      return <GlassLiveActivityBar {...resolvedProps} />
     case 'material-you':
-      return <MaterialGlanceableBar {...props} />
+      return <MaterialGlanceableBar {...resolvedProps} />
     default:
-      return <VimStatusLine {...props} />
+      return <VimStatusLine {...resolvedProps} />
   }
 })

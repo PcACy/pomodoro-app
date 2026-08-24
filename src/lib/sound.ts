@@ -19,7 +19,11 @@ function createCtx(): AudioContext | null {
 
 function ensureCtx(): AudioContext | null {
   if (!ctx) ctx = createCtx()
-  if (ctx && ctx.state === 'suspended') void ctx.resume()
+  if (ctx && ctx.state === 'suspended') {
+    ctx.resume().catch(() => {
+      /* browser autoplay policy / gesture required */
+    })
+  }
   return ctx
 }
 
@@ -148,6 +152,9 @@ export function playChime(kind: ChimeKind = 'focus'): void {
   try {
     const audio = ensureCtx()
     if (!audio) return
+    if (audio.state === 'suspended') {
+      audio.resume().catch(() => {})
+    }
     const buf = getBuffer(audio, kind)
     if (!buf) return
     const src = audio.createBufferSource()
@@ -160,7 +167,7 @@ export function playChime(kind: ChimeKind = 'focus'): void {
         /* already disconnected */
       }
     }
-    src.start()
+    src.start(0)
   } catch (err) {
     console.warn('[sound] Failed to play chime:', err)
   }

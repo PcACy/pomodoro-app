@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Pause, Play, SkipForward } from 'lucide-react'
 import type { PhaseId, TimerStatus } from '../types'
 import type { PipMode } from '../hooks/usePictureInPicture'
 import { useTranslation } from '../hooks/useTranslation'
+import { useFlowTimerTick, useTimerTick } from '../hooks/useTimerTick'
 
 interface Props {
   mode: PipMode
@@ -11,7 +12,8 @@ interface Props {
   phase: PhaseId
   phaseLabel: string
   status: TimerStatus
-  time: string
+  time?: string
+  isFlow?: boolean
   activeTodo: string
   onToggle: () => void
   onSkip: () => void
@@ -23,8 +25,24 @@ const BADGE: Record<PhaseId, string> = {
   longBreak: 'bg-long/15 text-long',
 }
 
-export function PipTimer({ mode, pipWindow, phase, phaseLabel, status, time, activeTodo, onToggle, onSkip }: Props) {
+export const PipTimer = memo(function PipTimer({
+  mode,
+  pipWindow,
+  phase,
+  phaseLabel,
+  status,
+  time,
+  isFlow = false,
+  activeTodo,
+  onToggle,
+  onSkip,
+}: Props) {
   const { t } = useTranslation()
+  const timerTick = useTimerTick()
+  const flowTick = useFlowTimerTick()
+
+  const activeTime = time ?? (isFlow ? flowTick.time : timerTick.time)
+
   if (mode !== 'document' || !pipWindow?.document?.body) return null
 
   const running = status === 'running'
@@ -36,7 +54,7 @@ export function PipTimer({ mode, pipWindow, phase, phaseLabel, status, time, act
       >
         {phaseLabel}
       </span>
-      <span className="font-display font-bold text-4xl tabular-nums leading-none text-fg">{time}</span>
+      <span className="font-display font-bold text-4xl tabular-nums leading-none text-fg">{activeTime}</span>
 
       {activeTodo && (
         <span className="max-w-full truncate text-xs text-muted" title={activeTodo}>
@@ -65,13 +83,14 @@ export function PipTimer({ mode, pipWindow, phase, phaseLabel, status, time, act
     </div>,
     pipWindow.document.body,
   )
-}
+})
 
 interface CanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement>
   phaseLabel: string
   status: TimerStatus
-  time: string
+  time?: string
+  isFlow?: boolean
   enabled?: boolean
 }
 
@@ -86,7 +105,7 @@ export function renderPipCanvas(
 ) {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
-  const dpr = Math.max(window.devicePixelRatio || 1, 2)
+  const dpr = typeof window !== 'undefined' ? Math.max(window.devicePixelRatio || 1, 2) : 2
   const w = canvas.width / dpr
   const h = canvas.height / dpr
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
@@ -107,24 +126,27 @@ export function renderPipCanvas(
   ctx.fillText(status === 'running' ? '● RUNNING' : '❚❚ PAUSED', w / 2, h / 2 + 34)
 }
 
-/** Renders the timer onto the hidden canvas that feeds the video-PiP fallback stream. */
-export function PipCanvas({ canvasRef, phaseLabel, status, time, enabled = true }: CanvasProps) {
+/** Renders the timer onto the hidden canvas that feeds the video-PiP fallback stream on demand only. */
+export const PipCanvas = memo(function PipCanvas({ canvasRef, phaseLabel, status, time, isFlow = false, enabled = true }: CanvasProps) {
+  const timerTick = useTimerTick()
+  const flowTick = useFlowTimerTick()
+  const activeTime = time ?? (isFlow ? flowTick.time : timerTick.time)
+  const lastStateRef = useRef<string>('')
+
   useEffect(() => {
+    if (!enabled) {
+      lastStateRef.current = ''
+      return
+    }
     const canvas = canvasRef.current
     if (!canvas) return
 
-    renderPipCanvas(canvas, phaseLabel, status, time)
+    const key = `${phaseLabel}:${status}:${activeTime}`
+    if (lastStateRef.current === key) return
+    lastStateRef.current = key
 
-    if (!enabled) return
-
-    let animId: number
-    const loop = () => {
-      renderPipCanvas(canvas, phaseLabel, status, time)
-      animId = requestAnimationFrame(loop)
-    }
-    animId = requestAnimationFrame(loop)
-    return () => cancelAnimationFrame(animId)
-  }, [canvasRef, phaseLabel, status, time, enabled])
+    renderPipCanvas(canvas, phaseLabel, status, activeTime)
+  }, [canvasRef, phaseLabel, status, activeTime, enabled])
 
   return null
-}
+})

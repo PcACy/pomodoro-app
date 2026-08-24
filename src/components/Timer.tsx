@@ -5,20 +5,21 @@ import type { ThemeId } from '../themes'
 import { useTranslation } from '../hooks/useTranslation'
 import { CatLogo } from './CatLogo'
 import { playMicroClick } from '../lib/sound'
+import { useFlowTimerTick, useTimerTick } from '../hooks/useTimerTick'
 
 interface Props {
   themeId?: ThemeId
   phase: PhaseId
   phaseLabel: string
   status: TimerStatus
-  time: string
-  progress: number
+  time?: string
+  progress?: number
   large?: boolean
   completedFocusInCycle: number
   roundsBeforeLongBreak: number
   mode: TimerMode
   flowStatus: TimerStatus
-  flowTime: string
+  flowTime?: string
   durationMinutes?: number
   onDurationChange?: (minutes: number) => void
   onModeChange: (m: TimerMode) => void
@@ -73,7 +74,7 @@ const FLOW_DELAYS = [
 ]
 
 /** 11-bar organic equalizer waveform for flow mode (GPU-composited). */
-function Waveform({ status }: { status: TimerStatus }) {
+const Waveform = memo(function Waveform({ status }: { status: TimerStatus }) {
   return (
     <div className="my-2.5 flex h-8 items-center justify-center gap-1.5 select-none" aria-hidden="true">
       {FLOW_BARS.map((i) => (
@@ -91,7 +92,7 @@ function Waveform({ status }: { status: TimerStatus }) {
       ))}
     </div>
   )
-}
+})
 
 export const Timer = memo(function Timer({
   themeId,
@@ -122,12 +123,19 @@ export const Timer = memo(function Timer({
   tag,
 }: Props) {
   const { t } = useTranslation()
+  const timerTick = useTimerTick()
+  const flowTick = useFlowTimerTick()
+
   const isFlow = mode === 'flow'
   const isIdle = status === 'idle'
   const isTui = themeId === 'gruvbox'
 
+  const activeTime = time ?? (isFlow ? flowTick.time : timerTick.time)
+  const activeProgress = progress ?? (isFlow ? 0 : timerTick.progress)
+  const activeFlowTime = flowTime ?? flowTick.time
+
   // Parse flow elapsed time for seconds & milestone calculations
-  const flowParts = (flowTime || '00:00').split(':').map(Number)
+  const flowParts = (activeFlowTime || '00:00').split(':').map(Number)
   let flowSeconds = 0
   if (flowParts.length === 3) {
     flowSeconds = (flowParts[0] || 0) * 3600 + (flowParts[1] || 0) * 60 + (flowParts[2] || 0)
@@ -138,7 +146,7 @@ export const Timer = memo(function Timer({
 
   // Pomodoro ASCII progress bar (deterministic countdown)
   const totalBlocks = 18
-  const currentProgress = Math.min(1, Math.max(0, progress))
+  const currentProgress = Math.min(1, Math.max(0, activeProgress))
   const filledBlocks = Math.min(totalBlocks, Math.max(0, Math.round(currentProgress * totalBlocks)))
   const emptyBlocks = totalBlocks - filledBlocks
   const asciiBar = `[${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}] ${Math.round(currentProgress * 100)}%`
@@ -212,16 +220,16 @@ export const Timer = memo(function Timer({
   const circ = 2 * Math.PI * r
 
   // When scrubbing in idle, preview the fraction of 60m; otherwise render smooth 1.0 -> 0.0 session countdown
-  const effectiveProgress = isScrubbing ? scrubFraction : Math.min(1, Math.max(0, progress))
+  const effectiveProgress = isScrubbing ? scrubFraction : Math.min(1, Math.max(0, activeProgress))
   const offset = circ * (1 - effectiveProgress)
   const glowVar = isFlow ? '--c-accent' : GLOW_VAR[phase]
 
   const shownLabel = isFlow ? t.timer.flow : phaseLabel
   const shownTime = isFlow
-    ? flowTime
+    ? activeFlowTime
     : scrubbingMinutes != null
       ? `${String(scrubbingMinutes).padStart(2, '0')}:00`
-      : time
+      : activeTime
   const shownStatus = running
     ? t.timer.status.running
     : paused
@@ -250,25 +258,25 @@ export const Timer = memo(function Timer({
     return Math.max(5, Math.min(60, snapped))
   }, [])
 
-  const handlePointerDown = (e: React.PointerEvent) => {
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
     if (!isIdle || isFlow || !onDurationChange) return
     isDraggingRef.current = true
     playMicroClick('tick')
     const mins = calcMinutesFromPointer(e)
     if (mins) setScrubbingMinutes(mins)
     e.currentTarget.setPointerCapture?.(e.pointerId)
-  }
+  }, [isIdle, isFlow, onDurationChange, calcMinutesFromPointer])
 
-  const handlePointerMove = (e: React.PointerEvent) => {
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDraggingRef.current) return
     const mins = calcMinutesFromPointer(e)
     if (mins && mins !== scrubbingMinutes) {
       playMicroClick('tick')
       setScrubbingMinutes(mins)
     }
-  }
+  }, [calcMinutesFromPointer, scrubbingMinutes])
 
-  const handlePointerUp = (e: React.PointerEvent) => {
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (!isDraggingRef.current) return
     isDraggingRef.current = false
     playMicroClick('pop')
@@ -281,7 +289,7 @@ export const Timer = memo(function Timer({
     try {
       e.currentTarget.releasePointerCapture?.(e.pointerId)
     } catch {}
-  }
+  }, [calcMinutesFromPointer, scrubbingMinutes, onDurationChange])
 
   const playBtnColor =
     isFlow || phase === 'focus'
@@ -290,20 +298,20 @@ export const Timer = memo(function Timer({
         ? 'bg-break text-on-accent border border-black/10 dark:border-white/10 active:border-break/60 shadow-[0_0_24px_rgb(var(--c-break)/calc(var(--glow-opacity,0.25)*1.5))]'
         : 'bg-long text-on-accent border border-black/10 dark:border-white/10 active:border-long/60 shadow-[0_0_24px_rgb(var(--c-long)/calc(var(--glow-opacity,0.25)*1.5))]'
 
-  const handleToggleClick = () => {
+  const handleToggleClick = useCallback(() => {
     playMicroClick(running ? 'tick' : 'pop')
     onToggle()
-  }
+  }, [running, onToggle])
 
-  const handleResetClick = () => {
+  const handleResetClick = useCallback(() => {
     playMicroClick('tap')
     onReset()
-  }
+  }, [onReset])
 
-  const handleSkipClick = () => {
+  const handleSkipClick = useCallback(() => {
     playMicroClick('toggle')
     onSkip()
-  }
+  }, [onSkip])
 
   return (
     <section
@@ -311,7 +319,7 @@ export const Timer = memo(function Timer({
         borderless
           ? 'max-w-xl gap-4 p-0 bg-transparent border-0 shadow-none'
           : isIos
-            ? 'rounded-[36px] bg-white/75 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/80 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-6 sm:p-7 relative overflow-hidden max-w-md 2xl:max-w-lg gap-4'
+            ? 'rounded-[36px] bg-white/75 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/80 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-5 sm:p-6 relative overflow-hidden max-w-md 2xl:max-w-lg gap-3 sm:gap-4'
             : 'card max-w-md 2xl:max-w-lg gap-3 sm:gap-4 p-5 sm:p-6'
       }`}
     >
@@ -327,7 +335,7 @@ export const Timer = memo(function Timer({
 
       {task && (
         <div
-          className={`inline-flex max-w-full items-center gap-2 px-3.5 py-1.5 text-xs shadow-sm backdrop-blur-md transition-all duration-300 ${
+          className={`inline-flex max-w-full items-center gap-2 px-3.5 py-1.5 text-xs shadow-sm transition-all duration-300 ${
             isIos
               ? 'rounded-full border border-black/[0.08] dark:border-white/15 bg-black/[0.05] dark:bg-white/10 text-zinc-800 dark:text-white/90 font-medium'
               : 'rounded-badge border border-line/70 bg-surface/80 text-fg'
@@ -386,7 +394,7 @@ export const Timer = memo(function Timer({
             aria-label="Timer Modus"
             className={`relative inline-grid grid-cols-2 ${
               borderless ? 'w-60 sm:w-64' : 'w-full max-w-[240px]'
-            } mx-auto items-center p-1 rounded-full bg-black/[0.05] dark:bg-black/35 border border-black/[0.06] dark:border-white/10 backdrop-blur-xl select-none transition-opacity duration-500 ${
+            } mx-auto items-center p-1 rounded-full bg-black/[0.05] dark:bg-black/35 border border-black/[0.06] dark:border-white/10 select-none transition-opacity duration-500 ${
               running && borderless ? 'opacity-30 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
             }`}
           >
@@ -424,7 +432,7 @@ export const Timer = memo(function Timer({
             aria-label="Timer Modus"
             className={`seg-track relative grid grid-cols-2 ${
               borderless ? 'w-60 sm:w-64' : 'w-full max-w-[260px]'
-            } mx-auto select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
+            } mx-auto select-none rounded-btn border border-line/70 bg-surface/80 p-1 transition-opacity duration-500 ${
               running && borderless ? 'opacity-30 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
             }`}
           >
@@ -617,7 +625,7 @@ export const Timer = memo(function Timer({
                 strokeWidth={stroke}
                 className={isIos ? 'stroke-black/[0.06] dark:stroke-white/10' : 'stroke-track'}
               />
-              {/* Neon Arc: stroke-primary with round caps and subtle acrylic light-guide glow */}
+              {/* Neon Arc: stroke-primary with round caps */}
               <circle
                 cx={center}
                 cy={center}
@@ -634,11 +642,6 @@ export const Timer = memo(function Timer({
                       ? 'ring-progress--running'
                       : 'ring-progress'
                 }`}
-                style={
-                  isIos
-                    ? { filter: `drop-shadow(0 0 4px rgb(var(${glowVar}) / 0.35))` }
-                    : undefined
-                }
               />
             </svg>
 
@@ -661,7 +664,7 @@ export const Timer = memo(function Timer({
             <div className="absolute inset-0 flex flex-col items-center justify-center -translate-y-0.5">
               {isIos ? (
                 /* Live Round Capsule for iOS 26 */
-                <div className="mb-3 sm:mb-3.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/10 backdrop-blur-md border border-black/[0.08] dark:border-white/15 text-[10px] sm:text-[11px] font-medium tracking-wide uppercase text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
+                <div className="mb-3 sm:mb-3.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/10 border border-black/[0.08] dark:border-white/15 text-[10px] sm:text-[11px] font-medium tracking-wide uppercase text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
                   <CatLogo
                     size={12}
                     state={isIdle ? 'idle' : phase}
@@ -729,7 +732,7 @@ export const Timer = memo(function Timer({
 
             {isIos ? (
               /* Live Round Capsule for iOS 26 Flow Mode */
-              <div className="mb-3 sm:mb-3.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/10 backdrop-blur-md border border-black/[0.08] dark:border-white/15 text-[10px] sm:text-[11px] font-medium tracking-wide uppercase text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
+              <div className="mb-3 sm:mb-3.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/10 border border-black/[0.08] dark:border-white/15 text-[10px] sm:text-[11px] font-medium tracking-wide uppercase text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
                 <CatLogo
                   size={12}
                   state={flowStatus === 'idle' ? 'idle' : 'focus'}
@@ -780,7 +783,7 @@ export const Timer = memo(function Timer({
                         className={`flex items-center gap-1 transition-all duration-300 px-2.5 py-0.5 rounded-full text-[11px] ${
                           reached
                             ? 'bg-primary/20 border border-primary/30 text-primary font-semibold shadow-[0_0_10px_rgba(var(--primary-rgb),0.25)]'
-                            : 'bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/10 text-zinc-600 dark:text-white/40 backdrop-blur-sm'
+                            : 'bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/10 text-zinc-600 dark:text-white/40'
                         }`}
                       >
                         <span>{reached ? '★' : '☆'}</span>
@@ -882,7 +885,7 @@ export const Timer = memo(function Timer({
             onClick={handleResetClick}
             title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
             aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/[0.05] hover:bg-black/[0.09] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.08] dark:border-white/10 backdrop-blur-xl flex items-center justify-center text-zinc-800 dark:text-white/80 transition-all cursor-pointer shadow-sm"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/[0.05] hover:bg-black/[0.09] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.08] dark:border-white/10 flex items-center justify-center text-zinc-800 dark:text-white/80 transition-all cursor-pointer shadow-sm"
           >
             <RotateCcw size={17} />
           </button>
@@ -909,7 +912,7 @@ export const Timer = memo(function Timer({
               onClick={handleSkipClick}
               title={`${t.flow.finish} (F)`}
               aria-label={t.flow.finish}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/[0.05] hover:bg-black/[0.09] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.08] dark:border-white/10 backdrop-blur-xl flex items-center justify-center text-zinc-800 dark:text-white/80 transition-all cursor-pointer shadow-sm"
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/[0.05] hover:bg-black/[0.09] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.08] dark:border-white/10 flex items-center justify-center text-zinc-800 dark:text-white/80 transition-all cursor-pointer shadow-sm"
             >
               <Check size={19} strokeWidth={2.5} />
             </button>
@@ -919,7 +922,7 @@ export const Timer = memo(function Timer({
               onClick={handleSkipClick}
               title={`${t.shortcuts.skip} (N)`}
               aria-label={t.shortcuts.skip}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/[0.05] hover:bg-black/[0.09] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.08] dark:border-white/10 backdrop-blur-xl flex items-center justify-center text-zinc-800 dark:text-white/80 transition-all cursor-pointer shadow-sm"
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/[0.05] hover:bg-black/[0.09] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.08] dark:border-white/10 flex items-center justify-center text-zinc-800 dark:text-white/80 transition-all cursor-pointer shadow-sm"
             >
               <SkipForward size={17} />
             </button>
@@ -980,34 +983,34 @@ export const Timer = memo(function Timer({
 
       {/* Keyboard shortcuts row: stable layout without jumps & zero wrap */}
       <div
-        className={`flex min-h-[26px] items-center justify-center gap-1.5 sm:gap-2.5 select-none text-[11px] font-mono ${
+        className={`flex min-h-[28px] items-center justify-center gap-2 sm:gap-3 select-none text-xs font-mono ${
           isIos ? 'text-zinc-600 dark:text-white/50 font-medium' : 'text-muted'
-        } transition-opacity duration-200 whitespace-nowrap mt-1 [@media(hover:none)]:hidden ${
+        } transition-opacity duration-200 whitespace-nowrap mt-2 [@media(hover:none)]:hidden ${
           running ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >
         <span className="inline-flex items-center gap-1 shrink-0">
-          <kbd className={isIos ? 'inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd text-[10px] shrink-0'}>Space</kbd> Start/Pause
+          <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>Space</kbd> Start/Pause
         </span>
         <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
         {isFlow ? (
           <>
             <span className="inline-flex items-center gap-1 shrink-0">
-              <kbd className={isIos ? 'inline-flex items-center justify-center px-1.5 py-0.5 min-w-[18px] rounded text-[10px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd text-[10px] shrink-0'}>R</kbd> Discard
+              <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>R</kbd> Discard
             </span>
             <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
             <span className="inline-flex items-center gap-1 shrink-0">
-              <kbd className={isIos ? 'inline-flex items-center justify-center px-1.5 py-0.5 min-w-[18px] rounded text-[10px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd text-[10px] shrink-0'}>F</kbd> Finish
+              <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>F</kbd> Finish
             </span>
           </>
         ) : (
           <>
             <span className="inline-flex items-center gap-1 shrink-0">
-              <kbd className={isIos ? 'inline-flex items-center justify-center px-1.5 py-0.5 min-w-[18px] rounded text-[10px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd text-[10px] shrink-0'}>R</kbd> Reset
+              <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>R</kbd> Reset
             </span>
             <span className={`shrink-0 ${isIos ? 'text-zinc-400 dark:text-white/20' : 'text-muted/40'}`}>·</span>
             <span className="inline-flex items-center gap-1 shrink-0">
-              <kbd className={isIos ? 'inline-flex items-center justify-center px-1.5 py-0.5 min-w-[18px] rounded text-[10px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd text-[10px] shrink-0'}>N</kbd> Skip
+              <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>N</kbd> Skip
             </span>
           </>
         )}
@@ -1021,7 +1024,7 @@ export const Timer = memo(function Timer({
             isIos ? 'hover:text-zinc-950 dark:hover:text-white' : 'hover:text-fg'
           } cursor-pointer`}
         >
-          <kbd className={isIos ? 'inline-flex items-center justify-center px-1.5 py-0.5 min-w-[18px] rounded text-[10px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd text-[10px] shrink-0'}>Z</kbd> Zen
+          <kbd className={isIos ? 'inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] rounded-md text-[11px] font-mono font-semibold bg-black/[0.06] border border-black/[0.1] text-zinc-900 shadow-none dark:bg-white/10 dark:border-white/15 dark:text-white shrink-0' : 'kbd inline-flex items-center justify-center px-2 py-0.5 min-w-[38px] text-[11px] shrink-0'}>Z</kbd> Zen
         </button>
       </div>
 
@@ -1045,7 +1048,7 @@ export const Timer = memo(function Timer({
             role="tooltip"
             className={`pointer-events-none absolute bottom-full right-0 mb-2 whitespace-nowrap rounded-md border px-2 py-1 text-xs font-normal opacity-0 shadow-lg transition-opacity duration-150 group-hover/pip:opacity-100 ${
               isIos
-                ? 'border-black/[0.08] dark:border-white/15 bg-white/95 dark:bg-black/80 text-zinc-900 dark:text-white backdrop-blur-md'
+                ? 'border-black/[0.08] dark:border-white/15 bg-white/95 dark:bg-black/90 text-zinc-900 dark:text-white'
                 : 'border-line bg-raised text-fg'
             }`}
           >

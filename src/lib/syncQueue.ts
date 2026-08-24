@@ -7,6 +7,9 @@ export type SyncOp =
 
 const STORAGE_KEY = 'pomodoro.sync.queue'
 
+let memoryCache: SyncOp[] | null = null
+let lastRawString: string | null = null
+
 function isValidSyncOp(op: unknown): op is SyncOp {
   if (!op || typeof op !== 'object') return false
   const o = op as Record<string, unknown>
@@ -20,20 +23,44 @@ function isValidSyncOp(op: unknown): op is SyncOp {
 
 function read(): SyncOp[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return []
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
+    if (!raw) {
+      memoryCache = []
+      lastRawString = null
+      return memoryCache
+    }
+    // Fast path: if raw string hasn't changed since last read/write, return memoryCache
+    if (memoryCache !== null && raw === lastRawString) {
+      return memoryCache
+    }
     const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
-    return parsed.filter(isValidSyncOp)
+    if (!Array.isArray(parsed)) {
+      memoryCache = []
+      lastRawString = raw
+      return memoryCache
+    }
+    memoryCache = parsed.filter(isValidSyncOp)
+    lastRawString = raw
+    return memoryCache
   } catch {
-    return []
+    memoryCache = []
+    lastRawString = null
+    return memoryCache
   }
 }
 
 function write(ops: SyncOp[]): void {
+  memoryCache = ops
   try {
-    if (ops.length === 0) localStorage.removeItem(STORAGE_KEY)
-    else localStorage.setItem(STORAGE_KEY, JSON.stringify(ops))
+    if (typeof localStorage === 'undefined') return
+    if (ops.length === 0) {
+      lastRawString = null
+      localStorage.removeItem(STORAGE_KEY)
+    } else {
+      const json = JSON.stringify(ops)
+      lastRawString = json
+      localStorage.setItem(STORAGE_KEY, json)
+    }
   } catch {
     /* storage unavailable */
   }

@@ -117,7 +117,7 @@ export function usePictureInPicture(): PictureInPictureState {
           (canvas as HTMLCanvasElement & { captureStream?: (fps: number) => MediaStream; mozCaptureStream?: (fps: number) => MediaStream }).captureStream ||
           (canvas as HTMLCanvasElement & { mozCaptureStream?: (fps: number) => MediaStream }).mozCaptureStream
         if (!captureFn) return
-        const stream = captureFn.call(canvas, 30)
+        const stream = captureFn.call(canvas, 10)
         video.srcObject = stream
         video.muted = true
         video.playsInline = true
@@ -136,34 +136,42 @@ export function usePictureInPicture(): PictureInPictureState {
     }
   }, [isSupported, mode, cleanupVideo])
 
+  const pipWindowRef = useRef<Window | null>(null)
+  pipWindowRef.current = pipWindow
+
   // Sync theme changes to active document PiP window
   useEffect(() => {
     if (!pipWindow) return
     const observer = new MutationObserver(() => {
-      const theme = document.documentElement.getAttribute('data-theme')
-      if (theme) pipWindow.document.documentElement.setAttribute('data-theme', theme)
-      const colorMode = document.documentElement.getAttribute('data-mode')
-      if (colorMode) pipWindow.document.documentElement.setAttribute('data-mode', colorMode)
+      try {
+        const theme = document.documentElement.getAttribute('data-theme')
+        if (theme) pipWindow.document.documentElement.setAttribute('data-theme', theme)
+        const colorMode = document.documentElement.getAttribute('data-mode')
+        if (colorMode) pipWindow.document.documentElement.setAttribute('data-mode', colorMode)
+      } catch {
+        /* window might be closing */
+      }
     })
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-mode'] })
     return () => observer.disconnect()
   }, [pipWindow])
 
+  // Clean up PiP resources only on component unmount
   useEffect(() => {
     return () => {
-      if (pipWindow) {
+      if (pipWindowRef.current) {
         try {
-          pipWindow.close()
+          pipWindowRef.current.close()
         } catch {
           /* already closed */
         }
       }
-      if (document.pictureInPictureElement) {
+      if (typeof document !== 'undefined' && document.pictureInPictureElement) {
         void document.exitPictureInPicture().catch(() => {})
       }
       cleanupVideo()
     }
-  }, [pipWindow, cleanupVideo])
+  }, [cleanupVideo])
 
   return { mode, pipWindow, isSupported, open, close, canvasRef, videoRef }
 }

@@ -19,12 +19,13 @@ export function useWakeLock(active: boolean): void {
     if (!wakeLockSupported()) return
 
     const acquire = async (): Promise<void> => {
-      if (!activeRef.current || sentinelRef.current) return
+      const currentSentinel = sentinelRef.current
+      if (!activeRef.current || (currentSentinel && !currentSentinel.released)) return
       try {
         const sentinel = await navigator.wakeLock.request('screen')
         // Another acquire() may have resolved first while we were awaiting –
         // release the surplus sentinel instead of leaking an untracked lock.
-        if (!activeRef.current || sentinelRef.current) {
+        if (!activeRef.current || (sentinelRef.current && !sentinelRef.current.released)) {
           void sentinel.release().catch(() => {})
           return
         }
@@ -59,9 +60,11 @@ export function useWakeLock(active: boolean): void {
 
     if (active) void acquire()
     document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('focus', onVisibility)
 
     return () => {
       document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('focus', onVisibility)
       void release()
     }
   }, [active])

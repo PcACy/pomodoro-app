@@ -6,7 +6,7 @@ import { useSessions } from './hooks/useSessions'
 import { useTimer } from './hooks/useTimer'
 import { useFlowTimer } from './hooks/useFlowTimer'
 import { useKeyboard } from './hooks/useKeyboard'
-import { useDocumentChrome } from './hooks/useDocumentChrome'
+import { DocumentChrome } from './hooks/useDocumentChrome'
 import { useTheme } from './hooks/useTheme'
 import { useServiceWorker } from './hooks/useServiceWorker'
 import { usePictureInPicture } from './hooks/usePictureInPicture'
@@ -230,11 +230,7 @@ export default function App() {
 
   const chromePhase = mode === 'flow' ? 'focus' : timer.phase
   const chromeStatus = mode === 'flow' ? flow.status : timer.status
-  const chromeTime = mode === 'flow' ? flow.time : timer.time
-  const chromeProgress = mode === 'flow' ? 0 : timer.progress
-  const chromeRemaining = mode === 'flow' ? flow.elapsedMs : timer.remainingMs
   const isRunning = chromeStatus === 'running'
-  useDocumentChrome(chromePhase, chromeStatus, chromeTime, chromeProgress, chromeRemaining)
 
   const { updateAvailable, reload } = useServiceWorker()
   const { pipWindow, isSupported: pipSupported, open: openPip, close: closePip, mode: pipMode, canvasRef, videoRef } =
@@ -248,9 +244,11 @@ export default function App() {
     const unlock = () => initAudio()
     window.addEventListener('pointerdown', unlock, { once: true })
     window.addEventListener('keydown', unlock, { once: true })
+    window.addEventListener('touchstart', unlock, { once: true })
     return () => {
       window.removeEventListener('pointerdown', unlock)
       window.removeEventListener('keydown', unlock)
+      window.removeEventListener('touchstart', unlock)
     }
   }, [])
 
@@ -298,6 +296,9 @@ export default function App() {
 
   return (
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl 2xl:max-w-6xl flex-col items-center gap-8 2xl:gap-10 px-4 py-8">
+      {/* Dynamic Document Title & Favicon Manager (Isolated from App re-renders) */}
+      <DocumentChrome phase={chromePhase} status={chromeStatus} mode={mode} />
+
       {/* Screen Reader Live Region for WCAG 2.1 AA Announcements */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
         {liveAnnouncement}
@@ -409,13 +410,10 @@ export default function App() {
                   phase={timer.phase}
                   phaseLabel={timer.phaseLabel}
                   status={timer.status}
-                  time={timer.time}
-                  progress={timer.progress}
                   completedFocusInCycle={timer.completedFocusInCycle}
                   roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
                   mode={mode}
                   flowStatus={flow.status}
-                  flowTime={flow.time}
                   task={sessionTask}
                   tag={sessionTag}
                   onModeChange={handleModeChange}
@@ -450,13 +448,10 @@ export default function App() {
                   phase={timer.phase}
                   phaseLabel={timer.phaseLabel}
                   status={timer.status}
-                  time={timer.time}
-                  progress={timer.progress}
                   completedFocusInCycle={timer.completedFocusInCycle}
                   roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
                   mode={mode}
                   flowStatus={flow.status}
-                  flowTime={flow.time}
                   task={sessionTask}
                   tag={sessionTag}
                   onModeChange={handleModeChange}
@@ -569,13 +564,10 @@ export default function App() {
               phase={timer.phase}
               phaseLabel={timer.phaseLabel}
               status={timer.status}
-              time={timer.time}
-              progress={timer.progress}
               completedFocusInCycle={timer.completedFocusInCycle}
               roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
               mode={mode}
               flowStatus={flow.status}
-              flowTime={flow.time}
               task={sessionTask}
               tag={sessionTag}
               onModeChange={handleModeChange}
@@ -618,7 +610,7 @@ export default function App() {
         phase={chromePhase}
         phaseLabel={mode === 'flow' ? 'Flow' : timer.phaseLabel}
         status={chromeStatus}
-        time={chromeTime}
+        isFlow={mode === 'flow'}
         activeTodo={sessionTask}
         onToggle={handleToggle}
         onSkip={handleSkip}
@@ -632,7 +624,7 @@ export default function App() {
         canvasRef={canvasRef}
         phaseLabel={mode === 'flow' ? 'Flow' : timer.phaseLabel}
         status={chromeStatus}
-        time={chromeTime}
+        isFlow={mode === 'flow'}
         enabled={pipMode === 'video'}
       />
 
@@ -649,8 +641,6 @@ export default function App() {
         mode={mode}
         phase={chromePhase}
         status={chromeStatus}
-        time={chromeTime}
-        progress={mode === 'flow' ? 1 : timer.progress}
         task={sessionTask}
         tag={sessionTag}
         completedRounds={timer.completedFocusInCycle}

@@ -6,8 +6,11 @@ export function useLocalState<T>(key: string, initial: T): [T, Dispatch<SetState
 
   const [value, setValue] = useState<T>(() => {
     try {
-      const raw = localStorage.getItem(key)
-      return raw != null ? (JSON.parse(raw) as T) : initial
+      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null
+      if (raw == null) return initial
+      const parsed = JSON.parse(raw) as T
+      if (parsed === null && initial !== null) return initial
+      return parsed
     } catch {
       return initial
     }
@@ -15,7 +18,9 @@ export function useLocalState<T>(key: string, initial: T): [T, Dispatch<SetState
 
   useEffect(() => {
     try {
-      localStorage.setItem(key, JSON.stringify(value))
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(key, JSON.stringify(value))
+      }
     } catch {
       /* storage full / unavailable */
     }
@@ -26,7 +31,12 @@ export function useLocalState<T>(key: string, initial: T): [T, Dispatch<SetState
       if (e.key === key) {
         if (e.newValue != null) {
           try {
-            setValue(JSON.parse(e.newValue) as T)
+            const parsed = JSON.parse(e.newValue) as T
+            if (parsed === null && initialRef.current !== null) {
+              setValue(initialRef.current)
+            } else {
+              setValue(parsed)
+            }
           } catch {
             /* invalid json */
           }

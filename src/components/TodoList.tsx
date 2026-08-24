@@ -106,7 +106,7 @@ const TagSelect = memo(function TagSelect({
 
       {/* Popover Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-48 sm:w-52 p-1.5 rounded-2xl bg-surface/95 border border-line shadow-2xl backdrop-blur-2xl z-50 flex flex-col gap-0.5 select-none animate-fade-in">
+        <div className="absolute right-0 top-full mt-2 w-48 sm:w-52 p-1.5 rounded-2xl bg-surface/95 border border-line shadow-2xl z-50 flex flex-col gap-0.5 select-none animate-fade-in">
           {/* Option: No Tag */}
           <button
             type="button"
