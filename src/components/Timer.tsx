@@ -315,10 +315,10 @@ export const Timer = memo(function Timer({
             : 'card max-w-md 2xl:max-w-lg gap-3 sm:gap-4 p-5 sm:p-6'
       }`}
     >
-      {/* iOS 26 Ambient Backlight (Centered soft breathing glow behind display) */}
+      {/* iOS 26 Ambient Backlight (Subtle acrylic depth glow behind display) */}
       {isIos && (
         <div
-          className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-primary/10 blur-3xl transition-all duration-1000 ${
+          className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-44 h-44 rounded-full bg-primary/[0.06] dark:bg-primary/[0.08] blur-2xl transition-all duration-1000 ${
             running ? 'opacity-100 animate-pulse-slow' : paused ? 'opacity-40' : 'opacity-15'
           }`}
           aria-hidden="true"
@@ -619,9 +619,9 @@ export const Timer = memo(function Timer({
                 r={r}
                 fill="none"
                 strokeWidth={stroke}
-                className={isIos ? 'stroke-black/[0.06] dark:stroke-white/10 [filter:blur(0.5px)]' : 'stroke-track'}
+                className={isIos ? 'stroke-black/[0.06] dark:stroke-white/10' : 'stroke-track'}
               />
-              {/* Neon Arc: stroke-primary with round caps and intense glow */}
+              {/* Neon Arc: stroke-primary with round caps and subtle acrylic light-guide glow */}
               <circle
                 cx={center}
                 cy={center}
@@ -640,7 +640,7 @@ export const Timer = memo(function Timer({
                 }`}
                 style={
                   isIos
-                    ? { filter: `drop-shadow(0 0 10px rgb(var(${glowVar}) / 0.7))` }
+                    ? { filter: `drop-shadow(0 0 4px rgb(var(${glowVar}) / 0.35))` }
                     : undefined
                 }
               />
