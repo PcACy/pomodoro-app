@@ -341,13 +341,13 @@ export const Timer = memo(function Timer({
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => onModeChange(m)}
-                  className={`px-3 py-1.5 border transition-colors cursor-pointer uppercase ${
+                  className={`px-3 py-1.5 border transition-colors cursor-pointer uppercase whitespace-nowrap shrink-0 ${
                     isSelected
-                      ? 'border-accent bg-accent text-canvas font-bold'
+                      ? 'border-accent bg-accent text-on-accent font-bold'
                       : 'border-line text-muted hover:border-fg hover:text-fg bg-surface'
                   }`}
                 >
-                  &lt; {isSelected ? `[${m.toUpperCase()}]` : m.toUpperCase()} &gt;
+                  &lt;&nbsp;{isSelected ? `[${m.toUpperCase()}]` : m.toUpperCase()}&nbsp;&gt;
                 </button>
               )
             })}
@@ -646,27 +646,27 @@ export const Timer = memo(function Timer({
       )}
 
       {isTui ? (
-        /* TUI Bracket Controls with WCAG-compliant Gruvbox Contrast */
-        <div className="flex items-center gap-3 font-mono select-none my-1">
+        /* TUI Bracket Controls with WCAG-compliant Gruvbox Contrast & No-Wrap */
+        <div className="flex items-center justify-center gap-3 font-mono select-none my-1 flex-nowrap shrink-0">
           <button
             type="button"
             onClick={handleResetClick}
             disabled={isFlow && flowStatus === 'idle'}
             title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
             aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className="tui-btn px-4 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-fg hover:text-canvas hover:bg-fg transition-colors uppercase cursor-pointer disabled:opacity-70 disabled:pointer-events-none active:scale-95"
+            className="tui-btn whitespace-nowrap shrink-0 inline-flex items-center justify-center px-4 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-fg hover:text-canvas hover:bg-fg transition-colors uppercase cursor-pointer disabled:opacity-70 disabled:pointer-events-none active:scale-95"
           >
-            [ RESET ]
+            [&nbsp;RESET&nbsp;]
           </button>
 
           <button
             type="button"
             onClick={handleToggleClick}
-            className="tui-btn tui-btn-primary px-6 py-2.5 text-sm font-bold border-2 border-accent bg-accent text-on-accent hover:bg-fg hover:text-canvas hover:border-fg transition-colors uppercase tracking-wider cursor-pointer active:scale-95 shadow-sm"
+            className="tui-btn tui-btn-primary whitespace-nowrap shrink-0 inline-flex items-center justify-center px-6 py-2.5 text-sm font-bold border-2 border-accent bg-accent text-on-accent hover:bg-fg hover:text-canvas hover:border-fg transition-colors uppercase tracking-wider cursor-pointer active:scale-95 shadow-sm"
             title={running ? t.timer.pause : t.timer.start}
             aria-label={running ? t.timer.pause : t.timer.start}
           >
-            {running ? '[ ❚❚ PAUSE ]' : '[ ▶ START ]'}
+            {running ? '[\u00A0❚❚\u00A0PAUSE\u00A0]' : '[\u00A0▶\u00A0START\u00A0]'}
           </button>
 
           {isFlow ? (
@@ -676,9 +676,9 @@ export const Timer = memo(function Timer({
               disabled={flowStatus === 'idle'}
               title={`${t.flow.finish} (F)`}
               aria-label={t.flow.finish}
-              className="tui-btn px-4 py-2 text-xs font-bold border border-accent/60 bg-accent/15 text-accent hover:bg-accent hover:text-on-accent transition-colors uppercase cursor-pointer disabled:opacity-70 disabled:pointer-events-none active:scale-95"
+              className="tui-btn whitespace-nowrap shrink-0 inline-flex items-center justify-center px-4 py-2 text-xs font-bold border border-accent/60 bg-accent/15 text-accent hover:bg-accent hover:text-on-accent transition-colors uppercase cursor-pointer disabled:opacity-70 disabled:pointer-events-none active:scale-95"
             >
-              [ FINISH ]
+              [&nbsp;FINISH&nbsp;]
             </button>
           ) : (
             <button
@@ -686,9 +686,9 @@ export const Timer = memo(function Timer({
               onClick={handleSkipClick}
               title={`${t.shortcuts.skip} (N)`}
               aria-label={t.shortcuts.skip}
-              className="tui-btn px-4 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95"
+              className="tui-btn whitespace-nowrap shrink-0 inline-flex items-center justify-center px-4 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95"
             >
-              [ SKIP ]
+              [&nbsp;SKIP&nbsp;]
             </button>
           )}
         </div>

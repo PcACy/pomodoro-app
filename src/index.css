@@ -127,6 +127,14 @@
   box-shadow: none !important;
 }
 
+:root[data-theme='gruvbox'] .tui-btn,
+:root:not([data-theme]) .tui-btn {
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 :root[data-theme='gruvbox'] .tui-btn:disabled,
 :root:not([data-theme]) .tui-btn:disabled {
   opacity: 0.7 !important;
