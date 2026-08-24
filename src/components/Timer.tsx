@@ -318,9 +318,7 @@ export const Timer = memo(function Timer({
       className={`group relative flex w-full flex-col items-center justify-between transition-[background-color,border-color,box-shadow,border-radius,opacity] duration-300 ${
         borderless
           ? 'max-w-xl gap-4 p-0 bg-transparent border-0 shadow-none'
-          : isIos
-            ? 'rounded-[36px] bg-white/75 backdrop-blur-2xl border border-white/80 shadow-[0_12px_40px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] dark:bg-white/[0.04] dark:backdrop-blur-2xl dark:border dark:border-white/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.12)] p-5 sm:p-6 relative overflow-hidden max-w-md 2xl:max-w-lg gap-3 sm:gap-4'
-            : 'card max-w-md 2xl:max-w-lg gap-3 sm:gap-4 p-5 sm:p-6'
+          : 'card max-w-md 2xl:max-w-lg gap-3 sm:gap-4 p-5 sm:p-6'
       }`}
     >
       {/* iOS 26 Ambient Backlight (Subtle acrylic depth glow behind display) */}
