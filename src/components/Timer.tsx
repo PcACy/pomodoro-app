@@ -457,10 +457,10 @@ export const Timer = memo(function Timer({
                   const reached = flowMinutes >= m
                   return (
                     <span key={m} className="flex items-center">
-                      <span className={reached ? 'text-accent font-bold' : 'text-muted/40'}>
+                      <span className={reached ? 'text-accent font-bold' : 'text-muted'}>
                         {reached ? '★' : '☆'} {m}m
                       </span>
-                      {idx < 2 && <span className="text-muted/40 mx-1">·</span>}
+                      {idx < 2 && <span className="text-muted/60 mx-1">·</span>}
                     </span>
                   )
                 })}
@@ -654,10 +654,9 @@ export const Timer = memo(function Timer({
           <button
             type="button"
             onClick={handleResetClick}
-            disabled={isFlow && flowStatus === 'idle'}
             title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
             aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-fg hover:text-canvas hover:bg-fg transition-colors uppercase cursor-pointer disabled:opacity-50 disabled:pointer-events-none active:scale-95 text-center justify-center"
+            className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-fg hover:text-canvas hover:bg-fg transition-colors uppercase cursor-pointer active:scale-95 text-center justify-center"
           >
             [&nbsp;RESET&nbsp;]
           </button>
@@ -678,10 +677,9 @@ export const Timer = memo(function Timer({
             <button
               type="button"
               onClick={handleSkipClick}
-              disabled={flowStatus === 'idle'}
               title={`${t.flow.finish} (F)`}
               aria-label={t.flow.finish}
-              className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-accent/60 bg-accent/15 text-accent hover:bg-accent hover:text-on-accent transition-colors uppercase cursor-pointer disabled:opacity-50 disabled:pointer-events-none active:scale-95 text-center justify-center"
+              className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95 text-center justify-center"
             >
               [&nbsp;FINISH&nbsp;]
             </button>
@@ -704,9 +702,7 @@ export const Timer = memo(function Timer({
             onClick={handleResetClick}
             title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
             aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className={`btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92] ${
-              isFlow && flowStatus === 'idle' ? 'pointer-events-none opacity-20' : 'opacity-100'
-            }`}
+            className="btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92]"
           >
             <RotateCcw size={18} />
           </button>
@@ -731,12 +727,9 @@ export const Timer = memo(function Timer({
             <button
               type="button"
               onClick={handleSkipClick}
-              disabled={flowStatus === 'idle'}
               title={`${t.flow.finish} (F)`}
               aria-label={t.flow.finish}
-              className={`flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full border border-accent/50 bg-accent/15 text-accent shadow-sm shadow-accent/15 transition-all duration-200 hover:bg-accent/25 active:scale-[0.92] ${
-                flowStatus === 'idle' ? 'pointer-events-none opacity-20' : 'opacity-100'
-              }`}
+              className="btn-ghost flex h-12 w-12 2xl:h-14 2xl:w-14 items-center justify-center rounded-full active:scale-[0.92]"
             >
               <Check size={20} strokeWidth={2.5} />
             </button>
