@@ -580,7 +580,10 @@ export const SettingsPanel = memo(function SettingsPanel({
                     )}
                   </div>
                 </div>
-                <span className="text-sm font-semibold text-fg tracking-tight">{theme.label}</span>
+                <span className="flex flex-col">
+                  <span className="text-sm font-semibold text-fg tracking-tight">{theme.label}</span>
+                  <span className="text-[10px] text-text-muted mt-0.5">{theme.subtitle}</span>
+                </span>
               </button>
             )
           })}
