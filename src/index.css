@@ -283,10 +283,11 @@
 :root[data-theme='material-you']:not([data-mode='light']) {
   /* Material You Dark (Official M3 Color Scheme & Roles) */
   color-scheme: dark;
-  --c-canvas: 20 18 24;              /* #141218 Surface (Canvas) */
-  --c-surface: 33 31 38;             /* #211F26 Surface Container */
+  --c-canvas: 18 16 22;              /* #121016 Background (Deep Violet-Black) */
+  --c-surface: 33 31 39;             /* #211F27 Surface Container (Elevated Cards) */
   --c-raised: 43 41 48;              /* #2B2930 Surface Container High */
   --c-surface-container-highest: 54 52 59; /* #36343B Surface Container Highest */
+  --c-surface-container-lowest: 13 12 17; /* #0D0C11 Surface Container Lowest (Inset) */
   --c-line: 73 69 79;                /* #49454F Outline Variant */
   --c-fg: 230 224 233;               /* #E6E0E9 On Surface */
   --c-on-surface: 230 224 233;       /* #E6E0E9 On Surface */
@@ -346,6 +347,7 @@
   --c-surface: 243 237 247;          /* #F3EDF7 Surface Container */
   --c-raised: 236 230 240;           /* #ECE6F0 Surface Container High */
   --c-surface-container-highest: 230 224 233; /* #E6E0E9 Surface Container Highest */
+  --c-surface-container-lowest: 255 255 255; /* #FFFFFF Surface Container Lowest (Inset) */
   --c-line: 202 196 208;             /* #CAC4D0 Outline Variant */
   --c-fg: 29 27 32;                  /* #1D1B20 On Surface */
   --c-on-surface: 29 27 32;          /* #1D1B20 On Surface */

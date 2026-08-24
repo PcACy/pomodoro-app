@@ -1,17 +1,20 @@
 import { memo, useMemo } from 'react'
 import { Flame, ListChecks } from 'lucide-react'
 import type { Session, Settings } from '../types'
+import type { ThemeId } from '../themes'
 import { currentStreakDays, minutesByTag, todayMinutes } from '../lib/stats'
 import { fmtDuration, sameDay, startOfDay } from '../lib/time'
 import { useTranslation } from '../hooks/useTranslation'
 
 interface Props {
+  themeId?: ThemeId
   sessions: Session[]
   settings: Settings
 }
 
-export const QuickStats = memo(function QuickStats({ sessions, settings }: Props) {
+export const QuickStats = memo(function QuickStats({ themeId, sessions, settings }: Props) {
   const { t, lang } = useTranslation()
+  const isM3 = themeId === 'material-you'
   const today = useMemo(() => todayMinutes(sessions), [sessions])
   const dailyGoal = Math.max(1, Math.round((settings.weeklyGoalMinutes || 700) / 7))
   const pct = Math.min(100, Math.max(0, Math.round((today / dailyGoal) * 100)))
@@ -26,7 +29,7 @@ export const QuickStats = memo(function QuickStats({ sessions, settings }: Props
   )
 
   return (
-    <section className="card flex w-full max-w-md 2xl:max-w-lg flex-col gap-3.5 sm:gap-4 p-5 sm:p-6">
+    <section className="card border border-outline-variant/15 dark:border-white/[0.05] flex w-full max-w-md 2xl:max-w-lg flex-col gap-3.5 sm:gap-4 p-5 sm:p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-fg font-display uppercase tracking-wide">{t.dashboard.todayFocus}</h3>
         <span className="text-xs font-medium text-on-surface-variant">{t.dashboard.dailyGoal}</span>
@@ -46,7 +49,9 @@ export const QuickStats = memo(function QuickStats({ sessions, settings }: Props
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex items-center gap-2.5 rounded-btn border border-line/60 bg-raised/30 px-3 py-2.5 transition-colors hover:bg-raised/50">
+        <div className={`flex items-center gap-2.5 rounded-btn border px-3 py-2.5 transition-colors hover:bg-raised/50 ${
+          isM3 ? 'border-white/[0.06] bg-surface-container-lowest' : 'border-line/60 bg-raised/30'
+        }`}>
           <Flame size={18} className="shrink-0 text-streak" />
           <div className="min-w-0">
             <p className="text-[11px] font-medium uppercase tracking-wider text-muted">{t.dashboard.streak}</p>
@@ -55,7 +60,9 @@ export const QuickStats = memo(function QuickStats({ sessions, settings }: Props
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2.5 rounded-btn border border-line/60 bg-raised/30 px-3 py-2.5 transition-colors hover:bg-raised/50">
+        <div className={`flex items-center gap-2.5 rounded-btn border px-3 py-2.5 transition-colors hover:bg-raised/50 ${
+          isM3 ? 'border-white/[0.06] bg-surface-container-lowest' : 'border-line/60 bg-raised/30'
+        }`}>
           <ListChecks size={18} className="shrink-0 text-accent" />
           <div className="min-w-0">
             <p className="text-[11px] font-medium uppercase tracking-wider text-muted">{t.dashboard.pomodorosToday}</p>

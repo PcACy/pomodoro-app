@@ -37,6 +37,8 @@ export default {
         'on-surface': 'rgb(var(--c-on-surface, var(--c-fg)) / <alpha-value>)',
         'on-surface-variant': 'rgb(var(--c-on-surface-variant, var(--c-muted)) / <alpha-value>)',
         'surface-container-highest': 'rgb(var(--c-surface-container-highest, var(--c-raised)) / <alpha-value>)',
+        'surface-container-lowest': 'rgb(var(--c-surface-container-lowest, var(--c-canvas)) / <alpha-value>)',
+        'outline-variant': 'rgb(var(--c-outline-variant, var(--c-line)) / <alpha-value>)',
         break: 'rgb(var(--c-break) / <alpha-value>)',
         long: 'rgb(var(--c-long) / <alpha-value>)',
         track: 'rgb(var(--c-track) / <alpha-value>)',

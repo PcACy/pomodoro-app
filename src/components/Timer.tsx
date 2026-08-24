@@ -318,7 +318,7 @@ export const Timer = memo(function Timer({
       className={`group relative flex w-full flex-col items-center justify-between transition-[background-color,border-color,box-shadow,border-radius,opacity] duration-300 ${
         borderless
           ? 'max-w-xl gap-4 p-0 bg-transparent border-0 shadow-none'
-          : 'card max-w-md 2xl:max-w-lg gap-3 sm:gap-4 p-5 sm:p-6'
+          : 'card border border-outline-variant/15 dark:border-white/[0.05] max-w-md 2xl:max-w-lg gap-3 sm:gap-4 p-5 sm:p-6'
       }`}
     >
       {/* iOS 26 Ambient Backlight (Subtle acrylic depth glow behind display) */}

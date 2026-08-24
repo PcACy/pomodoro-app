@@ -188,6 +188,7 @@ export const TodoList = memo(function TodoList({
   onFocus,
 }: Props) {
   const { t: tr } = useTranslation()
+  const isM3 = themeId === 'material-you'
   const [title, setTitle] = useState('')
   const [tag, setTag] = useState(tags[0] ?? '')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -301,7 +302,7 @@ export const TodoList = memo(function TodoList({
   }
 
   return (
-    <section className="card flex w-full max-w-md 2xl:max-w-lg min-h-[160px] sm:min-h-[180px] flex-col gap-3.5 sm:gap-4 p-5 sm:p-6">
+    <section className="card border border-outline-variant/15 dark:border-white/[0.05] flex w-full max-w-md 2xl:max-w-lg min-h-[160px] sm:min-h-[180px] flex-col gap-3.5 sm:gap-4 p-5 sm:p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-fg">{tr.todo.title}</h3>
         <span className="text-xs text-muted">
@@ -327,7 +328,9 @@ export const TodoList = memo(function TodoList({
             }
           }}
           placeholder={themeId === 'gruvbox' ? 'enter new task...' : (tr.todo.addTaskPlaceholder || tr.todo.addPlaceholder)}
-          className="input h-[38px] min-w-0 flex-1 font-mono text-sm py-2"
+          className={`input h-[38px] min-w-0 flex-1 font-mono text-sm py-2 ${
+            isM3 ? 'bg-surface-container-lowest border-outline-variant/40' : ''
+          }`}
           maxLength={80}
         />
 

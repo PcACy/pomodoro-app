@@ -58,14 +58,14 @@ export const ThemeBackground = memo(function ThemeBackground({
         />
       )}
 
-      {/* 3. MATERIAL YOU (M3): Clean Tonal Matte & Spotlight Depth */}
+      {/* 3. MATERIAL YOU (M3): Damped Spotlight on Deep Tonal Matte */}
       {themeId === 'material-you' && (
         <div
           className="absolute inset-0 transition-opacity duration-700"
           style={{
             background: isDark
-              ? 'radial-gradient(circle at 50% 45%, rgba(43, 41, 48, 0.65) 0%, rgba(20, 18, 24, 1) 75%)'
-              : 'radial-gradient(circle at 50% 45%, rgba(236, 230, 238, 0.75) 0%, rgba(253, 248, 253, 1) 75%)',
+              ? 'radial-gradient(circle at 50% 45%, rgba(43, 41, 48, 0.08) 0%, rgba(18, 16, 22, 1) 45%)'
+              : 'radial-gradient(circle at 50% 45%, rgba(236, 230, 238, 0.3) 0%, rgba(254, 247, 255, 1) 55%)',
           }}
         />
       )}

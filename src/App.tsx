@@ -438,7 +438,7 @@ export default function App() {
                   onRemove={todosApi.remove}
                   onFocus={handleFocusTodo}
                 />
-                <QuickStats sessions={sessions} settings={settings} />
+                <QuickStats themeId={themeId} sessions={sessions} settings={settings} />
                 <DayTimeline sessions={sessions} />
               </div>
             ) : (
@@ -477,7 +477,7 @@ export default function App() {
                     onRemove={todosApi.remove}
                     onFocus={handleFocusTodo}
                   />
-                  <QuickStats sessions={sessions} settings={settings} />
+                  <QuickStats themeId={themeId} sessions={sessions} settings={settings} />
                 </div>
                 <div className="col-span-full w-full">
                   <DayTimeline sessions={sessions} />
