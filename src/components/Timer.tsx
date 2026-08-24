@@ -161,7 +161,7 @@ export const Timer = memo(function Timer({
   const animPos = flowSeconds % waveFrames.length
   const flowAsciiStatus =
     flowStatus === 'running'
-      ? `${waveFrames[animPos]} ACTIVE`
+      ? `${waveFrames[animPos]} TRACKING`
       : flowStatus === 'paused'
         ? '[ ── PAUSED ── ]'
         : '[ ─────────── ] IDLE'
@@ -429,11 +429,13 @@ export const Timer = memo(function Timer({
 
       {isTui ? (
         /* TUI Terminal Box with Identical Height & Symmetric Geometry in Both Modes */
-        <div className="flex flex-col items-center justify-between p-6 sm:p-7 border-2 border-line bg-canvas font-mono w-full max-w-[340px] 2xl:max-w-[400px] h-[240px] sm:h-[250px] mx-auto text-center select-none shadow-none my-2">
+        <div className="flex flex-col items-center justify-between p-6 sm:p-7 border-2 border-line bg-canvas font-mono w-full max-w-sm min-h-[260px] mx-auto text-center select-none shadow-none my-2">
           {/* Row 1: Top Border with Mode / Phase Label */}
           <div className="text-xs font-bold text-accent uppercase tracking-widest flex items-center gap-2">
             <span className="text-line">┌──</span>
-            <span>[ {isFlow ? 'FLOW TIMER' : `POMODORO: ${shownLabel}`} ]</span>
+            <span>
+              [&nbsp;{isFlow ? (running ? 'FLOW: ACTIVE' : paused ? 'FLOW: PAUSED' : 'FLOW: IDLE') : `POMODORO: ${shownLabel.toUpperCase()}`}&nbsp;]
+            </span>
             <span className="text-line">──┐</span>
           </div>
 
@@ -446,31 +448,30 @@ export const Timer = memo(function Timer({
             {shownTime}
           </span>
 
-          {/* Row 3: Sub-Status / Milestones (Fixed Height in both modes) */}
+          {/* Row 3: Slot 1 (Meta-Information / Milestones) */}
           <div className="h-[20px] flex items-center justify-center font-mono text-[11px] text-muted select-none">
             {isFlow ? (
-              <div className="flex items-center justify-center gap-2">
-                {[25, 50, 75, 100].map((m) => {
+              <div className="flex items-center justify-center gap-1.5">
+                <span>[</span>
+                {[25, 50, 75].map((m, idx) => {
                   const reached = flowMinutes >= m
                   return (
-                    <span
-                      key={m}
-                      className={`flex items-center gap-0.5 transition-colors ${
-                        reached ? 'text-accent font-bold' : 'text-muted/40'
-                      }`}
-                    >
-                      <span>{reached ? '★' : '☆'}</span>
-                      <span>{m}m</span>
+                    <span key={m} className="flex items-center">
+                      <span className={reached ? 'text-accent font-bold' : 'text-muted/40'}>
+                        {reached ? '★' : '☆'} {m}m
+                      </span>
+                      {idx < 2 && <span className="text-muted/40 mx-1">·</span>}
                     </span>
                   )
                 })}
+                <span>]</span>
               </div>
             ) : (
               <span>[ ROUND: {currentRoundIndex + 1}/{roundsBeforeLongBreak} ]</span>
             )}
           </div>
 
-          {/* Row 4: Activity / Progress Bar (Fixed Height in both modes) */}
+          {/* Row 4: Slot 2 (Progress / Activity) */}
           <div className="h-[24px] flex items-center justify-center text-xs sm:text-sm font-bold text-accent tracking-wider font-mono">
             {isFlow ? (
               <span className={running ? 'text-accent' : 'text-muted'}>
@@ -647,29 +648,32 @@ export const Timer = memo(function Timer({
       )}
 
       {isTui ? (
-        /* TUI Bracket Controls with WCAG-compliant Gruvbox Contrast & No-Wrap */
-        <div className="flex items-center justify-center gap-3 font-mono select-none my-1 flex-nowrap shrink-0">
+        /* TUI Bracket Controls with 3-Column Grid System */
+        <div className="grid grid-cols-3 gap-2 w-full max-w-sm font-mono select-none my-1">
+          {/* Slot 1: Reset */}
           <button
             type="button"
             onClick={handleResetClick}
             disabled={isFlow && flowStatus === 'idle'}
             title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
             aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className="tui-btn whitespace-nowrap shrink-0 inline-flex items-center justify-center px-4 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-fg hover:text-canvas hover:bg-fg transition-colors uppercase cursor-pointer disabled:opacity-70 disabled:pointer-events-none active:scale-95"
+            className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-fg hover:text-canvas hover:bg-fg transition-colors uppercase cursor-pointer disabled:opacity-50 disabled:pointer-events-none active:scale-95 text-center justify-center"
           >
             [&nbsp;RESET&nbsp;]
           </button>
 
+          {/* Slot 2: Start / Pause */}
           <button
             type="button"
             onClick={handleToggleClick}
-            className="tui-btn tui-btn-primary whitespace-nowrap shrink-0 inline-flex items-center justify-center px-6 py-2.5 text-sm font-bold border-2 border-accent bg-accent text-on-accent hover:bg-fg hover:text-canvas hover:border-fg transition-colors uppercase tracking-wider cursor-pointer active:scale-95 shadow-sm"
+            className="tui-btn tui-btn-primary w-full whitespace-nowrap px-2 py-2 text-xs sm:text-sm font-bold border-2 border-accent bg-accent text-on-accent hover:bg-fg hover:text-canvas hover:border-fg transition-colors uppercase tracking-wider cursor-pointer active:scale-95 shadow-sm text-center justify-center"
             title={running ? t.timer.pause : t.timer.start}
             aria-label={running ? t.timer.pause : t.timer.start}
           >
             {running ? '[\u00A0❚❚\u00A0PAUSE\u00A0]' : '[\u00A0▶\u00A0START\u00A0]'}
           </button>
 
+          {/* Slot 3: Skip / Finish */}
           {isFlow ? (
             <button
               type="button"
@@ -677,7 +681,7 @@ export const Timer = memo(function Timer({
               disabled={flowStatus === 'idle'}
               title={`${t.flow.finish} (F)`}
               aria-label={t.flow.finish}
-              className="tui-btn whitespace-nowrap shrink-0 inline-flex items-center justify-center px-4 py-2 text-xs font-bold border border-accent/60 bg-accent/15 text-accent hover:bg-accent hover:text-on-accent transition-colors uppercase cursor-pointer disabled:opacity-70 disabled:pointer-events-none active:scale-95"
+              className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-accent/60 bg-accent/15 text-accent hover:bg-accent hover:text-on-accent transition-colors uppercase cursor-pointer disabled:opacity-50 disabled:pointer-events-none active:scale-95 text-center justify-center"
             >
               [&nbsp;FINISH&nbsp;]
             </button>
@@ -687,7 +691,7 @@ export const Timer = memo(function Timer({
               onClick={handleSkipClick}
               title={`${t.shortcuts.skip} (N)`}
               aria-label={t.shortcuts.skip}
-              className="tui-btn whitespace-nowrap shrink-0 inline-flex items-center justify-center px-4 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95"
+              className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95 text-center justify-center"
             >
               [&nbsp;SKIP&nbsp;]
             </button>
@@ -750,34 +754,38 @@ export const Timer = memo(function Timer({
         </div>
       )}
 
-      {/* Keyboard shortcuts row: stable layout without jumps */}
+      {/* Keyboard shortcuts row: stable layout without jumps & zero wrap */}
       <div
-        className={`flex min-h-[32px] flex-wrap items-center justify-center gap-2.5 sm:gap-3 select-none text-[11px] text-muted transition-opacity duration-200 [@media(hover:none)]:hidden ${
+        className={`flex min-h-[28px] items-center justify-center gap-2 sm:gap-2.5 select-none text-[11px] font-mono text-muted transition-opacity duration-200 whitespace-nowrap [@media(hover:none)]:hidden ${
           running ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >
         <span className="inline-flex items-center gap-1">
-          <kbd className="kbd">Space</kbd> {t.shortcuts.startPause}
+          <kbd className="kbd text-[10px]">Space</kbd> Start/Pause
         </span>
+        <span className="text-muted/40">·</span>
         {isFlow ? (
           <>
             <span className="inline-flex items-center gap-1">
-              <kbd className="kbd">R</kbd> {t.flow.discardShortcut}
+              <kbd className="kbd text-[10px]">R</kbd> Discard
             </span>
+            <span className="text-muted/40">·</span>
             <span className="inline-flex items-center gap-1">
-              <kbd className="kbd">F</kbd> {t.flow.finishShortcut}
+              <kbd className="kbd text-[10px]">F</kbd> Finish
             </span>
           </>
         ) : (
           <>
             <span className="inline-flex items-center gap-1">
-              <kbd className="kbd">R</kbd> {t.shortcuts.reset}
+              <kbd className="kbd text-[10px]">R</kbd> Reset
             </span>
+            <span className="text-muted/40">·</span>
             <span className="inline-flex items-center gap-1">
-              <kbd className="kbd">N</kbd> {t.shortcuts.skip}
+              <kbd className="kbd text-[10px]">N</kbd> Skip
             </span>
           </>
         )}
+        <span className="text-muted/40">·</span>
         <button
           type="button"
           onClick={onToggleZen}
@@ -785,7 +793,7 @@ export const Timer = memo(function Timer({
           aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
           className="inline-flex items-center gap-1 transition-colors hover:text-fg cursor-pointer"
         >
-          <kbd className="kbd">Z</kbd> {t.shortcuts.zen}
+          <kbd className="kbd text-[10px]">Z</kbd> Zen
         </button>
       </div>
 

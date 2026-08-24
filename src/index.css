@@ -137,7 +137,7 @@
 
 :root[data-theme='gruvbox'] .tui-btn:disabled,
 :root:not([data-theme]) .tui-btn:disabled {
-  opacity: 0.7 !important;
+  opacity: 0.5 !important;
   cursor: not-allowed !important;
 }
 
@@ -146,6 +146,7 @@
   color: #928374 !important;
   border-color: #d5c4a1 !important;
   background-color: transparent !important;
+  opacity: 0.5 !important;
 }
 
 :root[data-theme='gruvbox'][data-mode='dark'] .tui-btn:disabled,
@@ -153,6 +154,7 @@
   color: #7c6f64 !important;
   border-color: #504945 !important;
   background-color: transparent !important;
+  opacity: 0.5 !important;
 }
 
 /* =========================================================================
