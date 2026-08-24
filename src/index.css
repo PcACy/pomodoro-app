@@ -280,6 +280,8 @@
   --c-on-primary-container: 234 221 255; /* #EADDFF On Primary Container */
   --c-secondary-container: 74 68 88; /* #4A4458 Secondary Container */
   --c-on-secondary-container: 232 222 248; /* #E8DEF8 On Secondary Container */
+  --c-tertiary-container: 125 82 96; /* #7D5260 Tertiary Container */
+  --c-on-tertiary-container: 255 216 228; /* #FFD8E4 On Tertiary Container */
   --c-break: 168 199 250;
   --c-long: 196 238 208;
   --c-track: 73 69 79;
@@ -292,8 +294,8 @@
   --c-chart-7: 232 222 248;
   --c-chart-8: 182 196 255;
 
-  /* Material You Structural Tokens: Tonal Elevation, 0px border */
-  --radius-card: 28px;
+  /* Material You Structural Tokens: Tonal Elevation, 0px border, 32px Extra Large Shape */
+  --radius-card: 32px;
   --radius-btn: 9999px;
   --radius-sm: 12px;
   --badge-radius: 8px;
@@ -332,6 +334,8 @@
   --c-on-primary-container: 33 0 93; /* #21005D On Primary Container */
   --c-secondary-container: 232 222 248; /* #E8DEF8 Secondary Container */
   --c-on-secondary-container: 29 25 43; /* #1D192B On Secondary Container */
+  --c-tertiary-container: 255 216 228; /* #FFD8E4 Tertiary Container */
+  --c-on-tertiary-container: 49 17 29; /* #31111D On Tertiary Container */
   --c-break: 0 99 155;
   --c-long: 56 106 32;
   --c-track: 202 196 208;
@@ -345,7 +349,7 @@
   --c-chart-8: 67 90 159;
 
   /* Material You Structural Tokens */
-  --radius-card: 28px;
+  --radius-card: 32px;
   --radius-btn: 9999px;
   --radius-sm: 12px;
   --badge-radius: 8px;
@@ -596,16 +600,27 @@ textarea:focus:not(:focus-visible) {
     border-width: 0 !important;
     border-style: none !important;
     border-color: transparent !important;
+    border-radius: 32px !important;
     background-color: rgb(var(--c-surface));
-    box-shadow: var(--card-shadow);
+    box-shadow: none !important;
   }
 
   /* 2. M3 Connected Segmented Button (Mode Switcher) */
+  :root[data-theme='material-you'] .seg-track {
+    border-radius: 9999px !important;
+    border: 1px solid rgb(var(--c-line)) !important;
+    background: transparent !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
   :root[data-theme='material-you'] .ios-seg-active {
-    background-color: rgb(var(--c-secondary-container));
-    color: rgb(var(--c-on-secondary-container));
-    box-shadow: none;
-    border: none;
+    background-color: rgb(var(--c-secondary-container)) !important;
+    color: rgb(var(--c-on-secondary-container)) !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 9999px !important;
   }
   :root[data-theme='material-you'] .m3-seg-check {
     display: inline-block;
@@ -614,28 +629,35 @@ textarea:focus:not(:focus-visible) {
   /* 3. M3 Large Squircle FAB (Play/Pause Button) */
   :root[data-theme='material-you'] .play-spring {
     border-radius: 28px !important;
-    background-color: rgb(var(--c-primary-container)) !important;
-    color: rgb(var(--c-on-primary-container)) !important;
+    background-color: rgb(var(--c-accent)) !important;
+    color: rgb(var(--c-on-accent)) !important;
     border: none !important;
     box-shadow:
-      0 3px 6px 0 rgba(0, 0, 0, 0.18),
-      0 1px 3px 0 rgba(0, 0, 0, 0.24) !important;
+      0 4px 8px 0 rgba(0, 0, 0, 0.16),
+      0 2px 4px 0 rgba(0, 0, 0, 0.2) !important;
   }
   :root[data-theme='material-you'] .play-spring:hover {
     box-shadow:
-      0 6px 12px 0 rgba(0, 0, 0, 0.22),
-      0 2px 4px 0 rgba(0, 0, 0, 0.28) !important;
+      0 6px 14px 0 rgba(0, 0, 0, 0.22),
+      0 3px 6px 0 rgba(0, 0, 0, 0.26) !important;
+  }
+  :root[data-theme='material-you'] .play-spring:active {
+    transform: scale(0.95) !important;
   }
 
   /* 4. M3 Secondary Action Buttons (Tonal Circular Buttons) */
   :root[data-theme='material-you'] .btn-ghost {
-    background-color: rgb(var(--c-raised));
+    background-color: rgb(var(--c-raised)) !important;
     border-color: transparent !important;
-    color: rgb(var(--c-muted));
+    color: rgb(var(--c-muted)) !important;
+    border-radius: 9999px !important;
   }
   :root[data-theme='material-you'] .btn-ghost:hover {
-    background-color: rgb(var(--c-surface));
-    color: rgb(var(--c-fg));
+    background-color: rgb(var(--c-line)) !important;
+    color: rgb(var(--c-fg)) !important;
+  }
+  :root[data-theme='material-you'] .btn-ghost:active {
+    transform: scale(0.90) !important;
   }
 
   /* 5. M3 Navigation Bar Active Indicator Pill */

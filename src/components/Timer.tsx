@@ -200,11 +200,13 @@ export const Timer = memo(function Timer({
     [],
   )
 
+  const isM3 = themeId === 'material-you'
+
   const activeDuration = scrubbingMinutes ?? durationMinutes
   const scrubFraction = Math.max(5, Math.min(60, activeDuration)) / 60
 
   const size = large ? 380 : 300
-  const stroke = large ? 16 : 14
+  const stroke = isM3 ? 12 : large ? 16 : 14
   const r = (size - stroke) / 2
   const circ = 2 * Math.PI * r
 
@@ -393,7 +395,7 @@ export const Timer = memo(function Timer({
           </div>
         )}
 
-        {!isTui && (
+        {!isTui && !isM3 && (
           <div
             className="flex h-6 items-center justify-center my-2 transition-opacity duration-300"
             aria-hidden={isFlow}
@@ -574,16 +576,23 @@ export const Timer = memo(function Timer({
             )}
 
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-              <div className="flex items-center gap-1.5 min-h-[20px]">
-                <CatLogo
-                  size={16}
-                  state={isIdle ? 'idle' : phase}
-                  className={`transition-colors duration-500 ${PHASE_TEXT[phase]}`}
-                />
-                <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-500 ${PHASE_TEXT[phase]}`}>
-                  {shownLabel}
-                </span>
-              </div>
+              {isM3 ? (
+                <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-secondary-container px-3 py-0.5 text-xs font-medium text-on-secondary-container animate-fade-in shadow-none">
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                  <span>{`Runde ${currentRoundIndex + 1}/${roundsBeforeLongBreak}`}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 min-h-[20px]">
+                  <CatLogo
+                    size={16}
+                    state={isIdle ? 'idle' : phase}
+                    className={`transition-colors duration-500 ${PHASE_TEXT[phase]}`}
+                  />
+                  <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-500 ${PHASE_TEXT[phase]}`}>
+                    {shownLabel}
+                  </span>
+                </div>
+              )}
               <span
                 className={`font-display font-bold tabular-nums leading-none tracking-tight text-fg transition-all duration-300 ${
                   large ? 'text-6xl sm:text-7xl 2xl:text-8xl' : 'text-5xl 2xl:text-6xl'
@@ -632,7 +641,28 @@ export const Timer = memo(function Timer({
               {shownTime}
             </span>
             <div className="flex min-h-[50px] flex-col items-center justify-center">
-              <Waveform status={flowStatus} />
+              {isM3 ? (
+                <div className="my-2.5 flex items-center justify-center gap-2 select-none">
+                  {[25, 50, 75].map((m) => {
+                    const reached = flowMinutes >= m
+                    return (
+                      <span
+                        key={m}
+                        className={`flex items-center gap-1 rounded-xl px-3 py-1 text-xs transition-all duration-300 ${
+                          reached
+                            ? 'bg-tertiary-container text-on-tertiary-container font-semibold animate-in zoom-in-95'
+                            : 'bg-raised text-muted/60 font-medium'
+                        }`}
+                      >
+                        <span>{reached ? '★' : '☆'}</span>
+                        <span>{m}m</span>
+                      </span>
+                    )
+                  })}
+                </div>
+              ) : (
+                <Waveform status={flowStatus} />
+              )}
               <div className="flex min-h-[18px] items-center justify-center">
                 <span
                   className={`text-xs font-medium text-muted transition-opacity duration-200 ${
@@ -696,7 +726,7 @@ export const Timer = memo(function Timer({
           )}
         </div>
       ) : (
-        <div className="flex items-center gap-3.5 2xl:gap-5">
+        <div className="flex items-center justify-center gap-4 sm:gap-5 2xl:gap-6 mt-2">
           <button
             type="button"
             onClick={handleResetClick}
