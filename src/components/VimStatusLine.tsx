@@ -4,7 +4,7 @@ import type { ColorMode, ThemeId } from '../themes'
 import type { SyncStatus } from '../hooks/useSync'
 
 interface VimStatusLineProps {
-  themeId: ThemeId
+  themeId?: ThemeId
   colorMode: ColorMode
   mode: 'pomodoro' | 'flow'
   phase: PhaseId
@@ -21,7 +21,6 @@ interface VimStatusLineProps {
 // Memoized: all props are primitives, so this leaf only re-renders when its
 // own inputs change — not on unrelated App-level updates.
 export const VimStatusLine = memo(function VimStatusLine({
-  themeId,
   colorMode,
   mode,
   phase,
@@ -34,8 +33,6 @@ export const VimStatusLine = memo(function VimStatusLine({
   totalRounds,
   syncStatus,
 }: VimStatusLineProps) {
-  if (themeId !== 'gruvbox') return null
-
   const isRunning = status === 'running'
   const isBreak = phase === 'shortBreak' || phase === 'longBreak'
 
@@ -95,7 +92,7 @@ export const VimStatusLine = memo(function VimStatusLine({
         <span className="hidden md:inline text-muted/70">utf-8</span>
         {mode === 'pomodoro' && <span className="text-accent font-medium tabular-nums">{pct}%</span>}
         {syncStatus && <span className="hidden xl:inline text-muted/60">sync:{syncStatus}</span>}
-        <span className="hidden lg:inline text-muted/60">{themeId}-{colorMode}</span>
+        <span className="hidden lg:inline text-muted/60">terminal-{colorMode}</span>
       </div>
     </footer>
   )

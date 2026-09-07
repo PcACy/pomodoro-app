@@ -1,15 +1,14 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
-import { Check, Pause, PictureInPicture2, Play, RotateCcw, SkipForward } from 'lucide-react'
+import { memo, useCallback } from 'react'
+import { PictureInPicture2 } from 'lucide-react'
 import type { TimerStatus, PhaseId, TimerMode } from '../types'
 import type { ThemeId } from '../themes'
 import { useTranslation } from '../hooks/useTranslation'
-import { CatLogo } from './CatLogo'
 import { playMicroClick } from '../lib/sound'
 import { useFlowTimerTick, useTimerTick } from '../hooks/useTimerTick'
 
 interface Props {
   themeId?: ThemeId
-  phase: PhaseId
+  phase?: PhaseId
   phaseLabel: string
   status: TimerStatus
   time?: string
@@ -20,8 +19,6 @@ interface Props {
   mode: TimerMode
   flowStatus: TimerStatus
   flowTime?: string
-  durationMinutes?: number
-  onDurationChange?: (minutes: number) => void
   onModeChange: (m: TimerMode) => void
   onToggle: () => void
   onSkip: () => void
@@ -36,67 +33,25 @@ interface Props {
   tag?: string
 }
 
-const PHASE_TEXT: Record<PhaseId, string> = {
-  focus: 'text-accent',
-  shortBreak: 'text-break',
-  longBreak: 'text-long',
-}
-
-const RING: Record<PhaseId, string> = {
-  focus: 'stroke-accent',
-  shortBreak: 'stroke-break',
-  longBreak: 'stroke-long',
-}
-
-const GLOW_VAR: Record<PhaseId, string> = {
-  focus: '--c-accent',
-  shortBreak: '--c-break',
-  longBreak: '--c-long',
-}
-
 const MODES: TimerMode[] = ['pomodoro', 'flow']
 
-const FLOW_BARS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-// Pre-computed continuous harmonic phase offsets (negative delays)
-// Ensures the animation is already in continuous motion instantly without initial jumping
-const FLOW_DELAYS = [
-  '-0.00s',
-  '-0.25s',
-  '-0.50s',
-  '-0.75s',
-  '-1.00s',
-  '-1.25s',
-  '-1.00s',
-  '-0.75s',
-  '-0.50s',
-  '-0.25s',
-  '-0.00s',
+const WAVE_FRAMES = [
+  '[ ───==█==─── ]',
+  '[ ────==█==── ]',
+  '[ ─────==█==─ ]',
+  '[ ──────==█== ]',
+  '[ ─────==█==─ ]',
+  '[ ────==█==── ]',
+  '[ ───==█==─── ]',
+  '[ ──==█==──── ]',
+  '[ ─==█==───── ]',
+  '[ ==█==────── ]',
+  '[ ─==█==───── ]',
+  '[ ──==█==──── ]',
 ]
-
-/** 11-bar organic equalizer waveform for flow mode (GPU-composited). */
-const Waveform = memo(function Waveform({ status }: { status: TimerStatus }) {
-  return (
-    <div className="my-2.5 flex h-8 items-center justify-center gap-1.5 select-none" aria-hidden="true">
-      {FLOW_BARS.map((i) => (
-        <span
-          key={i}
-          className={`flow-bar ${
-            status === 'running'
-              ? 'flow-bar--running bg-accent'
-              : status === 'paused'
-                ? 'flow-bar--paused bg-accent/70'
-                : 'flow-bar--idle bg-accent/30'
-          }`}
-          style={status === 'running' ? { animationDelay: FLOW_DELAYS[i] } : undefined}
-        />
-      ))}
-    </div>
-  )
-})
+const FLOW_BAR_PAUSED = '[ ──███████── ]'
 
 export const Timer = memo(function Timer({
-  themeId,
-  phase,
   phaseLabel,
   status,
   time,
@@ -107,8 +62,6 @@ export const Timer = memo(function Timer({
   mode,
   flowStatus,
   flowTime,
-  durationMinutes = 25,
-  onDurationChange,
   onModeChange,
   onToggle,
   onSkip,
@@ -127,14 +80,10 @@ export const Timer = memo(function Timer({
   const flowTick = useFlowTimerTick()
 
   const isFlow = mode === 'flow'
-  const isIdle = status === 'idle'
-  const isTui = themeId === 'gruvbox'
-
   const activeTime = time ?? (isFlow ? flowTick.time : timerTick.time)
   const activeProgress = progress ?? (isFlow ? 0 : timerTick.progress)
   const activeFlowTime = flowTime ?? flowTick.time
 
-  // Parse flow elapsed time for seconds & milestone calculations
   const flowParts = (activeFlowTime || '00:00').split(':').map(Number)
   let flowSeconds = 0
   if (flowParts.length === 3) {
@@ -152,154 +101,20 @@ export const Timer = memo(function Timer({
   const asciiBar = `[${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}] ${Math.round(currentProgress * 100)}%`
 
   // Flow ASCII status activity scanner
-  const waveFrames = [
-    '[ ───==█==─── ]',
-    '[ ────==█==── ]',
-    '[ ─────==█==─ ]',
-    '[ ──────==█== ]',
-    '[ ─────==█==─ ]',
-    '[ ────==█==── ]',
-    '[ ───==█==─── ]',
-    '[ ──==█==──── ]',
-    '[ ─==█==───── ]',
-    '[ ==█==────── ]',
-    '[ ─==█==───── ]',
-    '[ ──==█==──── ]',
-  ]
-  // Flow ASCII activity bar: fixed 11-char inner width in every state so the
-  // stage never shifts; the status lives only in the header row above.
-  const animPos = flowSeconds % waveFrames.length
-  const FLOW_BAR_PAUSED = '[ ──███████── ]'
+  const animPos = flowSeconds % WAVE_FRAMES.length
   const flowAsciiBar =
     flowStatus === 'running'
-      ? waveFrames[animPos]
+      ? WAVE_FRAMES[animPos]
       : flowStatus === 'paused'
         ? FLOW_BAR_PAUSED
         : `[ ${'─'.repeat(11)} ]`
+
   const running = isFlow ? flowStatus === 'running' : status === 'running'
   const paused = isFlow ? flowStatus === 'paused' : status === 'paused'
   const currentRoundIndex = completedFocusInCycle % roundsBeforeLongBreak
 
-  const ringRef = useRef<HTMLDivElement>(null)
-  const isDraggingRef = useRef(false)
-  const [scrubbingMinutes, setScrubbingMinutes] = useState<number | null>(null)
-  const isScrubbing = scrubbingMinutes != null
-
-  // Completion relief impulse: a short, well-proportioned spring scale
-  // (1 -> 1.02 -> 1) whenever the timer reaches 00:00 and advances the phase.
-  const [pulseActive, setPulseActive] = useState(false)
-  const prevPhaseRef = useRef(phase)
-  const prevCycleRef = useRef(completedFocusInCycle)
-  const pulseTimerRef = useRef<number | null>(null)
-  useEffect(() => {
-    const phaseChanged = prevPhaseRef.current !== phase
-    const cycleChanged = prevCycleRef.current !== completedFocusInCycle
-    prevPhaseRef.current = phase
-    prevCycleRef.current = completedFocusInCycle
-    if (!phaseChanged && !cycleChanged) return
-    setPulseActive(false)
-    // Re-trigger on the next frame so back-to-back completions replay cleanly.
-    const raf = requestAnimationFrame(() => setPulseActive(true))
-    if (pulseTimerRef.current != null) window.clearTimeout(pulseTimerRef.current)
-    pulseTimerRef.current = window.setTimeout(() => setPulseActive(false), 340)
-    return () => cancelAnimationFrame(raf)
-  }, [phase, completedFocusInCycle])
-  useEffect(
-    () => () => {
-      if (pulseTimerRef.current != null) window.clearTimeout(pulseTimerRef.current)
-    },
-    [],
-  )
-
-  const isM3 = themeId === 'material-you'
-  const isIos = themeId === 'ios-26'
-
-  const activeDuration = scrubbingMinutes ?? durationMinutes
-  const scrubFraction = Math.max(5, Math.min(60, activeDuration)) / 60
-
-  const size = large ? 320 : 240
-  const stroke = isM3 ? 12 : isIos ? 12 : large ? 16 : 14
-  const r = (size - stroke) / 2
-  const circ = 2 * Math.PI * r
-
-  // When scrubbing in idle, preview the fraction of 60m; otherwise render smooth 1.0 -> 0.0 session countdown
-  const effectiveProgress = isScrubbing ? scrubFraction : Math.min(1, Math.max(0, activeProgress))
-  const offset = circ * (1 - effectiveProgress)
-  const glowVar = isFlow ? '--c-accent' : GLOW_VAR[phase]
-
   const shownLabel = isFlow ? t.timer.flow : phaseLabel
-  const shownTime = isFlow
-    ? activeFlowTime
-    : scrubbingMinutes != null
-      ? `${String(scrubbingMinutes).padStart(2, '0')}:00`
-      : activeTime
-  const shownStatus = running
-    ? t.timer.status.running
-    : paused
-      ? t.timer.status.paused
-      : null
-
-  // Calculate Knob position on the circular arc (0 = top / 12 o'clock)
-  const knobAngle = scrubFraction * 2 * Math.PI - Math.PI / 2
-  const center = size / 2
-  const knobX = center + r * Math.cos(knobAngle)
-  const knobY = center + r * Math.sin(knobAngle)
-
-  const calcMinutesFromPointer = useCallback((e: React.PointerEvent) => {
-    if (!ringRef.current) return null
-    const rect = ringRef.current.getBoundingClientRect()
-    const cx = rect.left + rect.width / 2
-    const cy = rect.top + rect.height / 2
-    const dx = e.clientX - cx
-    const dy = e.clientY - cy
-    let rad = Math.atan2(dy, dx) + Math.PI / 2
-    if (rad < 0) rad += 2 * Math.PI
-    const frac = rad / (2 * Math.PI)
-    const rawMins = frac * 60
-    let snapped = Math.round(rawMins / 5) * 5
-    if (snapped === 0) snapped = rawMins > 30 ? 60 : 5
-    return Math.max(5, Math.min(60, snapped))
-  }, [])
-
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    if (!isIdle || isFlow || !onDurationChange) return
-    isDraggingRef.current = true
-    playMicroClick('tick')
-    const mins = calcMinutesFromPointer(e)
-    if (mins) setScrubbingMinutes(mins)
-    e.currentTarget.setPointerCapture?.(e.pointerId)
-  }, [isIdle, isFlow, onDurationChange, calcMinutesFromPointer])
-
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return
-    const mins = calcMinutesFromPointer(e)
-    if (mins && mins !== scrubbingMinutes) {
-      playMicroClick('tick')
-      setScrubbingMinutes(mins)
-    }
-  }, [calcMinutesFromPointer, scrubbingMinutes])
-
-  const handlePointerUp = useCallback((e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return
-    isDraggingRef.current = false
-    playMicroClick('pop')
-    const mins = calcMinutesFromPointer(e)
-    const finalMins = mins ?? scrubbingMinutes
-    if (finalMins != null && onDurationChange) {
-      onDurationChange(finalMins)
-    }
-    setScrubbingMinutes(null)
-    try {
-      e.currentTarget.releasePointerCapture?.(e.pointerId)
-    } catch {}
-  }, [calcMinutesFromPointer, scrubbingMinutes, onDurationChange])
-
-  const playBtnColor =
-    isFlow || phase === 'focus'
-      ? 'bg-accent text-on-accent border border-black/10 dark:border-white/10 active:border-accent/60 shadow-[0_0_24px_rgb(var(--c-accent)/calc(var(--glow-opacity,0.25)*1.5))]'
-      : phase === 'shortBreak'
-        ? 'bg-break text-on-accent border border-black/10 dark:border-white/10 active:border-break/60 shadow-[0_0_24px_rgb(var(--c-break)/calc(var(--glow-opacity,0.25)*1.5))]'
-        : 'bg-long text-on-accent border border-black/10 dark:border-white/10 active:border-long/60 shadow-[0_0_24px_rgb(var(--c-long)/calc(var(--glow-opacity,0.25)*1.5))]'
+  const shownTime = isFlow ? activeFlowTime : activeTime
 
   const handleToggleClick = useCallback(() => {
     playMicroClick(running ? 'tick' : 'pop')
@@ -324,36 +139,14 @@ export const Timer = memo(function Timer({
           : 'card border border-outline-variant/15 dark:border-white/[0.05] max-w-md 2xl:max-w-lg gap-3 sm:gap-4 p-5 sm:p-6'
       }`}
     >
-      {/* iOS 26 Ambient Backlight (Subtle acrylic depth glow behind display) */}
-      {isIos && (
-        <div
-          className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-44 h-44 rounded-full bg-primary/[0.06] dark:bg-primary/[0.08] blur-2xl transition-all duration-1000 ${
-            running ? 'opacity-100 animate-pulse-slow' : paused ? 'opacity-40' : 'opacity-15'
-          }`}
-          aria-hidden="true"
-        />
-      )}
-
       {task && (
-        <div
-          className={`inline-flex max-w-full items-center gap-2 px-3.5 py-1.5 text-xs shadow-sm transition-all duration-300 ${
-            isIos
-              ? 'rounded-full border border-black/[0.08] dark:border-white/15 bg-black/[0.05] dark:bg-white/10 text-zinc-800 dark:text-white/90 font-medium'
-              : 'rounded-badge border border-line/70 bg-surface/80 text-fg'
-          }`}
-        >
-          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isIos ? 'bg-primary shadow-[0_0_6px_rgba(var(--primary-rgb),0.8)]' : 'bg-accent'}`} />
+        <div className="inline-flex max-w-full items-center gap-2 px-3.5 py-1.5 text-xs shadow-sm transition-all duration-300 rounded-badge border border-line/70 bg-surface/80 text-fg font-mono">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
           <span className="max-w-[180px] sm:max-w-[280px] truncate font-medium leading-none">
             {task}
           </span>
           {tag && (
-            <span
-              className={`shrink-0 px-1.5 py-0.5 text-[11px] font-medium leading-none ${
-                isIos
-                  ? 'rounded-full border border-black/[0.08] dark:border-white/20 bg-black/[0.05] dark:bg-white/10 text-zinc-700 dark:text-white/80'
-                  : 'rounded-badge border border-tag-border bg-tag-bg text-tag-text'
-              }`}
-            >
+            <span className="shrink-0 px-1.5 py-0.5 text-[11px] font-medium leading-none rounded-badge border border-tag-border bg-tag-bg text-tag-text">
               #{tag}
             </span>
           )}
@@ -361,854 +154,195 @@ export const Timer = memo(function Timer({
       )}
 
       <div className="flex w-full flex-col items-center">
-        {isTui ? (
-          /* TUI Mode Switcher */
-          <div
-            role="tablist"
-            aria-label="Timer Modus"
-            className="flex items-center justify-center gap-2 font-mono text-xs font-bold select-none"
-          >
-            {MODES.map((m) => {
-              const isSelected = mode === m
-              return (
-                <button
-                  key={m}
-                  type="button"
-                  role="tab"
-                  aria-selected={isSelected}
-                  onClick={() => onModeChange(m)}
-                  className={`px-3 py-1.5 border transition-colors cursor-pointer uppercase whitespace-nowrap shrink-0 ${
-                    isSelected
-                      ? 'border-accent bg-accent text-on-accent font-bold'
-                      : 'border-line text-muted hover:border-fg hover:text-fg bg-surface'
-                  }`}
-                >
-                  &lt;&nbsp;{isSelected ? `[${m.toUpperCase()}]` : m.toUpperCase()}&nbsp;&gt;
-                </button>
-              )
-            })}
-          </div>
-        ) : isIos ? (
-          /* iOS 26 Unified Glass Segmented Control */
-          <div
-            role="tablist"
-            aria-label="Timer Modus"
-            className={`relative inline-grid grid-cols-2 ${
-              borderless ? 'w-60 sm:w-64' : 'w-full max-w-[240px]'
-            } mx-auto items-center p-1 rounded-full bg-black/[0.05] dark:bg-black/35 border border-black/[0.06] dark:border-white/10 select-none transition-opacity duration-500 ${
-              running && borderless ? 'opacity-30 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
-            }`}
-          >
-            {/* Sliding Glass Puck */}
-            <div
-              className="pointer-events-none absolute bottom-1 top-1 rounded-full bg-white dark:bg-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.2)] border border-black/[0.04] dark:border-white/15 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
-              style={{
-                width: 'calc((100% - 8px - 4px) / 2)',
-                left: '4px',
-                transform: `translateX(calc(${mode === 'pomodoro' ? 0 : 1} * (100% + 4px)))`,
-              }}
-            />
-            {MODES.map((m) => (
+        {/* TUI Mode Switcher */}
+        <div
+          role="tablist"
+          aria-label="Timer Modus"
+          className="flex items-center justify-center gap-2 font-mono text-xs font-bold select-none"
+        >
+          {MODES.map((m) => {
+            const isSelected = mode === m
+            return (
               <button
                 key={m}
                 type="button"
                 role="tab"
-                aria-selected={mode === m}
-                aria-label={t.timer[m]}
+                aria-selected={isSelected}
                 onClick={() => onModeChange(m)}
-                className={`relative z-10 flex items-center justify-center whitespace-nowrap rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-150 cursor-pointer ${
-                  mode === m
-                    ? 'text-zinc-950 dark:text-white'
-                    : 'text-zinc-600 dark:text-white/60 hover:text-zinc-950 dark:hover:text-white'
+                className={`px-3 py-1.5 border transition-colors cursor-pointer uppercase whitespace-nowrap shrink-0 ${
+                  isSelected
+                    ? 'border-accent bg-accent text-on-accent font-bold'
+                    : 'border-line text-muted hover:border-fg hover:text-fg bg-surface'
                 }`}
               >
-                <span>{t.timer[m]}</span>
+                &lt;&nbsp;{isSelected ? `[${m.toUpperCase()}]` : m.toUpperCase()}&nbsp;&gt;
               </button>
-            ))}
-          </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* TUI Terminal Box with Identical Height & Symmetric Geometry in Both Modes */}
+      <div className="flex flex-col items-center justify-between p-6 sm:p-7 border-2 border-line bg-canvas font-mono w-full max-w-sm min-h-[260px] mx-auto text-center select-none shadow-none my-2">
+        {/* Row 1: Top Border with Mode / Phase Label */}
+        <div className="text-xs font-bold text-accent uppercase tracking-widest flex items-center gap-2">
+          <span className="text-line">┌──</span>
+          <span>
+            [&nbsp;{isFlow ? (running ? 'FLOW: ACTIVE' : paused ? 'FLOW: PAUSED' : 'FLOW: IDLE') : `POMODORO: ${shownLabel.toUpperCase()}`}&nbsp;]
+          </span>
+          <span className="text-line">──┐</span>
+        </div>
+
+        {/* Row 2: Giant Digits */}
+        <span
+          className={`font-mono font-bold tabular-nums leading-none tracking-tight text-fg my-1 ${
+            large ? 'text-6xl sm:text-7xl' : 'text-5xl sm:text-6xl'
+          }`}
+        >
+          {shownTime}
+        </span>
+
+        {/* Row 3: Slot 1 (Meta-Information / Milestones) */}
+        <div className="h-[20px] flex items-center justify-center font-mono text-[11px] text-muted select-none">
+          {isFlow ? (
+            <div className="flex items-center justify-center gap-1.5">
+              <span>[</span>
+              {[25, 50, 75].map((m, idx) => {
+                const reached = flowMinutes >= m
+                return (
+                  <span key={m} className="flex items-center">
+                    <span className={reached ? 'text-accent font-bold' : 'text-muted'}>
+                      {reached ? '★' : '☆'} {m}m
+                    </span>
+                    {idx < 2 && <span className="text-muted/60 mx-1">·</span>}
+                  </span>
+                )
+              })}
+              <span>]</span>
+            </div>
+          ) : (
+            <span>[ ROUND: {currentRoundIndex + 1}/{roundsBeforeLongBreak} ]</span>
+          )}
+        </div>
+
+        {/* Row 4: Slot 2 (Progress / Activity) */}
+        <div className="flex items-center justify-center w-full font-mono text-xs select-none h-5 my-1">
+          {isFlow ? (
+            <span
+              className={`tracking-wider tabular-nums ${
+                running
+                  ? 'text-primary'
+                  : paused
+                    ? 'text-accent/50 animate-pulse'
+                    : 'text-text-muted/40'
+              }`}
+            >
+              {flowAsciiBar}
+            </span>
+          ) : (
+            <span className="font-bold text-accent tracking-wider">{asciiBar}</span>
+          )}
+        </div>
+
+        {/* Row 5: Bottom Border */}
+        <div className="text-xs text-muted flex items-center justify-center font-mono">
+          <span className="text-line">└───────────────────────────────┘</span>
+        </div>
+      </div>
+
+      {/* TUI 3-Column Action Buttons */}
+      <div className="grid grid-cols-3 gap-2 w-full max-w-sm mx-auto font-mono select-none">
+        <button
+          type="button"
+          onClick={handleResetClick}
+          title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
+          aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
+          className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95 text-center justify-center"
+        >
+          [&nbsp;RESET&nbsp;]
+        </button>
+
+        <button
+          type="button"
+          onClick={handleToggleClick}
+          className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-accent bg-accent text-on-accent hover:opacity-90 transition-opacity uppercase cursor-pointer active:scale-95 text-center justify-center shadow-none"
+          title={running ? t.timer.pause : t.timer.start}
+          aria-label={running ? t.timer.pause : t.timer.start}
+        >
+          {running ? '[❚❚\u00A0PAUSE]' : '[▶\u00A0START]'}
+        </button>
+
+        {isFlow ? (
+          <button
+            type="button"
+            onClick={handleSkipClick}
+            title={`${t.flow.finish} (F)`}
+            aria-label={t.flow.finish}
+            className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95 text-center justify-center"
+          >
+            [&nbsp;FINISH&nbsp;]
+          </button>
         ) : (
-          /* Standard / M3 Segmented Control Track */
-          <div
-            role="tablist"
-            aria-label="Timer Modus"
-            className={`seg-track relative grid grid-cols-2 ${
-              borderless ? 'w-60 sm:w-64' : 'w-full max-w-[260px]'
-            } mx-auto select-none rounded-btn border border-line/70 bg-surface/80 p-1 transition-opacity duration-500 ${
-              running && borderless ? 'opacity-30 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
-            }`}
+          <button
+            type="button"
+            onClick={handleSkipClick}
+            title={`${t.shortcuts.skip} (N)`}
+            aria-label={t.shortcuts.skip}
+            className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95 text-center justify-center"
           >
-            {/* Sliding Pill — transform-based so the glide stays on the compositor */}
-            <div
-              className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform"
-              style={{
-                width: 'calc((100% - 8px - 4px) / 2)',
-                left: '4px',
-                transform: `translateX(calc(${mode === 'pomodoro' ? 0 : 1} * (100% + 4px)))`,
-              }}
-            />
-            {MODES.map((m) => (
-              <button
-                key={m}
-                type="button"
-                role="tab"
-                aria-selected={mode === m}
-                aria-label={t.timer[m]}
-                onClick={() => onModeChange(m)}
-                className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] w-full items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                  mode === m ? 'text-fg' : 'text-muted hover:text-fg'
-                }`}
-              >
-                {mode === m && (
-                  <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
-                )}
-                <span>{t.timer[m]}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {!isTui && !isM3 && (
-          <div
-            className={`flex items-center justify-center gap-1.5 h-3 my-1 transition-opacity duration-300 ${
-              isFlow ? 'invisible select-none pointer-events-none' : 'visible'
-            }`}
-            aria-hidden={isFlow}
-            aria-label={`Runde ${currentRoundIndex + 1} von ${roundsBeforeLongBreak}`}
-          >
-            {Array.from({ length: roundsBeforeLongBreak }).map((_, i) => {
-              const isCompleted = i < currentRoundIndex
-              const isCurrent = i === currentRoundIndex
-
-              let pillStyle = isIos ? 'bg-black/10 dark:bg-white/10' : 'bg-line'
-              if (isCompleted) {
-                pillStyle = isIos
-                  ? 'bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]'
-                  : 'bg-accent'
-              } else if (isCurrent) {
-                pillStyle = isIos
-                  ? running
-                    ? 'bg-primary/90 shadow-[0_0_10px_rgba(var(--primary-rgb),0.6)] animate-pulse'
-                    : 'bg-primary/50'
-                  : running
-                    ? 'bg-accent animate-pulse'
-                    : 'bg-accent/60'
-              }
-
-              return (
-                <span
-                  key={i}
-                  className={`h-1 w-7 2xl:w-8 rounded-full transition-all duration-300 ${pillStyle}`}
-                />
-              )
-            })}
-          </div>
+            [&nbsp;SKIP&nbsp;]
+          </button>
         )}
       </div>
 
-      {isTui ? (
-        /* TUI Terminal Box with Identical Height & Symmetric Geometry in Both Modes */
-        <div className="flex flex-col items-center justify-between p-6 sm:p-7 border-2 border-line bg-canvas font-mono w-full max-w-sm min-h-[260px] mx-auto text-center select-none shadow-none my-2">
-          {/* Row 1: Top Border with Mode / Phase Label */}
-          <div className="text-xs font-bold text-accent uppercase tracking-widest flex items-center gap-2">
-            <span className="text-line">┌──</span>
-            <span>
-              [&nbsp;{isFlow ? (running ? 'FLOW: ACTIVE' : paused ? 'FLOW: PAUSED' : 'FLOW: IDLE') : `POMODORO: ${shownLabel.toUpperCase()}`}&nbsp;]
-            </span>
-            <span className="text-line">──┐</span>
-          </div>
-
-          {/* Row 2: Giant Digits */}
-          <span
-            className={`font-mono font-bold tabular-nums leading-none tracking-tight text-fg my-1 ${
-              large ? 'text-6xl sm:text-7xl' : 'text-5xl sm:text-6xl'
-            }`}
-          >
-            {shownTime}
-          </span>
-
-          {/* Row 3: Slot 1 (Meta-Information / Milestones) */}
-          <div className="h-[20px] flex items-center justify-center font-mono text-[11px] text-muted select-none">
-            {isFlow ? (
-              <div className="flex items-center justify-center gap-1.5">
-                <span>[</span>
-                {[25, 50, 75].map((m, idx) => {
-                  const reached = flowMinutes >= m
-                  return (
-                    <span key={m} className="flex items-center">
-                      <span className={reached ? 'text-accent font-bold' : 'text-muted'}>
-                        {reached ? '★' : '☆'} {m}m
-                      </span>
-                      {idx < 2 && <span className="text-muted/60 mx-1">·</span>}
-                    </span>
-                  )
-                })}
-                <span>]</span>
-              </div>
-            ) : (
-              <span>[ ROUND: {currentRoundIndex + 1}/{roundsBeforeLongBreak} ]</span>
-            )}
-          </div>
-
-          {/* Row 4: Slot 2 (Progress / Activity) */}
-          <div className="flex items-center justify-center w-full font-mono text-xs select-none h-5 my-1">
-            {isFlow ? (
-              <span
-                className={`tracking-wider tabular-nums ${
-                  running
-                    ? 'text-primary'
-                    : paused
-                      ? 'text-accent/50 animate-pulse'
-                      : 'text-text-muted/40'
-                }`}
-              >
-                {flowAsciiBar}
-              </span>
-            ) : (
-              <span className="font-bold text-accent tracking-wider">{asciiBar}</span>
-            )}
-          </div>
-
-          {/* Row 5: Bottom Border */}
-          <div className="text-xs text-muted flex items-center justify-center font-mono">
-            <span className="text-line">└───────────────────────────────┘</span>
-          </div>
-        </div>
-      ) : (
-        <div
-          ref={ringRef}
-          className={`relative isolate touch-none select-none ${pulseActive ? 'animate-complete-pulse' : ''} ${
-            isIdle && !isFlow ? 'cursor-grab active:cursor-grabbing' : ''
-          }`}
-          style={{ width: size, height: size }}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-        >
-          {/* Ambient Breathing Glow behind Timer for non-iOS themes */}
-          {!isIos && (
-            <div
-              className={`pointer-events-none absolute inset-0 -z-10 rounded-full blur-3xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-                running
-                  ? 'opacity-28 scale-105'
-                  : paused
-                    ? 'opacity-14 scale-100'
-                    : 'opacity-0 scale-95'
-              }`}
-              style={
-                {
-                  background: `radial-gradient(circle at center, rgb(var(${glowVar})) 0%, transparent 68%)`,
-                } as React.CSSProperties
-              }
-            >
-              {/* Inner Organic Breathing Layer while running */}
-              <div
-                className={`h-full w-full rounded-full transition-opacity duration-1000 ${
-                  running ? 'animate-ambient-breath opacity-100' : 'opacity-0'
-                }`}
-                style={{
-                  background: `radial-gradient(circle at center, rgb(var(${glowVar})) 0%, transparent 58%)`,
-                }}
-              />
-            </div>
-          )}
-
-          {/* Pomodoro Mode View */}
-          <div
-            className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-              isFlow ? 'pointer-events-none opacity-0 scale-95' : 'opacity-100 scale-100'
-            }`}
-          >
-            <svg
-              width={size}
-              height={size}
-              className="-rotate-90 select-none overflow-visible"
-              aria-hidden="true"
-            >
-              {/* Frost Track: stroke-black/[0.06] on light / stroke-white/10 on dark on iOS 26 */}
-              <circle
-                cx={center}
-                cy={center}
-                r={r}
-                fill="none"
-                strokeWidth={stroke}
-                className={isIos ? 'stroke-black/[0.06] dark:stroke-white/10' : 'stroke-track'}
-              />
-              {/* Neon Arc: stroke-primary with round caps */}
-              <circle
-                cx={center}
-                cy={center}
-                r={r}
-                fill="none"
-                strokeWidth={stroke}
-                strokeLinecap="round"
-                strokeDasharray={circ}
-                strokeDashoffset={offset}
-                className={`${isIos ? 'stroke-primary' : RING[phase]} ${
-                  isScrubbing
-                    ? 'ring-progress--none'
-                    : running
-                      ? 'ring-progress--running'
-                      : 'ring-progress'
-                }`}
-              />
-            </svg>
-
-            {/* Scrubbing Knob indicator only while active dragging */}
-            {isScrubbing && !isFlow && (
-              <div
-                className="pointer-events-none absolute z-20 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center animate-fade-in"
-                style={{ left: `${knobX}px`, top: `${knobY}px` }}
-              >
-                <div
-                  className={`rounded-full border-2 border-white scale-125 transition-transform duration-100 ${
-                    isIos
-                      ? 'h-4 w-4 bg-primary shadow-[0_0_12px_rgba(var(--primary-rgb),0.8)]'
-                      : 'h-4 w-4 bg-accent shadow-md shadow-accent/50'
-                  }`}
-                />
-              </div>
-            )}
-
-            <div className="absolute inset-0 flex flex-col items-center justify-center -translate-y-0.5">
-              {isIos ? (
-                /* Live Round Capsule for iOS 26 */
-                <div className="mb-3 sm:mb-3.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/10 border border-black/[0.08] dark:border-white/15 text-[10px] sm:text-[11px] font-medium tracking-wide uppercase text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
-                  <CatLogo
-                    size={12}
-                    state={isIdle ? 'idle' : phase}
-                    className={`transition-colors duration-500 ${PHASE_TEXT[phase]}`}
-                  />
-                  <span className="tracking-widest">{shownLabel}</span>
-                  <span className="text-zinc-400 dark:text-white/30">·</span>
-                  <span className="tabular-nums text-zinc-800 dark:text-white/80 font-semibold">{`Runde ${currentRoundIndex + 1}/${roundsBeforeLongBreak}`}</span>
-                </div>
-              ) : isM3 ? (
-                <div className="mb-3 sm:mb-3.5 inline-flex items-center gap-1.5 rounded-full bg-secondary-container px-2.5 py-0.5 text-[10px] sm:text-[11px] font-medium text-on-secondary-container animate-fade-in shadow-none">
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                  <span>{`Runde ${currentRoundIndex + 1}/${roundsBeforeLongBreak}`}</span>
-                </div>
-              ) : (
-                <div className="mb-3 sm:mb-3.5 flex items-center gap-1.5 min-h-[20px]">
-                  <CatLogo
-                    size={14}
-                    state={isIdle ? 'idle' : phase}
-                    className={`transition-colors duration-500 ${PHASE_TEXT[phase]}`}
-                  />
-                  <span className={`text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest transition-colors duration-500 ${PHASE_TEXT[phase]}`}>
-                    {shownLabel}
-                  </span>
-                </div>
-              )}
-              <span
-                className={`font-display font-bold tabular-nums leading-none tracking-tight select-none transition-all duration-300 ${
-                  isIos ? 'text-zinc-950 dark:text-white' : 'text-fg'
-                } ${
-                  large ? 'text-6xl sm:text-7xl 2xl:text-8xl' : 'text-4xl sm:text-5xl'
-                }`}
-              >
-                {shownTime}
-              </span>
-              <div className="mt-2 flex min-h-[20px] items-center justify-center">
-                <span
-                  className={`text-xs font-medium transition-opacity duration-200 ${
-                    isIos ? 'text-zinc-600 dark:text-white/60' : 'text-muted'
-                  } ${
-                    shownStatus ? 'opacity-100' : 'opacity-0'
-                  }`}
-                >
-                  {shownStatus || ''}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Flow Mode View */}
-          <div
-            className={`absolute inset-0 flex flex-col items-center justify-center -translate-y-0.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-              isFlow ? 'opacity-100 scale-100' : 'pointer-events-none opacity-0 scale-95'
-            }`}
-          >
-            {/* iOS 26 Ambient Backlight in Flow Mode */}
-            {isIos && isFlow && (
-              <div
-                className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-44 h-44 rounded-full bg-primary/[0.04] blur-2xl transition-all duration-1000 ${
-                  running ? 'opacity-100 animate-pulse-slow' : paused ? 'opacity-40' : 'opacity-20'
-                }`}
-                aria-hidden="true"
-              />
-            )}
-
-            {isIos ? (
-              /* Live Round Capsule for iOS 26 Flow Mode */
-              <div className="mb-3 sm:mb-3.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/10 border border-black/[0.08] dark:border-white/15 text-[10px] sm:text-[11px] font-medium tracking-wide uppercase text-zinc-800 dark:text-white/90 shadow-none animate-fade-in">
-                <CatLogo
-                  size={12}
-                  state={flowStatus === 'idle' ? 'idle' : 'focus'}
-                  className="text-primary"
-                />
-                <span className="tracking-widest">{shownLabel}</span>
-                <span className="text-zinc-400 dark:text-white/30">·</span>
-                <span className="text-zinc-800 dark:text-white/80 font-semibold">{running ? 'TRACKING' : paused ? 'PAUSED' : 'IDLE'}</span>
-              </div>
-            ) : (
-              <div className="mb-3 sm:mb-3.5 flex items-center gap-1.5 min-h-[20px]">
-                <CatLogo
-                  size={14}
-                  state={flowStatus === 'idle' ? 'idle' : 'focus'}
-                  className="text-accent"
-                />
-                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.3em] text-accent/80">
-                  {shownLabel}
-                </span>
-              </div>
-            )}
-
-            <span
-              className={`font-display font-bold leading-none tracking-tight tabular-nums select-none transition-all duration-300 ${
-                isIos ? 'text-zinc-950 dark:text-white' : 'text-fg'
-              } ${
-                large
-                  ? isFlow && shownTime.length > 5
-                    ? 'text-5xl sm:text-6xl 2xl:text-7xl'
-                    : 'text-6xl sm:text-7xl 2xl:text-8xl'
-                  : isFlow && shownTime.length > 5
-                    ? 'text-3xl sm:text-4xl'
-                    : 'text-4xl sm:text-5xl'
-              }`}
-            >
-              {shownTime}
-            </span>
-
-            <div className="mt-2 flex min-h-[50px] flex-col items-center justify-center">
-              {isIos ? (
-                /* iOS 26 Floating Apple Milestone Live Activity Capsules */
-                <div className="my-1 flex items-center justify-center gap-1.5 select-none">
-                  {[25, 50, 75].map((m) => {
-                    const reached = flowMinutes >= m
-                    return (
-                      <span
-                        key={m}
-                        className={`flex items-center gap-1 transition-all duration-300 px-2.5 py-0.5 rounded-full text-[11px] ${
-                          reached
-                            ? 'bg-primary/20 border border-primary/30 text-primary font-semibold shadow-[0_0_10px_rgba(var(--primary-rgb),0.25)]'
-                            : 'bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/10 text-zinc-600 dark:text-white/40'
-                        }`}
-                      >
-                        <span>{reached ? '★' : '☆'}</span>
-                        <span className="tabular-nums">{m}m</span>
-                      </span>
-                    )
-                  })}
-                </div>
-              ) : isM3 ? (
-                <div className="my-1 flex items-center justify-center gap-2 select-none">
-                  {[25, 50, 75].map((m) => {
-                    const reached = flowMinutes >= m
-                    return (
-                      <span
-                        key={m}
-                        className={`flex items-center gap-1 rounded-xl px-3 py-1 text-xs transition-all duration-300 ${
-                          reached
-                            ? 'bg-tertiary-container text-on-tertiary-container font-semibold animate-in zoom-in-95'
-                            : 'bg-raised text-muted/60 font-medium'
-                        }`}
-                      >
-                        <span>{reached ? '★' : '☆'}</span>
-                        <span>{m}m</span>
-                      </span>
-                    )
-                  })}
-                </div>
-              ) : (
-                <Waveform status={flowStatus} />
-              )}
-
-              <div className="flex min-h-[18px] items-center justify-center">
-                <span
-                  className={`text-xs font-medium transition-opacity duration-200 ${
-                    isIos ? 'text-zinc-600 dark:text-white/60' : 'text-muted'
-                  } ${
-                    shownStatus ? 'opacity-100' : 'opacity-0'
-                  }`}
-                >
-                  {shownStatus || ''}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isTui ? (
-        /* TUI 3-Column Action Buttons */
-        <div className="grid grid-cols-3 gap-2 w-full max-w-sm mx-auto font-mono select-none">
-          <button
-            type="button"
-            onClick={handleResetClick}
-            title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
-            aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95 text-center justify-center"
-          >
-            [&nbsp;RESET&nbsp;]
-          </button>
-
-          <button
-            type="button"
-            onClick={handleToggleClick}
-            className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-accent bg-accent text-on-accent hover:opacity-90 transition-opacity uppercase cursor-pointer active:scale-95 text-center justify-center shadow-none"
-            title={running ? t.timer.pause : t.timer.start}
-            aria-label={running ? t.timer.pause : t.timer.start}
-          >
-            {running ? '[❚❚\u00A0PAUSE]' : '[▶\u00A0START]'}
-          </button>
-
-          {isFlow ? (
-            <button
-              type="button"
-              onClick={handleSkipClick}
-              title={`${t.flow.finish} (F)`}
-              aria-label={t.flow.finish}
-              className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95 text-center justify-center"
-            >
-              [&nbsp;FINISH&nbsp;]
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSkipClick}
-              title={`${t.shortcuts.skip} (N)`}
-              aria-label={t.shortcuts.skip}
-              className="tui-btn w-full whitespace-nowrap px-2 py-2 text-xs font-bold border border-line bg-surface text-fg hover:border-accent hover:text-accent transition-colors uppercase cursor-pointer active:scale-95 text-center justify-center"
-            >
-              [&nbsp;SKIP&nbsp;]
-            </button>
-          )}
-        </div>
-      ) : isIos ? (
-        /* iOS 26 Glass Lens Control Cluster */
-        <div className="flex items-center justify-center gap-3.5 sm:gap-5 mt-1">
-          {/* Secondary Action: Reset / Discard Frosted Mini-Pill */}
-          <button
-            type="button"
-            onClick={handleResetClick}
-            title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
-            aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/[0.05] hover:bg-black/[0.09] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.08] dark:border-white/10 flex items-center justify-center text-zinc-800 dark:text-white/80 transition-all cursor-pointer shadow-sm"
-          >
-            <RotateCcw size={17} />
-          </button>
-
-          {/* Center Action: Play / Pause Optical Lens */}
-          <button
-            type="button"
-            onClick={handleToggleClick}
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-primary/90 to-primary text-white flex items-center justify-center shadow-[0_8px_24px_rgba(var(--primary-rgb),0.35),inset_0_1px_1px_rgba(255,255,255,0.45)] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-            title={running ? t.timer.pause : t.timer.start}
-            aria-label={running ? t.timer.pause : t.timer.start}
-          >
-            {running ? (
-              <Pause size={large ? 28 : 24} />
-            ) : (
-              <Play size={large ? 28 : 24} className="translate-x-0.5" />
-            )}
-          </button>
-
-          {/* Secondary Action: Skip / Finish Frosted Mini-Pill */}
-          {isFlow ? (
-            <button
-              type="button"
-              onClick={handleSkipClick}
-              title={`${t.flow.finish} (F)`}
-              aria-label={t.flow.finish}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/[0.05] hover:bg-black/[0.09] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.08] dark:border-white/10 flex items-center justify-center text-zinc-800 dark:text-white/80 transition-all cursor-pointer shadow-sm"
-            >
-              <Check size={19} strokeWidth={2.5} />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSkipClick}
-              title={`${t.shortcuts.skip} (N)`}
-              aria-label={t.shortcuts.skip}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/[0.05] hover:bg-black/[0.09] dark:bg-white/10 dark:hover:bg-white/15 active:scale-90 border border-black/[0.08] dark:border-white/10 flex items-center justify-center text-zinc-800 dark:text-white/80 transition-all cursor-pointer shadow-sm"
-            >
-              <SkipForward size={17} />
-            </button>
-          )}
-        </div>
-      ) : isM3 ? (
-        /* Material 3 Squircle Control Cluster */
-        <div className="flex items-center justify-center gap-3.5 sm:gap-5 mt-1">
-          <button
-            type="button"
-            onClick={handleResetClick}
-            title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
-            aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className="btn-ghost flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92]"
-          >
-            <RotateCcw size={17} />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleToggleClick}
-            className="w-16 h-16 sm:w-18 sm:h-18 rounded-[24px] bg-primary text-on-primary flex items-center justify-center shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer"
-            title={running ? t.timer.pause : t.timer.start}
-            aria-label={running ? t.timer.pause : t.timer.start}
-          >
-            {running ? (
-              <Pause size={large ? 28 : 24} />
-            ) : (
-              <Play size={large ? 28 : 24} className="translate-x-0.5" />
-            )}
-          </button>
-
-          {isFlow ? (
-            <button
-              type="button"
-              onClick={handleSkipClick}
-              title={`${t.flow.finish} (F)`}
-              aria-label={t.flow.finish}
-              className="btn-ghost flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full active:scale-[0.92]"
-            >
-              <Check size={19} strokeWidth={2.5} />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSkipClick}
-              title={`${t.shortcuts.skip} (N)`}
-              aria-label={t.shortcuts.skip}
-              className="btn-ghost flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full active:scale-[0.92]"
-            >
-              <SkipForward size={17} />
-            </button>
-          )}
-        </div>
-      ) : (
-        /* Standard Control Cluster */
-        <div className="flex items-center justify-center gap-3.5 sm:gap-5 mt-1">
-          <button
-            type="button"
-            onClick={handleResetClick}
-            title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
-            aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-            className="btn-ghost flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full transition-all duration-200 active:scale-[0.92]"
-          >
-            <RotateCcw size={17} />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleToggleClick}
-            className={`ios-play-lens play-spring flex items-center justify-center rounded-full ${
-              large ? 'h-18 w-18 shadow-2xl' : 'h-14 w-14 sm:h-16 sm:w-16 shadow-lg'
-            } ${playBtnColor}`}
-            title={running ? t.timer.pause : t.timer.start}
-            aria-label={running ? t.timer.pause : t.timer.start}
-          >
-            {running ? (
-              <Pause size={large ? 28 : 24} />
-            ) : (
-              <Play size={large ? 28 : 24} className="translate-x-0.5" />
-            )}
-          </button>
-
-          {isFlow ? (
-            <button
-              type="button"
-              onClick={handleSkipClick}
-              title={`${t.flow.finish} (F)`}
-              aria-label={t.flow.finish}
-              className="btn-ghost flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full active:scale-[0.92]"
-            >
-              <Check size={19} strokeWidth={2.5} />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSkipClick}
-              title={`${t.shortcuts.skip} (N)`}
-              aria-label={t.shortcuts.skip}
-              className="btn-ghost flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full active:scale-[0.92]"
-            >
-              <SkipForward size={17} />
-            </button>
-          )}
-        </div>
-      )}
-
       {/* Keyboard shortcuts row */}
-      {isIos ? (
-        <div
-          className={`flex items-center justify-center gap-2 sm:gap-2.5 text-xs text-text-muted mt-2 w-full flex-nowrap select-none transition-opacity duration-200 [@media(hover:none)]:hidden ${
-            running ? 'pointer-events-none opacity-0' : 'opacity-100'
-          }`}
+      <div
+        className={`flex items-center justify-center gap-1.5 sm:gap-2.5 text-[11px] sm:text-xs text-text-muted mt-2 sm:mt-3 w-full flex-nowrap select-none transition-opacity duration-200 [@media(hover:none)]:hidden ${
+          running ? 'pointer-events-none opacity-0' : 'opacity-100'
+        }`}
+      >
+        <span className="inline-flex items-center gap-1 whitespace-nowrap shrink-0">
+          <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] rounded text-[10px] font-mono font-medium shrink-0 border border-line bg-surface text-fg">Space</kbd>
+          <span className="text-[10px] sm:text-[11px] font-mono opacity-80">Start/Pause</span>
+        </span>
+        <span className="text-text-muted/40 mx-0.5 shrink-0">·</span>
+        {isFlow ? (
+          <>
+            <span className="inline-flex items-center gap-1 whitespace-nowrap shrink-0">
+              <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] rounded text-[10px] font-mono font-medium shrink-0 border border-line bg-surface text-fg">R</kbd>
+              <span className="text-[10px] sm:text-[11px] font-mono opacity-80">Discard</span>
+            </span>
+            <span className="text-text-muted/40 mx-0.5 shrink-0">·</span>
+            <span className="inline-flex items-center gap-1 whitespace-nowrap shrink-0">
+              <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] rounded text-[10px] font-mono font-medium shrink-0 border border-line bg-surface text-fg">F</kbd>
+              <span className="text-[10px] sm:text-[11px] font-mono opacity-80">Finish</span>
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="inline-flex items-center gap-1 whitespace-nowrap shrink-0">
+              <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] rounded text-[10px] font-mono font-medium shrink-0 border border-line bg-surface text-fg">R</kbd>
+              <span className="text-[10px] sm:text-[11px] font-mono opacity-80">Reset</span>
+            </span>
+            <span className="text-text-muted/40 mx-0.5 shrink-0">·</span>
+            <span className="inline-flex items-center gap-1 whitespace-nowrap shrink-0">
+              <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] rounded text-[10px] font-mono font-medium shrink-0 border border-line bg-surface text-fg">N</kbd>
+              <span className="text-[10px] sm:text-[11px] font-mono opacity-80">Skip</span>
+            </span>
+          </>
+        )}
+        <span className="text-text-muted/40 mx-0.5 shrink-0">·</span>
+        <button
+          type="button"
+          onClick={onToggleZen}
+          title={isZenMode ? t.zen.exitHint : t.zen.enterHint}
+          aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
+          className="inline-flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors hover:text-fg cursor-pointer"
         >
-          <span className="inline-flex items-center gap-1 shrink-0">
-            <kbd className="px-1.5 py-0.5 min-w-[22px] rounded-md bg-white/10 border border-white/15 text-[10px] font-mono font-medium text-text-primary shrink-0">
-              Space
-            </kbd>
-            <span className="whitespace-nowrap text-[11px]">Start/Pause</span>
-          </span>
-          <span className="shrink-0 text-white/20">·</span>
-          {isFlow ? (
-            <>
-              <span className="inline-flex items-center gap-1 shrink-0">
-                <kbd className="px-1.5 py-0.5 min-w-[22px] rounded-md bg-white/10 border border-white/15 text-[10px] font-mono font-medium text-text-primary shrink-0">
-                  R
-                </kbd>
-                <span className="whitespace-nowrap text-[11px]">Discard</span>
-              </span>
-              <span className="shrink-0 text-white/20">·</span>
-              <span className="inline-flex items-center gap-1 shrink-0">
-                <kbd className="px-1.5 py-0.5 min-w-[22px] rounded-md bg-white/10 border border-white/15 text-[10px] font-mono font-medium text-text-primary shrink-0">
-                  F
-                </kbd>
-                <span className="whitespace-nowrap text-[11px]">Finish</span>
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="inline-flex items-center gap-1 shrink-0">
-                <kbd className="px-1.5 py-0.5 min-w-[22px] rounded-md bg-white/10 border border-white/15 text-[10px] font-mono font-medium text-text-primary shrink-0">
-                  R
-                </kbd>
-                <span className="whitespace-nowrap text-[11px]">Reset</span>
-              </span>
-              <span className="shrink-0 text-white/20">·</span>
-              <span className="inline-flex items-center gap-1 shrink-0">
-                <kbd className="px-1.5 py-0.5 min-w-[22px] rounded-md bg-white/10 border border-white/15 text-[10px] font-mono font-medium text-text-primary shrink-0">
-                  N
-                </kbd>
-                <span className="whitespace-nowrap text-[11px]">Skip</span>
-              </span>
-            </>
-          )}
-          <span className="shrink-0 text-white/20">·</span>
-          <button
-            type="button"
-            onClick={onToggleZen}
-            title={isZenMode ? t.zen.exitHint : t.zen.enterHint}
-            aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
-            className="inline-flex items-center gap-1 shrink-0 transition-colors hover:text-fg cursor-pointer"
-          >
-            <kbd className="px-1.5 py-0.5 min-w-[22px] rounded-md bg-white/10 border border-white/15 text-[10px] font-mono font-medium text-text-primary shrink-0">
-              Z
-            </kbd>
-            <span className="whitespace-nowrap text-[11px]">Zen</span>
-          </button>
-        </div>
-      ) : isM3 ? (
-        <div
-          className={`flex items-center justify-center gap-2 sm:gap-3 text-xs text-text-muted mt-3 w-full flex-nowrap select-none transition-opacity duration-200 [@media(hover:none)]:hidden ${
-            running ? 'pointer-events-none opacity-0' : 'opacity-100'
-          }`}
-        >
-          <span className="inline-flex items-center gap-1 shrink-0">
-            <kbd className="px-1.5 py-0.5 rounded-md bg-surface-container-highest text-on-surface text-[10px] font-mono font-medium shrink-0">
-              Space
-            </kbd>
-            <span className="whitespace-nowrap text-[11px]">Start/Pause</span>
-          </span>
-          <span className="shrink-0 text-muted/40">·</span>
-          {isFlow ? (
-            <>
-              <span className="inline-flex items-center gap-1 shrink-0">
-                <kbd className="px-1.5 py-0.5 rounded-md bg-surface-container-highest text-on-surface text-[10px] font-mono font-medium shrink-0">
-                  R
-                </kbd>
-                <span className="whitespace-nowrap text-[11px]">Discard</span>
-              </span>
-              <span className="shrink-0 text-muted/40">·</span>
-              <span className="inline-flex items-center gap-1 shrink-0">
-                <kbd className="px-1.5 py-0.5 rounded-md bg-surface-container-highest text-on-surface text-[10px] font-mono font-medium shrink-0">
-                  F
-                </kbd>
-                <span className="whitespace-nowrap text-[11px]">Finish</span>
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="inline-flex items-center gap-1 shrink-0">
-                <kbd className="px-1.5 py-0.5 rounded-md bg-surface-container-highest text-on-surface text-[10px] font-mono font-medium shrink-0">
-                  R
-                </kbd>
-                <span className="whitespace-nowrap text-[11px]">Reset</span>
-              </span>
-              <span className="shrink-0 text-muted/40">·</span>
-              <span className="inline-flex items-center gap-1 shrink-0">
-                <kbd className="px-1.5 py-0.5 rounded-md bg-surface-container-highest text-on-surface text-[10px] font-mono font-medium shrink-0">
-                  N
-                </kbd>
-                <span className="whitespace-nowrap text-[11px]">Skip</span>
-              </span>
-            </>
-          )}
-          <span className="shrink-0 text-muted/40">·</span>
-          <button
-            type="button"
-            onClick={onToggleZen}
-            title={isZenMode ? t.zen.exitHint : t.zen.enterHint}
-            aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
-            className="inline-flex items-center gap-1 shrink-0 transition-colors hover:text-fg cursor-pointer"
-          >
-            <kbd className="px-1.5 py-0.5 rounded-md bg-surface-container-highest text-on-surface text-[10px] font-mono font-medium shrink-0">
-              Z
-            </kbd>
-            <span className="whitespace-nowrap text-[11px]">Zen</span>
-          </button>
-        </div>
-      ) : (
-        <div
-          className={`flex items-center justify-center gap-1.5 sm:gap-2.5 text-[11px] sm:text-xs text-text-muted mt-2 sm:mt-3 w-full flex-nowrap select-none transition-opacity duration-200 [@media(hover:none)]:hidden ${
-            running ? 'pointer-events-none opacity-0' : 'opacity-100'
-          }`}
-        >
-          <span className="inline-flex items-center gap-1 whitespace-nowrap shrink-0">
-            <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] rounded text-[10px] font-mono font-medium shrink-0">Space</kbd>
-            <span className="text-[10px] sm:text-[11px] font-mono opacity-80">Start/Pause</span>
-          </span>
-          <span className="text-text-muted/40 mx-0.5 shrink-0">·</span>
-          {isFlow ? (
-            <>
-              <span className="inline-flex items-center gap-1 whitespace-nowrap shrink-0">
-                <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] rounded text-[10px] font-mono font-medium shrink-0">R</kbd>
-                <span className="text-[10px] sm:text-[11px] font-mono opacity-80">Discard</span>
-              </span>
-              <span className="text-text-muted/40 mx-0.5 shrink-0">·</span>
-              <span className="inline-flex items-center gap-1 whitespace-nowrap shrink-0">
-                <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] rounded text-[10px] font-mono font-medium shrink-0">F</kbd>
-                <span className="text-[10px] sm:text-[11px] font-mono opacity-80">Finish</span>
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="inline-flex items-center gap-1 whitespace-nowrap shrink-0">
-                <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] rounded text-[10px] font-mono font-medium shrink-0">R</kbd>
-                <span className="text-[10px] sm:text-[11px] font-mono opacity-80">Reset</span>
-              </span>
-              <span className="text-text-muted/40 mx-0.5 shrink-0">·</span>
-              <span className="inline-flex items-center gap-1 whitespace-nowrap shrink-0">
-                <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] rounded text-[10px] font-mono font-medium shrink-0">N</kbd>
-                <span className="text-[10px] sm:text-[11px] font-mono opacity-80">Skip</span>
-              </span>
-            </>
-          )}
-          <span className="text-text-muted/40 mx-0.5 shrink-0">·</span>
-          <button
-            type="button"
-            onClick={onToggleZen}
-            title={isZenMode ? t.zen.exitHint : t.zen.enterHint}
-            aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
-            className="inline-flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors hover:text-fg cursor-pointer"
-          >
-            <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] rounded text-[10px] font-mono font-medium shrink-0">Z</kbd>
-            <span className="text-[10px] sm:text-[11px] font-mono opacity-80">Zen</span>
-          </button>
-        </div>
-      )}
+          <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] rounded text-[10px] font-mono font-medium shrink-0 border border-line bg-surface text-fg">Z</kbd>
+          <span className="text-[10px] sm:text-[11px] font-mono opacity-80">Zen</span>
+        </button>
+      </div>
 
       {pipSupported && (
         <div className="group/pip absolute bottom-3 right-3 z-10 sm:bottom-4 sm:right-4">
@@ -1219,20 +353,14 @@ export const Timer = memo(function Timer({
             className={`rounded-lg p-2 transition-all duration-200 ${
               pipOpen
                 ? 'bg-accent/15 text-accent opacity-100'
-                : isIos
-                  ? 'text-zinc-500 dark:text-white/40 opacity-0 hover:bg-black/[0.05] dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white focus:opacity-100 group-hover:opacity-100'
-                  : 'text-muted opacity-0 hover:bg-raised/50 hover:text-fg focus:opacity-100 group-hover:opacity-100'
+                : 'text-muted opacity-0 hover:bg-raised/50 hover:text-fg focus:opacity-100 group-hover:opacity-100'
             }`}
           >
             <PictureInPicture2 size={16} />
           </button>
           <span
             role="tooltip"
-            className={`pointer-events-none absolute bottom-full right-0 mb-2 whitespace-nowrap rounded-md border px-2 py-1 text-xs font-normal opacity-0 shadow-lg transition-opacity duration-150 group-hover/pip:opacity-100 ${
-              isIos
-                ? 'border-black/[0.08] dark:border-white/15 bg-white/95 dark:bg-black/90 text-zinc-900 dark:text-white'
-                : 'border-line bg-raised text-fg'
-            }`}
+            className="pointer-events-none absolute bottom-full right-0 mb-2 whitespace-nowrap rounded-md border border-line bg-raised px-2 py-1 text-xs font-normal text-fg opacity-0 shadow-lg transition-opacity duration-150 group-hover/pip:opacity-100"
           >
             {pipOpen ? t.pip.close : t.pip.open}
           </span>

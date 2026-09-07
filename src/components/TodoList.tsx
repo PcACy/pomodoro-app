@@ -1,7 +1,6 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Check, ChevronDown, Pencil, Plus, Target, Timer, Trash2, X } from 'lucide-react'
 import type { TodoItem } from '../types'
-import type { ThemeId } from '../themes'
 import { useTranslation } from '../hooks/useTranslation'
 
 const TAG_PALETTE = [
@@ -163,7 +162,6 @@ const TagSelect = memo(function TagSelect({
 })
 
 interface Props {
-  themeId?: ThemeId
   todos: TodoItem[]
   tags: string[]
   activeTodoId: string | null
@@ -176,7 +174,6 @@ interface Props {
 }
 
 export const TodoList = memo(function TodoList({
-  themeId,
   todos,
   tags,
   activeTodoId,
@@ -188,7 +185,6 @@ export const TodoList = memo(function TodoList({
   onFocus,
 }: Props) {
   const { t: tr } = useTranslation()
-  const isM3 = themeId === 'material-you'
   const [title, setTitle] = useState('')
   const [tag, setTag] = useState(tags[0] ?? '')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -312,11 +308,9 @@ export const TodoList = memo(function TodoList({
 
       {/* Unified Input Group */}
       <div className="flex items-center gap-1.5">
-        {themeId === 'gruvbox' && (
-          <span className="font-mono text-sm font-bold text-accent select-none shrink-0 pl-1">
-            &gt;
-          </span>
-        )}
+        <span className="font-mono text-sm font-bold text-accent select-none shrink-0 pl-1">
+          &gt;
+        </span>
         <input
           type="text"
           value={title}
@@ -327,10 +321,8 @@ export const TodoList = memo(function TodoList({
               submitAdd()
             }
           }}
-          placeholder={themeId === 'gruvbox' ? 'enter new task...' : (tr.todo.addTaskPlaceholder || tr.todo.addPlaceholder)}
-          className={`input h-[38px] min-w-0 flex-1 font-mono text-sm py-2 ${
-            isM3 ? 'bg-surface-container-lowest border-outline-variant/40' : ''
-          }`}
+          placeholder="enter new task..."
+          className="input h-[38px] min-w-0 flex-1 font-mono text-sm py-2"
           maxLength={80}
         />
 
@@ -377,42 +369,22 @@ export const TodoList = memo(function TodoList({
                   : 'border-line hover:bg-raised/35'
               }`}
             >
-              {themeId === 'gruvbox' ? (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onToggle(t.id)
-                  }}
-                  title={t.done ? tr.todo.reopen : tr.todo.done}
-                  aria-label={t.done ? tr.todo.reopen : tr.todo.done}
-                  className="font-mono text-xs font-bold select-none px-1 py-0.5 cursor-pointer shrink-0 transition-colors"
-                >
-                  {t.done ? (
-                    <span className="text-success font-bold">[X]</span>
-                  ) : (
-                    <span className="text-muted hover:text-fg">[ ]</span>
-                  )}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onToggle(t.id)
-                  }}
-                  title={t.done ? tr.todo.reopen : tr.todo.done}
-                  aria-label={t.done ? tr.todo.reopen : tr.todo.done}
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border transition-colors duration-150 active:scale-90 ${
-                    t.done ? 'border-success bg-success text-on-accent' : 'border-line text-transparent hover:border-accent'
-                  }`}
-                >
-                  <Check
-                    size={13}
-                    className={`transition-transform duration-150 ${t.done ? 'scale-100 animate-check-pop' : 'scale-0'}`}
-                  />
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onToggle(t.id)
+                }}
+                title={t.done ? tr.todo.reopen : tr.todo.done}
+                aria-label={t.done ? tr.todo.reopen : tr.todo.done}
+                className="font-mono text-xs font-bold select-none px-1 py-0.5 cursor-pointer shrink-0 transition-colors"
+              >
+                {t.done ? (
+                  <span className="text-success font-bold">[X]</span>
+                ) : (
+                  <span className="text-muted hover:text-fg">[ ]</span>
+                )}
+              </button>
 
               {editingId === t.id ? (
                 <div className="flex min-w-0 flex-1 items-center gap-1.5">
@@ -480,22 +452,12 @@ export const TodoList = memo(function TodoList({
                     <span
                       className="tag-badge shrink-0 rounded-badge border px-2 py-0.5 font-mono text-[10px] font-semibold"
                       style={{
-                        backgroundColor: themeId === 'gruvbox' ? 'transparent' : `${getTagColor(t.tag)}28`,
+                        backgroundColor: 'transparent',
                         color: getTagColor(t.tag),
-                        borderColor: themeId === 'gruvbox' ? `${getTagColor(t.tag)}88` : `${getTagColor(t.tag)}58`,
+                        borderColor: `${getTagColor(t.tag)}88`,
                       }}
                     >
-                      {themeId === 'gruvbox' ? (
-                        `#[${t.tag}]`
-                      ) : (
-                        <>
-                          <span
-                            className="tag-dot mr-1 inline-block h-1.5 w-1.5 rounded-full align-middle shadow-sm"
-                            style={{ backgroundColor: getTagColor(t.tag) }}
-                          />
-                          {t.tag}
-                        </>
-                      )}
+                      {`#[${t.tag}]`}
                     </span>
                   )}
                 </>

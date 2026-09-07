@@ -117,8 +117,6 @@ export interface Messages {
     importFailed: string
   }
   settings: {
-    theme: string
-    themeHint: string
     colorMode: string
     colorModeHint: string
     dark: string
@@ -316,8 +314,6 @@ const de: Messages = {
     importFailed: 'Import fehlgeschlagen: Die Datei ist kein gültiges Backup.',
   },
   settings: {
-    theme: 'Theme',
-    themeHint: 'Designstil der App, wird lokal gespeichert.',
     colorMode: 'Farbmodus',
     colorModeHint: 'Wähle zwischen dunklem und hellem Erscheinungsbild.',
     dark: 'Dunkel',
@@ -521,8 +517,6 @@ const en: Messages = {
     importFailed: 'Import failed: the file is not a valid backup.',
   },
   settings: {
-    theme: 'Theme',
-    themeHint: 'App design system theme, stored locally.',
     colorMode: 'Color Mode',
     colorModeHint: 'Choose between dark and light appearance.',
     dark: 'Dark',

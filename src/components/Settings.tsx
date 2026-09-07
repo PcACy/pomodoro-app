@@ -17,7 +17,7 @@ import {
   X,
 } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../types'
-import { THEMES, type ColorMode, type ThemeId } from '../themes'
+import type { ColorMode, ThemeId } from '../themes'
 import { useThemeColors } from '../hooks/useTheme'
 import { clearSessions, exportAll } from '../lib/db'
 import { downloadText, sessionsToCsv, sessionsToJson, todosToCsv, todosToJson } from '../lib/dataExport'
@@ -233,7 +233,6 @@ interface Props {
   update: (updater: (s: Settings) => Settings) => void
   themeId: ThemeId
   colorMode: ColorMode
-  onThemeChange: (id: ThemeId) => void
   onColorModeChange: (mode: ColorMode) => void
   sessions: Session[]
   todos: TodoItem[]
@@ -253,7 +252,6 @@ export const SettingsPanel = memo(function SettingsPanel({
   update,
   themeId,
   colorMode,
-  onThemeChange,
   onColorModeChange,
   sessions,
   todos,
@@ -448,7 +446,7 @@ export const SettingsPanel = memo(function SettingsPanel({
             className="seg-track relative grid grid-cols-2 w-full sm:w-56 items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md"
           >
             <div
-              className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
               style={{
                 width: 'calc((100% - 8px - 4px) / 2)',
                 left: '4px',
@@ -464,9 +462,6 @@ export const SettingsPanel = memo(function SettingsPanel({
                 lang === 'de' ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
-              {lang === 'de' && (
-                <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
-              )}
               <span className="font-mono text-[10px] font-bold tracking-wider opacity-60">DE</span>
               <span>Deutsch</span>
             </button>
@@ -479,9 +474,6 @@ export const SettingsPanel = memo(function SettingsPanel({
                 lang === 'en' ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
-              {lang === 'en' && (
-                <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
-              )}
               <span className="font-mono text-[10px] font-bold tracking-wider opacity-60">EN</span>
               <span>English</span>
             </button>
@@ -491,7 +483,7 @@ export const SettingsPanel = memo(function SettingsPanel({
 
       <div className="card p-6">
         {/* Dark / Light Color Mode Switcher */}
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-line/50 pb-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-sm font-semibold text-fg">{t.settings.colorMode}</h3>
             <p className="text-xs text-muted">{t.settings.colorModeHint}</p>
@@ -502,7 +494,7 @@ export const SettingsPanel = memo(function SettingsPanel({
             className="seg-track relative grid grid-cols-2 w-full sm:w-56 items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md"
           >
             <div
-              className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm ios-seg-active transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
               style={{
                 width: 'calc((100% - 8px - 4px) / 2)',
                 left: '4px',
@@ -518,9 +510,6 @@ export const SettingsPanel = memo(function SettingsPanel({
                 colorMode === 'dark' ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
-              {colorMode === 'dark' && (
-                <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
-              )}
               <Moon size={14} />
               <span>{t.settings.dark}</span>
             </button>
@@ -533,60 +522,10 @@ export const SettingsPanel = memo(function SettingsPanel({
                 colorMode === 'light' ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
-              {colorMode === 'light' && (
-                <Check size={13} className="m3-seg-check hidden animate-fade-in stroke-[2.5]" />
-              )}
               <Sun size={14} />
               <span>{t.settings.light}</span>
             </button>
           </div>
-        </div>
-
-        {/* Theme Families */}
-        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.theme}</h3>
-        <p className="mb-4 text-xs text-muted">{t.settings.themeHint}</p>
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-          {THEMES.map((theme) => {
-            const swatches = colorMode === 'dark' ? theme.swatchDark : theme.swatchLight
-            const isSelected = themeId === theme.id
-            return (
-              <button
-                key={theme.id}
-                type="button"
-                onClick={() => onThemeChange(theme.id)}
-                className={`group relative flex flex-col justify-between rounded-card border p-3.5 text-left transition-all active:scale-[0.98] ${
-                  isSelected
-                    ? 'border-accent bg-accent/10 shadow-sm shadow-accent/15 ring-1 ring-accent/30'
-                    : 'border-line/70 bg-canvas/80 hover:border-line hover:bg-raised/60'
-                }`}
-              >
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <span className="flex -space-x-1.5">
-                    {swatches.map((c, i) => (
-                      <span
-                        key={i}
-                        className="h-4 w-4 rounded-full border border-line/80 shadow-sm"
-                        style={{ backgroundColor: c }}
-                      />
-                    ))}
-                  </span>
-                  <div className="flex h-5 w-5 items-center justify-center">
-                    {isSelected ? (
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-on-accent shadow-sm">
-                        <Check size={12} strokeWidth={3} />
-                      </div>
-                    ) : (
-                      <div className="h-4 w-4 rounded-full border border-line/70" />
-                    )}
-                  </div>
-                </div>
-                <span className="flex flex-col">
-                  <span className="text-sm font-semibold text-fg tracking-tight">{theme.label}</span>
-                  <span className="text-[10px] text-text-muted mt-0.5">{theme.subtitle}</span>
-                </span>
-              </button>
-            )
-          })}
         </div>
       </div>
 

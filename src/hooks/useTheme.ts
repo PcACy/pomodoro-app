@@ -7,14 +7,6 @@ const THEME_BG_HEX: Record<ThemeId, Record<ColorMode, string>> = {
     dark: '#282828',
     light: '#fbf1c7',
   },
-  'ios-26': {
-    dark: '#000000',
-    light: '#f2f2f7',
-  },
-  'material-you': {
-    dark: '#141218',
-    light: '#fdf8fd',
-  },
 }
 
 const applyTheme = (id: ThemeId, mode: ColorMode): void => {
@@ -38,8 +30,6 @@ const VALID_THEMES: Record<string, ThemeId> = {
   gruvbox: 'gruvbox',
   'gruvbox-dark': 'gruvbox',
   'gruvbox-light': 'gruvbox',
-  'ios-26': 'ios-26',
-  'material-you': 'material-you',
 }
 
 const VALID_MODES: Record<string, ColorMode> = {
