@@ -168,38 +168,38 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         aria-hidden="true"
       />
 
-      {/* Atmospheric cursor spotlight ambient glow - 95px compact falloff */}
+      {/* Atmospheric cursor spotlight ambient glow - 60px compact falloff */}
       <div
         className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ease-out ${
           isHovered ? 'opacity-100' : 'opacity-0'
         }`}
         style={{
           background:
-            'radial-gradient(circle 95px at var(--mouse-x, -999px) var(--mouse-y, -999px), rgb(var(--c-fg) / 0.04), transparent 80%)',
+            'radial-gradient(circle 60px at var(--mouse-x, -999px) var(--mouse-y, -999px), rgb(var(--c-fg) / 0.035), transparent 80%)',
         }}
         aria-hidden="true"
       />
 
-      {/* Interactive Cursor Spotlight Dot-Matrix Glow - Crisp 85px instant hardware focus */}
+      {/* Interactive Cursor Spotlight Dot-Matrix Glow - Crisp 48px instant hardware focus */}
       <div
         className={`pointer-events-none absolute inset-0 text-fg transition-opacity duration-300 ease-out [background-image:radial-gradient(currentColor_1.5px,transparent_1.5px)] [background-size:14px_14px] ${
           isHovered ? 'opacity-40 dark:opacity-55' : 'opacity-0'
         }`}
         style={{
           maskImage:
-            'radial-gradient(circle 85px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 20%, transparent 100%)',
+            'radial-gradient(circle 48px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 15%, transparent 100%)',
           WebkitMaskImage:
-            'radial-gradient(circle 85px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 20%, transparent 100%)',
+            'radial-gradient(circle 48px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 15%, transparent 100%)',
         }}
         aria-hidden="true"
       />
 
-      {/* Interactive Phosphor Decay LED Matrix Trail - 600ms organic wake behind cursor */}
+      {/* Interactive Phosphor Decay LED Matrix Trail - 550ms organic wake behind cursor */}
       <InteractiveGridCanvas
         ref={gridCanvasRef}
         gridSize={14}
-        spotlightRadius={55}
-        decayDurationMs={600}
+        spotlightRadius={42}
+        decayDurationMs={550}
       />
 
       {/* Hardware Glass Edge - Subtle hairline border reflection near pointer */}
@@ -210,9 +210,9 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         style={{
           border: '1px solid rgb(var(--c-fg) / 0.28)',
           maskImage:
-            'radial-gradient(circle 100px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 100%)',
+            'radial-gradient(circle 70px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 100%)',
           WebkitMaskImage:
-            'radial-gradient(circle 100px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 100%)',
+            'radial-gradient(circle 70px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 100%)',
         }}
         aria-hidden="true"
       />

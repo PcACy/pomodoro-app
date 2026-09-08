@@ -24,8 +24,8 @@ export const InteractiveGridCanvas = memo(
     {
       className = '',
       gridSize = 14,
-      spotlightRadius = 55,
-      decayDurationMs = 600,
+      spotlightRadius = 42,
+      decayDurationMs = 550,
     },
     ref
   ) {
