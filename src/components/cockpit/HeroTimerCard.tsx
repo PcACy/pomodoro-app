@@ -4,6 +4,7 @@ import type { TimerMode, TimerStatus } from '../../types'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useFlowTimerTick, useTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
+import { GlyphTimeDisplay } from './GlyphTimeDisplay'
 
 interface HeroTimerCardProps {
   phaseLabel: string
@@ -46,7 +47,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   const timerTick = useTimerTick()
   const flowTick = useFlowTimerTick()
 
-  // Local live clock for top-card timestamp
+  // Local live clock for date display
   const [localDate, setLocalDate] = useState(() => new Date())
   useEffect(() => {
     const timer = setInterval(() => setLocalDate(new Date()), 1000)
@@ -54,8 +55,9 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   }, [])
 
   const isFlow = mode === 'flow'
-  const activeTime = time ?? (isFlow ? flowTick.time : timerTick.time)
-  const activeProgress = progress ?? (isFlow ? 0 : timerTick.progress)
+  // Always use reactive timer tick so countdown runs smoothly without being frozen by stale props
+  const activeTime = isFlow ? (flowTime ?? flowTick.time) : (timerTick.time || time || '25:00')
+  const activeProgress = isFlow ? 0 : (timerTick.progress ?? progress ?? 1)
   const activeFlowTime = flowTime ?? flowTick.time
 
   const running = isFlow ? flowStatus === 'running' : status === 'running'
@@ -98,17 +100,16 @@ export const HeroTimerCard = memo(function HeroTimerCard({
     onAddTime?.(5)
   }, [onAddTime])
 
-  const dayName = localDate.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase()
+  const dayName = localDate.toLocaleDateString('en-US', { weekday: 'long' })
   const dateFormatted = localDate.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
-  const localTimeStr = localDate.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
 
   return (
     <div
       className={`relative overflow-hidden rounded-card bg-surface border border-line p-5 sm:p-6 lg:p-7 flex flex-col justify-between select-none ${className}`}
     >
-      {/* Substrate dot-grid */}
+      {/* Signature Nothing Dot-Matrix Canvas Grid - ONLY on Hero Timer Card */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.05] [background-image:radial-gradient(var(--color-fg)_1px,transparent_1px)] [background-size:12px_12px]"
+        className="pointer-events-none absolute inset-0 opacity-[0.14] dark:opacity-[0.22] [background-image:radial-gradient(currentColor_1.5px,transparent_1.5px)] [background-size:14px_14px] text-fg"
         aria-hidden="true"
       />
 
@@ -133,7 +134,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
               playMicroClick('tab')
               onModeChange('pomodoro')
             }}
-            className={`rounded-full px-2.5 py-0.5 uppercase tracking-wider transition-colors ${
+            className={`rounded-full px-2.5 py-0.5 uppercase tracking-wider transition-colors cursor-pointer ${
               mode === 'pomodoro'
                 ? 'bg-fg text-canvas font-bold'
                 : 'text-muted hover:text-fg'
@@ -147,7 +148,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
               playMicroClick('tab')
               onModeChange('flow')
             }}
-            className={`rounded-full px-2.5 py-0.5 uppercase tracking-wider transition-colors ${
+            className={`rounded-full px-2.5 py-0.5 uppercase tracking-wider transition-colors cursor-pointer ${
               mode === 'flow'
                 ? 'bg-fg text-canvas font-bold'
                 : 'text-muted hover:text-fg'
@@ -158,30 +159,33 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         </div>
       </div>
 
-      {/* Hero Display */}
-      <div className="relative z-10 flex-1 flex flex-col justify-center py-2 sm:py-4">
-        <div className="flex items-baseline gap-3 sm:gap-4 flex-wrap">
-          <div className="font-display text-6xl sm:text-7xl lg:text-8xl font-medium tracking-tight tabular-nums text-fg leading-none">
-            {shownTime}
+      {/* Hero Glyph Display */}
+      <div className="relative z-10 flex-1 flex flex-col justify-center py-2 sm:py-3">
+        {/* Glyph Dot-Matrix Clock with Red Status Dot */}
+        <div className="my-1">
+          <GlyphTimeDisplay time={shownTime} isRunning={running} />
+        </div>
+
+        {/* Date & Phase Info */}
+        <div className="mt-4 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex flex-col">
+            <span className="font-sans font-medium text-base text-fg">
+              {dayName}
+            </span>
+            <span className="font-mono text-xs text-muted tracking-wider uppercase">
+              {dateFormatted}
+            </span>
           </div>
-          <div className="flex flex-col gap-1 pb-1">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-line bg-canvas text-fg font-mono text-[10px] sm:text-xs uppercase tracking-wider">
-              <span className={`h-1.5 w-1.5 rounded-full ${running ? 'bg-accent' : 'bg-muted'}`} />
+
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-line bg-canvas text-fg font-mono text-xs uppercase tracking-wider">
+              <span className={`h-1.5 w-1.5 rounded-full ${running ? 'bg-accent animate-pulse' : 'bg-muted'}`} />
               {shownLabel}
             </div>
             <span className="font-mono text-[10px] text-muted tracking-wider">
-              ROUND {(completedFocusInCycle % roundsBeforeLongBreak) + 1} OF {roundsBeforeLongBreak}
+              ROUND {(completedFocusInCycle % roundsBeforeLongBreak) + 1} / {roundsBeforeLongBreak}
             </span>
           </div>
-        </div>
-
-        {/* Date & Local Time Info */}
-        <div className="mt-3 flex items-center gap-2 font-mono text-[10px] sm:text-xs text-muted tracking-wider uppercase">
-          <span>{dayName}</span>
-          <span>·</span>
-          <span>{dateFormatted}</span>
-          <span>·</span>
-          <span className="text-fg/80">{localTimeStr}</span>
         </div>
 
         {/* 20-Segment Mechanical Progress Bar */}

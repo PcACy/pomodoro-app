@@ -2,6 +2,7 @@ import { memo, useEffect, useState } from 'react'
 import type { TodoItem } from '../../types'
 import { BentoCard } from './BentoCard'
 import { getTagColor } from '../TodoList'
+import { useTimerTick } from '../../hooks/useTimerTick'
 
 interface ActiveTaskCardProps {
   activeTodo: TodoItem | null
@@ -24,6 +25,9 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   onOpenTodoManager,
   className = '',
 }: ActiveTaskCardProps) {
+  const timerTick = useTimerTick()
+  const liveRemainingMs = isRunning ? timerTick.remainingMs : remainingMs
+  const liveTime = isRunning ? (timerTick.time || time) : time
   // Waveform visualization bars animation
   const [waveHeights, setWaveHeights] = useState<number[]>(() =>
     Array.from({ length: BAR_COUNT }, (_, i) => 20 + Math.sin(i * 0.8) * 15),
@@ -44,7 +48,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
     return () => clearInterval(interval)
   }, [isRunning])
 
-  const elapsedMs = Math.max(0, totalMs - remainingMs)
+  const elapsedMs = Math.max(0, totalMs - liveRemainingMs)
   const elapsedMinutes = Math.floor(elapsedMs / 60_000)
   const elapsedSeconds = Math.floor((elapsedMs % 60_000) / 1000)
   const elapsedStr = `${String(elapsedMinutes).padStart(2, '0')}:${String(elapsedSeconds).padStart(2, '0')}`
@@ -135,7 +139,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         </div>
         <div className="mt-1.5 flex items-center justify-between font-mono text-[9px] text-muted tracking-wider tabular-nums">
           <span>{elapsedStr}</span>
-          <span className="text-fg/80 font-medium">{time}</span>
+          <span className="text-fg/80 font-medium">{liveTime}</span>
           <span>{totalStr}</span>
         </div>
       </div>

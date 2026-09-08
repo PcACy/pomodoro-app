@@ -26,13 +26,6 @@ export const ThemeBackground = memo(function ThemeBackground({
           backgroundColor: isDark ? '#000000' : '#f5f5f5',
         }}
       />
-
-      {/* Signature Nothing Dot-Matrix Grid */}
-      <div
-        className={`absolute inset-0 transition-opacity duration-500 ${
-          isDark ? 'opacity-[0.14]' : 'opacity-[0.10]'
-        } dot-grid-subtle`}
-      />
     </div>
   )
 })
