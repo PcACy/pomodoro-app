@@ -222,8 +222,8 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
       contentClassName="justify-between"
     >
       <div className="flex items-center justify-between gap-4">
-        {/* Track info with smooth reveal animation */}
-        <div key={textAnimKey} className="min-w-0 flex-1 animate-tape-text">
+        {/* Track info with smooth stationary cross-fade (no hopping) */}
+        <div key={textAnimKey} className="min-w-0 flex-1 animate-track-fade">
           <h3 className={`font-sans font-medium text-lg sm:text-xl truncate ${activeTodo ? 'text-fg' : 'text-muted'}`}>
             {activeTodo?.title || '[ NO TAPE INSERTED // SELECT TASK ]'}
           </h3>
@@ -267,33 +267,41 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           </div>
         </div>
 
-        {/* Dual reels in cassette window with mechanical slide & snap-in animation */}
-        <div
-          className={`shrink-0 rounded-xl border border-black/10 bg-black/[0.02] p-2 dark:border-white/5 dark:bg-white/[0.02] ${
-            cassetteAnim === 'insert'
-              ? 'animate-tape-insert'
-              : cassetteAnim === 'eject'
-                ? 'animate-tape-eject'
-                : ''
-          }`}
-        >
-          <div className="flex items-center gap-1.5 sm:gap-2 text-fg">
-            <Reel packWidth={activeTodo ? leftPack : 1.5} spinning={spinning} dim={!activeTodo} />
-            <Reel packWidth={activeTodo ? rightPack : 1.5} spinning={spinning} reverse dim={!activeTodo} />
-          </div>
-          {/* Tape path + head */}
-          <div className="relative mt-1.5 h-3" aria-hidden="true">
-            <div className="absolute left-3 right-3 top-0 h-px bg-fg/20" />
-            <div className="absolute left-1/2 top-[3px] flex -translate-x-1/2 items-end gap-[3px]">
-              <span className="h-1.5 w-px bg-fg/30" />
-              <span className="h-[5px] w-2.5 rounded-[1px] border border-fg/30 bg-canvas" />
-              <span className="h-1.5 w-px bg-fg/30" />
+        {/* Stationary Cassette Window Frame - Never hops or shifts */}
+        <div className="shrink-0 relative overflow-hidden rounded-xl border border-black/10 bg-black/[0.02] p-2 dark:border-white/5 dark:bg-white/[0.02]">
+          {/* Inner Cassette Carriage - Slides smoothly into/out of slot */}
+          <div
+            className={`flex flex-col items-center ${
+              cassetteAnim === 'insert'
+                ? 'animate-cassette-in'
+                : cassetteAnim === 'eject'
+                  ? 'animate-cassette-out'
+                  : ''
+            }`}
+          >
+            <div className="flex items-center gap-1.5 sm:gap-2 text-fg">
+              <Reel packWidth={activeTodo ? leftPack : 1.5} spinning={spinning} dim={!activeTodo} />
+              <Reel packWidth={activeTodo ? rightPack : 1.5} spinning={spinning} reverse dim={!activeTodo} />
+            </div>
+            {/* Tape path + head */}
+            <div
+              className={`relative mt-1.5 h-3 w-full ${
+                activeTodo && cassetteAnim === 'insert' ? 'animate-head-engage' : ''
+              }`}
+              aria-hidden="true"
+            >
+              <div className="absolute left-3 right-3 top-0 h-px bg-fg/20" />
+              <div className="absolute left-1/2 top-[3px] flex -translate-x-1/2 items-end gap-[3px]">
+                <span className="h-1.5 w-px bg-fg/30" />
+                <span className="h-[5px] w-2.5 rounded-[1px] border border-fg/30 bg-canvas" />
+                <span className="h-1.5 w-px bg-fg/30" />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Transport keys */}
+      {/* Transport keys - permanently mounted 50/50 rack buttons (no layout shifts) */}
       <div className="mt-3 flex items-center gap-2">
         <button
           type="button"
@@ -312,20 +320,25 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           <ArrowUpFromLine size={13} />
           <span>{activeTodo ? 'EJECT' : 'INSERT'}</span>
         </button>
-        {activeTodo && onToggleDone && (
-          <button
-            type="button"
-            onClick={() => {
+        <button
+          type="button"
+          disabled={!activeTodo || !onToggleDone}
+          onClick={() => {
+            if (activeTodo && onToggleDone) {
               playMicroClick('tick')
               onToggleDone(activeTodo.id)
-            }}
-            title="Stop and complete track"
-            className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-md border border-line bg-canvas font-mono text-[11px] tracking-widest uppercase text-fg transition-colors hover:bg-fg hover:text-canvas hover:border-fg active:translate-y-px cursor-pointer"
-          >
-            <Square size={11} />
-            <span>DONE</span>
-          </button>
-        )}
+            }
+          }}
+          title={activeTodo ? 'Stop and complete track' : 'No track loaded'}
+          className={`flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-md border font-mono text-[11px] tracking-widest uppercase transition-colors ${
+            activeTodo
+              ? 'border-line bg-canvas text-fg hover:bg-fg hover:text-canvas hover:border-fg active:translate-y-px cursor-pointer'
+              : 'border-line/40 bg-canvas/40 text-muted/30 cursor-not-allowed pointer-events-none'
+          }`}
+        >
+          <Square size={11} />
+          <span>DONE</span>
+        </button>
       </div>
 
       {/* Pick slot: fixed label + exactly 3 rows + footer — height never moves */}
