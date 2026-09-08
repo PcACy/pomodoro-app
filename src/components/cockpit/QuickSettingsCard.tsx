@@ -60,7 +60,6 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-
   const toggleSound = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation()
     playMicroClick('toggle')
@@ -104,7 +103,7 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
       className={`cursor-pointer hover:border-fg/30 transition-colors ${className}`}
       contentClassName="justify-between"
     >
-      <div className="flex flex-col gap-3 my-auto">
+      <div className="flex flex-col gap-1.5 sm:gap-2 my-auto">
         {/* Toggle 1: Dark Mode */}
         <div
           onClick={(e) => {
@@ -112,12 +111,14 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
             playMicroClick('toggle')
             onToggleColorMode()
           }}
-          className="flex items-center justify-between gap-2 cursor-pointer group"
+          className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
         >
-          <div className="flex flex-col">
-            <span className="font-sans text-xs text-fg font-medium group-hover:text-fg transition-colors">Dark Mode</span>
-            <span className="font-mono text-[9px] text-muted uppercase">
-              {colorMode === 'dark' ? 'OLED BLACK' : 'PAPER WHITE'}
+          <div className="flex flex-col min-w-0">
+            <span className="font-sans text-[11px] text-fg font-medium truncate group-hover:text-fg transition-colors">
+              Dark Mode
+            </span>
+            <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
+              {colorMode === 'dark' ? 'OLED' : 'LIGHT'}
             </span>
           </div>
           <button
@@ -129,13 +130,13 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
               playMicroClick('toggle')
               onToggleColorMode()
             }}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
+            className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
               colorMode === 'dark' ? 'bg-accent border-accent' : 'bg-canvas border-line'
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                colorMode === 'dark' ? 'translate-x-4' : 'translate-x-0 bg-muted'
+              className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
+                colorMode === 'dark' ? 'translate-x-3.5' : 'translate-x-0 bg-muted'
               }`}
             />
           </button>
@@ -144,11 +145,13 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
         {/* Toggle 2: Sound FX */}
         <div
           onClick={toggleSound}
-          className="flex items-center justify-between gap-2 cursor-pointer group"
+          className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
         >
-          <div className="flex flex-col">
-            <span className="font-sans text-xs text-fg font-medium group-hover:text-fg transition-colors">Sound Effects</span>
-            <span className="font-mono text-[9px] text-muted uppercase">
+          <div className="flex flex-col min-w-0">
+            <span className="font-sans text-[11px] text-fg font-medium truncate group-hover:text-fg transition-colors">
+              Sound FX
+            </span>
+            <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
               {soundEnabled ? 'ACTIVE' : 'MUTED'}
             </span>
           </div>
@@ -157,13 +160,13 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
             role="switch"
             aria-checked={soundEnabled}
             onClick={toggleSound}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
+            className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
               soundEnabled ? 'bg-accent border-accent' : 'bg-canvas border-line'
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                soundEnabled ? 'translate-x-4' : 'translate-x-0 bg-muted'
+              className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
+                soundEnabled ? 'translate-x-3.5' : 'translate-x-0 bg-muted'
               }`}
             />
           </button>
@@ -172,12 +175,14 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
         {/* Toggle 3: Auto-Start Breaks */}
         <div
           onClick={toggleAutoBreaks}
-          className="flex items-center justify-between gap-2 cursor-pointer group"
+          className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
         >
-          <div className="flex flex-col">
-            <span className="font-sans text-xs text-fg font-medium group-hover:text-fg transition-colors">Auto Breaks</span>
-            <span className="font-mono text-[9px] text-muted uppercase">
-              {autoBreaks ? 'AUTOMATIC' : 'MANUAL'}
+          <div className="flex flex-col min-w-0">
+            <span className="font-sans text-[11px] text-fg font-medium truncate group-hover:text-fg transition-colors">
+              Auto Breaks
+            </span>
+            <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
+              {autoBreaks ? 'AUTO' : 'MANUAL'}
             </span>
           </div>
           <button
@@ -185,13 +190,13 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
             role="switch"
             aria-checked={autoBreaks}
             onClick={toggleAutoBreaks}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
+            className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
               autoBreaks ? 'bg-accent border-accent' : 'bg-canvas border-line'
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                autoBreaks ? 'translate-x-4' : 'translate-x-0 bg-muted'
+              className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
+                autoBreaks ? 'translate-x-3.5' : 'translate-x-0 bg-muted'
               }`}
             />
           </button>
@@ -204,11 +209,13 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
             playMicroClick('toggle')
             onToggleZen?.()
           }}
-          className="flex items-center justify-between gap-2 cursor-pointer group"
+          className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
         >
-          <div className="flex flex-col">
-            <span className="font-sans text-xs text-fg font-medium group-hover:text-fg transition-colors">Distraction Free</span>
-            <span className="font-mono text-[9px] text-muted uppercase">
+          <div className="flex flex-col min-w-0">
+            <span className="font-sans text-[11px] text-fg font-medium truncate group-hover:text-fg transition-colors">
+              Distraction Free
+            </span>
+            <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
               {isZenMode ? 'IMMERSIVE' : 'STANDBY'}
             </span>
           </div>
@@ -221,13 +228,13 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
               playMicroClick('toggle')
               onToggleZen?.()
             }}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
+            className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
               isZenMode ? 'bg-accent border-accent' : 'bg-canvas border-line'
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                isZenMode ? 'translate-x-4' : 'translate-x-0 bg-muted'
+              className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
+                isZenMode ? 'translate-x-3.5' : 'translate-x-0 bg-muted'
               }`}
             />
           </button>
@@ -236,4 +243,3 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
     </BentoCard>
   )
 })
-

@@ -11,7 +11,7 @@ interface ActiveTaskCardProps {
   isRunning: boolean
   remainingMs: number
   totalMs: number
-  time: string
+  time?: string
   sessions?: Session[]
   focusMinutes?: number
   onOpenTodoManager?: () => void
@@ -24,7 +24,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   isRunning,
   remainingMs,
   totalMs,
-  time,
+  time = '25:00',
   sessions,
   focusMinutes = 25,
   onOpenTodoManager,

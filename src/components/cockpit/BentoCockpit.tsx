@@ -5,12 +5,9 @@ import { HeroTimerCard } from './HeroTimerCard'
 import { GoalLoadCard } from './GoalLoadCard'
 import { FocusTimeCard } from './FocusTimeCard'
 import { ActiveTaskCard } from './ActiveTaskCard'
-import { DayFlowCard } from './DayFlowCard'
-import { FocusRatioCard } from './FocusRatioCard'
 import { ProjectsDistributionCard } from './ProjectsDistributionCard'
 import { QuickSettingsCard } from './QuickSettingsCard'
 import { SystemStatusCard } from './SystemStatusCard'
-import { CycleBatteryCard } from './CycleBatteryCard'
 import { TaskInboxCard } from './TaskInboxCard'
 
 interface BentoCockpitProps {
@@ -43,21 +40,25 @@ interface BentoCockpitProps {
 
   // Analytics & Sessions
   sessions: Session[]
+
+  // Settings & Theme
   settings: Settings
   onUpdateSettings: (updater: (s: Settings) => Settings) => void
   colorMode: ColorMode
   onToggleColorMode: () => void
   onOpenSettingsModal: () => void
-  onOpenAnalyticsModal?: () => void
-  isZenMode?: boolean
-  onToggleZen?: () => void
+  onOpenAnalyticsModal: () => void
+
+  // Zen Mode
+  isZenMode: boolean
+  onToggleZen: () => void
 }
 
 export const BentoCockpit = memo(function BentoCockpit({
   phaseLabel,
   status,
-  time = '25:00',
-  progress = 0,
+  time,
+  progress,
   remainingMs,
   totalMs,
   mode,
@@ -92,7 +93,7 @@ export const BentoCockpit = memo(function BentoCockpit({
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-3 sm:py-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 auto-rows-auto">
-        {/* 1. HERO TIMER: Large 2x2 card (Top-Left) */}
+        {/* 1. HERO TIMER: Large 2x2 card (Top-Left, Cols 1-2, Rows 1-2) */}
         <HeroTimerCard
           phaseLabel={phaseLabel}
           status={status}
@@ -111,7 +112,7 @@ export const BentoCockpit = memo(function BentoCockpit({
           className="md:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[320px] sm:min-h-[360px]"
         />
 
-        {/* 2. GOAL LOAD: Circular dial gauge (Top-Center) */}
+        {/* 2. GOAL LOAD: Circular dial gauge (Top-Right Row 1, Col 3) */}
         <GoalLoadCard
           sessions={sessions}
           settings={settings}
@@ -119,7 +120,7 @@ export const BentoCockpit = memo(function BentoCockpit({
           className="md:col-span-1 lg:col-span-1 min-h-[170px]"
         />
 
-        {/* 3. FOCUS TIME: Memory-style segmented meter (Top-Right) */}
+        {/* 3. FOCUS TIME: Today's focus goal + 24h timeline (Top-Right Row 1, Col 4) */}
         <FocusTimeCard
           sessions={sessions}
           settings={settings}
@@ -127,7 +128,7 @@ export const BentoCockpit = memo(function BentoCockpit({
           className="md:col-span-1 lg:col-span-1 min-h-[170px]"
         />
 
-        {/* 4. ACTIVE TASK: Task card with metrics and quick complete (Middle-Right) */}
+        {/* 4. ACTIVE TASK: Task card with metrics and quick complete (Top-Right Row 2, Cols 3-4) */}
         <ActiveTaskCard
           activeTodo={activeTodo}
           isRunning={isRunning}
@@ -141,19 +142,21 @@ export const BentoCockpit = memo(function BentoCockpit({
           className="md:col-span-2 lg:col-span-2 min-h-[170px]"
         />
 
-        {/* 5. DAY FLOW: 24h mini timeline with red needle */}
-        <DayFlowCard
+        {/* 5. PROJECTS DISTRIBUTION: Multi-row segmented bars (Row 3, Cols 1-2) */}
+        <ProjectsDistributionCard
           sessions={sessions}
+          tags={settings.tags}
+          className="md:col-span-2 lg:col-span-2 min-h-[170px]"
+        />
+
+        {/* 6. DAILY STREAK & PERFORMANCE (Row 3, Col 3) */}
+        <SystemStatusCard
+          sessions={sessions}
+          onOpenAnalyticsModal={onOpenAnalyticsModal}
           className="md:col-span-1 lg:col-span-1 min-h-[170px]"
         />
 
-        {/* 6. FOCUS RATIO: Sparkline & focus rate */}
-        <FocusRatioCard
-          sessions={sessions}
-          className="md:col-span-1 lg:col-span-1 min-h-[170px]"
-        />
-
-        {/* 7. QUICK SETTINGS: Mechanical toggles */}
+        {/* 7. QUICK SETTINGS: Compact 1x1 mechanical toggles (Row 3, Col 4) */}
         <QuickSettingsCard
           settings={settings}
           colorMode={colorMode}
@@ -162,32 +165,10 @@ export const BentoCockpit = memo(function BentoCockpit({
           onToggleColorMode={onToggleColorMode}
           onToggleZen={onToggleZen}
           onOpenSettingsModal={onOpenSettingsModal}
-          className="md:col-span-2 lg:col-span-2 min-h-[200px]"
-        />
-
-        {/* 8. PROJECTS DISTRIBUTION: Multi-row segmented bars (like Storage in screenshot) */}
-        <ProjectsDistributionCard
-          sessions={sessions}
-          tags={settings.tags}
-          className="md:col-span-2 lg:col-span-2 min-h-[170px]"
-        />
-
-        {/* 9. DAILY STREAK & PERFORMANCE */}
-        <SystemStatusCard
-          sessions={sessions}
-          onOpenAnalyticsModal={onOpenAnalyticsModal}
           className="md:col-span-1 lg:col-span-1 min-h-[170px]"
         />
 
-        {/* 10. CYCLE BATTERY: Segmented battery bar with Doto % */}
-        <CycleBatteryCard
-          completedFocusInCycle={completedFocusInCycle}
-          roundsBeforeLongBreak={roundsBeforeLongBreak}
-          focusMinutes={settings.phases.focus}
-          className="md:col-span-1 lg:col-span-1 min-h-[170px]"
-        />
-
-        {/* 11. TASK INBOX: Full-width / 4-column card at bottom */}
+        {/* 8. TASK INBOX: Full-width / 4-column card directly below (Row 4) */}
         <TaskInboxCard
           todos={todos}
           tags={settings.tags}
