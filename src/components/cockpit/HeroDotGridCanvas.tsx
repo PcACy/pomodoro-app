@@ -5,12 +5,15 @@ import { memo, useEffect, useRef } from 'react'
 // (inner core in Nothing signal red). Strictly contained: the canvas lives
 // inside the card's overflow-hidden box and never intercepts pointer events.
 const GRID_PX = 14
-const RADIUS_PX = 100
-const INNER_RADIUS_PX = 32
-const BASE_SIZE_PX = 1.5
-const MAX_SIZE_PX = 3.5
+const RADIUS_PX = 80
+const INNER_RADIUS_PX = 28
+const BASE_SIZE_PX = 1.75
+const MAX_SIZE_PX = 3.75
 const REST_ALPHA = 0.08
-const LERP = 0.25
+// Asymmetric response: fast attack (dots ignite instantly), slow release
+// (dots decay gradually) — this creates the trailing phosphor tail.
+const ATTACK = 0.5
+const DECAY = 0.93
 const STOP_EPSILON = 0.01
 
 function parseRgbVar(name: string, fallback: [number, number, number]): [number, number, number] {
@@ -114,15 +117,24 @@ export const HeroDotGridCanvas = memo(function HeroDotGridCanvas() {
             }
           }
         }
-        const e = energies[i] + (target - energies[i]) * LERP
-        energies[i] = e
-        if (e > max) max = e
-        if (e < 0.004 && !pointer.inside) {
+        const e = energies[i]
+        // Fast attack toward the cursor-driven target, slow exponential
+        // decay afterward — the dot keeps glowing briefly after the cursor
+        // moved on, producing the fading trail ("tail").
+        const next = target > e ? e + (target - e) * ATTACK : e * DECAY
+        energies[i] = next
+        if (next > max) max = next
+        if (next < 0.004 && !pointer.inside) {
           drawDot(x, y, BASE_SIZE_PX, fg, REST_ALPHA)
         } else {
-          const size = BASE_SIZE_PX + (MAX_SIZE_PX - BASE_SIZE_PX) * e
-          const alpha = REST_ALPHA + (0.93 - REST_ALPHA) * e
-          drawDot(x, y, size, accentMix > 0.35 ? accent : fg, alpha)
+          const size = BASE_SIZE_PX + (MAX_SIZE_PX - BASE_SIZE_PX) * next
+          // Color gradient: fresh dots near the cursor glow in signal red,
+          // the decaying tail fades through dim gray back to rest.
+          // accentMix is distance-driven, so only freshly activated dots turn
+          // red while the tail (cursor moved away) cools down to gray.
+          const isFresh = accentMix > 0.35 && next > 0.4
+          const alpha = REST_ALPHA + (0.93 - REST_ALPHA) * next
+          drawDot(x, y, size, isFresh ? accent : fg, alpha)
         }
       }
       if (!pointer.inside && max < STOP_EPSILON) {
