@@ -131,10 +131,10 @@ export const HeroTimerCard = memo(function HeroTimerCard({
       <HeroDotGridCanvas />
 
       {/* Header Bar */}
-      <div className="relative z-10 flex items-center justify-between gap-2 mb-4">
+      <div className="relative z-10 flex h-7 items-center justify-between gap-2 mb-4 shrink-0">
         <div className="flex items-center gap-2">
           <span
-            className={`h-2 w-2 rounded-full transition-colors ${
+            className={`h-2 w-2 rounded-full shrink-0 transition-colors ${
               running ? 'bg-accent animate-pulse' : 'bg-line'
             }`}
           />
@@ -164,7 +164,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         </div>
 
         {/* Date & Phase Info */}
-        <div className="mt-4 flex items-center justify-between gap-4 flex-wrap">
+        <div className="mt-4 flex min-h-[44px] items-center justify-between gap-4 flex-wrap shrink-0">
           <div className="flex flex-col">
             <span className="font-sans font-medium text-base text-fg">
               {dayName}
@@ -215,7 +215,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
 
         {/* 20-Segment Mechanical Progress Bar */}
         <div
-          className="mt-6 flex h-2 w-full gap-0.5"
+          className="mt-6 flex h-3 w-full items-center gap-0.5 shrink-0"
           role="progressbar"
           aria-valuenow={Math.round((isFlow ? flowRatio : elapsedRatio) * 100)}
           aria-valuemin={0}
@@ -236,13 +236,13 @@ export const HeroTimerCard = memo(function HeroTimerCard({
       </div>
 
       {/* Action Controls Bar */}
-      <div className="relative z-10 mt-6 flex items-center justify-between gap-3 pt-4 border-t border-line/60">
+      <div className="relative z-10 mt-6 flex items-center justify-between gap-3 pt-4 border-t border-line/60 shrink-0">
         <div className="flex items-center gap-2">
           {/* Main Start / Pause Trigger */}
           <button
             type="button"
             onClick={handleToggleClick}
-            className="rounded-full px-6 sm:px-8 py-2.5 font-mono text-xs tracking-widest uppercase font-semibold transition-colors active:scale-[0.98] cursor-pointer bg-fg text-canvas hover:opacity-90"
+            className="h-11 min-w-[180px] inline-flex items-center justify-center rounded-full border border-fg px-6 sm:px-8 font-mono text-xs leading-none tracking-widest uppercase font-semibold transition-colors active:scale-[0.98] cursor-pointer bg-fg text-canvas hover:opacity-90 shrink-0"
           >
             {running ? t.timer.pause : t.timer.start}
           </button>
@@ -253,7 +253,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
               type="button"
               onClick={handleAddFive}
               title="+5 minutes"
-              className="rounded-full px-3 py-2 border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg font-mono text-[10px] tracking-wider uppercase transition-colors flex items-center gap-1 cursor-pointer"
+              className="h-11 rounded-full px-3 border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg font-mono text-[10px] tracking-wider uppercase transition-colors inline-flex items-center gap-1 cursor-pointer shrink-0"
             >
               <Plus size={11} />
               5M
@@ -268,7 +268,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             onClick={handleResetClick}
             title={t.shortcuts.reset}
             aria-label={t.shortcuts.reset}
-            className="rounded-full p-2.5 border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer"
+            className="h-11 w-11 flex items-center justify-center shrink-0 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer"
           >
             <RotateCcw size={14} />
           </button>
@@ -277,7 +277,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             onClick={handleSkipClick}
             title={t.shortcuts.skip}
             aria-label={t.shortcuts.skip}
-            className="rounded-full p-2.5 border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer"
+            className="h-11 w-11 flex items-center justify-center shrink-0 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer"
           >
             <SkipForward size={14} />
           </button>
