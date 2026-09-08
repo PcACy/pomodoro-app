@@ -268,7 +268,7 @@ export default function App() {
   }, [timer.phase, timer.status, timer.totalMs, t.phases])
 
   return (
-    <div className="min-h-screen min-h-[100dvh] flex flex-col justify-between py-4 px-3 sm:px-6 lg:px-8 max-w-7xl 2xl:max-w-[1440px] mx-auto relative w-full">
+    <div className="min-h-screen min-h-[100dvh] flex flex-col justify-start px-3 sm:px-6 lg:px-8 pt-4 pb-12 max-w-7xl 2xl:max-w-[1440px] mx-auto relative w-full">
       {/* Dynamic Document Title & Favicon Manager (Isolated from App re-renders) */}
       <DocumentChrome phase={chromePhase} status={chromeStatus} mode={mode} />
 
@@ -280,7 +280,7 @@ export default function App() {
       {/* Theme-Specific High-End Atmosphere Background */}
       <ThemeBackground colorMode={colorMode} />
 
-      <header className="flex w-full items-center justify-between gap-4 py-2 px-1">
+      <header className="flex w-full h-14 shrink-0 items-center justify-between gap-4 px-1">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors">
             <CatLogo
@@ -359,7 +359,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex w-full flex-1 flex-col items-center justify-center gap-6 py-2 sm:py-4 pb-20 sm:pb-24">
+      <main className="flex w-full flex-1 flex-col items-center justify-start gap-6 pt-6 pb-20 sm:pb-24">
         {!isZenMode && (
           <BentoCockpit
             phaseLabel={timer.phaseLabel}
@@ -466,7 +466,7 @@ export default function App() {
         <div
           key={toast.id}
           role="status"
-          className="w-full pb-16 text-center font-mono text-[11px] uppercase tracking-widest text-muted select-none"
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 font-mono text-[11px] uppercase tracking-widest text-muted select-none pointer-events-none"
         >
           [{toast.message}]
         </div>
