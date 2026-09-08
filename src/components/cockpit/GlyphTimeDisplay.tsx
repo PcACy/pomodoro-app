@@ -155,8 +155,8 @@ export const GlyphTimeDisplay = memo(function GlyphTimeDisplay({
           width={DOT_SIZE}
           height={DOT_SIZE}
           rx="1.2"
-          fill="#d71921"
-          className={isRunning ? 'animate-pulse' : ''}
+          fill="currentColor"
+          className={`text-accent ${isRunning ? 'animate-pulse' : ''}`}
         />
 
         {/* Lit Matrix Digits */}

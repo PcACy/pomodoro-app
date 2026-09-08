@@ -525,52 +525,73 @@ export const SettingsPanel = memo(function SettingsPanel({
         <div className="my-6 border-t border-line/50" />
 
         {/* Accent Color Switcher */}
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between font-mono">
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-muted">{t.settings.accentColor}</h3>
-            <p className="text-[11px] text-muted">{t.settings.accentColorHint}</p>
-          </div>
-          <div
-            role="radiogroup"
-            aria-label={t.settings.accentColor}
-            className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl sm:rounded-full border border-line bg-canvas font-mono text-xs select-none w-full lg:w-auto"
-          >
-            {ACCENT_OPTIONS.map((opt) => {
-              const active = (settings.accentColor || 'red') === opt.id
-              const swatchColor =
-                opt.id === 'monochrome'
-                  ? colorMode === 'light'
-                    ? '#1e1e1e'
-                    : '#ffffff'
-                  : opt.colorHex
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={active}
-                  onClick={() => {
-                    playMicroClick('toggle')
-                    update((s) => ({ ...s, accentColor: opt.id }))
-                  }}
-                  className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-full flex items-center justify-center gap-2 text-xs transition-all cursor-pointer uppercase ${
-                    active
-                      ? 'bg-fg text-canvas font-bold'
-                      : 'text-muted hover:text-fg'
-                  }`}
-                >
-                  <span
-                    className={`h-2.5 w-2.5 rounded-full shrink-0 ${
-                      opt.id === 'monochrome' ? 'border border-line' : ''
-                    }`}
-                    style={{ backgroundColor: swatchColor }}
-                  />
-                  <span>{t.settings[opt.labelKey]}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
+        {(() => {
+          const currentAccentOption =
+            ACCENT_OPTIONS.find((o) => o.id === (settings.accentColor || 'red')) || ACCENT_OPTIONS[0]
+          return (
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between font-mono">
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-muted">{t.settings.accentColor}</h3>
+                  <span className="font-mono text-[10px] text-accent tracking-wider uppercase">
+                    // {t.settings[currentAccentOption.labelKey]}
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted">{t.settings.accentColorHint}</p>
+              </div>
+
+              {/* Clean Single-Row Tactile Swatches - Never wraps */}
+              <div
+                role="radiogroup"
+                aria-label={t.settings.accentColor}
+                className="inline-flex items-center gap-2 p-1.5 rounded-full border border-line bg-canvas select-none shrink-0 self-start sm:self-auto"
+              >
+                {ACCENT_OPTIONS.map((opt) => {
+                  const active = (settings.accentColor || 'red') === opt.id
+                  const swatchColor =
+                    opt.id === 'monochrome'
+                      ? colorMode === 'light'
+                        ? '#1E1E1E'
+                        : '#FFFFFF'
+                      : opt.colorHex
+
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      title={t.settings[opt.labelKey]}
+                      onClick={() => {
+                        playMicroClick('toggle')
+                        document.documentElement.dataset.accent = opt.id
+                        update((s) => ({ ...s, accentColor: opt.id }))
+                      }}
+                      className={`group relative h-7 w-7 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                        active
+                          ? 'ring-2 ring-fg ring-offset-2 ring-offset-canvas scale-110'
+                          : 'opacity-65 hover:opacity-100 hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: swatchColor }}
+                    >
+                      {active && (
+                        <Check
+                          size={13}
+                          strokeWidth={3}
+                          className={
+                            opt.id === 'monochrome' && colorMode !== 'light'
+                              ? 'text-black'
+                              : 'text-white'
+                          }
+                        />
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })()}
       </div>
 
       <div className="card p-6">
