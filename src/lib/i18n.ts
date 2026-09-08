@@ -622,8 +622,6 @@ const en: Messages = {
   },
 }
 
-const rawTranslations: Record<Lang, Messages> = { de, en }
-
 function createFallbackProxy<T extends object>(target: T, fallback: T): T {
   return new Proxy(target, {
     get(obj, prop, receiver) {
@@ -648,11 +646,6 @@ function createFallbackProxy<T extends object>(target: T, fallback: T): T {
 export const translations: Record<Lang, Messages> = {
   de: createFallbackProxy(de, de),
   en: createFallbackProxy(en, de),
-}
-
-export function getMessages(lang: Lang): Messages {
-  const target = rawTranslations[lang] ?? rawTranslations.de
-  return createFallbackProxy(target, rawTranslations.de)
 }
 
 const STORAGE_KEY = 'pomodoro.lang'

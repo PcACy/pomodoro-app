@@ -1,7 +1,7 @@
 export type PhaseId = 'focus' | 'shortBreak' | 'longBreak'
 export type TimerStatus = 'idle' | 'running' | 'paused'
 export type TimerMode = 'pomodoro' | 'flow'
-export type LayoutMode = 'split' | 'single'
+type LayoutMode = 'split' | 'single'
 export type AccentColor = 'red' | 'orange' | 'blue' | 'green' | 'monochrome'
 
 export interface PhaseConfig {

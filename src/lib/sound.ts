@@ -6,7 +6,7 @@ let ctx: AudioContext | null = null
 let buffers: Record<ChimeKind, AudioBuffer | null> = { focus: null, break: null }
 let initialized = false
 
-export function isSoundEnabled(): boolean {
+function isSoundEnabled(): boolean {
   if (typeof localStorage === 'undefined') return true
   return localStorage.getItem('pomodoro.sound') !== 'false'
 }

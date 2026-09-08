@@ -11,15 +11,6 @@ export const fmtTime = (ms: number): string => {
   return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`
 }
 
-/** Count-up format, always with hours: "00:00:00", "01:02:03", "25:00:00". */
-export const fmtElapsed = (ms: number): string => {
-  const totalSec = Math.max(0, Math.floor(ms / 1000))
-  const h = Math.floor(totalSec / 3600)
-  const m = Math.floor((totalSec % 3600) / 60)
-  const s = totalSec % 60
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-}
-
 /** Adaptive Flow time format: MM:SS under 60 min, H:MM:SS at or above 60 min. */
 export const fmtFlowTime = (ms: number): string => {
   const totalSec = Math.max(0, Math.floor(ms / 1000))
@@ -62,9 +53,6 @@ export const sameDay = (a: Date, b: Date): boolean => dayKey(a) === dayKey(b)
 
 /** "Mo", "Di", … short German weekday labels, Monday-indexed (0 = Mo) */
 export const WEEKDAY_SHORT: string[] = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
-
-export const fmtDate = (d: Date, locale = 'de-DE'): string =>
-  d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
 
 export const fmtDateTime = (d: Date, locale = 'de-DE'): string =>
   d.toLocaleDateString(locale, {

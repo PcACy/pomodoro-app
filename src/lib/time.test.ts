@@ -5,10 +5,8 @@ import {
   WEEKDAY_SHORT,
   addDays,
   dayKey,
-  fmtDate,
   fmtDateTime,
   fmtDuration,
-  fmtElapsed,
   fmtFlowTime,
   fmtTime,
   sameDay,
@@ -148,28 +146,6 @@ describe('time lib', () => {
     })
   })
 
-  describe('fmtElapsed', () => {
-    it('formats 0 ms as 00:00:00', () => {
-      expect(fmtElapsed(0)).toBe('00:00:00')
-    })
-
-    it('handles negative ms by clamping to 00:00:00', () => {
-      expect(fmtElapsed(-5000)).toBe('00:00:00')
-    })
-
-    it('floors sub-second milliseconds using Math.floor', () => {
-      expect(fmtElapsed(999)).toBe('00:00:00')
-      expect(fmtElapsed(1000)).toBe('00:00:01')
-      expect(fmtElapsed(1999)).toBe('00:00:01')
-    })
-
-    it('always includes padded 2-digit hours, minutes, and seconds', () => {
-      expect(fmtElapsed(65_000)).toBe('00:01:05')
-      expect(fmtElapsed(3600_000 + 120_000 + 3_000)).toBe('01:02:03')
-      expect(fmtElapsed(25 * 3600_000)).toBe('25:00:00')
-    })
-  })
-
   describe('fmtFlowTime', () => {
     it('formats times under 60 minutes as MM:SS', () => {
       expect(fmtFlowTime(0)).toBe('00:00')
@@ -220,12 +196,6 @@ describe('time lib', () => {
   })
 
   describe('fmtDate and fmtDateTime', () => {
-    it('formats date according to locale', () => {
-      const date = new Date(2025, 4, 14, 14, 30)
-      const formatted = fmtDate(date, 'de-DE')
-      expect(formatted).toMatch(/14\.05\.2025/)
-    })
-
     it('formats date and time according to locale', () => {
       const date = new Date(2025, 4, 14, 14, 30)
       const formatted = fmtDateTime(date, 'de-DE')

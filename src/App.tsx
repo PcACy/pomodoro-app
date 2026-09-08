@@ -278,12 +278,7 @@ export default function App() {
       </div>
 
       {/* Theme-Specific High-End Atmosphere Background */}
-      <ThemeBackground
-        themeId={themeId}
-        colorMode={colorMode}
-        phase={chromePhase}
-        isRunning={isRunning}
-      />
+      <ThemeBackground colorMode={colorMode} />
 
       <header className="flex w-full items-center justify-between gap-4 py-2 px-1">
         <div className="flex items-center gap-2.5">
@@ -400,12 +395,7 @@ export default function App() {
       {isZenMode && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-canvas select-none overflow-hidden animate-fade-in">
           {/* Theme-Specific Atmosphere Background */}
-          <ThemeBackground
-            themeId={themeId}
-            colorMode={colorMode}
-            phase={chromePhase}
-            isRunning={isRunning}
-          />
+          <ThemeBackground colorMode={colorMode} />
 
           {/* Floating Minimalist Top Exit Badge (auto-fades on idle during focus) */}
           <div

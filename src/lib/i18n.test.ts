@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getLang, getMessages, setLang, translations } from './i18n'
+import { getLang, setLang, translations } from './i18n'
 
 describe('i18n Fallback Proxy and Language Support', () => {
   it('provides all default translations for German and English', () => {
@@ -10,9 +10,8 @@ describe('i18n Fallback Proxy and Language Support', () => {
   })
 
   it('transparently falls back to German for missing keys or undefined properties', () => {
-    const customLangMessages = getMessages('en')
     // Standard access
-    expect(customLangMessages.nav.settings).toBe('Settings')
+    expect(translations.en.nav.settings).toBe('Settings')
     // Accessing an object with fallback proxy
     const deNav = translations.de.nav
     expect(deNav.timer).toBe('Timer')

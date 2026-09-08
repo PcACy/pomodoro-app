@@ -4,9 +4,7 @@ import {
   currentStreakDays,
   formatYAxisTick,
   getYAxisConfig,
-  groupMinutesByDay,
   heatmapData,
-  lastNDaysStats,
   minutesByTag,
   pomodoroVsFlowBreakdown,
   sessionsByHour,
@@ -158,37 +156,6 @@ describe('stats lib', () => {
   })
 
   describe('additional stats helpers', () => {
-    it('groupMinutesByDay aggregates minutes for date range', () => {
-      const from = new Date(2025, 4, 13, 0, 0, 0)
-      const to = new Date(2025, 4, 14, 23, 59, 59)
-      const s1 = new Date(2025, 4, 13, 10, 0, 0).getTime()
-      const s2 = new Date(2025, 4, 14, 11, 0, 0).getTime()
-
-      const sessions: Session[] = [
-        makeSession({ start: s1, durationMs: 30 * 60_000 }),
-        makeSession({ start: s2, durationMs: 20 * 60_000 }),
-      ]
-
-      const stats = groupMinutesByDay(sessions, from, to, 2)
-      expect(stats).toHaveLength(2)
-      expect(stats[0].minutes).toBe(30)
-      expect(stats[1].minutes).toBe(20)
-    })
-
-    it('lastNDaysStats returns last n days stats ending today, including afternoon sessions', () => {
-      const todayAfternoon = new Date(2025, 4, 14, 15, 30, 0).getTime()
-      const yesterday = new Date(2025, 4, 13, 11, 0, 0).getTime()
-      const sessions: Session[] = [
-        makeSession({ start: todayAfternoon, durationMs: 25 * 60_000 }),
-        makeSession({ start: yesterday, durationMs: 40 * 60_000 }),
-      ]
-
-      const stats = lastNDaysStats(sessions, 3)
-      expect(stats).toHaveLength(3)
-      expect(stats[1].minutes).toBe(40) // yesterday
-      expect(stats[2].minutes).toBe(25) // today
-    })
-
     it('minutesByTag aggregates and sorts minutes by tag', () => {
       const t1 = new Date(2025, 4, 14, 10, 0, 0).getTime()
       const sessions: Session[] = [

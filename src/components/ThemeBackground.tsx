@@ -1,12 +1,8 @@
 import { memo } from 'react'
-import type { ThemeId, ColorMode } from '../themes'
-import type { PhaseId } from '../types'
+import type { ColorMode } from '../themes'
 
 interface ThemeBackgroundProps {
-  themeId?: ThemeId
   colorMode: ColorMode
-  phase?: PhaseId
-  isRunning?: boolean
 }
 
 export const ThemeBackground = memo(function ThemeBackground({

@@ -6,12 +6,6 @@ interface TagStat {
   minutes: number
 }
 
-interface DayStat {
-  key: string
-  date: Date
-  minutes: number
-}
-
 interface HourStat {
   hour: number
   count: number
@@ -123,31 +117,6 @@ export function currentStreakDays(sessions: Session[]): number {
     cursor = addDays(cursor, -1)
   }
   return streak
-}
-
-/** Focus minutes per day for the last n days (oldest first), Monday-aligned for charts. */
-export function lastNDaysStats(sessions: Session[], n: number): DayStat[] {
-  const today = startOfDay(new Date())
-  const first = addDays(today, -(n - 1))
-  return groupMinutesByDay(sessions, first, today, n)
-}
-
-export function groupMinutesByDay(sessions: Session[], from: Date, to: Date, count: number): DayStat[] {
-  const totals = new Map<string, number>()
-  const fromMs = startOfDay(from).getTime()
-  const toMs = new Date(to.getFullYear(), to.getMonth(), to.getDate(), 23, 59, 59, 999).getTime()
-  for (const s of sessions) {
-    if (s.start >= fromMs && s.start <= toMs) {
-      const key = dayKey(new Date(s.start))
-      totals.set(key, (totals.get(key) ?? 0) + minutesOf(s))
-    }
-  }
-  const out: DayStat[] = []
-  for (let i = 0; i < count; i++) {
-    const date = addDays(from, i)
-    out.push({ key: dayKey(date), date, minutes: totals.get(dayKey(date)) ?? 0 })
-  }
-  return out
 }
 
 export function minutesByTag(sessions: Session[], from?: Date, untaggedLabel = 'Ohne Tag'): TagStat[] {

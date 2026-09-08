@@ -108,5 +108,3 @@ export const SystemStatusCard = memo(function SystemStatusCard({
   )
 })
 
-export const StreakStatusCard = SystemStatusCard
-
