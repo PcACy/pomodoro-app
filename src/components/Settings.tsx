@@ -17,12 +17,13 @@ import {
   X,
 } from 'lucide-react'
 import type { AccentColor, Settings, Session, TodoItem } from '../types'
-import type { ColorMode, ThemeId } from '../themes'
+import type { ColorMode } from '../themes'
 import { clearSessions, exportAll } from '../lib/db'
 import { dayKey } from '../lib/time'
 import { downloadText, sessionsToCsv, sessionsToJson, todosToCsv, todosToJson } from '../lib/dataExport'
 import { useTranslation } from '../hooks/useTranslation'
 import { playMicroClick } from '../lib/sound'
+import { isNotifyEffective, writeNotifyFlag } from '../lib/notify'
 import type { SyncStatus } from '../hooks/useSync'
 import type { GitHubProfile } from '../hooks/useAuth'
 import { SlidingSegmentedControl } from './SlidingSegmentedControl'
@@ -31,7 +32,6 @@ import { MechanicalSwitch } from './MechanicalSwitch'
 
 const SOUND_KEY = 'pomodoro.sound'
 const AUTO_BREAKS_KEY = 'pomodoro.auto_breaks'
-const NOTIFY_KEY = 'pomodoro.notifications'
 
 function readFlag(key: string, expectTrue: boolean): boolean {
   try {
@@ -140,7 +140,15 @@ function StepperButton({
       aria-label={ariaLabel}
       disabled={disabled}
       onClick={(e) => {
-        e.preventDefault()
+        // Pointer input already fired via onPointerDown (hold-repeat):
+        // only handle keyboard activation here (click with detail === 0),
+        // otherwise keyboard users could never operate the stepper.
+        if (e.detail === 0) {
+          playMicroClick('tap')
+          onClick()
+        } else {
+          e.preventDefault()
+        }
       }}
       {...holdHandlers}
       className="tap-spring flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted hover:bg-surface-raised hover:text-fg disabled:pointer-events-none disabled:opacity-20 cursor-pointer transition-colors"
@@ -279,7 +287,6 @@ function ProfileAvatar({ avatarUrl, name }: { avatarUrl?: string; name: string }
 interface Props {
   settings: Settings
   update: (updater: (s: Settings) => Settings) => void
-  themeId: ThemeId
   colorMode: ColorMode
   onColorModeChange: (mode: ColorMode) => void
   sessions: Session[]
@@ -298,7 +305,6 @@ interface Props {
 export const SettingsPanel = memo(function SettingsPanel({
   settings,
   update,
-  themeId: _themeId,
   colorMode,
   onColorModeChange,
   sessions,
@@ -319,10 +325,10 @@ export const SettingsPanel = memo(function SettingsPanel({
   const [errorNonce, setErrorNonce] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // System Hardware Flags
+  // System Hardware Flags (notify shares its initializer with Quick Settings)
   const [soundEnabled, setSoundEnabled] = useState(() => readFlag(SOUND_KEY, false))
   const [autoBreaks, setAutoBreaks] = useState(() => readFlag(AUTO_BREAKS_KEY, true))
-  const [notifyEnabled, setNotifyEnabled] = useState(() => readFlag(NOTIFY_KEY, false))
+  const [notifyEnabled, setNotifyEnabled] = useState(() => isNotifyEffective())
 
   // Destructive Confirmation State (Inline Two-Step)
   const [confirmClear, setConfirmClear] = useState(false)
@@ -332,7 +338,7 @@ export const SettingsPanel = memo(function SettingsPanel({
     const handleStorage = () => {
       setSoundEnabled(readFlag(SOUND_KEY, false))
       setAutoBreaks(readFlag(AUTO_BREAKS_KEY, true))
-      setNotifyEnabled(readFlag(NOTIFY_KEY, false))
+      setNotifyEnabled(isNotifyEffective())
     }
     window.addEventListener('storage', handleStorage)
     return () => window.removeEventListener('storage', handleStorage)
@@ -360,14 +366,14 @@ export const SettingsPanel = memo(function SettingsPanel({
         void Notification.requestPermission().then((perm) => {
           const granted = perm === 'granted'
           setNotifyEnabled(granted)
-          writeFlag(NOTIFY_KEY, granted)
+          writeNotifyFlag(granted)
         })
         return
       }
     }
     setNotifyEnabled((prev) => {
       const next = !prev
-      writeFlag(NOTIFY_KEY, next)
+      writeNotifyFlag(next)
       return next
     })
   }, [])

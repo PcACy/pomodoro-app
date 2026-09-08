@@ -1,8 +1,7 @@
 import { memo, useCallback, useEffect, useState } from 'react'
-import type { Settings } from '../../types'
-import type { ColorMode } from '../../themes'
 import { BentoCard } from './BentoCard'
 import { playMicroClick } from '../../lib/sound'
+import { isNotifyEffective, writeNotifyFlag } from '../../lib/notify'
 
 const SOUND_KEY = 'pomodoro.sound'
 const AUTO_BREAKS_KEY = 'pomodoro.auto_breaks'
@@ -28,22 +27,14 @@ function writeFlag(key: string, value: boolean): void {
 import { MechanicalSwitch } from '../MechanicalSwitch'
 
 interface QuickSettingsCardProps {
-  settings?: Settings
-  colorMode: ColorMode
   isZenMode?: boolean
-  onUpdateSettings?: (updater: (s: Settings) => Settings) => void
-  onToggleColorMode: () => void
   onToggleZen?: () => void
   onOpenSettingsModal: () => void
   className?: string
 }
 
 export const QuickSettingsCard = memo(function QuickSettingsCard({
-  settings: _settings,
-  colorMode: _colorMode,
   isZenMode = false,
-  onUpdateSettings: _onUpdateSettings,
-  onToggleColorMode: _onToggleColorMode,
   onToggleZen,
   onOpenSettingsModal,
   className = '',
@@ -51,17 +42,16 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
   // Local quick toggle preferences synced to localStorage
   const [soundEnabled, setSoundEnabled] = useState(() => readFlag(SOUND_KEY, false))
   const [autoBreaks, setAutoBreaks] = useState(() => readFlag(AUTO_BREAKS_KEY, true))
-  const [notifyEnabled, setNotifyEnabled] = useState(() => {
-    if (typeof window === 'undefined' || !('Notification' in window)) return false
-    return Notification.permission === 'granted' && readFlag(NOTIFY_KEY, true)
-  })
+  // Shared effective-state initializer: identical to the Settings panel, so
+  // both toggles render the same value for the same stored flag.
+  const [notifyEnabled, setNotifyEnabled] = useState(() => isNotifyEffective())
 
   // Stay in sync when another tab (or the Settings panel) flips these flags.
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === SOUND_KEY) setSoundEnabled(readFlag(SOUND_KEY, false))
       else if (e.key === AUTO_BREAKS_KEY) setAutoBreaks(readFlag(AUTO_BREAKS_KEY, true))
-      else if (e.key === NOTIFY_KEY) setNotifyEnabled(readFlag(NOTIFY_KEY, true))
+      else if (e.key === NOTIFY_KEY) setNotifyEnabled(isNotifyEffective())
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
@@ -97,14 +87,14 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
         void Notification.requestPermission().then((perm) => {
           const granted = perm === 'granted'
           setNotifyEnabled(granted)
-          writeFlag(NOTIFY_KEY, granted)
+          writeNotifyFlag(granted)
         })
         return
       }
     }
     setNotifyEnabled((prev) => {
       const next = !prev
-      writeFlag(NOTIFY_KEY, next)
+      writeNotifyFlag(next)
       return next
     })
   }, [])

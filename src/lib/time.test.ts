@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import {
-  MS_PER_DAY,
   MS_PER_MINUTE,
   WEEKDAY_SHORT,
   addDays,
@@ -18,7 +17,6 @@ describe('time lib', () => {
   describe('constants', () => {
     it('defines correct millisecond constants', () => {
       expect(MS_PER_MINUTE).toBe(60_000)
-      expect(MS_PER_DAY).toBe(86_400_000)
     })
 
     it('defines weekday short labels starting with Monday', () => {

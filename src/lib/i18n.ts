@@ -1,41 +1,31 @@
 export type Lang = 'de' | 'en'
 
 export interface Messages {
-  nav: { timer: string; statistics: string; settings: string }
+  nav: { statistics: string; settings: string }
   update: { available: string; reload: string }
   errors: { saveFailed: string }
   phases: { focus: string; shortBreak: string; longBreak: string }
   paused: string
   timer: {
-    pomodoro: string
     flow: string
-    taskPlaceholder: string
     start: string
     pause: string
-    stop: string
-    rounds: (done: number, total: number) => string
-    status: { running: string; paused: string; ready: string }
   }
   flow: {
     finish: string
-    finishShortcut: string
     discard: string
-    discardShortcut: string
     finishedToast: (minutes: number) => string
   }
-  shortcuts: { startPause: string; skip: string; reset: string; zen: string }
-  zen: { mode: string; exitHint: string; enterHint: string }
+  shortcuts: { skip: string; reset: string }
+  zen: { exitHint: string; enterHint: string }
   pip: { open: string; close: string }
   todo: {
     title: string
     tag: string
     add: string
-    doneCount: (done: number, total: number) => string
     addPlaceholder: string
-    addTaskPlaceholder: string
     noTag: string
     selectTag: string
-    empty: string
     reopen: string
     done: string
     selectFocus: string
@@ -45,32 +35,19 @@ export interface Messages {
     save: string
     cancel: string
   }
-  timeline: {
-    title: string
-    noSessions: string
-    now: string
-    todayProgress: (count: number, minutes: number) => string
-  }
   reflection: { title: string; prompt: string; placeholder: string; save: string; skip: string }
   dashboard: {
-    today: string
-    todayFocus: string
-    dailyGoal: string
-    pomodorosToday: string
     streak: string
     weeklyGoal: string
-    noDataToday: string
     streakActive: string
     streakReset: string
     goalReached: (pct: number) => string
     last7Days: string
     focusMinutes: string
     byTag: string
-    noWeekData: string
     last52Weeks: string
     hourOfDay: string
     sessionsPerHour: string
-    noData: string
     hourRange: (h: number) => string
     sessions: string
     amount: string
@@ -87,8 +64,6 @@ export interface Messages {
     pomodoroVsFlow: string
     pomodoroRatio: (pomPct: number, flowPct: number) => string
     noDataPeriod: string
-    activeDay: string
-    activeDays: string
     focusTime: string
     periodOverview: string
     sessionsCsv: string
@@ -128,8 +103,6 @@ export interface Messages {
     accentBlue: string
     accentGreen: string
     accentMonochrome: string
-    timerIntervals: string
-    timerIntervalsHint: string
     presets: string
     presetClassic: string
     presetDeepWork: string
@@ -137,8 +110,6 @@ export interface Messages {
     roundsUnit: string
     minUnit: string
     weeklyGoalHours: (hours: number) => string
-    phases: string
-    phasesHint: string
     cycle: string
     cycleHint: string
     weeklyGoal: string
@@ -146,10 +117,8 @@ export interface Messages {
     dailyGoal: string
     dailyGoalHint: string
     dailyGoalHours: (hours: number) => string
-    minutes: string
     tags: string
     tagsHint: string
-    newTag: string
     newTagPlaceholder: string
     addTag: string
     removeTag: (tag: string) => string
@@ -164,7 +133,6 @@ export interface Messages {
     languageHint: string
   }
   sync: {
-    title: string
     hint: string
     notConfigured: string
     login: string
@@ -191,32 +159,24 @@ export interface Messages {
 }
 
 const de: Messages = {
-  nav: { timer: 'Timer', statistics: 'Statistik', settings: 'Einstellungen' },
+  nav: { statistics: 'Statistik', settings: 'Einstellungen' },
   update: { available: 'Neue Version verfügbar', reload: 'Neu laden' },
   errors: { saveFailed: 'Speichern fehlgeschlagen – Speicher nicht verfügbar?' },
   phases: { focus: 'Fokus', shortBreak: 'Kurze Pause', longBreak: 'Lange Pause' },
   weekdays: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
   paused: 'pausiert',
   timer: {
-    pomodoro: 'Pomodoro',
     flow: 'Flow',
-    taskPlaceholder: 'Aktuelle Aufgabe …',
     start: 'Start (Leertaste)',
     pause: 'Pause (Leertaste)',
-    stop: 'Stoppen & Zeit loggen (N)',
-    rounds: (done, total) => `${done}/${total} Runden`,
-    status: { running: 'läuft', paused: 'pausiert', ready: 'bereit' },
   },
   flow: {
     finish: 'Flow beenden & speichern',
-    finishShortcut: 'Beenden & speichern',
     discard: 'Verwerfen ohne Speichern',
-    discardShortcut: 'Verwerfen',
     finishedToast: (minutes) => `Flow abgeschlossen! +${minutes} Min. Fokuszeit gespeichert`,
   },
-  shortcuts: { startPause: 'Start / Pause', skip: 'Skip', reset: 'Reset', zen: 'Zen' },
+  shortcuts: { skip: 'Skip', reset: 'Reset' },
   zen: {
-    mode: 'Zen-Modus',
     exitHint: 'Zen-Modus · Z oder Esc zum Beenden',
     enterHint: 'Zen-Modus aktivieren',
   },
@@ -225,12 +185,9 @@ const de: Messages = {
     title: 'To-Do',
     tag: 'Tag',
     add: 'Hinzufügen',
-    doneCount: (done, total) => `${done}/${total} erledigt`,
     addPlaceholder: 'Neue Aufgabe …',
-    addTaskPlaceholder: 'Neue Aufgabe …',
     noTag: 'Ohne Tag',
     selectTag: 'Tag wählen',
-    empty: 'Noch keine Aufgaben. Lege eine neue an.',
     reopen: 'Wieder öffnen',
     done: 'Erledigt',
     selectFocus: 'Als aktive Aufgabe wählen',
@@ -240,12 +197,6 @@ const de: Messages = {
     save: 'Speichern',
     cancel: 'Abbrechen',
   },
-  timeline: {
-    title: 'Tages-Timeline',
-    noSessions: 'Der Schreibtisch ist noch kalt.',
-    now: 'Jetzt',
-    todayProgress: (count, minutes) => `${count} ${count === 1 ? 'Session' : 'Sessions'} · ${minutes} Min. Fokus`,
-  },
   reflection: {
     title: 'Micro-Reflection',
     prompt: 'Was hast du in dieser Session gelernt / erreicht?',
@@ -254,24 +205,17 @@ const de: Messages = {
     skip: 'Überspringen',
   },
   dashboard: {
-    today: 'Heute',
-    todayFocus: 'Heutige Fokuszeit',
-    dailyGoal: 'Tagesziel',
-    pomodorosToday: 'Runden heute',
     streak: 'Tages-Streak',
     weeklyGoal: 'Wochenziel',
-    noDataToday: 'Der Schreibtisch ist noch kalt.',
     streakActive: 'Streak aktiv. Bleib im Flow.',
     streakReset: 'Morgen neu starten',
     goalReached: (pct) => `${pct}% erreicht`,
     last7Days: 'Letzte 7 Tage',
     focusMinutes: 'Fokuszeit in Minuten',
     byTag: 'Verteilung nach Tag',
-    noWeekData: 'Noch keine Kerben geschlagen.',
     last52Weeks: 'Letzte 52 Wochen',
     hourOfDay: 'Tageszeit',
     sessionsPerHour: 'Abgeschlossene Sessions pro Stunde',
-    noData: 'Noch keine Kerben geschlagen.',
     hourRange: (h) => `${h}:00 – ${h + 1}:00 Uhr`,
     sessions: 'Sessions',
     amount: 'Anzahl',
@@ -288,8 +232,6 @@ const de: Messages = {
     pomodoroVsFlow: 'Pomodoro vs. Flow',
     pomodoroRatio: (pom, flow) => `${pom}% Pomodoro · ${flow}% Flow`,
     noDataPeriod: 'Der Schreibtisch ist noch kalt. Starte deinen ersten Fokus-Block.',
-    activeDay: 'aktiver Tag',
-    activeDays: 'aktive Tage',
     focusTime: 'Fokuszeit',
     periodOverview: 'Fokus-Übersicht',
     sessionsCsv: 'Sessions .csv',
@@ -329,8 +271,6 @@ const de: Messages = {
     accentBlue: 'Electric Blue',
     accentGreen: 'Matrix Green',
     accentMonochrome: 'Monochrome',
-    timerIntervals: 'Timer & Intervalle',
-    timerIntervalsHint: 'Passe Fokus- und Pausendauern, Zykluslänge sowie dein Wochenziel an.',
     presets: 'Fokus-Rhythmen',
     presetClassic: 'Klassisch (25 / 5 min)',
     presetDeepWork: 'Deep Work (50 / 10 min)',
@@ -338,8 +278,6 @@ const de: Messages = {
     roundsUnit: 'Runden',
     minUnit: 'min',
     weeklyGoalHours: (h) => `≈ ${h.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Std./Woche`,
-    phases: 'Phasen',
-    phasesHint: 'Dauern in Minuten, zwischen 1 und 180.',
     cycle: 'Zyklus',
     cycleHint: 'Nach wie vielen Fokus-Runden folgt eine lange Pause?',
     weeklyGoal: 'Wochenziel',
@@ -347,10 +285,8 @@ const de: Messages = {
     dailyGoal: 'Tagesziel',
     dailyGoalHint: 'Ziel-Fokuszeit pro Tag.',
     dailyGoalHours: (h) => `≈ ${h.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Std./Tag`,
-    minutes: 'Minuten',
     tags: 'Tags',
     tagsHint: 'Kategorien für die Aufgaben-Zuweisung.',
-    newTag: 'Neuer Tag …',
     newTagPlaceholder: 'Neuen Tag eingeben …',
     addTag: 'Tag hinzufügen',
     removeTag: (tag) => `Tag "${tag}" entfernen`,
@@ -365,7 +301,6 @@ const de: Messages = {
     languageHint: 'Wähle deine bevorzugte Sprache für UI und Benachrichtigungen.',
   },
   sync: {
-    title: 'Cloud-Sync',
     hint: 'Spiegle deine Sessions und Aufgaben sicher über GitHub in die Cloud.',
     notConfigured:
       'Cloud-Sync ist nicht konfiguriert. Ergänze VITE_SUPABASE_URL und VITE_SUPABASE_ANON_KEY – die App bleibt vollständig lokal.',
@@ -398,32 +333,24 @@ const de: Messages = {
 }
 
 const en: Messages = {
-  nav: { timer: 'Timer', statistics: 'Statistics', settings: 'Settings' },
+  nav: { statistics: 'Statistics', settings: 'Settings' },
   update: { available: 'New version available', reload: 'Reload' },
   errors: { saveFailed: 'Saving failed – storage unavailable?' },
   phases: { focus: 'Focus', shortBreak: 'Short Break', longBreak: 'Long Break' },
   weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   paused: 'paused',
   timer: {
-    pomodoro: 'Pomodoro',
     flow: 'Flow',
-    taskPlaceholder: 'Current task …',
     start: 'Start (Space)',
     pause: 'Pause (Space)',
-    stop: 'Stop & log time (N)',
-    rounds: (done, total) => `${done}/${total} rounds`,
-    status: { running: 'running', paused: 'paused', ready: 'ready' },
   },
   flow: {
     finish: 'Finish flow & save',
-    finishShortcut: 'Finish & save',
     discard: 'Discard without saving',
-    discardShortcut: 'Discard',
     finishedToast: (minutes) => `Flow complete! +${minutes} min focus saved`,
   },
-  shortcuts: { startPause: 'Start / Pause', skip: 'Skip', reset: 'Reset', zen: 'Zen' },
+  shortcuts: { skip: 'Skip', reset: 'Reset' },
   zen: {
-    mode: 'Zen Mode',
     exitHint: 'Zen Mode · Press Z or Esc to exit',
     enterHint: 'Enter Zen Mode',
   },
@@ -432,12 +359,9 @@ const en: Messages = {
     title: 'To-Do',
     tag: 'Tag',
     add: 'Add',
-    doneCount: (done, total) => `${done}/${total} done`,
     addPlaceholder: 'Add task …',
-    addTaskPlaceholder: 'Add task …',
     noTag: 'No tag',
     selectTag: 'Select tag',
-    empty: 'No tasks yet. Add one to get started.',
     reopen: 'Reopen',
     done: 'Done',
     selectFocus: 'Select as active task',
@@ -447,12 +371,6 @@ const en: Messages = {
     save: 'Save',
     cancel: 'Cancel',
   },
-  timeline: {
-    title: "Today's Timeline",
-    noSessions: 'Quiet in here. Time to lock in.',
-    now: 'Now',
-    todayProgress: (count, minutes) => `${count} ${count === 1 ? 'session' : 'sessions'} · ${minutes} min focus`,
-  },
   reflection: {
     title: 'Micro-Reflection',
     prompt: 'What did you learn / achieve in this session?',
@@ -461,24 +379,17 @@ const en: Messages = {
     skip: 'Skip',
   },
   dashboard: {
-    today: 'Today',
-    todayFocus: 'Today’s focus time',
-    dailyGoal: 'Daily goal',
-    pomodorosToday: 'Rounds today',
     streak: 'Daily streak',
     weeklyGoal: 'Weekly goal',
-    noDataToday: 'Quiet in here. Time to lock in.',
     streakActive: 'Momentum running. Keep the streak.',
     streakReset: 'Restarts tomorrow',
     goalReached: (pct) => `${pct}% reached`,
     last7Days: 'Last 7 days',
     focusMinutes: 'Focus minutes',
     byTag: 'Distribution by tag',
-    noWeekData: 'Zero distractions logged yet.',
     last52Weeks: 'Last 52 weeks',
     hourOfDay: 'Time of day',
     sessionsPerHour: 'Completed sessions per hour',
-    noData: 'Zero distractions logged yet.',
     hourRange: (h) => `${h}:00 – ${h + 1}:00`,
     sessions: 'Sessions',
     amount: 'Count',
@@ -495,8 +406,6 @@ const en: Messages = {
     pomodoroVsFlow: 'Pomodoro vs. Flow',
     pomodoroRatio: (pom, flow) => `${pom}% Pomodoro · ${flow}% Flow`,
     noDataPeriod: 'Quiet in here. Start your first focus block.',
-    activeDay: 'active day',
-    activeDays: 'active days',
     focusTime: 'Focus time',
     periodOverview: 'Focus Overview',
     sessionsCsv: 'Sessions .csv',
@@ -536,8 +445,6 @@ const en: Messages = {
     accentBlue: 'Electric Blue',
     accentGreen: 'Matrix Green',
     accentMonochrome: 'Monochrome',
-    timerIntervals: 'Timer & Intervals',
-    timerIntervalsHint: 'Customize focus and break durations, cycle length, and weekly goal.',
     presets: 'Focus Rhythms',
     presetClassic: 'Classic (25 / 5 min)',
     presetDeepWork: 'Deep Work (50 / 10 min)',
@@ -545,8 +452,6 @@ const en: Messages = {
     roundsUnit: 'rounds',
     minUnit: 'min',
     weeklyGoalHours: (h) => `≈ ${h.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} hrs/week`,
-    phases: 'Phases',
-    phasesHint: 'Durations in minutes, between 1 and 180.',
     cycle: 'Cycle',
     cycleHint: 'After how many focus rounds follows a long break?',
     weeklyGoal: 'Weekly goal',
@@ -554,10 +459,8 @@ const en: Messages = {
     dailyGoal: 'Daily goal',
     dailyGoalHint: 'Target focus time per day.',
     dailyGoalHours: (h) => `≈ ${h.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} hrs/day`,
-    minutes: 'minutes',
     tags: 'Tags',
     tagsHint: 'Categories for task assignment.',
-    newTag: 'New tag …',
     newTagPlaceholder: 'Enter new tag …',
     addTag: 'Add tag',
     removeTag: (tag) => `Remove tag "${tag}"`,
@@ -572,7 +475,6 @@ const en: Messages = {
     languageHint: 'Select your preferred language for the interface and notifications.',
   },
   sync: {
-    title: 'Cloud Sync',
     hint: 'Mirror your sessions and tasks securely to the cloud via GitHub.',
     notConfigured:
       'Cloud sync is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY – the app keeps working fully local.',
@@ -643,7 +545,9 @@ function detectLang(): Lang {
   } catch {
     /* storage unavailable */
   }
-  return typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('de')
+  return typeof navigator !== 'undefined' &&
+    typeof navigator.language === 'string' &&
+    navigator.language.toLowerCase().startsWith('de')
     ? 'de'
     : 'en'
 }

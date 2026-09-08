@@ -162,7 +162,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
       <div className="relative z-10 flex-1 flex flex-col justify-center py-2 sm:py-3">
         {/* Glyph Dot-Matrix Clock */}
         <div className="my-1 flex justify-center">
-          <GlyphTimeDisplay time={shownTime} isRunning={running} />
+          <GlyphTimeDisplay time={shownTime} />
         </div>
 
         {/* Date & Phase Info */}
@@ -191,14 +191,22 @@ export const HeroTimerCard = memo(function HeroTimerCard({
                 <div className="flex items-center gap-1 ml-0.5" title={`Cycle: ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`}>
                   {Array.from({ length: safeRounds }).map((_, rIdx) => {
                     const currentRoundIdx = completedFocusInCycle % safeRounds
-                    const isFilled = rIdx <= currentRoundIdx
+                    // Same semantics as Timer.tsx: only completed rounds are
+                    // filled; the current round gets its own pulsing style so
+                    // done vs. active are distinguishable.
+                    const isCompleted = rIdx < currentRoundIdx
+                    const isCurrent = rIdx === currentRoundIdx
                     return (
                       <span
                         key={rIdx}
                         className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                          isFilled
+                          isCompleted
                             ? 'bg-fg'
-                            : 'border border-line bg-canvas'
+                            : isCurrent
+                              ? running
+                                ? 'bg-accent animate-pulse'
+                                : 'bg-accent/80'
+                              : 'border border-line bg-canvas'
                         }`}
                       />
                     )

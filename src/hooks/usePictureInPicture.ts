@@ -51,6 +51,9 @@ export function usePictureInPicture(): PictureInPictureState {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const isSupported = supportsDocumentPip() || supportsVideoPip()
+  // Synchronous open guard: `mode` state commits async, so two rapid open()
+  // calls would both pass the `mode !== 'none'` check and orphan a window.
+  const openingRef = useRef(false)
 
   const cleanupVideo = useCallback(() => {
     const video = videoRef.current
@@ -81,9 +84,10 @@ export function usePictureInPicture(): PictureInPictureState {
   }, [pipWindow, cleanupVideo])
 
   const open = useCallback(async () => {
-    if (!isSupported || mode !== 'none') return
-
-    // 1. Modern Document Picture-in-Picture API (Chrome/Edge >= 116)
+    if (!isSupported || mode !== 'none' || openingRef.current) return
+    openingRef.current = true
+    try {
+      // 1. Modern Document Picture-in-Picture API (Chrome/Edge >= 116)
     if (supportsDocumentPip()) {
       try {
         const win = await window.documentPictureInPicture!.requestWindow({
@@ -134,6 +138,9 @@ export function usePictureInPicture(): PictureInPictureState {
         cleanupVideo()
         setMode('none')
       }
+    }
+    } finally {
+      openingRef.current = false
     }
   }, [isSupported, mode, cleanupVideo])
 

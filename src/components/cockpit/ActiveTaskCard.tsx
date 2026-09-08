@@ -1,9 +1,9 @@
 import { memo } from 'react'
 import { Check } from 'lucide-react'
-import type { Session, TodoItem } from '../../types'
+import type { Session, TodoItem, TimerMode } from '../../types'
 import { BentoCard } from './BentoCard'
 import { getTagColor } from '../TodoList'
-import { useTimerTick } from '../../hooks/useTimerTick'
+import { useFlowTimerTick, useTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
 
 interface ActiveTaskCardProps {
@@ -12,6 +12,7 @@ interface ActiveTaskCardProps {
   remainingMs: number
   totalMs: number
   time?: string
+  mode?: TimerMode
   sessions?: Session[]
   focusMinutes?: number
   onOpenTodoManager?: () => void
@@ -25,6 +26,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   remainingMs,
   totalMs,
   time = '25:00',
+  mode = 'pomodoro',
   sessions,
   focusMinutes = 25,
   onOpenTodoManager,
@@ -32,10 +34,16 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   className = '',
 }: ActiveTaskCardProps) {
   const timerTick = useTimerTick()
-  const liveRemainingMs = isRunning ? timerTick.remainingMs : remainingMs
-  const liveTime = isRunning ? (timerTick.time || time) : time
+  const flowTick = useFlowTimerTick()
+  const isFlowMode = mode === 'flow'
+  // The pomodoro tick is meaningless in flow mode (and vice versa): only use
+  // the tick of the active mode, otherwise the bar counts the wrong clock.
+  const liveRemainingMs = !isFlowMode && isRunning ? timerTick.remainingMs : remainingMs
+  const liveTime = !isFlowMode && isRunning ? (timerTick.time || time) : time
 
-  const elapsedMs = Math.max(0, totalMs - liveRemainingMs)
+  const elapsedMs = isFlowMode
+    ? Math.max(0, flowTick.elapsedMs)
+    : Math.max(0, totalMs - liveRemainingMs)
   const elapsedMinutes = Math.floor(elapsedMs / 60_000)
   const elapsedSeconds = Math.floor((elapsedMs % 60_000) / 1000)
   const elapsedStr = `${String(elapsedMinutes).padStart(2, '0')}:${String(elapsedSeconds).padStart(2, '0')}`
@@ -44,7 +52,11 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   const totalSeconds = Math.floor((totalMs % 60_000) / 1000)
   const totalStr = `${String(totalMinutes).padStart(2, '0')}:${String(totalSeconds).padStart(2, '0')}`
 
-  const progressRatio = totalMs > 0 ? Math.min(1, Math.max(0, elapsedMs / totalMs)) : 0
+  const progressRatio = isFlowMode
+    ? 0 // flow has no fixed target; the bar stays empty, elapsed counts up
+    : totalMs > 0
+      ? Math.min(1, Math.max(0, elapsedMs / totalMs))
+      : 0
   const tagColor = activeTodo?.tag ? getTagColor(activeTodo.tag) : undefined
 
   const taskMinutes = activeTodo && sessions
@@ -155,9 +167,15 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         <div className="mt-1.5 flex items-center justify-between font-mono text-[9px] text-muted tracking-wider tabular-nums">
           <span>{elapsedStr}</span>
           <span className="text-fg/80 font-medium">
-            {isRunning ? `-${liveTime}` : (progressRatio > 0 ? `${Math.round(progressRatio * 100)}%` : 'STANDBY')}
+            {isRunning
+              ? isFlowMode
+                ? `+${flowTick.time}`
+                : `-${liveTime}`
+              : progressRatio > 0
+                ? `${Math.round(progressRatio * 100)}%`
+                : 'STANDBY'}
           </span>
-          <span>{totalStr}</span>
+          <span>{isFlowMode ? flowTick.time : totalStr}</span>
         </div>
       </div>
     </BentoCard>

@@ -22,8 +22,13 @@ export function useServiceWorker(): ServiceWorkerState {
     if (waitingWorkerRef.current) {
       waitingWorkerRef.current.postMessage({ type: 'SKIP_WAITING' })
     }
+    // Fallback only: onControllerChange clears the flag and reloads first,
+    // so this fires solely when no controller change arrives.
     setTimeout(() => {
-      window.location.reload()
+      if (reloadingRef.current) {
+        reloadingRef.current = false
+        window.location.reload()
+      }
     }, 100)
   }, [])
 
@@ -64,15 +69,24 @@ export function useServiceWorker(): ServiceWorkerState {
       const newWorker = registration?.installing
       if (!newWorker) return
 
-      newWorker.addEventListener('statechange', () => {
+      const onStateChange = () => {
+        if (disposed) {
+          newWorker.removeEventListener('statechange', onStateChange)
+          return
+        }
         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          newWorker.removeEventListener('statechange', onStateChange)
           handleWaitingWorker(newWorker)
         }
-      })
+      }
+      newWorker.addEventListener('statechange', onStateChange)
     }
 
     const onControllerChange = () => {
       if (reloadingRef.current) {
+        // Consume the flag: without this, reload() and this handler would
+        // each trigger a full page reload.
+        reloadingRef.current = false
         window.location.reload()
       }
     }

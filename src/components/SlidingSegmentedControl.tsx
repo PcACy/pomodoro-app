@@ -81,7 +81,7 @@ export function SlidingSegmentedControl<T extends string>({
   return (
     <div
       ref={containerRef}
-      role="tablist"
+      role="radiogroup"
       aria-label={ariaLabel}
       className={`relative inline-flex items-center rounded-full border border-line bg-canvas font-mono select-none ${containerPadding} ${
         fullWidth ? 'w-full sm:w-auto flex' : ''
@@ -116,8 +116,8 @@ export function SlidingSegmentedControl<T extends string>({
               }
             }}
             type="button"
-            role="tab"
-            aria-selected={isSelected}
+            role="radio"
+            aria-checked={isSelected}
             onClick={() => {
               playMicroClick('tab')
               onChange(opt.value)

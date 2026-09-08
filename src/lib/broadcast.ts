@@ -46,21 +46,39 @@ export function subscribeBroadcast(callback: (msg: BroadcastMessage) => void): (
   const ch = getChannel()
   if (!ch) return () => {}
 
-  const handler = (e: MessageEvent<BroadcastMessage>) => {
-    if (e.data && typeof e.data === 'object' && 'type' in e.data) {
-      const data = e.data
-      const sender =
-        'payload' in data && data.payload && typeof data.payload === 'object'
-          ? (data.payload as { senderId?: string }).senderId
-          : 'senderId' in data
-            ? (data as { senderId?: string }).senderId
-            : null
+  // Strict shape check: the channel is shared per origin, so any object with
+  // a `type` key (other libs, devtools) must not reach the timer consumer,
+  // which reads payload fields unconditionally.
+  const isTimerState = (d: unknown): d is BroadcastMessage => {
+    if (!d || typeof d !== 'object') return false
+    const m = d as Record<string, unknown>
+    if (m.type !== 'timer_state') return false
+    const p = m.payload as Record<string, unknown> | null | undefined
+    return (
+      !!p &&
+      typeof p.remainingMs === 'number' &&
+      typeof p.totalMs === 'number' &&
+      typeof p.phase === 'string' &&
+      typeof p.status === 'string' &&
+      typeof p.completedFocusInCycle === 'number' &&
+      (p.targetEnd === null || typeof p.targetEnd === 'number')
+    )
+  }
 
-      if (sender === TAB_INSTANCE_ID) {
-        return // Ignore own messages
-      }
-      callback(data)
+  const handler = (e: MessageEvent<BroadcastMessage>) => {
+    if (!isTimerState(e.data)) return
+    const data = e.data
+    const sender =
+      'payload' in data && data.payload && typeof data.payload === 'object'
+        ? (data.payload as { senderId?: string }).senderId
+        : 'senderId' in data
+          ? (data as { senderId?: string }).senderId
+          : null
+
+    if (sender === TAB_INSTANCE_ID) {
+      return // Ignore own messages
     }
+    callback(data)
   }
 
   ch.addEventListener('message', handler)

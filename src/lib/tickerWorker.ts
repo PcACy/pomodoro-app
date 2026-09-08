@@ -42,6 +42,61 @@ self.onmessage = function (e) {
 
 let worker: Worker | null = null
 
+interface TickerControlMessage {
+  type?: string
+  id?: string
+}
+
+/**
+ * Fallback ticker when a real Worker cannot be created (e.g. CSP blocking
+ * blob: workers): a refcounted setInterval behind the same interface, so the
+ * timer keeps running instead of crashing the effect that requested it.
+ */
+function createFallbackTicker(): Worker {
+  const listeners = new Set<(e: MessageEvent) => void>()
+  const clients = new Set<string>()
+  let timer: ReturnType<typeof setInterval> | null = null
+  const tick = () => {
+    const evt = { data: { type: 'tick', now: Date.now() } } as MessageEvent
+    listeners.forEach((l) => {
+      try {
+        l(evt)
+      } catch {
+        /* listener failure non-fatal */
+      }
+    })
+  }
+  const asListener = (fn: EventListener): ((e: MessageEvent) => void) => fn as (e: MessageEvent) => void
+  const api = {
+    postMessage: (msg: TickerControlMessage) => {
+      if (!msg) return
+      if (msg.type === 'start') {
+        clients.add(msg.id ?? 'default')
+        if (timer == null) timer = setInterval(tick, 250)
+      } else if (msg.type === 'stop') {
+        clients.delete(msg.id ?? 'default')
+        if (clients.size === 0 && timer != null) {
+          clearInterval(timer)
+          timer = null
+        }
+      }
+    },
+    addEventListener: (_type: string, listener: EventListener) => {
+      listeners.add(asListener(listener))
+    },
+    removeEventListener: (_type: string, listener: EventListener) => {
+      listeners.delete(asListener(listener))
+    },
+    terminate: () => {
+      if (timer != null) clearInterval(timer)
+      timer = null
+      listeners.clear()
+      clients.clear()
+    },
+  }
+  return api as unknown as Worker
+}
+
 /**
  * Difference-based ticking: the worker only reports wall-clock timestamps.
  * The main thread computes remaining time from a fixed target end timestamp,
@@ -50,13 +105,18 @@ let worker: Worker | null = null
  */
 export function getTickerWorker(): Worker {
   if (!worker) {
-    const blob = new Blob([WORKER_CODE], { type: 'application/javascript' })
-    const blobUrl = URL.createObjectURL(blob)
-    worker = new Worker(blobUrl)
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
-    worker.onerror = (err) => {
-      console.warn('[tickerWorker] Worker error encountered, resetting instance:', err)
-      terminateTickerWorker()
+    try {
+      const blob = new Blob([WORKER_CODE], { type: 'application/javascript' })
+      const blobUrl = URL.createObjectURL(blob)
+      worker = new Worker(blobUrl)
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
+      worker.onerror = (err) => {
+        console.warn('[tickerWorker] Worker error encountered, resetting instance:', err)
+        terminateTickerWorker()
+      }
+    } catch (err) {
+      console.warn('[tickerWorker] Worker creation failed, using interval fallback:', err)
+      worker = createFallbackTicker()
     }
   }
   return worker

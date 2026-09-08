@@ -6,30 +6,16 @@ interface CatLogoProps extends SVGProps<SVGSVGElement> {
   className?: string
   size?: number
   state?: CatMascotState | string
-  ascii?: boolean
 }
 
 export const CatLogo: FC<CatLogoProps> = ({
   className = 'w-6 h-6',
   size = 24,
   state = 'idle',
-  ascii = false,
   ...props
 }) => {
   const isBreak = state === 'break' || state === 'shortBreak' || state === 'longBreak'
   const isFocus = state === 'focus' || state === 'flow' || state === 'running'
-
-  if (ascii) {
-    return (
-      <span
-        aria-label="Pomau Cat"
-        className={`inline-block select-none font-mono font-bold leading-tight tracking-tight ${className}`}
-        style={{ fontSize: `${Math.max(10, size * 0.45)}px` }}
-      >
-        {isBreak ? '[:.-.:]' : isFocus ? '[:o.o:]' : '[:^.^:]'}
-      </span>
-    )
-  }
 
   return (
     <div

@@ -3,6 +3,7 @@ import type { Session } from '../../types'
 import { minutesByTag } from '../../lib/stats'
 import { BentoCard } from './BentoCard'
 import { getTagColor } from '../TodoList'
+import { useTranslation } from '../../hooks/useTranslation'
 
 interface ProjectsDistributionCardProps {
   sessions: Session[]
@@ -17,10 +18,13 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
   tags = [],
   className = '',
 }: ProjectsDistributionCardProps) {
+  const { t } = useTranslation()
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const tagStats = minutesByTag(sessions, today, 'OHNE TAG')
+  // Localized untagged bucket, matching Dashboard/TodoList (a hardcoded
+  // German label would never merge with the translated "No tag" bucket).
+  const tagStats = minutesByTag(sessions, today, t.todo.noTag)
   const totalTodayMinutes = tagStats.reduce((sum, t) => sum + t.minutes, 0)
 
   // Configured user tags or fallback

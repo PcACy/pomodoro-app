@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useState } from 'react'
 import { DEFAULT_MODE, DEFAULT_THEME, MODE_KEY, THEME_KEY } from '../themes'
 import type { ColorMode, ThemeId } from '../themes'
 
@@ -40,13 +40,9 @@ const VALID_MODES: Record<string, ColorMode> = {
   light: 'light',
 }
 
-export function useTheme(): [
-  ThemeId,
-  (id: ThemeId) => void,
-  ColorMode,
-  (mode: ColorMode) => void,
-] {
-  const [themeId, setThemeId] = useState<ThemeId>(() => {
+export function useTheme(): [ThemeId, ColorMode, (mode: ColorMode) => void] {
+  // Single-theme build: the id never changes at runtime (no setter needed).
+  const [themeId] = useState<ThemeId>(() => {
     let id = DEFAULT_THEME
     try {
       const saved = localStorage.getItem(THEME_KEY)
@@ -75,21 +71,13 @@ export function useTheme(): [
     return mode
   })
 
-  // Synchronously ensure root datasets are set
-  applyTheme(themeId, colorMode)
-
-  const setTheme = useCallback(
-    (id: ThemeId) => {
-      applyTheme(id, colorMode)
-      setThemeId(id)
-      try {
-        localStorage.setItem(THEME_KEY, id)
-      } catch {
-        /* ignore */
-      }
-    },
-    [colorMode],
-  )
+  // Apply outside render: render-phase DOM writes break under StrictMode /
+  // concurrent rendering (double-invoke, tearing). useLayoutEffect still runs
+  // before paint, so there is no flash. Event-handler setters below update
+  // the DOM synchronously for instant feedback.
+  useLayoutEffect(() => {
+    applyTheme(themeId, colorMode)
+  }, [themeId, colorMode])
 
   const setColorMode = useCallback(
     (mode: ColorMode) => {
@@ -104,7 +92,7 @@ export function useTheme(): [
     [themeId],
   )
 
-  return [themeId, setTheme, colorMode, setColorMode]
+  return [themeId, colorMode, setColorMode]
 }
 
 const readVar = (name: string): string =>
@@ -125,7 +113,7 @@ export interface ThemeColors {
 }
 
 /** Resolves the theme CSS variables to concrete `rgb(...)` strings (for Recharts, inline styles). */
-export function useThemeColors(themeId: ThemeId, colorMode: ColorMode, accentColor?: string): ThemeColors {
+export function useThemeColors(themeId: ThemeId, colorMode: ColorMode): ThemeColors {
   return useMemo(() => {
     const rgb = (name: string) => `rgb(${readVar(name)})`
     return {
@@ -141,5 +129,5 @@ export function useThemeColors(themeId: ThemeId, colorMode: ColorMode, accentCol
       long: rgb('--c-long'),
       chart: Array.from({ length: 8 }, (_, i) => rgb(`--c-chart-${i + 1}`)),
     }
-  }, [themeId, colorMode, accentColor])
+  }, [themeId, colorMode])
 }

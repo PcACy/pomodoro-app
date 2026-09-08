@@ -4,7 +4,7 @@ import type { TodoItem } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
 import { playMicroClick } from '../lib/sound'
 
-export const TAG_PALETTE = [
+const TAG_PALETTE = [
   '#d71921', // Nothing Red
   '#fa5d29', // CMF Orange
   '#38bdf8', // Electric Blue
@@ -301,7 +301,10 @@ export const TodoList = memo(function TodoList({
       parsedTag = hashMatch[1]
       parsedTitle = trimmed.replace(hashMatch[0], '').trim()
     }
-    if (!parsedTitle) return
+    // A tag-only input ("#work") keeps the raw input as title, mirroring the
+    // task inbox parser — silently dropping it diverges by entry point.
+    // `trimmed` is non-empty here (checked above), so parsedTitle is too.
+    if (!parsedTitle) parsedTitle = trimmed
     playMicroClick('pop')
     onAdd(parsedTitle, parsedTag)
     setTitle('')

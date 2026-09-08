@@ -10,8 +10,6 @@ interface FlowTimerApi {
   status: TimerStatus
   elapsedMs: number
   time: string
-  start: () => void
-  pause: () => void
   toggle: () => void
   finishSession: () => void
   resetTimer: () => void
@@ -189,8 +187,6 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
     status,
     elapsedMs: liveElapsed,
     time: fmtFlowTime(liveElapsed),
-    start,
-    pause,
     toggle,
     finishSession,
     resetTimer,

@@ -7,6 +7,39 @@ function notificationsSupported(): boolean {
   return typeof window !== 'undefined' && 'Notification' in window
 }
 
+const NOTIFY_KEY = 'pomodoro.notifications'
+
+/** Stored opt-out flag. Defaults to ON (notifications sent unless disabled). */
+export function readNotifyFlag(): boolean {
+  try {
+    if (typeof localStorage === 'undefined') return true
+    return localStorage.getItem(NOTIFY_KEY) !== 'false'
+  } catch {
+    return true
+  }
+}
+
+export function writeNotifyFlag(value: boolean): void {
+  try {
+    localStorage.setItem(NOTIFY_KEY, String(value))
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+/**
+ * Effective state for UI toggles: the stored flag AND a granted permission.
+ * A single shared initializer keeps Settings and Quick Settings in sync.
+ */
+export function isNotifyEffective(): boolean {
+  if (typeof window === 'undefined' || !('Notification' in window)) return false
+  try {
+    return Notification.permission === 'granted' && readNotifyFlag()
+  } catch {
+    return false
+  }
+}
+
 export async function requestNotificationPermission(): Promise<void> {
   if (!notificationsSupported() || Notification.permission !== 'default') return
   try {
@@ -22,8 +55,11 @@ export function notify(
   actions: NotificationActionConfig[] = [],
 ): void {
   if (!notificationsSupported() || Notification.permission !== 'granted') return
-  if (typeof localStorage !== 'undefined' && localStorage.getItem('pomodoro.notifications') === 'false') return
   try {
+    // The flag read itself can throw (SecurityError with blocked cookies),
+    // so it must live inside the try — it previously crashed timer
+    // phase-change callbacks from outside any error boundary.
+    if (!readNotifyFlag()) return
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
       void navigator.serviceWorker.ready
         .then((reg) => {

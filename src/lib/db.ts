@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import type { Session } from '../types'
-import { uid, uidFrom } from './uid'
+import { uid } from './uid'
 import { enqueue } from './syncQueue'
 
 class PomodoroDB extends Dexie {
@@ -69,7 +69,11 @@ export function sanitizeImportedSession(raw: unknown): Session | null {
   const notes = typeof s.notes === 'string' && s.notes.trim() ? s.notes.slice(0, 2000) : undefined
 
   const rawId = typeof s.id === 'string' ? s.id : ''
-  const id = UUID_REGEX.test(rawId) ? rawId : uidFrom(`${start}:${durationMs}:${task}:${tag}`)
+  // Content-derived IDs would collapse legitimately distinct rows that share
+  // start/duration/task/tag (e.g. two identical untagged blocks): since
+  // importSessions clears the table first, idempotency across imports is moot
+  // and uniqueness wins — mint a fresh id for every non-UUID row.
+  const id = UUID_REGEX.test(rawId) ? rawId : uid()
   const updatedAt =
     typeof s.updatedAt === 'number' && Number.isFinite(s.updatedAt)
       ? s.updatedAt

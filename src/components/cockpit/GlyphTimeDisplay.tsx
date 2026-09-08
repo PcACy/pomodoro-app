@@ -2,7 +2,6 @@ import { memo } from 'react'
 
 interface GlyphTimeDisplayProps {
   time: string // e.g. "25:00"
-  isRunning?: boolean
   className?: string
 }
 
@@ -116,7 +115,6 @@ const DIGIT_GAP = 2 * STEP // 18px between characters
 
 export const GlyphTimeDisplay = memo(function GlyphTimeDisplay({
   time,
-  isRunning: _isRunning = false,
   className = '',
 }: GlyphTimeDisplayProps) {
   // Parse time characters (e.g. ['2', '5', ':', '0', '0'])

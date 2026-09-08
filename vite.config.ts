@@ -13,7 +13,6 @@ function pwaVersionPlugin(): Plugin {
       config.define = {
         ...(config.define || {}),
         '__APP_BUILD_VERSION__': JSON.stringify(buildVersion),
-        '__APP_BUILD_TIME__': JSON.stringify(buildTime),
       }
     },
     generateBundle() {

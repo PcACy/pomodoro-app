@@ -160,7 +160,6 @@ export const Timer = memo(function Timer({
         {/* Hero Time in Nothing Dot-Matrix Glyph SVG */}
         <GlyphTimeDisplay
           time={shownTime}
-          isRunning={running}
           className={`w-full ${
             large || borderless
               ? 'max-w-[520px] sm:max-w-[640px] md:max-w-[720px] my-5 sm:my-8'

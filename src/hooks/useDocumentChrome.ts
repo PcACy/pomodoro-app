@@ -77,7 +77,7 @@ function canvasFaviconDataUri(
 }
 
 /** Keep the browser tab title and favicon in sync with the timer. */
-export function useDocumentChrome(
+function useDocumentChrome(
   phase: PhaseId,
   status: TimerStatus,
   time: string,

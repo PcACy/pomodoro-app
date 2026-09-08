@@ -1,7 +1,7 @@
 import { memo, useEffect } from 'react'
 import { X } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../../types'
-import type { ColorMode, ThemeId } from '../../themes'
+import type { ColorMode } from '../../themes'
 import type { SyncStatus } from '../../hooks/useSync'
 import type { GitHubProfile } from '../../hooks/useAuth'
 import { SettingsPanel } from '../Settings'
@@ -12,7 +12,6 @@ interface SettingsModalProps {
   onClose: () => void
   settings: Settings
   update: (updater: (s: Settings) => Settings) => void
-  themeId: ThemeId
   colorMode: ColorMode
   onColorModeChange: (m: ColorMode) => void
   sessions: Session[]
@@ -33,7 +32,6 @@ export const SettingsModal = memo(function SettingsModal({
   onClose,
   settings,
   update,
-  themeId,
   colorMode,
   onColorModeChange,
   sessions,
@@ -118,7 +116,6 @@ export const SettingsModal = memo(function SettingsModal({
           <SettingsPanel
             settings={settings}
             update={update}
-            themeId={themeId}
             colorMode={colorMode}
             onColorModeChange={onColorModeChange}
             sessions={sessions}

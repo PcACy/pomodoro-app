@@ -437,7 +437,6 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     phaseLabel: t.phases[machine.phase],
     time: fmtTime(curRem),
     start,
-    pause,
     toggle,
     skip,
     reset,

@@ -10,7 +10,12 @@ export const uid = (): string => {
     const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`
   }
-  throw new Error('Cryptographically secure random number generator is unavailable.')
+  // Last resort: non-cryptographic fallback so session/todo creation never
+  // hard-crashes on platforms without WebCrypto (ids stay unique enough).
+  const r = (): string => Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, '0')
+  const a = r()
+  const b = r()
+  return `${a.slice(0, 8)}-${b.slice(0, 4)}-4${b.slice(5, 8)}-${((parseInt(b.slice(0, 1), 16) & 0x3) | 0x8).toString(16)}${a.slice(1, 4)}-${a.slice(4, 8)}${b.slice(4, 8)}${r().slice(0, 4)}`
 }
 
 /** Stable, content-derived valid UUID (RFC-4122-style) so identical payloads map to the same id. */

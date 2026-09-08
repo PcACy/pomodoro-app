@@ -1,6 +1,5 @@
 import { memo } from 'react'
 import type { Session, Settings, TimerMode, TimerStatus, TodoItem } from '../../types'
-import type { ColorMode } from '../../themes'
 import { HeroTimerCard } from './HeroTimerCard'
 import { GoalLoadCard } from './GoalLoadCard'
 import { FocusTimeCard } from './FocusTimeCard'
@@ -43,9 +42,6 @@ interface BentoCockpitProps {
 
   // Settings & Theme
   settings: Settings
-  onUpdateSettings: (updater: (s: Settings) => Settings) => void
-  colorMode: ColorMode
-  onToggleColorMode: () => void
   onOpenSettingsModal: () => void
   onOpenAnalyticsModal: () => void
 
@@ -80,9 +76,6 @@ export const BentoCockpit = memo(function BentoCockpit({
   onOpenTodoManager,
   sessions,
   settings,
-  onUpdateSettings,
-  colorMode,
-  onToggleColorMode,
   onOpenSettingsModal,
   onOpenAnalyticsModal,
   isZenMode,
@@ -135,6 +128,7 @@ export const BentoCockpit = memo(function BentoCockpit({
           remainingMs={remainingMs}
           totalMs={totalMs}
           time={time}
+          mode={mode}
           sessions={sessions}
           focusMinutes={settings.phases.focus}
           onOpenTodoManager={onOpenTodoManager}
@@ -158,11 +152,7 @@ export const BentoCockpit = memo(function BentoCockpit({
 
         {/* 7. QUICK SETTINGS: Compact 1x1 mechanical toggles (Row 3, Col 4) */}
         <QuickSettingsCard
-          settings={settings}
-          colorMode={colorMode}
           isZenMode={isZenMode}
-          onUpdateSettings={onUpdateSettings}
-          onToggleColorMode={onToggleColorMode}
           onToggleZen={onToggleZen}
           onOpenSettingsModal={onOpenSettingsModal}
           className="md:col-span-1 lg:col-span-1 min-h-[170px]"

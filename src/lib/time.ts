@@ -1,5 +1,4 @@
 export const MS_PER_MINUTE = 60_000
-export const MS_PER_DAY = 86_400_000
 
 export const fmtTime = (ms: number): string => {
   const totalSec = Math.max(0, Math.ceil(ms / 1000))

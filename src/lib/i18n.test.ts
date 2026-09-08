@@ -3,8 +3,8 @@ import { getLang, setLang, translations } from './i18n'
 
 describe('i18n Fallback Proxy and Language Support', () => {
   it('provides all default translations for German and English', () => {
-    expect(translations.de.nav.timer).toBe('Timer')
-    expect(translations.en.nav.timer).toBe('Timer')
+    expect(translations.de.nav.statistics).toBe('Statistik')
+    expect(translations.en.nav.statistics).toBe('Statistics')
     expect(translations.de.phases.focus).toBe('Fokus')
     expect(translations.en.phases.focus).toBe('Focus')
   })
@@ -14,12 +14,12 @@ describe('i18n Fallback Proxy and Language Support', () => {
     expect(translations.en.nav.settings).toBe('Settings')
     // Accessing an object with fallback proxy
     const deNav = translations.de.nav
-    expect(deNav.timer).toBe('Timer')
+    expect(deNav.settings).toBe('Einstellungen')
 
     // Verify proxy behavior when accessing existing nested properties
-    expect(translations.en.timer.pomodoro).toBe('Pomodoro')
-    expect(translations.de.timer.rounds(2, 4)).toBe('2/4 Runden')
-    expect(translations.en.timer.rounds(2, 4)).toBe('2/4 rounds')
+    expect(translations.en.timer.flow).toBe('Flow')
+    expect(translations.de.dashboard.goalReached(50)).toBe('50% erreicht')
+    expect(translations.en.dashboard.goalReached(50)).toBe('50% reached')
   })
 
   it('validates language detection and setting', () => {

@@ -34,7 +34,7 @@ const ReflectionModal = lazy(() => import('./components/ReflectionModal').then((
 
 export default function App() {
   const { t } = useTranslation()
-  const [themeId, , colorMode, setColorMode] = useTheme()
+  const [themeId, colorMode, setColorMode] = useTheme()
   const [settings, updateSettings] = useSettings()
   const [isTodoModalOpen, setIsTodoModalOpen] = useState(false)
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false)
@@ -380,9 +380,6 @@ export default function App() {
             onOpenTodoManager={() => setIsTodoModalOpen(true)}
             sessions={sessions}
             settings={settings}
-            onUpdateSettings={updateSettings}
-            colorMode={colorMode}
-            onToggleColorMode={() => setColorMode(colorMode === 'dark' ? 'light' : 'dark')}
             onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
             onOpenAnalyticsModal={() => setIsAnalyticsModalOpen(true)}
             isZenMode={isZenMode}
@@ -425,10 +422,13 @@ export default function App() {
               borderless
               phaseLabel={timer.phaseLabel}
               status={timer.status}
+              time={timer.time}
+              progress={timer.progress}
               completedFocusInCycle={timer.completedFocusInCycle}
               roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
               mode={mode}
               flowStatus={flow.status}
+              flowTime={flow.time}
               task={sessionTask}
               tag={sessionTag}
               onModeChange={handleModeChange}
@@ -526,7 +526,6 @@ export default function App() {
         onClose={() => setIsSettingsModalOpen(false)}
         settings={settings}
         update={updateSettings}
-        themeId={themeId}
         colorMode={colorMode}
         onColorModeChange={setColorMode}
         sessions={sessions}
