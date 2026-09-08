@@ -47,9 +47,9 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
     <BentoCard
       label={`PROJECTS · ${Math.round(totalTodayMinutes)} MINS`}
       className={className}
-      contentClassName="justify-around py-1"
+      contentClassName="justify-between"
     >
-      <div className="flex flex-col gap-3">
+      <div className="flex-1 flex flex-col justify-around py-1">
         {displayRows.map((row) => {
           const ratio = totalTodayMinutes > 0 ? row.minutes / totalTodayMinutes : 0
           const filled = totalTodayMinutes > 0 && row.minutes > 0
@@ -59,7 +59,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
           const tagColor = getTagColor(row.tag)
 
           return (
-            <div key={row.tag} className="flex flex-col gap-1">
+            <div key={row.tag} className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between font-mono text-[10px] tracking-wider uppercase">
                 <span className="flex items-center gap-1.5 text-muted">
                   <span

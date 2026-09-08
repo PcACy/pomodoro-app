@@ -21,27 +21,39 @@ export const FocusRatioCard = memo(function FocusRatioCard({
     0,
   )
 
-  // Standard pomodoro ratio estimate: 25 min focus : 5 min break = 5:1 (83.3% focus)
-  // Or approximate break time from rounds
-  const estimatedBreakMinutes = Math.max(5, Math.round(todaySessions.length * 5))
+  const hasData = todaySessions.length > 0
+  const estimatedBreakMinutes = hasData ? Math.round(todaySessions.length * 5) : 0
   const totalTracked = focusMinutes + estimatedBreakMinutes
-  const focusRate = totalTracked > 0 ? Math.round((focusMinutes / totalTracked) * 100) : 85
-  const ratioMultiple = (focusMinutes / Math.max(1, estimatedBreakMinutes)).toFixed(1)
+  const focusRate = totalTracked > 0 ? Math.round((focusMinutes / totalTracked) * 100) : 0
+  const ratioMultiple = estimatedBreakMinutes > 0
+    ? (focusMinutes / estimatedBreakMinutes).toFixed(1)
+    : focusMinutes > 0
+      ? '5.0'
+      : '0.0'
 
-  // Generate sparkline points (representing hourly intensity today)
-  const sparklineData = [15, 25, 10, 35, 45, 30, 50, 40, 60, 55, 70, 65, 80]
-  const maxVal = Math.max(...sparklineData)
-  const minVal = Math.min(...sparklineData)
-  const range = maxVal - minVal || 1
+  // Aggregate into 12 two-hour daytime buckets across 24h
+  const hourlyBuckets = Array.from({ length: 12 }, () => 0)
+  if (hasData) {
+    for (const s of todaySessions) {
+      const hour = new Date(s.start).getHours()
+      const bucket = Math.min(11, Math.floor(hour / 2))
+      hourlyBuckets[bucket] += Math.round(s.durationMs / 60_000)
+    }
+  }
 
-  // SVG polyline points (width 120, height 32)
-  const points = sparklineData
-    .map((val, idx) => {
-      const x = (idx / (sparklineData.length - 1)) * 120
-      const y = 32 - ((val - minVal) / range) * 26 - 3
-      return `${x},${y}`
-    })
-    .join(' ')
+  const maxVal = Math.max(...hourlyBuckets, 1)
+  const peakMinutes = Math.max(...hourlyBuckets)
+
+  // SVG polyline points (width 120, height 32, baseline y = 28)
+  const points = hasData
+    ? hourlyBuckets
+        .map((val, idx) => {
+          const x = (idx / 11) * 120
+          const y = 28 - (val / maxVal) * 22
+          return `${x.toFixed(1)},${y.toFixed(1)}`
+        })
+        .join(' ')
+    : '0,28 120,28'
 
   return (
     <BentoCard
@@ -71,16 +83,18 @@ export const FocusRatioCard = memo(function FocusRatioCard({
           <polyline
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.5"
+            strokeWidth={hasData ? 1.5 : 1}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-accent"
+            className={hasData ? 'text-accent' : 'text-line/60'}
             points={points}
           />
         </svg>
         <div className="mt-1 flex items-center justify-between font-mono text-[9px] text-muted tracking-wider uppercase">
-          <span className="text-accent">↑ {ratioMultiple}x BREAK</span>
-          <span>PACE 25M</span>
+          <span className={hasData ? 'text-accent' : 'text-muted'}>
+            {hasData ? `↑ ${ratioMultiple}x BREAK` : '0.0x BREAK'}
+          </span>
+          <span>{hasData ? `PEAK ${peakMinutes}M` : 'STANDBY'}</span>
         </div>
       </div>
     </BentoCard>

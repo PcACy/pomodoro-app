@@ -14,16 +14,14 @@ export const CycleBatteryCard = memo(function CycleBatteryCard({
   roundsBeforeLongBreak,
   className = '',
 }: CycleBatteryCardProps) {
-  const currentRound = completedFocusInCycle % roundsBeforeLongBreak
-  const ratio = (currentRound + 1) / roundsBeforeLongBreak
+  const currentCompleted = roundsBeforeLongBreak > 0
+    ? completedFocusInCycle % roundsBeforeLongBreak
+    : 0
+  const ratio = roundsBeforeLongBreak > 0 ? currentCompleted / roundsBeforeLongBreak : 0
   const percentage = Math.round(ratio * 100)
 
-  const filledSegments = Math.min(
-    TOTAL_SEGMENTS,
-    Math.max(1, Math.round(ratio * TOTAL_SEGMENTS)),
-  )
-
-  const remainingRounds = roundsBeforeLongBreak - currentRound - 1
+  const filledSegments = Math.round(ratio * TOTAL_SEGMENTS)
+  const remainingRounds = Math.max(0, roundsBeforeLongBreak - currentCompleted)
 
   return (
     <BentoCard
@@ -39,7 +37,7 @@ export const CycleBatteryCard = memo(function CycleBatteryCard({
           <span className="font-mono text-xs text-muted uppercase">%</span>
         </div>
         <div className="font-mono text-[10px] text-muted tracking-wider uppercase mt-0.5">
-          ROUND {currentRound + 1} OF {roundsBeforeLongBreak}
+          {currentCompleted} OF {roundsBeforeLongBreak} COMPLETED
         </div>
       </div>
 
@@ -53,9 +51,7 @@ export const CycleBatteryCard = memo(function CycleBatteryCard({
                 key={i}
                 className={`flex-1 rounded-[0.5px] transition-colors duration-150 ${
                   i < filledSegments
-                    ? percentage > 50
-                      ? 'bg-[#4a9e5c]'
-                      : 'bg-fg'
+                    ? 'bg-fg'
                     : 'bg-line/40'
                 }`}
               />
@@ -67,7 +63,7 @@ export const CycleBatteryCard = memo(function CycleBatteryCard({
 
         {/* Next Milestone Subtitle */}
         <div className="mt-1.5 flex items-center justify-between font-mono text-[9px] text-muted tracking-wider uppercase">
-          <span>~ {remainingRounds === 0 ? 'LONG BREAK NEXT' : `${remainingRounds * 25}M TO LONG BREAK`}</span>
+          <span>{remainingRounds === 0 ? 'LONG BREAK NEXT' : `~ ${remainingRounds * 25}M TO LONG BREAK`}</span>
         </div>
       </div>
     </BentoCard>
