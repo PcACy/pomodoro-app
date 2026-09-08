@@ -3,15 +3,15 @@ import { Check, ChevronDown, Pencil, Plus, Target, Timer, Trash2, X } from 'luci
 import type { TodoItem } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
 
-const TAG_PALETTE = [
-  '#ffffff', // Pure White
-  '#e8e8e8', // Light Silver
-  '#999999', // Muted Gray
-  '#666666', // Dark Gray
+export const TAG_PALETTE = [
   '#d71921', // Nothing Red
-  '#4a9e5c', // Technical Green
-  '#d4a843', // Technical Amber
-  '#5b9bf6', // Technical Blue
+  '#fa5d29', // CMF Orange
+  '#38bdf8', // Electric Blue
+  '#22c55e', // Matrix Green
+  '#f59e0b', // Cyber Amber
+  '#a855f7', // Electric Violet
+  '#fb7185', // Neon Rose
+  '#34d399', // Mint Green
 ]
 
 export function getTagColor(tag: string): string {

@@ -17,7 +17,6 @@ import {
 } from 'lucide-react'
 import type { AccentColor, Settings, Session, TodoItem } from '../types'
 import type { ColorMode, ThemeId } from '../themes'
-import { useThemeColors } from '../hooks/useTheme'
 import { clearSessions, exportAll } from '../lib/db'
 import { dayKey } from '../lib/time'
 import { downloadText, sessionsToCsv, sessionsToJson, todosToCsv, todosToJson } from '../lib/dataExport'
@@ -26,6 +25,7 @@ import { playMicroClick } from '../lib/sound'
 import type { SyncStatus } from '../hooks/useSync'
 import type { GitHubProfile } from '../hooks/useAuth'
 import { SlidingSegmentedControl } from './SlidingSegmentedControl'
+import { getTagColor } from './TodoList'
 
 interface AccentOption {
   id: AccentColor
@@ -270,7 +270,7 @@ interface Props {
 export const SettingsPanel = memo(function SettingsPanel({
   settings,
   update,
-  themeId,
+  themeId: _themeId,
   colorMode,
   onColorModeChange,
   sessions,
@@ -286,7 +286,6 @@ export const SettingsPanel = memo(function SettingsPanel({
   onSyncNow,
 }: Props) {
   const { t, lang, setLang } = useTranslation()
-  const colors = useThemeColors(themeId, colorMode, settings.accentColor)
   const [newTag, setNewTag] = useState('')
   const [tagError, setTagError] = useState<string | null>(null)
   // Increments on every failed attempt so the error message remounts and its
@@ -321,27 +320,6 @@ export const SettingsPanel = memo(function SettingsPanel({
 
   const todayKey = dayKey(new Date())
 
-  const getTagColor = useCallback(
-    (tag: string): string => {
-      let hash = 0
-      for (let i = 0; i < tag.length; i++) {
-        hash = (hash << 5) - hash + tag.charCodeAt(i)
-        hash |= 0
-      }
-      const index = Math.abs(hash) % colors.chart.length
-      return colors.chart[index]
-    },
-    [colors.chart],
-  )
-
-  /** "rgb(254 128 25)" -> "254 128 25" so chips can use alpha variants. */
-  const tagRgbTriplet = useCallback(
-    (tag: string): string => {
-      const parts = getTagColor(tag).match(/[\d.]+/g)
-      return parts && parts.length >= 3 ? `${parts[0]} ${parts[1]} ${parts[2]}` : '128 128 128'
-    },
-    [getTagColor],
-  )
 
   const handleBackup = () => {
     void exportAll().then((data) => {
@@ -383,6 +361,7 @@ export const SettingsPanel = memo(function SettingsPanel({
       inputRef.current?.focus()
       return
     }
+    playMicroClick('tap')
     update((s) => ({ ...s, tags: [...s.tags, trimmed] }))
     setNewTag('')
     setTagError(null)
@@ -390,6 +369,7 @@ export const SettingsPanel = memo(function SettingsPanel({
   }
 
   const removeTag = (tag: string) => {
+    playMicroClick('tap')
     update((s) => ({ ...s, tags: s.tags.filter((t) => t !== tag) }))
   }
 
@@ -751,10 +731,17 @@ export const SettingsPanel = memo(function SettingsPanel({
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-1 font-mono text-xs font-bold uppercase tracking-widest text-muted">{t.settings.tags}</h3>
-        <p className="mb-4 font-mono text-[11px] text-muted">{t.settings.tagsHint}</p>
+        <div className="mb-4 flex items-start justify-between">
+          <div>
+            <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-muted">{t.settings.tags}</h3>
+            <p className="mt-1 font-mono text-[11px] text-muted">{t.settings.tagsHint}</p>
+          </div>
+          <span className="rounded-full border border-line bg-canvas px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted">
+            {settings.tags.length} {settings.tags.length === 1 ? 'TAG' : 'TAGS'}
+          </span>
+        </div>
 
-        {/* Integrated Single-Line Input Row */}
+        {/* Integrated Hardware Pill Input */}
         <div className="relative flex w-full max-w-md items-center">
           <input
             ref={inputRef}
@@ -776,30 +763,35 @@ export const SettingsPanel = memo(function SettingsPanel({
               if (e.animationName === 'shake') e.currentTarget.classList.remove('animate-shake')
             }}
             placeholder={t.settings.newTagPlaceholder}
-            className={`w-full rounded-full border bg-surface px-4 py-2 pr-10 font-mono text-xs text-fg placeholder:text-muted transition-colors focus:outline-none ${
+            className={`w-full rounded-full border bg-canvas pl-4 pr-16 py-2 font-mono text-xs text-fg placeholder:text-muted/60 transition-colors focus:outline-none ${
               tagError ? 'border-accent ring-1 ring-accent/40' : 'border-line focus:border-fg'
             }`}
             maxLength={30}
           />
-          <button
-            type="button"
-            onClick={() => {
-              if (canAdd) addTag()
-            }}
-            aria-disabled={!canAdd}
-            tabIndex={canAdd ? 0 : -1}
-            title={t.settings.addTag}
-            aria-label={t.settings.addTag}
-            className={`absolute right-1.5 flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150 ${
-              canAdd
-                ? 'cursor-pointer bg-accent text-white opacity-100 hover:opacity-90 active:scale-95'
-                : 'pointer-events-none cursor-not-allowed bg-transparent text-muted opacity-30'
-            }`}
-          >
-            <span key={popNonce} className={`flex ${canAdd ? 'animate-add-pop' : ''}`}>
-              <Plus size={15} />
-            </span>
-          </button>
+          <div className="absolute right-1.5 flex items-center gap-1.5">
+            <kbd className="hidden select-none rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-[9px] text-muted/60 sm:inline-block">
+              ⏎
+            </kbd>
+            <button
+              type="button"
+              onClick={() => {
+                if (canAdd) addTag()
+              }}
+              aria-disabled={!canAdd}
+              tabIndex={canAdd ? 0 : -1}
+              title={t.settings.addTag}
+              aria-label={t.settings.addTag}
+              className={`flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150 ${
+                canAdd
+                  ? 'cursor-pointer bg-fg text-canvas opacity-100 hover:bg-accent hover:text-white active:scale-95'
+                  : 'pointer-events-none cursor-not-allowed bg-transparent text-muted opacity-30'
+              }`}
+            >
+              <span key={popNonce} className={`flex ${canAdd ? 'animate-add-pop' : ''}`}>
+                <Plus size={15} />
+              </span>
+            </button>
+          </div>
         </div>
 
         {tagError && (
@@ -812,26 +804,26 @@ export const SettingsPanel = memo(function SettingsPanel({
         {settings.tags.length === 0 ? (
           <p className="mt-3 font-mono text-xs italic text-muted">{t.settings.noTagsYet}</p>
         ) : (
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             {settings.tags.map((tag) => {
-              const chipRgb = tagRgbTriplet(tag)
-              const chipVars = { '--chip-rgb': chipRgb } as React.CSSProperties
+              const tagColor = getTagColor(tag)
               return (
                 <span
                   key={tag}
-                  className="tag-badge tag-chip-tonal group inline-flex animate-chip-in items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-xs font-medium"
-                  style={chipVars}
+                  className="group inline-flex animate-chip-in items-center gap-2 rounded-full border border-line bg-canvas px-3 py-1.5 font-mono text-xs font-medium text-fg transition-colors hover:border-fg/40 select-none"
                 >
                   <span
-                    className="h-1.5 w-1.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: `rgb(${chipRgb})` }}
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{
+                      backgroundColor: tagColor,
+                      boxShadow: `0 0 8px ${tagColor}66`,
+                    }}
                   />
                   <span className="max-w-[160px] truncate">{tag}</span>
                   <button
                     type="button"
                     onClick={() => removeTag(tag)}
-                    className="tag-chip-remove flex h-4 w-4 shrink-0 cursor-pointer items-center justify-center rounded-full"
-                    style={chipVars}
+                    className="flex h-4 w-4 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted transition-colors hover:bg-accent/15 hover:text-accent"
                     title={t.settings.removeTag(tag)}
                     aria-label={t.settings.removeTag(tag)}
                   >

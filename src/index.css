@@ -435,25 +435,6 @@ textarea:focus:not(:focus-visible) {
   animation: chip-in 180ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-/* --- Tag manager (Settings) ---------------------------------------------- */
-.tag-chip-tonal {
-  background-color: rgb(var(--chip-rgb) / 0.12);
-  border-color: rgb(var(--chip-rgb) / 0.3);
-  color: rgb(var(--chip-rgb));
-}
-
-/* Delete affordance: mechanical click */
-.tag-chip-remove {
-  transition:
-    background-color 120ms ease,
-    transform 100ms cubic-bezier(0.2, 0, 0, 1);
-}
-.tag-chip-remove:hover {
-  background-color: rgb(var(--chip-rgb) / 0.2);
-}
-.tag-chip-remove:active {
-  transform: scale(0.92);
-}
 
 /* Add button icon: mechanical snap */
 @keyframes add-pop {
