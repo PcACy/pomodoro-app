@@ -168,6 +168,12 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   const leftPack = 1.5 + 4.5 * (1 - ratio)
   const rightPack = 1.5 + 4.5 * ratio
 
+  // Preserve pack thickness during mechanical eject pop so winding doesn't jump
+  const lastPacksRef = useRef<{ left: number; right: number }>({ left: leftPack, right: rightPack })
+  if (activeTodo) {
+    lastPacksRef.current = { left: leftPack, right: rightPack }
+  }
+
   const [cassetteAnim, setCassetteAnim] = useState<'insert' | 'eject' | ''>('')
   const [textAnimKey, setTextAnimKey] = useState<string>('')
   const prevTodoIdRef = useRef<string | null>(activeTodo?.id ?? null)
@@ -191,7 +197,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
       } else {
         setCassetteAnim('eject')
         setTextAnimKey('empty')
-        const t = setTimeout(() => setCassetteAnim(''), 250)
+        const t = setTimeout(() => setCassetteAnim(''), 280)
         return () => clearTimeout(t)
       }
     }
@@ -294,8 +300,8 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
                         : ''
                   }`}
                 >
-                  <Reel packWidth={leftPack} spinning={spinning} />
-                  <Reel packWidth={rightPack} spinning={spinning} reverse />
+                  <Reel packWidth={activeTodo ? leftPack : lastPacksRef.current.left} spinning={spinning} />
+                  <Reel packWidth={activeTodo ? rightPack : lastPacksRef.current.right} spinning={spinning} reverse />
                 </div>
               )}
             </div>
