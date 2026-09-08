@@ -6,6 +6,7 @@ import { useFlowTimerTick, useTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
 import { GlyphTimeDisplay } from './GlyphTimeDisplay'
 import { SlidingSegmentedControl } from '../SlidingSegmentedControl'
+import { InteractiveGridCanvas } from './InteractiveGridCanvas'
 
 interface HeroTimerCardProps {
   phaseLabel: string
@@ -171,18 +172,11 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         aria-hidden="true"
       />
 
-      {/* Interactive Cursor Spotlight Dot-Matrix Glow - Crisp 85px focus with punchy core */}
-      <div
-        className={`pointer-events-none absolute inset-0 text-fg transition-opacity duration-300 ease-out [background-image:radial-gradient(currentColor_1.5px,transparent_1.5px)] [background-size:14px_14px] ${
-          isHovered ? 'opacity-40 dark:opacity-55' : 'opacity-0'
-        }`}
-        style={{
-          maskImage:
-            'radial-gradient(circle 85px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 20%, transparent 100%)',
-          WebkitMaskImage:
-            'radial-gradient(circle 85px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 20%, transparent 100%)',
-        }}
-        aria-hidden="true"
+      {/* Interactive Phosphor Decay LED Matrix Trail - 500ms organic wake */}
+      <InteractiveGridCanvas
+        gridSize={14}
+        spotlightRadius={48}
+        decayDurationMs={500}
       />
 
       {/* Hardware Glass Edge - Subtle hairline border reflection near pointer */}
