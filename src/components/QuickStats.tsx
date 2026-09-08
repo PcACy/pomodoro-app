@@ -1,13 +1,11 @@
 import { memo, useMemo } from 'react'
 import { Flame, ListChecks } from 'lucide-react'
 import type { Session, Settings } from '../types'
-import type { ThemeId } from '../themes'
 import { currentStreakDays, minutesByTag, todayMinutes } from '../lib/stats'
 import { fmtDuration, sameDay, startOfDay } from '../lib/time'
 import { useTranslation } from '../hooks/useTranslation'
 
 interface Props {
-  themeId?: ThemeId
   sessions: Session[]
   settings: Settings
 }
@@ -27,56 +25,68 @@ export const QuickStats = memo(function QuickStats({ sessions, settings }: Props
     [sessions, t.todo.noTag],
   )
 
+  const TOTAL_GOAL_SEGMENTS = 16
+  const filledGoalSegments = Math.min(
+    TOTAL_GOAL_SEGMENTS,
+    Math.max(0, Math.round((pct / 100) * TOTAL_GOAL_SEGMENTS)),
+  )
+
   return (
-    <section className="card border border-outline-variant/15 dark:border-white/[0.05] flex w-full max-w-md 2xl:max-w-lg flex-col gap-3.5 sm:gap-4 p-5 sm:p-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-fg font-display uppercase tracking-wide">{t.dashboard.todayFocus}</h3>
-        <span className="text-xs font-medium text-on-surface-variant">{t.dashboard.dailyGoal}</span>
+    <section className="card flex w-full max-w-md 2xl:max-w-lg flex-col gap-4 p-5 sm:p-6 select-none">
+      <div className="flex items-center justify-between font-mono">
+        <h3 className="text-xs font-bold text-muted uppercase tracking-widest">{t.dashboard.todayFocus}</h3>
+        <span className="text-[11px] text-muted uppercase tracking-wider">{t.dashboard.dailyGoal}</span>
       </div>
 
       <div>
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="text-2xl font-bold font-display tabular-nums text-fg">{fmtDuration(today * 60_000, lang)}</span>
-          <span className="text-xs font-semibold text-primary">{pct}%</span>
+        <div className="flex items-baseline justify-between gap-2 font-mono">
+          <span className="text-2xl font-bold tabular-nums text-fg">{fmtDuration(today * 60_000, lang)}</span>
+          <span className="text-xs font-bold tabular-nums text-fg">{pct}%</span>
         </div>
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-raised/70">
-          <div
-            className="h-full rounded-full bg-accent transition-all duration-500 ease-out"
-            style={{ width: `${pct}%` }}
-          />
+
+        {/* Nothing Segmented Goal Bar */}
+        <div className="mt-2.5 flex items-center w-full h-2 gap-[2px] p-0.5 rounded-sm bg-canvas border border-line/60">
+          {Array.from({ length: TOTAL_GOAL_SEGMENTS }).map((_, idx) => (
+            <div
+              key={idx}
+              className={`flex-1 h-full rounded-none transition-colors duration-200 ${
+                idx < filledGoalSegments ? 'bg-fg' : 'bg-surface-raised/40'
+              }`}
+            />
+          ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex items-center gap-2.5 rounded-btn border border-line/60 bg-raised/30 px-3 py-2.5 transition-colors hover:bg-raised/50">
-          <Flame size={18} className="shrink-0 text-streak" />
-          <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted">{t.dashboard.streak}</p>
-            <p className="truncate text-base font-bold font-display tabular-nums leading-tight text-fg">
+      <div className="grid grid-cols-2 gap-2.5">
+        <div className="flex items-center gap-2.5 rounded-lg border border-line bg-canvas p-3 transition-colors hover:border-fg/40">
+          <Flame size={16} className="shrink-0 text-warning" />
+          <div className="min-w-0 font-mono">
+            <p className="text-[10px] uppercase tracking-wider text-muted truncate">{t.dashboard.streak}</p>
+            <p className="truncate text-sm font-bold tabular-nums text-fg">
               {streak} {streak === 1 ? t.dashboard.day : t.dashboard.days}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2.5 rounded-btn border border-line/60 bg-raised/30 px-3 py-2.5 transition-colors hover:bg-raised/50">
-          <ListChecks size={18} className="shrink-0 text-accent" />
-          <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted">{t.dashboard.pomodorosToday}</p>
-            <p className="truncate text-base font-bold font-display tabular-nums leading-tight text-fg">{roundsToday}</p>
+        <div className="flex items-center gap-2.5 rounded-lg border border-line bg-canvas p-3 transition-colors hover:border-fg/40">
+          <ListChecks size={16} className="shrink-0 text-fg" />
+          <div className="min-w-0 font-mono">
+            <p className="text-[10px] uppercase tracking-wider text-muted truncate">{t.dashboard.pomodorosToday}</p>
+            <p className="truncate text-sm font-bold tabular-nums text-fg">{roundsToday}</p>
           </div>
         </div>
       </div>
 
       {tags.length > 0 && (
         <div>
-          <p className="mb-2 text-xs font-medium text-muted">{t.dashboard.byTag}</p>
-          <div className="flex flex-wrap gap-2">
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted">{t.dashboard.byTag}</p>
+          <div className="flex flex-wrap gap-1.5">
             {tags.map((ts) => (
               <span
                 key={ts.tag}
-                className="inline-flex items-center gap-1.5 rounded-badge border border-tag-border bg-tag-bg px-2.5 py-1 text-xs text-tag-text"
+                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-canvas px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wider text-muted"
               >
-                <span className="font-medium">{ts.tag}</span>
-                <span className="font-mono text-muted tabular-nums">{ts.minutes} min</span>
+                <span className="text-fg font-medium">{ts.tag}</span>
+                <span className="text-muted/60 tabular-nums">{ts.minutes}m</span>
               </span>
             ))}
           </div>

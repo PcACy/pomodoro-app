@@ -25,7 +25,7 @@ const SessionRow = memo(function SessionRow({ s, locale }: { s: Session; locale:
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-sm text-fg">{s.task || t.sessionLog.noTask}</span>
-          <span className="text-xs text-muted">{fmtDateTime(new Date(s.start), locale)}</span>
+          <span className="font-mono text-[11px] text-muted">{fmtDateTime(new Date(s.start), locale)}</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {hasNote && (
@@ -33,25 +33,25 @@ const SessionRow = memo(function SessionRow({ s, locale }: { s: Session; locale:
               type="button"
               onClick={() => setOpen((o) => !o)}
               title={open ? 'Notiz ausblenden' : 'Notiz anzeigen'}
-              className={`rounded-sm border p-1.5 transition-colors ${
+              className={`rounded-full border p-1.5 transition-colors ${
                 open
-                  ? 'border-accent/60 bg-accent/10 text-accent'
-                  : 'border-line text-muted hover:bg-raised hover:text-fg'
+                  ? 'border-accent bg-accent/15 text-accent'
+                  : 'border-line text-muted hover:border-fg/40 hover:text-fg'
               }`}
             >
-              <StickyNote size={14} />
+              <StickyNote size={13} />
             </button>
           )}
-          <span className="rounded-badge bg-raised px-2 py-0.5 text-[10px] font-medium text-fg">
+          <span className="rounded-full border border-line bg-surface px-2.5 py-0.5 font-mono text-[10px] text-muted">
             {s.tag || '—'}
           </span>
-          <span className="w-16 text-right font-mono text-xs tabular-nums text-accent">
+          <span className="w-16 text-right font-mono text-xs tabular-nums text-fg">
             {fmtDuration(s.durationMs, locale === 'de-DE' ? 'de' : 'en')}
           </span>
         </div>
       </div>
       {open && s.notes && (
-        <p className="mt-2 whitespace-pre-wrap rounded-sm border border-line bg-canvas px-3 py-2 text-xs leading-relaxed text-fg">
+        <p className="mt-2 whitespace-pre-wrap rounded-card border border-line bg-surface px-3 py-2 font-mono text-xs leading-relaxed text-fg">
           {s.notes}
         </p>
       )}
@@ -150,7 +150,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-semibold text-fg">{title}</h3>
+        <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-muted">{title}</h3>
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <input
@@ -181,7 +181,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
             {open && (
               <div
                 role="menu"
-                className="absolute right-0 top-full z-20 mt-2 w-64 rounded-xl border border-line bg-surface p-1 shadow-lg"
+                className="absolute right-0 top-full z-20 mt-2 w-64 rounded-card border border-line-strong bg-surface p-1.5"
               >
                 <button
                   type="button"
@@ -190,7 +190,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
                     handleMdDownload()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-fg transition-colors hover:bg-raised"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised"
                 >
                   <FileText size={14} className="text-muted" /> {t.sessionLog.mdDownload}
                 </button>
@@ -198,7 +198,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
                   type="button"
                   role="menuitem"
                   onClick={handleMdCopy}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-fg transition-colors hover:bg-raised"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised"
                 >
                   {copied ? (
                     <Check size={14} className="text-accent" />
@@ -214,7 +214,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
                     handleSessionsCsv()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-fg transition-colors hover:bg-raised"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised"
                 >
                   <FileDown size={14} className="text-muted" /> {t.sessionLog.csv}
                 </button>
@@ -225,7 +225,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
                     handleSessionsJson()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-fg transition-colors hover:bg-raised"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised"
                 >
                   <FileJson size={14} className="text-muted" /> {t.sessionLog.json}
                 </button>
@@ -234,13 +234,13 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
           </div>
 
           <div className="relative">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.sessionLog.searchPlaceholder}
-              className="input h-9 w-40 pl-9 sm:w-56 text-xs bg-canvas/80 border-line/60 focus:border-accent/50"
+              className="h-9 w-40 rounded-full border border-line bg-surface pl-9 pr-3.5 font-mono text-xs text-fg placeholder:text-muted focus:border-fg focus:outline-none sm:w-56"
             />
           </div>
 
@@ -248,23 +248,23 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
             type="button"
             onClick={onClear}
             disabled={sessions.length === 0}
-            className="btn-ghost h-9 w-9 p-0 text-xs disabled:opacity-30 disabled:pointer-events-none"
+            className="btn-ghost h-9 w-9 rounded-full p-0 text-xs disabled:pointer-events-none disabled:opacity-30"
             title={t.sessionLog.clearAll}
           >
-            <Trash2 size={15} />
+            <Trash2 size={14} />
           </button>
         </div>
       </div>
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-10 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-line/60 bg-raised/30 text-muted/50">
-            <History size={22} />
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-card border border-line bg-surface text-muted">
+            <History size={20} />
           </div>
-          <p className="text-sm font-semibold text-fg">
+          <p className="font-mono text-xs font-bold uppercase tracking-wider text-fg">
             {sessions.length === 0 ? t.sessionLog.empty : t.sessionLog.noResults}
           </p>
-          <p className="mt-1 max-w-sm text-xs text-muted">
+          <p className="mt-1 max-w-sm font-mono text-[11px] text-muted">
             {sessions.length === 0 ? t.sessionLog.emptySub : t.sessionLog.searchPlaceholder}
           </p>
         </div>

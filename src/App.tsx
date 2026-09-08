@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
-import { BarChart3, Check, Settings as SettingsIcon, Timer as TimerIcon } from 'lucide-react'
+import { BarChart3, Settings as SettingsIcon, Timer as TimerIcon } from 'lucide-react'
 import { useSettings } from './hooks/useSettings'
 import { useLocalState } from './hooks/useLocalState'
 import { useSessions } from './hooks/useSessions'
@@ -313,49 +313,52 @@ export default function App() {
       />
 
       <header className="flex w-full items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-btn border border-accent/20 bg-accent/10 text-accent shadow-sm transition-all hover:scale-105 active:scale-95">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors">
             <CatLogo
-              className="text-accent"
-              size={22}
+              className="text-fg"
+              size={20}
               state={isRunning ? chromePhase : 'idle'}
             />
           </div>
-          <h1 className="text-lg font-bold text-fg">Pomau</h1>
+          <div className="flex items-center gap-1.5 font-mono">
+            <h1 className="text-sm font-bold tracking-widest uppercase text-fg">Pomau</h1>
+            <span
+              className={`inline-block h-1.5 w-1.5 rounded-full ${
+                isRunning ? 'bg-accent animate-pulse' : 'bg-muted/40'
+              }`}
+            />
+          </div>
         </div>
 
         <nav
           role="tablist"
           aria-label="Navigation"
-          className={`nav-track relative grid grid-cols-3 items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md transition-opacity duration-500 ${
+          className={`relative flex items-center select-none rounded-full border border-line bg-surface p-1 transition-opacity duration-500 ${
             zenRunning ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
           }`}
         >
-          {/* Sliding Pill Indicator */}
-          <div
-            className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-            style={{
-              width: 'calc((100% - 8px - 8px) / 3)',
-              left: '4px',
-              transform: `translateX(calc(${TABS.findIndex((tb) => tb.id === tab)} * (100% + 4px)))`,
-            }}
-          />
-          {TABS.map((tb) => (
-            <button
-              key={tb.id}
-              type="button"
-              role="tab"
-              aria-selected={tab === tb.id}
-              aria-label={t.nav[TAB_LABEL_KEYS[tb.id]]}
-              onClick={() => handleTabChange(tb.id)}
-              className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-2 whitespace-nowrap shrink-0 rounded-[calc(var(--radius-btn)-4px)] px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-150 cursor-pointer ${
-                tab === tb.id ? 'text-fg' : 'text-muted hover:text-fg'
-              }`}
-            >
-              {tb.icon}
-              <span className="hidden sm:inline">{t.nav[TAB_LABEL_KEYS[tb.id]]}</span>
-            </button>
-          ))}
+          {TABS.map((tb) => {
+            const isSelected = tab === tb.id
+            return (
+              <button
+                key={tb.id}
+                type="button"
+                role="tab"
+                aria-selected={isSelected}
+                aria-label={t.nav[TAB_LABEL_KEYS[tb.id]]}
+                onClick={() => handleTabChange(tb.id)}
+                className={`relative z-10 flex min-h-[32px] sm:min-h-[34px] items-center justify-center gap-1.5 whitespace-nowrap shrink-0 rounded-full px-3 sm:px-4 py-1 font-mono text-[11px] sm:text-xs uppercase tracking-wider transition-colors duration-150 cursor-pointer ${
+                  isSelected
+                    ? 'bg-fg text-canvas font-bold'
+                    : 'text-muted hover:text-fg'
+                }`}
+              >
+                {tb.icon}
+                <span className="hidden sm:inline">{t.nav[TAB_LABEL_KEYS[tb.id]]}</span>
+              </button>
+            )
+          })}
         </nav>
       </header>
 
@@ -365,9 +368,7 @@ export default function App() {
             settings.layoutMode === 'single' ? (
               <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-6">
                 <Timer
-                  themeId={themeId}
                   large
-                  phase={timer.phase}
                   phaseLabel={timer.phaseLabel}
                   status={timer.status}
                   completedFocusInCycle={timer.completedFocusInCycle}
@@ -397,14 +398,12 @@ export default function App() {
                   onRemove={todosApi.remove}
                   onFocus={handleFocusTodo}
                 />
-                <QuickStats themeId={themeId} sessions={sessions} settings={settings} />
+                <QuickStats sessions={sessions} settings={settings} />
                 <DayTimeline sessions={sessions} />
               </div>
             ) : (
               <div className="mx-auto grid w-full max-w-5xl 2xl:max-w-6xl grid-cols-1 items-start justify-items-center gap-6 lg:grid-cols-2">
                 <Timer
-                  themeId={themeId}
-                  phase={timer.phase}
                   phaseLabel={timer.phaseLabel}
                   status={timer.status}
                   completedFocusInCycle={timer.completedFocusInCycle}
@@ -435,7 +434,7 @@ export default function App() {
                     onRemove={todosApi.remove}
                     onFocus={handleFocusTodo}
                   />
-                  <QuickStats themeId={themeId} sessions={sessions} settings={settings} />
+                  <QuickStats sessions={sessions} settings={settings} />
                 </div>
                 <div className="col-span-full w-full">
                   <DayTimeline sessions={sessions} />
@@ -504,21 +503,19 @@ export default function App() {
               onClick={handleExitZen}
               title={t.zen.exitHint}
               aria-label={t.zen.exitHint}
-              className="group flex items-center gap-2.5 rounded-full border border-line/70 bg-surface/75 px-4 py-1.5 text-xs font-medium text-muted shadow-lg backdrop-blur-md transition-all hover:border-accent/40 hover:bg-surface hover:text-fg active:scale-95"
+              className="group flex items-center gap-2.5 rounded-full border border-line bg-surface px-4 py-1.5 font-mono text-xs font-medium text-muted transition-colors hover:border-fg hover:text-fg active:scale-95"
             >
-              <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
-              <span>{t.zen.exitHint}</span>
-              <kbd className="kbd text-[10px]">Esc</kbd>
+              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+              <span className="uppercase tracking-wider">{t.zen.exitHint}</span>
+              <kbd className="kbd text-[10px]">ESC</kbd>
             </button>
           </div>
 
           {/* Heroic Borderless Timer */}
           <div className="relative z-10 flex flex-col items-center justify-center p-4">
             <Timer
-              themeId={themeId}
               large
               borderless
-              phase={timer.phase}
               phaseLabel={timer.phaseLabel}
               status={timer.status}
               completedFocusInCycle={timer.completedFocusInCycle}
@@ -542,9 +539,9 @@ export default function App() {
       )}
 
       {updateAvailable && (
-        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-sm shadow-lg">
-          <span className="text-fg">{t.update.available}</span>
-          <button type="button" className="btn-primary px-3 py-1.5" onClick={reload}>
+        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-card border border-line bg-surface px-4 py-3 font-mono text-xs">
+          <span className="text-fg uppercase">{t.update.available}</span>
+          <button type="button" className="btn-primary px-3 py-1 text-xs" onClick={reload}>
             {t.update.reload}
           </button>
         </div>
@@ -554,10 +551,10 @@ export default function App() {
         <div
           key={toast.id}
           role="status"
-          className="animate-fade-in fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-2xl border border-accent/40 bg-surface px-4 py-3 text-sm text-fg shadow-lg"
+          className="animate-fade-in fixed bottom-8 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-full border border-line bg-surface px-4 py-2 font-mono text-xs text-fg select-none"
         >
-          <Check size={16} className="shrink-0 text-accent" />
-          <span>{toast.message}</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+          <span className="tracking-wide">{toast.message}</span>
         </div>
       )}
 
@@ -593,7 +590,6 @@ export default function App() {
 
       {/* Theme-specific Dynamic Status Bar */}
       <ThemeStatusBar
-        themeId={themeId}
         colorMode={colorMode}
         mode={mode}
         phase={chromePhase}

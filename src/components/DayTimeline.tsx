@@ -109,10 +109,10 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
   }
 
   return (
-    <section className="card border border-outline-variant/15 dark:border-white/[0.05] flex w-full flex-col gap-3 p-5 sm:p-6">
-      <div className="flex items-center gap-2">
-        <Clock size={16} className="text-accent" />
-        <h3 className="text-sm font-semibold text-fg">{t.timeline.title}</h3>
+    <section className="card flex w-full flex-col gap-3.5 p-5 sm:p-6 select-none">
+      <div className="flex items-center gap-2 font-mono">
+        <Clock size={14} className="text-muted" />
+        <h3 className="text-xs font-bold uppercase tracking-widest text-muted">{t.timeline.title}</h3>
       </div>
 
       <div className="relative pt-2 pb-6">
@@ -123,15 +123,12 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
             setHoverPct(null)
             setTip(null)
           }}
-          className="relative h-4 w-full cursor-crosshair rounded-full border border-line/60 bg-canvas/90 p-0.5 shadow-inner"
+          className="relative h-3.5 w-full cursor-crosshair rounded-sm border border-line bg-canvas p-0.5"
         >
           {/* Today's Session Blocks */}
           {todaySessions.map((s) => {
             const sStart = new Date(s.start)
             const sEnd = new Date(s.end)
-            // Clamp to the visible day window so sessions crossing midnight
-            // render only their portion inside [00:00, 24:00]. Wall-clock
-            // components keep positions stable across DST transitions.
             const visStart = new Date(Math.max(s.start, dayStartMs))
             const visEnd = new Date(Math.min(s.end, dayStartMs + MS_PER_DAY))
             const sStartMin = visStart.getHours() * 60 + visStart.getMinutes() + visStart.getSeconds() / 60 - startHour * 60
@@ -147,7 +144,7 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
                 tabIndex={0}
                 aria-label={`${s.task || 'Focus'} (${fmtTime(sStart, locale)} - ${fmtTime(sEnd, locale)})`}
                 onMouseMove={(e) => handleSessionHover(e, s)}
-                className="absolute top-0.5 bottom-0.5 z-10 origin-center rounded-full bg-accent shadow-sm transition-all duration-150 hover:z-30 hover:scale-y-125 hover:brightness-125 hover:shadow-[0_0_12px_rgb(var(--c-accent)/0.8)]"
+                className="absolute top-0.5 bottom-0.5 z-10 origin-center rounded-none bg-fg/90 transition-colors duration-150 hover:bg-fg hover:z-30 cursor-pointer"
                 style={{
                   left: `${left}%`,
                   width: `${width}%`,
@@ -159,24 +156,24 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
           {/* Hover Magnifier / Scrubber Needle */}
           {hoverPct !== null && (
             <div
-              className="pointer-events-none absolute -top-1 bottom-[-4px] z-20 w-0.5 -translate-x-1/2 bg-white/40 shadow-sm"
+              className="pointer-events-none absolute -top-1 bottom-[-4px] z-20 w-[1px] -translate-x-1/2 bg-fg/50"
               style={{ left: `${hoverPct}%` }}
             />
           )}
 
-          {/* Current Time Needle */}
+          {/* Current Time Needle: Nothing Red Signal */}
           {nowPct >= 0 && nowPct <= 100 && (
             <div
-              className="pointer-events-none absolute -top-1.5 bottom-[-6px] z-20 w-0.5 -translate-x-1/2 bg-fg transition-[left] duration-1000"
+              className="pointer-events-none absolute -top-1 bottom-[-4px] z-20 w-[1.5px] -translate-x-1/2 bg-accent transition-[left] duration-1000"
               style={{ left: `${nowPct}%` }}
             >
-              <div className="absolute -top-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-fg shadow-[0_0_8px_rgba(255,255,255,0.8)] animate-pulse" />
+              <div className="absolute -top-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-accent animate-pulse" />
             </div>
           )}
         </div>
 
         {/* Hour Ticks & Labels */}
-        <div className="pointer-events-none absolute inset-x-0 top-7 flex justify-between text-[11px] font-medium text-muted tracking-normal">
+        <div className="pointer-events-none absolute inset-x-0 top-7 flex justify-between font-mono text-[10px] text-muted tracking-normal">
           {hourTicks.map((h) => {
             const hourRange = Math.max(1, endHour - startHour)
             const pct = ((h - startHour) / hourRange) * 100
@@ -193,29 +190,29 @@ export const DayTimeline = memo(function DayTimeline({ sessions }: Props) {
         </div>
       </div>
 
-      {/* Floating Glass Tooltip */}
+      {/* Floating Tooltip: Nothing Minimal */}
       {tip &&
         typeof document !== 'undefined' &&
         createPortal(
           <div
-            className="pointer-events-none fixed z-[9999] flex flex-col gap-1 rounded-card border border-line bg-surface/95 px-3 py-2 text-xs font-medium text-fg shadow-2xl backdrop-blur-md"
+            className="pointer-events-none fixed z-[9999] flex flex-col gap-1 rounded-lg border border-line bg-surface px-3 py-2 text-xs font-mono text-fg shadow-none"
             style={{
               left: Math.max(12, Math.min(tip.x - 100, window.innerWidth - 240)),
               top: Math.max(12, tip.y - 75),
             }}
           >
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-fg">{tip.session.task || t.phases.focus}</span>
+              <span className="font-bold text-fg uppercase">{tip.session.task || t.phases.focus}</span>
               {tip.session.tag && (
-                <span className="rounded-badge border border-tag-border bg-tag-bg px-1.5 py-0.5 text-[10px] font-medium text-tag-text">
-                  {tip.session.tag}
+                <span className="rounded-full border border-line px-1.5 py-0.5 text-[10px] text-muted">
+                  #{tip.session.tag}
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 text-[11px] font-mono tabular-nums text-muted">
+            <div className="flex items-center gap-2 text-[11px] tabular-nums text-muted">
               <span>{tip.timeRange}</span>
               <span>·</span>
-              <span className="font-semibold text-accent">{tip.durationStr}</span>
+              <span className="font-bold text-fg">{tip.durationStr}</span>
             </div>
           </div>,
           document.body,

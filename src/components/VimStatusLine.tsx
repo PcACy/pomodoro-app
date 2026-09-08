@@ -1,10 +1,9 @@
 import { memo } from 'react'
 import type { PhaseId, TimerStatus } from '../types'
-import type { ColorMode, ThemeId } from '../themes'
+import type { ColorMode } from '../themes'
 import type { SyncStatus } from '../hooks/useSync'
 
 interface VimStatusLineProps {
-  themeId?: ThemeId
   colorMode: ColorMode
   mode: 'pomodoro' | 'flow'
   phase: PhaseId
@@ -36,23 +35,23 @@ export const VimStatusLine = memo(function VimStatusLine({
   const isRunning = status === 'running'
   const isBreak = phase === 'shortBreak' || phase === 'longBreak'
 
-  let modeTag = '[NORMAL]'
-  let modeBg = 'bg-raised text-fg'
+  let statusLabel = 'IDLE'
+  let dotColor = 'bg-muted/40'
 
   if (isRunning) {
     if (mode === 'flow') {
-      modeTag = '[FLOW]'
-      modeBg = 'bg-accent text-on-accent font-bold'
+      statusLabel = 'FLOW'
+      dotColor = 'bg-accent animate-pulse'
     } else if (isBreak) {
-      modeTag = '[REST]'
-      modeBg = 'bg-break text-canvas font-bold'
+      statusLabel = 'BREAK'
+      dotColor = 'bg-success'
     } else {
-      modeTag = '[INSERT]'
-      modeBg = 'bg-accent text-on-accent font-bold'
+      statusLabel = 'FOCUS'
+      dotColor = 'bg-accent animate-pulse'
     }
   } else if (status === 'paused') {
-    modeTag = '[PAUSED]'
-    modeBg = 'bg-accent-strong text-white font-bold'
+    statusLabel = 'PAUSED'
+    dotColor = 'bg-warning'
   }
 
   const pct = Math.round(progress * 100)
@@ -60,39 +59,54 @@ export const VimStatusLine = memo(function VimStatusLine({
   return (
     <footer
       role="contentinfo"
-      aria-label="Vim Statusline"
-      className="sticky bottom-0 z-30 flex w-full items-center justify-between border-t border-line/70 bg-surface/95 px-3 py-1 font-mono text-[11px] text-muted backdrop-blur-sm select-none"
+      aria-label="Nothing Instrument Panel"
+      className="sticky bottom-0 z-30 flex w-full items-center justify-between border-t border-line bg-canvas/95 px-4 py-2 font-mono text-[11px] text-muted select-none uppercase tracking-wider"
     >
-      <div className="flex items-center gap-2 overflow-hidden">
-        <span className={`rounded-sm px-1.5 py-0.5 uppercase tracking-wider text-[10px] ${modeBg}`}>
-          {modeTag}
+      <div className="flex items-center gap-3 overflow-hidden">
+        {/* Status Pill with Signal Dot */}
+        <div className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-2.5 py-0.5 text-[10px] text-fg font-bold shrink-0">
+          <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
+          <span>{statusLabel}</span>
+        </div>
+
+        <span className="text-fg font-medium truncate hidden sm:inline">
+          {mode === 'flow' ? 'FLOW SESSION' : `POMODORO // ${phase}`}
         </span>
-        <span className="text-fg font-medium truncate">
-          pomau://{mode}/{phase === 'focus' ? 'focus' : isBreak ? 'break' : phase}
-        </span>
+
         {task && (
-          <span className="hidden sm:inline text-muted/80 truncate">
+          <span className="hidden md:inline text-muted truncate">
             &quot;{task}&quot;
           </span>
         )}
+
         {tag && (
-          <span className="hidden md:inline rounded border border-line px-1 text-[10px] text-accent">
-            +{tag}
+          <span className="hidden lg:inline rounded-full border border-line px-2 py-0.5 text-[10px] text-muted">
+            #{tag}
           </span>
         )}
       </div>
 
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-3 shrink-0 font-mono text-xs">
         <span className="text-fg font-bold tabular-nums">[{time}]</span>
         {mode === 'pomodoro' && (
-          <span className="hidden sm:inline text-muted">
+          <span className="hidden sm:inline text-muted tabular-nums">
             R:{completedRounds}/{totalRounds}
           </span>
         )}
-        <span className="hidden md:inline text-muted/70">utf-8</span>
-        {mode === 'pomodoro' && <span className="text-accent font-medium tabular-nums">{pct}%</span>}
-        {syncStatus && <span className="hidden xl:inline text-muted/60">sync:{syncStatus}</span>}
-        <span className="hidden lg:inline text-muted/60">terminal-{colorMode}</span>
+        {mode === 'pomodoro' && (
+          <span className="hidden md:inline text-fg font-medium tabular-nums">
+            {pct}%
+          </span>
+        )}
+        <span className="text-muted/40 hidden sm:inline">|</span>
+        {syncStatus && (
+          <span className="hidden lg:inline text-muted/60 text-[10px]">
+            SYNC:{syncStatus}
+          </span>
+        )}
+        <span className="hidden sm:inline text-muted/60 text-[10px]">
+          NOTHING-{colorMode}
+        </span>
       </div>
     </footer>
   )

@@ -74,16 +74,31 @@ export function ReflectionModal({ onSave, onSkip }: Props) {
       onClick={(e) => {
         if (e.target === e.currentTarget) handleSkip()
       }}
-      className={`modal-backdrop fixed inset-0 z-40 flex items-start justify-center bg-black/40 p-4 pt-[15vh] ${
+      className={`modal-backdrop fixed inset-0 z-40 flex items-start justify-center bg-black/80 p-4 pt-[15vh] ${
         closing ? 'modal-backdrop--closing' : ''
       }`}
     >
       <div
         ref={modalRef}
-        className={`card modal-panel w-full max-w-sm p-5 ${closing ? 'modal-panel--closing' : ''}`}
+        className={`card modal-panel w-full max-w-sm border-line-strong bg-surface p-5 ${closing ? 'modal-panel--closing' : ''}`}
       >
-        <h3 id="reflection-title" className="text-sm font-semibold text-fg">{t.reflection.title}</h3>
-        <p className="mt-1 text-xs text-muted">{t.reflection.prompt}</p>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+            <h3 id="reflection-title" className="font-mono text-xs font-bold uppercase tracking-widest text-fg">
+              {t.reflection.title}
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={handleSkip}
+            className="font-mono text-xs text-muted transition-colors hover:text-fg"
+            aria-label="Close"
+          >
+            [ X ]
+          </button>
+        </div>
+        <p className="mt-2 font-mono text-[11px] text-muted leading-relaxed">{t.reflection.prompt}</p>
         <textarea
           ref={inputRef}
           value={value}
@@ -97,25 +112,25 @@ export function ReflectionModal({ onSave, onSkip }: Props) {
           placeholder={t.reflection.placeholder}
           rows={3}
           maxLength={500}
-          className="input mt-3 resize-none"
+          className="mt-3 w-full resize-none rounded-lg border border-line bg-canvas p-3 font-mono text-xs text-fg placeholder:text-muted focus:border-fg focus:outline-none"
           aria-label={t.reflection.prompt}
         />
-        <div className="mt-3 flex justify-end gap-2">
+        <div className="mt-3.5 flex justify-end gap-2">
           <button
             type="button"
             onClick={handleSkip}
-            className="btn-ghost text-xs"
+            className="btn-ghost rounded-full px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider"
             aria-label={`${t.reflection.skip} (Escape)`}
           >
-            {t.reflection.skip} <span className="kbd">Esc</span>
+            {t.reflection.skip} <span className="ml-1 rounded border border-line px-1 py-0.5 font-mono text-[10px] text-muted">Esc</span>
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="btn-primary text-xs"
+            className="btn-primary rounded-full px-4 py-1.5 font-mono text-xs uppercase tracking-wider"
             aria-label={`${t.reflection.save} (Enter)`}
           >
-            {t.reflection.save} <span className="kbd text-on-accent/70">Enter</span>
+            {t.reflection.save} <span className="ml-1 rounded border border-canvas/40 px-1 py-0.5 font-mono text-[10px] text-canvas/80">Enter</span>
           </button>
         </div>
       </div>

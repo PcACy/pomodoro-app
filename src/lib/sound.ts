@@ -105,6 +105,14 @@ export function playMicroClick(kind: ClickKind = 'tick'): void {
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.018)
       osc.start(now)
       osc.stop(now + 0.018)
+    } else if (kind === 'tab') {
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(800, now)
+      osc.frequency.exponentialRampToValueAtTime(350, now + 0.008)
+      gain.gain.setValueAtTime(0.05, now)
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.008)
+      osc.start(now)
+      osc.stop(now + 0.008)
     }
   } catch {
     /* ignore click errors */

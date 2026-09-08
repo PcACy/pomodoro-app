@@ -3,164 +3,170 @@
 @tailwind utilities;
 
 /* =========================================================================
-   1. GRUVBOX (Default)
+   1. NOTHING DESIGN SYSTEM TOKENS
    ========================================================================= */
 :root,
-:root[data-theme='gruvbox'][data-mode='dark'],
-:root[data-theme='gruvbox']:not([data-mode='light']),
-:root:not([data-theme])[data-mode='dark'],
-:root:not([data-theme]):not([data-mode='light']) {
-  /* Gruvbox Dark */
+:root[data-theme='nothing'][data-mode='dark'],
+:root:not([data-mode='light']) {
+  /* Nothing Dark Mode (OLED Black #000000) */
   color-scheme: dark;
-  --c-canvas: 40 40 40;
-  --c-surface: 60 56 54;
-  --c-raised: 80 73 69;
-  --c-line: 102 92 84;
-  --c-fg: 235 219 178;
-  --c-muted: 168 153 132;
-  --c-accent: 254 128 25;
-  --c-accent-strong: 251 73 52;
-  --c-on-accent: 40 40 40;
-  --c-on-primary: 40 40 40;
-  --c-on-surface: 235 219 178;
-  --c-on-surface-variant: 168 153 132;
-  --c-surface-container-highest: 80 73 69;
-  --c-break: 184 187 38;
-  --c-long: 142 192 124;
-  --c-track: 80 73 69;
-  --primary-rgb: var(--c-accent);
-  --c-chart-1: 254 128 25;
-  --c-chart-2: 251 73 52;
-  --c-chart-3: 250 189 47;
-  --c-chart-4: 184 187 38;
-  --c-chart-5: 142 192 124;
-  --c-chart-6: 211 134 155;
-  --c-chart-7: 131 165 152;
-  --c-chart-8: 146 131 116;
+  --black: 0 0 0;
+  --surface: 17 17 17;
+  --surface-raised: 26 26 26;
+  --border: 34 34 34;
+  --border-visible: 51 51 51;
+  --text-disabled: 102 102 102;
+  --text-secondary: 153 153 153;
+  --text-primary: 232 232 232;
+  --text-display: 255 255 255;
+  --accent: 215 25 33;
+  --accent-strong: 215 25 33;
+  --accent-subtle: rgba(215, 25, 33, 0.15);
+  --success: 74 158 92;
+  --warning: 212 168 67;
+  --interactive: 91 155 246;
 
-  /* Gruvbox Structural Tokens: Strict sharp terminal box-model */
-  --radius-card: 0px;
-  --radius-btn: 0px;
-  --radius-sm: 0px;
-  --badge-radius: 0px;
+  /* Mapped Framework Tokens */
+  --c-canvas: var(--black);
+  --c-surface: var(--surface);
+  --c-raised: var(--surface-raised);
+  --c-line: var(--border-visible);
+  --c-fg: var(--text-primary);
+  --c-muted: var(--text-secondary);
+  --c-accent: var(--accent);
+  --c-accent-strong: var(--accent-strong);
+  --c-on-accent: 255 255 255;
+  --c-on-primary: 0 0 0;
+  --c-on-surface: var(--text-primary);
+  --c-on-surface-variant: var(--text-secondary);
+  --c-surface-container-highest: var(--surface-raised);
+  --c-surface-container-lowest: var(--black);
+  --c-outline-variant: var(--border-visible);
+  --c-break: var(--success);
+  --c-long: var(--interactive);
+  --c-track: var(--surface-raised);
+  --primary-rgb: var(--c-accent);
+
+  /* Chart Colors (Monochrome high-contrast with red signal) */
+  --c-chart-1: 255 255 255;
+  --c-chart-2: 232 232 232;
+  --c-chart-3: 153 153 153;
+  --c-chart-4: 102 102 102;
+  --c-chart-5: 215 25 33;
+  --c-chart-6: 74 158 92;
+  --c-chart-7: 212 168 67;
+  --c-chart-8: 91 155 246;
+
+  /* Structural Geometry: Flat surfaces, 1px border separation, no shadows */
+  --radius-card: 16px;
+  --radius-btn: 999px;
+  --radius-sm: 8px;
+  --badge-radius: 999px;
   --border-card-width: 1px;
   --border-card-style: solid;
-  --font-display: 'JetBrains Mono', ui-monospace, monospace;
-  --font-body: 'JetBrains Mono', ui-monospace, monospace;
-  --card-shadow: none;
-  --card-blur: 0px;
-  --card-bg-opacity: 1;
-
-  /* Semantic Tokens: Gruvbox Aqua, Yellow, Green, Matte no-glow */
-  --color-tag-bg: rgba(142, 192, 124, 0.15);
-  --color-tag-text: #8ec07c;
-  --color-tag-border: rgba(142, 192, 124, 0.3);
-  --color-streak: #fabd2f;
-  --color-success: #b8bb26;
-  --glow-opacity: 0;
-  --heatmap-l0: rgba(255, 255, 255, 0.05);
-  --heatmap-l0-border: rgba(102, 92, 84, 0.5);
-
-}
-
-:root[data-theme='gruvbox'][data-mode='light'],
-:root:not([data-theme])[data-mode='light'] {
-  /* Gruvbox Light */
-  color-scheme: light;
-  --c-canvas: 251 241 199;
-  --c-surface: 242 229 188;
-  --c-raised: 235 219 178;
-  --c-line: 213 196 161;
-  --c-fg: 60 56 54;
-  --c-muted: 124 111 100;
-  --c-accent: 175 58 3;
-  --c-accent-strong: 157 0 6;
-  --c-on-accent: 251 241 199;
-  --c-on-primary: 251 241 199;
-  --c-on-surface: 60 56 54;
-  --c-on-surface-variant: 124 111 100;
-  --c-surface-container-highest: 235 219 178;
-  --c-break: 121 116 14;
-  --c-long: 66 123 88;
-  --c-track: 213 196 161;
-  --primary-rgb: var(--c-accent);
-  --c-chart-1: 175 58 3;
-  --c-chart-2: 214 93 14;
-  --c-chart-3: 181 118 20;
-  --c-chart-4: 121 116 14;
-  --c-chart-5: 66 123 88;
-  --c-chart-6: 143 63 113;
-  --c-chart-7: 7 102 120;
-  --c-chart-8: 124 111 100;
-
-  /* Gruvbox Structural Tokens */
-  --radius-card: 0px;
-  --radius-btn: 0px;
-  --radius-sm: 0px;
-  --badge-radius: 0px;
-  --border-card-width: 1px;
-  --border-card-style: solid;
-  --font-display: 'JetBrains Mono', ui-monospace, monospace;
-  --font-body: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Doto', 'Space Grotesk', monospace;
+  --font-body: 'Space Grotesk', system-ui, sans-serif;
   --card-shadow: none;
   --card-blur: 0px;
   --card-bg-opacity: 1;
 
   /* Semantic Tokens */
-  --color-tag-bg: rgba(104, 157, 106, 0.15);
-  --color-tag-text: #689d6a;
-  --color-tag-border: rgba(104, 157, 106, 0.3);
-  --color-streak: #d79921;
-  --color-success: #98971a;
+  --color-tag-bg: rgba(255, 255, 255, 0.06);
+  --color-tag-text: rgb(var(--text-primary));
+  --color-tag-border: rgb(var(--border-visible));
+  --color-streak: #d4a843;
+  --color-success: #4a9e5c;
   --glow-opacity: 0;
-  --heatmap-l0: rgba(60, 56, 54, 0.06);
-  --heatmap-l0-border: rgba(189, 174, 147, 0.6);
+  --heatmap-l0: rgba(255, 255, 255, 0.04);
+  --heatmap-l0-border: rgb(var(--border));
+}
 
+:root[data-theme='nothing'][data-mode='light'],
+:root[data-mode='light'] {
+  /* Nothing Light Mode (Warm Off-White Technical Paper #F5F5F5) */
+  color-scheme: light;
+  --black: 245 245 245;
+  --surface: 255 255 255;
+  --surface-raised: 240 240 240;
+  --border: 232 232 232;
+  --border-visible: 204 204 204;
+  --text-disabled: 153 153 153;
+  --text-secondary: 102 102 102;
+  --text-primary: 26 26 26;
+  --text-display: 0 0 0;
+  --accent: 215 25 33;
+  --accent-strong: 215 25 33;
+  --accent-subtle: rgba(215, 25, 33, 0.12);
+  --success: 74 158 92;
+  --warning: 212 168 67;
+  --interactive: 0 122 255;
+
+  /* Mapped Framework Tokens */
+  --c-canvas: var(--black);
+  --c-surface: var(--surface);
+  --c-raised: var(--surface-raised);
+  --c-line: var(--border-visible);
+  --c-fg: var(--text-primary);
+  --c-muted: var(--text-secondary);
+  --c-accent: var(--accent);
+  --c-accent-strong: var(--accent-strong);
+  --c-on-accent: 255 255 255;
+  --c-on-primary: 255 255 255;
+  --c-on-surface: var(--text-primary);
+  --c-on-surface-variant: var(--text-secondary);
+  --c-surface-container-highest: var(--surface-raised);
+  --c-surface-container-lowest: var(--black);
+  --c-outline-variant: var(--border-visible);
+  --c-break: var(--success);
+  --c-long: var(--interactive);
+  --c-track: var(--surface-raised);
+  --primary-rgb: var(--c-accent);
+
+  /* Chart Colors (Monochrome high-contrast with red signal) */
+  --c-chart-1: 0 0 0;
+  --c-chart-2: 51 51 51;
+  --c-chart-3: 102 102 102;
+  --c-chart-4: 153 153 153;
+  --c-chart-5: 215 25 33;
+  --c-chart-6: 74 158 92;
+  --c-chart-7: 212 168 67;
+  --c-chart-8: 0 122 255;
+
+  /* Structural Geometry */
+  --radius-card: 16px;
+  --radius-btn: 999px;
+  --radius-sm: 8px;
+  --badge-radius: 999px;
+  --border-card-width: 1px;
+  --border-card-style: solid;
+  --font-display: 'Doto', 'Space Grotesk', monospace;
+  --font-body: 'Space Grotesk', system-ui, sans-serif;
+  --card-shadow: none;
+  --card-blur: 0px;
+  --card-bg-opacity: 1;
+
+  /* Semantic Tokens */
+  --color-tag-bg: rgba(0, 0, 0, 0.05);
+  --color-tag-text: rgb(var(--text-primary));
+  --color-tag-border: rgb(var(--border-visible));
+  --color-streak: #d4a843;
+  --color-success: #4a9e5c;
+  --glow-opacity: 0;
+  --heatmap-l0: rgba(0, 0, 0, 0.04);
+  --heatmap-l0-border: rgb(var(--border));
 }
 
 /* =========================================================================
-   1.1 GRUVBOX TUI STRICT ENFORCEMENTS
+   DOT-MATRIX MOTIF & BACKGROUNDS
    ========================================================================= */
-:root[data-theme='gruvbox'] *,
-:root:not([data-theme]) * {
-  border-radius: 0px !important;
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+.dot-grid {
+  background-image: radial-gradient(circle, rgb(var(--border-visible)) 1px, transparent 1px);
+  background-size: 16px 16px;
 }
 
-:root[data-theme='gruvbox'] .card,
-:root:not([data-theme]) .card {
-  border: 1px solid rgb(var(--c-line)) !important;
-  box-shadow: none !important;
-}
-
-:root[data-theme='gruvbox'] .tui-btn,
-:root:not([data-theme]) .tui-btn {
-  white-space: nowrap !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-:root[data-theme='gruvbox'] .tui-btn:disabled,
-:root:not([data-theme]) .tui-btn:disabled {
-  opacity: 0.5 !important;
-  cursor: not-allowed !important;
-}
-
-:root[data-theme='gruvbox'][data-mode='light'] .tui-btn:disabled,
-:root:not([data-theme])[data-mode='light'] .tui-btn:disabled {
-  color: #928374 !important;
-  border-color: #d5c4a1 !important;
-  background-color: transparent !important;
-  opacity: 0.5 !important;
-}
-
-:root[data-theme='gruvbox'][data-mode='dark'] .tui-btn:disabled,
-:root:not([data-theme])[data-mode='dark'] .tui-btn:disabled {
-  color: #7c6f64 !important;
-  border-color: #504945 !important;
-  background-color: transparent !important;
-  opacity: 0.5 !important;
+.dot-grid-subtle {
+  background-image: radial-gradient(circle, rgb(var(--border-visible)) 0.75px, transparent 0.75px);
+  background-size: 14px 14px;
 }
 
 html {
@@ -177,7 +183,7 @@ body {
   overflow-y: auto;
   touch-action: pan-y;
   @apply bg-canvas text-fg antialiased;
-  font-family: var(--font-body, system-ui, sans-serif);
+  font-family: var(--font-body, 'Space Grotesk', system-ui, sans-serif);
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-left: env(safe-area-inset-left, 0px);
@@ -209,50 +215,58 @@ textarea:focus:not(:focus-visible) {
 @layer components {
   .card {
     position: relative;
-    overflow: hidden;
-    border-radius: var(--radius-card);
-    border-width: var(--border-card-width);
-    border-style: var(--border-card-style, solid);
+    border-radius: var(--radius-card, 16px);
+    border-width: 1px;
+    border-style: solid;
     border-color: rgb(var(--c-line));
-    background-color: rgba(var(--c-surface), var(--card-bg-opacity, 1));
-    box-shadow: var(--card-shadow);
-    backdrop-filter: blur(var(--card-blur, 0px));
-    -webkit-backdrop-filter: blur(var(--card-blur, 0px));
-    transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, border-radius 200ms ease;
+    background-color: rgb(var(--c-surface));
+    box-shadow: none !important;
+    transition: background-color 200ms ease, border-color 200ms ease;
   }
 
   .btn {
-    border-radius: var(--radius-btn);
-    transition: transform 140ms cubic-bezier(0.34, 1.56, 0.64, 1), background-color 150ms ease, opacity 150ms ease, box-shadow 150ms ease;
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 active:scale-[0.96] active:translate-y-[0.5px] disabled:pointer-events-none disabled:opacity-40;
+    border-radius: var(--radius-btn, 999px);
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 12px;
+    font-weight: 700;
+    transition: transform 120ms ease, background-color 150ms ease, opacity 150ms ease, border-color 150ms ease;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
   }
 
   .btn-primary {
-    @apply btn bg-accent text-on-accent hover:opacity-90;
+    @apply btn bg-fg text-canvas hover:opacity-90;
+  }
+
+  .btn-secondary {
+    border: 1px solid rgb(var(--c-line));
+    @apply btn bg-transparent text-fg hover:border-fg;
   }
 
   .btn-ghost {
-    border-radius: var(--radius-btn);
-    border-width: var(--border-card-width, 1px);
-    border-style: var(--border-card-style, solid);
-    border-color: rgb(var(--c-line));
-    @apply btn bg-transparent text-fg hover:bg-raised/60 hover:text-fg;
+    border: none;
+    @apply btn bg-transparent text-muted hover:text-fg;
+  }
+
+  .btn-destructive {
+    border: 1px solid rgb(var(--c-accent));
+    @apply btn bg-transparent text-accent hover:bg-accent/10;
   }
 
   .input {
-    border-radius: var(--radius-sm);
-    border-width: var(--border-card-width, 1px);
-    border-style: var(--border-card-style, solid);
+    border-radius: var(--radius-sm, 8px);
+    border-width: 1px;
+    border-style: solid;
     border-color: rgb(var(--c-line));
     background-color: rgb(var(--c-canvas));
-    @apply w-full px-3 py-2 text-sm text-fg placeholder-muted transition-colors focus:border-accent/60 focus:outline-none focus:ring-1 focus:ring-accent/40;
+    font-family: 'Space Mono', monospace;
+    @apply w-full px-3.5 py-2 text-sm text-fg placeholder-muted transition-colors focus:border-fg focus:outline-none focus:ring-1 focus:ring-fg;
   }
 
   .kbd {
-    border-radius: var(--radius-sm);
-    border-width: var(--border-card-width, 1px);
-    border-style: var(--border-card-style, solid);
-    border-color: rgb(var(--c-line));
+    border-radius: 4px;
+    border: 1px solid rgb(var(--c-line));
     @apply bg-raised px-1.5 py-0.5 font-mono text-[10px] text-muted;
   }
 
@@ -295,74 +309,16 @@ textarea:focus:not(:focus-visible) {
   animation: tab-enter 250ms cubic-bezier(0.2, 0, 0, 1) forwards;
 }
 
-/* Mascot context-reactive animations */
-@keyframes mascot-hop {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-  30% {
-    transform: translateY(-7px) scale(1.1) rotate(-3deg);
-  }
-  60% {
-    transform: translateY(0) scale(0.95);
-  }
-  80% {
-    transform: translateY(-2px) scale(1.03) rotate(2deg);
-  }
-}
-
-@keyframes zzz {
-  0% {
-    opacity: 0;
-    transform: translate(0, 4px) scale(0.7);
-  }
-  40% {
-    opacity: 0.9;
-    transform: translate(3px, -3px) scale(1);
-  }
-  80% {
-    opacity: 0.8;
-    transform: translate(6px, -9px) scale(1.2);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(9px, -15px) scale(1.35);
-  }
-}
-
-.animate-mascot-hop {
-  animation: mascot-hop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) 3;
-}
-
-.animate-zzz {
-  animation: zzz 2.4s ease-in-out infinite;
-}
-
 /* =========================================================================
-   MOTION SYSTEM — GPU-composited micro-interactions
+   MOTION SYSTEM — Snappy mechanical Nothing motion
    Only transform / opacity / filter are ever animated (no layout thrash).
    ========================================================================= */
-
-/* --- Mascot phase morph (FOCUS <-> BREAK crossfade-scale) --------------- */
-@keyframes mascot-morph {
-  0% {
-    opacity: 0.2;
-    transform: scale(0.88);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-.animate-mascot-morph {
-  animation: mascot-morph 280ms cubic-bezier(0.32, 0.72, 0, 1);
-}
 
 /* --- Todo list choreography --------------------------------------------- */
 @keyframes todo-in {
   0% {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-4px);
   }
   100% {
     opacity: 1;
@@ -370,7 +326,7 @@ textarea:focus:not(:focus-visible) {
   }
 }
 .animate-todo-in {
-  animation: todo-in 260ms cubic-bezier(0.32, 0.72, 0, 1);
+  animation: todo-in 180ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 @keyframes todo-exit {
@@ -380,42 +336,26 @@ textarea:focus:not(:focus-visible) {
   }
   100% {
     opacity: 0;
-    transform: translateX(10px);
+    transform: translateX(8px);
   }
 }
 .animate-todo-exit {
-  animation: todo-exit 170ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: todo-exit 150ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
-/* Checkbox icon spring pop on completion */
-@keyframes check-pop {
-  0% {
-    transform: scale(0.3);
-  }
-  55% {
-    transform: scale(1.25);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-.animate-check-pop {
-  animation: check-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
 
-/* Delayed horizontal strike-through expansion (plays after the pop lands). */
+/* Delayed horizontal strike-through expansion */
 .todo-strike {
   position: absolute;
   left: -1%;
   right: -1%;
   top: 50%;
   height: 1.5px;
-  border-radius: 9999px;
   background: currentColor;
   pointer-events: none;
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 240ms cubic-bezier(0.4, 0, 0.2, 1) 140ms;
+  transition: transform 180ms cubic-bezier(0.2, 0, 0, 1) 80ms;
 }
 .todo-strike--done {
   transform: scaleX(1);
@@ -426,52 +366,46 @@ textarea:focus:not(:focus-visible) {
   will-change: transform;
 }
 
-/* Settings tag chip entrance: soft rise-and-settle when a tag is created. */
+/* Settings tag chip entrance: clean slide-in */
 @keyframes chip-in {
   0% {
     opacity: 0;
-    transform: translateY(-4px) scale(0.92);
+    transform: translateY(-3px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 .animate-chip-in {
-  animation: chip-in 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  animation: chip-in 180ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 /* --- Tag manager (Settings) ---------------------------------------------- */
-/* Tonal chip: colors derive from --chip-rgb so every alpha step stays in the
-   exact tag hue (replaces the broken hex-suffix inline styles that produced
-   invalid `rgb(...)18` values and fell back to browser default borders). */
 .tag-chip-tonal {
   background-color: rgb(var(--chip-rgb) / 0.12);
   border-color: rgb(var(--chip-rgb) / 0.3);
   color: rgb(var(--chip-rgb));
 }
 
-/* Delete affordance: small tonal hover circle with tactile compression. */
+/* Delete affordance: mechanical click */
 .tag-chip-remove {
   transition:
-    background-color 150ms ease,
-    transform 120ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    background-color 120ms ease,
+    transform 100ms cubic-bezier(0.2, 0, 0, 1);
 }
 .tag-chip-remove:hover {
   background-color: rgb(var(--chip-rgb) / 0.2);
 }
 .tag-chip-remove:active {
-  transform: scale(0.9);
+  transform: scale(0.92);
 }
 
-/* Add button icon: soft spring pop when the button wakes from idle. */
+/* Add button icon: mechanical snap */
 @keyframes add-pop {
   0% {
     opacity: 0.4;
-    transform: scale(0.6);
-  }
-  60% {
-    transform: scale(1.15);
+    transform: scale(0.8);
   }
   100% {
     opacity: 1;
@@ -479,27 +413,23 @@ textarea:focus:not(:focus-visible) {
   }
 }
 .animate-add-pop {
-  animation: add-pop 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: add-pop 150ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* --- Elastic button physics ---------------------------------------------- */
-/* Natural click compression; spring-out on release. Applied to interactive
-   controls that don't already carry Tailwind active:scale utilities. */
+/* --- Mechanical button feedback ------------------------------------------ */
 .tap-spring {
   transition:
-    transform 120ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    background-color 150ms ease,
-    color 150ms ease,
-    border-color 150ms ease,
-    opacity 150ms ease;
+    transform 100ms cubic-bezier(0.2, 0, 0, 1),
+    background-color 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease,
+    opacity 120ms ease;
 }
 .tap-spring:active:not(:disabled) {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
-/* --- Dialog entrance / exit ----------------------------------------------
-   Open: backdrop fade + centered scale-spring rise.
-   Close: inverse, faster (150ms) for a snappy feel. */
+/* --- Dialog entrance / exit (Mechanical) --------------------------------- */
 @keyframes modal-backdrop-in {
   from {
     opacity: 0;
@@ -511,7 +441,7 @@ textarea:focus:not(:focus-visible) {
 @keyframes modal-panel-in {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.96);
+    transform: translateY(6px) scale(0.98);
   }
   to {
     opacity: 1;
@@ -519,10 +449,10 @@ textarea:focus:not(:focus-visible) {
   }
 }
 .modal-backdrop {
-  animation: modal-backdrop-in 200ms cubic-bezier(0.2, 0, 0, 1);
+  animation: modal-backdrop-in 180ms cubic-bezier(0, 0, 0.2, 1);
 }
 .modal-panel {
-  animation: modal-panel-in 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: modal-panel-in 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 @keyframes modal-backdrop-out {
   from {
@@ -539,14 +469,14 @@ textarea:focus:not(:focus-visible) {
   }
   to {
     opacity: 0;
-    transform: translateY(4px) scale(0.97);
+    transform: translateY(4px) scale(0.98);
   }
 }
 .modal-backdrop--closing {
-  animation: modal-backdrop-out 150ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: modal-backdrop-out 140ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 .modal-panel--closing {
-  animation: modal-panel-out 150ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: modal-panel-out 140ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 /* --- Accessibility guardrail ---------------------------------------------

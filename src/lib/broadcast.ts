@@ -11,9 +11,7 @@ interface TimerBroadcastPayload {
   senderId: string
 }
 
-type BroadcastMessage =
-  | { type: 'timer_state'; payload: TimerBroadcastPayload }
-  | { type: 'session_recorded'; id: string; senderId: string }
+type BroadcastMessage = { type: 'timer_state'; payload: TimerBroadcastPayload }
 
 const CHANNEL_NAME = 'pomau_sync_channel'
 const TAB_INSTANCE_ID = Math.random().toString(36).slice(2, 9)

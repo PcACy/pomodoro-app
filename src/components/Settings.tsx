@@ -5,7 +5,6 @@ import {
   FileDown,
   FileJson,
   Github,
-  Languages,
   Loader2,
   LogOut,
   Minus,
@@ -100,7 +99,7 @@ function StepperButton({
         e.preventDefault()
       }}
       {...holdHandlers}
-      className="tap-spring flex h-8 w-8 shrink-0 items-center justify-center rounded-btn text-muted hover:bg-raised hover:text-fg disabled:pointer-events-none disabled:opacity-25"
+      className="tap-spring flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted hover:bg-surface-raised hover:text-fg disabled:pointer-events-none disabled:opacity-25"
     >
       <Icon size={14} />
     </button>
@@ -158,7 +157,7 @@ function NumberStepper({
 
   return (
     <div
-      className={`flex items-center justify-between rounded-btn border border-line bg-canvas/80 p-1 transition-colors focus-within:border-accent/60 focus-within:ring-1 focus-within:ring-accent/40 ${className}`}
+      className={`flex items-center justify-between rounded-full border border-line bg-surface p-1 transition-colors focus-within:border-fg ${className}`}
     >
       <StepperButton
         icon={Minus}
@@ -376,24 +375,24 @@ export const SettingsPanel = memo(function SettingsPanel({
   return (
     <div className="flex w-full max-w-2xl flex-col gap-5">
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">{t.sync.title}</h3>
-        <p className="mb-4 text-xs text-muted">{t.sync.hint}</p>
+        <h3 className="mb-1 font-mono text-xs font-bold uppercase tracking-widest text-muted">{t.sync.title}</h3>
+        <p className="mb-4 font-mono text-[11px] text-muted">{t.sync.hint}</p>
 
         {!syncAvailable ? (
-          <p className="text-xs text-muted">{t.sync.notConfigured}</p>
+          <p className="font-mono text-xs text-muted">{t.sync.notConfigured}</p>
         ) : syncStatus === 'signed-out' ? (
           <button type="button" onClick={onSyncLogin} className="btn-primary">
             <Github size={15} /> {t.sync.login}
           </button>
         ) : syncStatus === 'syncing' || syncLoading ? (
-          <div className="flex items-center gap-2 text-sm text-muted">
-            <Loader2 size={15} className="animate-spin" />
+          <div className="flex items-center gap-2 font-mono text-xs text-muted">
+            <Loader2 size={15} className="animate-spin text-accent" />
             {t.sync.syncing}
           </div>
         ) : syncStatus === 'offline' || syncStatus === 'error' ? (
           <div className="flex flex-wrap items-center gap-3">
-            <span className="flex items-center gap-2 text-sm text-accent-strong">
-              <span className="h-2 w-2 rounded-full bg-accent-strong" />
+            <span className="flex items-center gap-2 font-mono text-xs text-accent">
+              <span className="h-2 w-2 rounded-full bg-accent" />
               {t.sync.offline}
             </span>
             <button type="button" onClick={onSyncNow} className="btn-ghost text-xs">
@@ -403,11 +402,11 @@ export const SettingsPanel = memo(function SettingsPanel({
         ) : syncProfile ? (
           <div className="flex flex-wrap items-center gap-3">
             <ProfileAvatar avatarUrl={syncProfile.avatarUrl} name={syncProfile.name} />
-            <span className="text-sm font-medium text-fg">{syncProfile.name}</span>
+            <span className="font-mono text-xs font-bold uppercase tracking-wider text-fg">{syncProfile.name}</span>
             {syncPending ? (
-              <span className="rounded-full bg-raised px-2.5 py-1 text-xs text-muted">{t.sync.pending}</span>
+              <span className="rounded-full border border-line bg-surface px-2.5 py-0.5 font-mono text-[11px] text-muted">{t.sync.pending}</span>
             ) : (
-              <span className="flex items-center gap-1.5 rounded-full bg-accent/15 px-2.5 py-1 text-xs text-accent">
+              <span className="flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/15 px-2.5 py-0.5 font-mono text-[11px] text-accent">
                 <Check size={12} /> {t.sync.synced}
               </span>
             )}
@@ -422,60 +421,47 @@ export const SettingsPanel = memo(function SettingsPanel({
           </div>
         ) : null}
         {syncStatus === 'synced' && syncLastSyncAt != null && (
-          <p className="mt-3 text-[10px] text-muted">
+          <p className="mt-3 font-mono text-[10px] text-muted">
             {t.sync.lastSync(new Date(syncLastSyncAt))}
           </p>
         )}
       </div>
 
       <div className="card p-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-btn bg-accent/10 text-accent">
-              <Languages size={18} />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-fg">{t.settings.language}</h3>
-              <p className="text-xs text-muted">{t.settings.languageHint}</p>
-            </div>
+        {/* Language Selection */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between font-mono">
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-muted">{t.settings.language}</h3>
+            <p className="text-[11px] text-muted">{t.settings.languageHint}</p>
           </div>
-
           <div
             role="tablist"
             aria-label={t.settings.language}
-            className="seg-track relative grid grid-cols-2 w-full sm:w-56 items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md"
+            className="inline-flex items-center p-1 rounded-full border border-line bg-canvas font-mono text-xs select-none w-full sm:w-auto"
           >
-            <div
-              className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-              style={{
-                width: 'calc((100% - 8px - 4px) / 2)',
-                left: '4px',
-                transform: `translateX(calc(${lang === 'de' ? 0 : 1} * (100% + 4px)))`,
-              }}
-            />
             <button
               type="button"
               role="tab"
               aria-selected={lang === 'de'}
               onClick={() => setLang('de')}
-              className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                lang === 'de' ? 'text-fg' : 'text-muted hover:text-fg'
+              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-full flex items-center justify-center gap-1.5 text-xs font-bold transition-colors cursor-pointer uppercase ${
+                lang === 'de' ? 'bg-fg text-canvas' : 'text-muted hover:text-fg'
               }`}
             >
-              <span className="font-mono text-[10px] font-bold tracking-wider opacity-60">DE</span>
-              <span>Deutsch</span>
+              <span>DE</span>
+              <span className="hidden sm:inline">Deutsch</span>
             </button>
             <button
               type="button"
               role="tab"
               aria-selected={lang === 'en'}
               onClick={() => setLang('en')}
-              className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-1.5 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                lang === 'en' ? 'text-fg' : 'text-muted hover:text-fg'
+              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-full flex items-center justify-center gap-1.5 text-xs font-bold transition-colors cursor-pointer uppercase ${
+                lang === 'en' ? 'bg-fg text-canvas' : 'text-muted hover:text-fg'
               }`}
             >
-              <span className="font-mono text-[10px] font-bold tracking-wider opacity-60">EN</span>
-              <span>English</span>
+              <span>EN</span>
+              <span className="hidden sm:inline">English</span>
             </button>
           </div>
         </div>
@@ -483,34 +469,26 @@ export const SettingsPanel = memo(function SettingsPanel({
 
       <div className="card p-6">
         {/* Dark / Light Color Mode Switcher */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between font-mono">
           <div>
-            <h3 className="text-sm font-semibold text-fg">{t.settings.colorMode}</h3>
-            <p className="text-xs text-muted">{t.settings.colorModeHint}</p>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-muted">{t.settings.colorMode}</h3>
+            <p className="text-[11px] text-muted">{t.settings.colorModeHint}</p>
           </div>
           <div
             role="tablist"
             aria-label={t.settings.colorMode}
-            className="seg-track relative grid grid-cols-2 w-full sm:w-56 items-center gap-1 select-none rounded-btn border border-line/70 bg-surface/80 p-1 backdrop-blur-md"
+            className="inline-flex items-center p-1 rounded-full border border-line bg-canvas font-mono text-xs select-none w-full sm:w-auto"
           >
-            <div
-              className="pointer-events-none absolute bottom-1 top-1 rounded-[calc(var(--radius-btn)-4px)] bg-raised shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-              style={{
-                width: 'calc((100% - 8px - 4px) / 2)',
-                left: '4px',
-                transform: `translateX(calc(${colorMode === 'dark' ? 0 : 1} * (100% + 4px)))`,
-              }}
-            />
             <button
               type="button"
               role="tab"
               aria-selected={colorMode === 'dark'}
               onClick={() => onColorModeChange('dark')}
-              className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-2 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                colorMode === 'dark' ? 'text-fg' : 'text-muted hover:text-fg'
+              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold transition-colors cursor-pointer uppercase ${
+                colorMode === 'dark' ? 'bg-fg text-canvas' : 'text-muted hover:text-fg'
               }`}
             >
-              <Moon size={14} />
+              <Moon size={13} />
               <span>{t.settings.dark}</span>
             </button>
             <button
@@ -518,11 +496,11 @@ export const SettingsPanel = memo(function SettingsPanel({
               role="tab"
               aria-selected={colorMode === 'light'}
               onClick={() => onColorModeChange('light')}
-              className={`relative z-10 flex min-h-[36px] sm:min-h-[38px] items-center justify-center gap-2 rounded-[calc(var(--radius-btn)-4px)] px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-200 active:scale-[0.98] cursor-pointer ${
-                colorMode === 'light' ? 'text-fg' : 'text-muted hover:text-fg'
+              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold transition-colors cursor-pointer uppercase ${
+                colorMode === 'light' ? 'bg-fg text-canvas' : 'text-muted hover:text-fg'
               }`}
             >
-              <Sun size={14} />
+              <Sun size={13} />
               <span>{t.settings.light}</span>
             </button>
           </div>
@@ -530,53 +508,51 @@ export const SettingsPanel = memo(function SettingsPanel({
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.appearance}</h3>
-        <p className="mb-4 text-xs text-muted">{t.settings.layoutHint}</p>
+        <h3 className="mb-1 font-mono text-xs font-bold uppercase tracking-widest text-muted">{t.settings.appearance}</h3>
+        <p className="mb-4 text-[11px] font-mono text-muted">{t.settings.layoutHint}</p>
 
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
           {/* Two Columns (split) */}
           <button
             type="button"
             onClick={() => update((s) => ({ ...s, layoutMode: 'split' }))}
-            className={`group relative flex flex-col rounded-card border p-4 text-left transition-all active:scale-[0.98] ${
+            className={`group relative flex flex-col rounded-card border p-4 text-left transition-colors active:scale-[0.98] cursor-pointer ${
               settings.layoutMode === 'split'
-                ? 'border-accent bg-accent/10 shadow-sm shadow-accent/15 ring-1 ring-accent/30'
-                : 'border-line/70 bg-canvas/80 hover:border-line hover:bg-raised/60'
+                ? 'border-fg bg-surface-raised/40'
+                : 'border-line bg-canvas hover:border-fg/50'
             }`}
           >
             {/* Selection indicator pill */}
             <div className="absolute right-3.5 top-3.5 z-10 flex h-5 w-5 items-center justify-center">
               {settings.layoutMode === 'split' ? (
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-on-accent shadow-sm">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-fg text-canvas">
                   <Check size={12} strokeWidth={3} />
                 </div>
               ) : (
-                <div className="h-4 w-4 rounded-full border border-line/70" />
+                <div className="h-4 w-4 rounded-full border border-line" />
               )}
             </div>
 
             {/* Wireframe Preview Graphic */}
-            <div className="mb-3.5 flex h-24 sm:h-28 w-full items-center justify-center overflow-hidden rounded-btn border border-line/70 bg-raised/40 p-3 shadow-inner">
+            <div className="mb-3.5 flex h-24 sm:h-28 w-full items-center justify-center overflow-hidden rounded-lg border border-line bg-surface p-3">
               <div className="flex items-center gap-4">
-                {/* Left Column: Mini Dial */}
-                <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-accent bg-accent/15 shadow-sm">
-                  <div className="h-2 w-2 rounded-full bg-accent" />
+                <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-fg bg-canvas">
+                  <div className="h-1.5 w-1.5 rounded-full bg-accent" />
                 </div>
-                {/* Right Column: Mini Task & Stats Bars */}
                 <div className="flex flex-col gap-2">
-                  <div className="h-2 w-16 rounded-full border border-fg/20 bg-fg/25" />
-                  <div className="h-2 w-12 rounded-full border border-fg/15 bg-fg/15" />
-                  <div className="h-1.5 w-14 rounded-full border border-accent/40 bg-accent/20" />
+                  <div className="h-2 w-16 rounded-sm bg-fg/30" />
+                  <div className="h-2 w-12 rounded-sm bg-fg/20" />
+                  <div className="h-1.5 w-14 rounded-sm bg-accent/40" />
                 </div>
               </div>
             </div>
 
             {/* Typography & Labels */}
-            <div className="pr-6">
-              <span className="text-sm font-semibold text-fg">
+            <div className="pr-6 font-mono">
+              <span className="text-xs font-bold uppercase tracking-wider text-fg">
                 {t.settings.layoutTwoColumns}
               </span>
-              <p className="mt-0.5 text-xs text-muted leading-relaxed">
+              <p className="mt-1 text-[11px] text-muted leading-relaxed">
                 {t.settings.layoutTwoColumnsDesc}
               </p>
             </div>
@@ -586,42 +562,40 @@ export const SettingsPanel = memo(function SettingsPanel({
           <button
             type="button"
             onClick={() => update((s) => ({ ...s, layoutMode: 'single' }))}
-            className={`group relative flex flex-col rounded-card border p-4 text-left transition-all active:scale-[0.98] ${
+            className={`group relative flex flex-col rounded-card border p-4 text-left transition-colors active:scale-[0.98] cursor-pointer ${
               settings.layoutMode === 'single'
-                ? 'border-accent bg-accent/10 shadow-sm shadow-accent/15 ring-1 ring-accent/30'
-                : 'border-line/70 bg-canvas/80 hover:border-line hover:bg-raised/60'
+                ? 'border-fg bg-surface-raised/40'
+                : 'border-line bg-canvas hover:border-fg/50'
             }`}
           >
             {/* Selection indicator pill */}
             <div className="absolute right-3.5 top-3.5 z-10 flex h-5 w-5 items-center justify-center">
               {settings.layoutMode === 'single' ? (
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-on-accent shadow-sm">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-fg text-canvas">
                   <Check size={12} strokeWidth={3} />
                 </div>
               ) : (
-                <div className="h-4 w-4 rounded-full border border-line/70" />
+                <div className="h-4 w-4 rounded-full border border-line" />
               )}
             </div>
 
             {/* Wireframe Preview Graphic */}
-            <div className="mb-3.5 flex h-24 sm:h-28 w-full items-center justify-center overflow-hidden rounded-btn border border-line/70 bg-raised/40 p-3 shadow-inner">
+            <div className="mb-3.5 flex h-24 sm:h-28 w-full items-center justify-center overflow-hidden rounded-lg border border-line bg-surface p-3">
               <div className="flex flex-col items-center gap-2">
-                {/* Centered Large Mini Dial */}
-                <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-accent bg-accent/15 shadow-sm">
-                  <div className="h-2 w-2 rounded-full bg-accent" />
+                <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-fg bg-canvas">
+                  <div className="h-1.5 w-1.5 rounded-full bg-accent" />
                 </div>
-                {/* Centered Mini Task Bars */}
-                <div className="h-2 w-14 rounded-full border border-fg/20 bg-fg/25" />
-                <div className="h-1.5 w-10 rounded-full border border-fg/15 bg-fg/15" />
+                <div className="h-2 w-14 rounded-sm bg-fg/30" />
+                <div className="h-1.5 w-10 rounded-sm bg-fg/20" />
               </div>
             </div>
 
             {/* Typography & Labels */}
-            <div className="pr-6">
-              <span className="text-sm font-semibold text-fg">
+            <div className="pr-6 font-mono">
+              <span className="text-xs font-bold uppercase tracking-wider text-fg">
                 {t.settings.layoutOneColumn}
               </span>
-              <p className="mt-0.5 text-xs text-muted leading-relaxed">
+              <p className="mt-1 text-[11px] text-muted leading-relaxed">
                 {t.settings.layoutOneColumnDesc}
               </p>
             </div>
@@ -630,12 +604,12 @@ export const SettingsPanel = memo(function SettingsPanel({
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.timerIntervals}</h3>
-        <p className="mb-5 text-xs text-muted">{t.settings.timerIntervalsHint}</p>
+        <h3 className="mb-1 font-mono text-xs font-bold uppercase tracking-widest text-muted">{t.settings.timerIntervals}</h3>
+        <p className="mb-5 font-mono text-[11px] text-muted">{t.settings.timerIntervalsHint}</p>
 
         {/* Quick Presets */}
         <div className="mb-6">
-          <div className="mb-2 text-xs font-medium text-muted">
+          <div className="mb-2 font-mono text-[11px] uppercase tracking-wider text-muted">
             {t.settings.presets}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -659,10 +633,10 @@ export const SettingsPanel = memo(function SettingsPanel({
                       },
                     }))
                   }
-                  className={`rounded-btn border px-3.5 py-1.5 text-xs font-medium transition-all active:scale-95 ${
+                  className={`rounded-full border px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors active:scale-95 ${
                     active
-                      ? 'border-accent bg-accent/15 text-accent shadow-sm shadow-accent/10 font-semibold'
-                      : 'border-line bg-canvas/80 text-muted hover:border-line hover:bg-raised hover:text-fg'
+                      ? 'border-fg bg-fg text-canvas font-bold'
+                      : 'border-line bg-surface text-muted hover:border-fg/50 hover:text-fg'
                   }`}
                 >
                   {t.settings[p.labelKey]}
@@ -675,7 +649,7 @@ export const SettingsPanel = memo(function SettingsPanel({
         {/* 3-Column Phases Grid */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted">{t.phases.focus}</span>
+            <span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t.phases.focus}</span>
             <NumberStepper
               value={settings.phases.focus}
               min={1}
@@ -687,7 +661,7 @@ export const SettingsPanel = memo(function SettingsPanel({
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted">{t.phases.shortBreak}</span>
+            <span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t.phases.shortBreak}</span>
             <NumberStepper
               value={settings.phases.shortBreak}
               min={1}
@@ -699,7 +673,7 @@ export const SettingsPanel = memo(function SettingsPanel({
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted">{t.phases.longBreak}</span>
+            <span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t.phases.longBreak}</span>
             <NumberStepper
               value={settings.phases.longBreak}
               min={1}
@@ -719,8 +693,8 @@ export const SettingsPanel = memo(function SettingsPanel({
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="flex flex-col justify-between gap-2">
             <div className="flex min-h-[38px] flex-col justify-center">
-              <span className="text-xs font-semibold text-fg">{t.settings.cycle}</span>
-              <p className="text-[11px] text-muted line-clamp-1">{t.settings.cycleHint}</p>
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-fg">{t.settings.cycle}</span>
+              <p className="font-mono text-[11px] text-muted line-clamp-1">{t.settings.cycleHint}</p>
             </div>
             <NumberStepper
               value={settings.phases.roundsBeforeLongBreak}
@@ -741,8 +715,8 @@ export const SettingsPanel = memo(function SettingsPanel({
 
           <div className="flex flex-col justify-between gap-2">
             <div className="flex min-h-[38px] flex-col justify-center">
-              <span className="text-xs font-semibold text-fg">{t.settings.weeklyGoal}</span>
-              <p className="text-[11px] text-muted line-clamp-1">{t.settings.weeklyGoalHint}</p>
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-fg">{t.settings.weeklyGoal}</span>
+              <p className="font-mono text-[11px] text-muted line-clamp-1">{t.settings.weeklyGoalHint}</p>
             </div>
             <NumberStepper
               value={settings.weeklyGoalMinutes}
@@ -759,7 +733,7 @@ export const SettingsPanel = memo(function SettingsPanel({
               }
             />
             <div className="flex items-center justify-center">
-              <span className="text-[11px] font-medium text-muted">
+              <span className="font-mono text-[11px] text-muted">
                 {t.settings.weeklyGoalHours(settings.weeklyGoalMinutes / 60)}
               </span>
             </div>
@@ -768,8 +742,8 @@ export const SettingsPanel = memo(function SettingsPanel({
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.tags}</h3>
-        <p className="mb-4 text-xs text-muted">{t.settings.tagsHint}</p>
+        <h3 className="mb-1 font-mono text-xs font-bold uppercase tracking-widest text-muted">{t.settings.tags}</h3>
+        <p className="mb-4 font-mono text-[11px] text-muted">{t.settings.tagsHint}</p>
 
         {/* Integrated Single-Line Input Row */}
         <div className="relative flex w-full max-w-md items-center">
@@ -793,8 +767,8 @@ export const SettingsPanel = memo(function SettingsPanel({
               if (e.animationName === 'shake') e.currentTarget.classList.remove('animate-shake')
             }}
             placeholder={t.settings.newTagPlaceholder}
-            className={`w-full rounded-btn border bg-raised/50 px-3.5 py-2 pr-10 font-mono text-sm text-fg placeholder:text-muted transition-colors focus:outline-none ${
-              tagError ? 'border-accent-strong ring-1 ring-accent-strong/40' : 'border-line focus:border-accent'
+            className={`w-full rounded-full border bg-surface px-4 py-2 pr-10 font-mono text-xs text-fg placeholder:text-muted transition-colors focus:outline-none ${
+              tagError ? 'border-accent ring-1 ring-accent/40' : 'border-line focus:border-fg'
             }`}
             maxLength={30}
           />
@@ -807,27 +781,27 @@ export const SettingsPanel = memo(function SettingsPanel({
             tabIndex={canAdd ? 0 : -1}
             title={t.settings.addTag}
             aria-label={t.settings.addTag}
-            className={`absolute right-1.5 flex h-7 w-7 items-center justify-center rounded-sm transition-all duration-150 ${
+            className={`absolute right-1.5 flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150 ${
               canAdd
-                ? 'cursor-pointer bg-accent text-on-accent opacity-100 shadow-sm hover:opacity-90 active:scale-95'
+                ? 'cursor-pointer bg-accent text-white opacity-100 hover:opacity-90 active:scale-95'
                 : 'pointer-events-none cursor-not-allowed bg-transparent text-muted opacity-30'
             }`}
           >
             <span key={popNonce} className={`flex ${canAdd ? 'animate-add-pop' : ''}`}>
-              <Plus size={16} />
+              <Plus size={15} />
             </span>
           </button>
         </div>
 
         {tagError && (
-          <p key={errorNonce} className="mt-1.5 text-xs font-medium text-accent-strong animate-fade-in">
+          <p key={errorNonce} className="mt-1.5 font-mono text-xs text-accent animate-fade-in">
             {tagError}
           </p>
         )}
 
         {/* Tag Chips Flex-Wrap List */}
         {settings.tags.length === 0 ? (
-          <p className="mt-3 text-xs italic text-muted">{t.settings.noTagsYet}</p>
+          <p className="mt-3 font-mono text-xs italic text-muted">{t.settings.noTagsYet}</p>
         ) : (
           <div className="mt-3 flex flex-wrap gap-2">
             {settings.tags.map((tag) => {
@@ -862,16 +836,16 @@ export const SettingsPanel = memo(function SettingsPanel({
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-1 text-sm font-semibold text-fg">{t.settings.data}</h3>
-        <p className="mb-4 text-xs text-muted">{t.settings.dataHint}</p>
+        <h3 className="mb-1 font-mono text-xs font-bold uppercase tracking-widest text-muted">{t.settings.data}</h3>
+        <p className="mb-4 font-mono text-[11px] text-muted">{t.settings.dataHint}</p>
 
         {/* Primary Backup Action (Full Width) */}
         <button
           type="button"
           onClick={handleBackup}
-          className="flex w-full items-center justify-center gap-2 rounded-btn border border-line/80 bg-raised/60 px-4 py-2.5 text-sm font-medium text-fg shadow-sm transition-all hover:border-muted/40 hover:bg-raised active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-line bg-surface px-4 py-2.5 font-mono text-xs uppercase tracking-wider text-fg transition-colors hover:border-fg/50 hover:bg-surface-raised active:scale-[0.98]"
         >
-          <Download size={16} className="text-accent" />
+          <Download size={15} className="text-accent" />
           <span>{t.settings.backup}</span>
         </button>
 
@@ -880,7 +854,7 @@ export const SettingsPanel = memo(function SettingsPanel({
           <button
             type="button"
             onClick={handleSessionsCsv}
-            className="btn-ghost flex w-full items-center justify-center gap-2 rounded-btn px-3 py-2 text-xs"
+            className="btn-ghost flex w-full items-center justify-center gap-2 rounded-full border border-transparent hover:border-line hover:bg-surface px-3 py-2 font-mono text-xs uppercase tracking-wider"
             title={t.dashboard.sessionsCsvTitle}
           >
             <FileDown size={14} className="text-muted" />
@@ -889,7 +863,7 @@ export const SettingsPanel = memo(function SettingsPanel({
           <button
             type="button"
             onClick={handleSessionsJson}
-            className="btn-ghost flex w-full items-center justify-center gap-2 rounded-btn px-3 py-2 text-xs"
+            className="btn-ghost flex w-full items-center justify-center gap-2 rounded-full border border-transparent hover:border-line hover:bg-surface px-3 py-2 font-mono text-xs uppercase tracking-wider"
             title={t.dashboard.sessionsJsonTitle}
           >
             <FileJson size={14} className="text-muted" />
@@ -898,7 +872,7 @@ export const SettingsPanel = memo(function SettingsPanel({
           <button
             type="button"
             onClick={handleTodosCsv}
-            className="btn-ghost flex w-full items-center justify-center gap-2 rounded-btn px-3 py-2 text-xs"
+            className="btn-ghost flex w-full items-center justify-center gap-2 rounded-full border border-transparent hover:border-line hover:bg-surface px-3 py-2 font-mono text-xs uppercase tracking-wider"
             title={t.dashboard.todosCsvTitle}
           >
             <FileDown size={14} className="text-muted" />
@@ -907,7 +881,7 @@ export const SettingsPanel = memo(function SettingsPanel({
           <button
             type="button"
             onClick={handleTodosJson}
-            className="btn-ghost flex w-full items-center justify-center gap-2 rounded-btn px-3 py-2 text-xs"
+            className="btn-ghost flex w-full items-center justify-center gap-2 rounded-full border border-transparent hover:border-line hover:bg-surface px-3 py-2 font-mono text-xs uppercase tracking-wider"
             title={t.dashboard.todosJsonTitle}
           >
             <FileJson size={14} className="text-muted" />
@@ -922,9 +896,9 @@ export const SettingsPanel = memo(function SettingsPanel({
             onClick={() => {
               if (window.confirm(t.settings.confirmClear)) void clearSessions()
             }}
-            className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-btn border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs sm:text-sm font-medium text-red-400/90 transition-all hover:bg-red-500/20 hover:border-red-500/60 active:scale-[0.98]"
+            className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 font-mono text-xs uppercase tracking-wider text-accent transition-colors hover:bg-accent/20 hover:border-accent active:scale-[0.98]"
           >
-            <Trash2 size={15} />
+            <Trash2 size={14} />
             <span>{t.settings.clearSessions}</span>
           </button>
         </div>

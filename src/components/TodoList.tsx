@@ -4,18 +4,18 @@ import type { TodoItem } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
 
 const TAG_PALETTE = [
-  '#8ec07c', // Aqua / Mint
-  '#83a598', // Blue / Teal
-  '#fabd2f', // Yellow / Amber
-  '#d3869b', // Purple / Lavender
-  '#b8bb26', // Green
-  '#fe8019', // Orange
-  '#fb4934', // Red
-  '#d65d0e', // Cinnamon
+  '#ffffff', // Pure White
+  '#e8e8e8', // Light Silver
+  '#999999', // Muted Gray
+  '#666666', // Dark Gray
+  '#d71921', // Nothing Red
+  '#4a9e5c', // Technical Green
+  '#d4a843', // Technical Amber
+  '#5b9bf6', // Technical Blue
 ]
 
 export function getTagColor(tag: string): string {
-  if (!tag) return '#928374'
+  if (!tag) return '#666666'
   let hash = 0
   for (let i = 0; i < tag.length; i++) {
     hash = (hash << 5) - hash + tag.charCodeAt(i)
@@ -75,10 +75,10 @@ const TagSelect = memo(function TagSelect({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`tap-spring flex h-[38px] cursor-pointer items-center gap-1.5 px-3 rounded-btn border text-xs font-medium select-none ${
+        className={`flex h-[38px] cursor-pointer items-center gap-1.5 px-3.5 rounded-full border text-xs font-mono uppercase tracking-wider select-none transition-colors ${
           value
-            ? 'border-line/80 bg-raised/70 text-fg hover:border-accent/50'
-            : 'border-line/60 bg-raised/40 text-muted hover:border-line hover:text-fg'
+            ? 'border-fg/40 bg-canvas text-fg'
+            : 'border-line bg-canvas text-muted hover:border-fg/40 hover:text-fg'
         }`}
         title={title}
         aria-label={title}
@@ -87,13 +87,13 @@ const TagSelect = memo(function TagSelect({
         {value ? (
           <>
             <span
-              className="h-2 w-2 shrink-0 rounded-full"
-              style={{ backgroundColor: selectedColor || '#8ec07c' }}
+              className="h-1.5 w-1.5 shrink-0 rounded-full"
+              style={{ backgroundColor: selectedColor || '#ffffff' }}
             />
             <span className="max-w-[80px] sm:max-w-[110px] truncate">{value}</span>
           </>
         ) : (
-          <span className="text-muted">{noTagLabel}</span>
+          <span>{noTagLabel}</span>
         )}
         <ChevronDown
           size={13}
@@ -103,9 +103,9 @@ const TagSelect = memo(function TagSelect({
         />
       </button>
 
-      {/* Popover Dropdown */}
+      {/* Nothing Dropdown (8px radius, border-visible, flat, no shadows) */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-48 sm:w-52 p-1.5 rounded-2xl bg-surface/95 border border-line shadow-2xl z-50 flex flex-col gap-0.5 select-none animate-fade-in">
+        <div className="absolute right-0 top-full mt-2 w-48 sm:w-52 p-1 rounded-lg bg-surface border border-line z-50 flex flex-col gap-0.5 select-none font-mono text-xs">
           {/* Option: No Tag */}
           <button
             type="button"
@@ -113,14 +113,14 @@ const TagSelect = memo(function TagSelect({
               onChange('')
               setIsOpen(false)
             }}
-            className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-left transition-all cursor-pointer active:scale-[0.98] ${
+            className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded text-left transition-colors cursor-pointer uppercase ${
               !value
-                ? 'bg-accent/15 text-fg font-semibold'
-                : 'text-muted hover:bg-raised/70 hover:text-fg'
+                ? 'border-l-2 border-l-accent bg-surface-raised text-fg font-bold'
+                : 'text-muted hover:bg-surface-raised hover:text-fg'
             }`}
           >
-            <span className="flex items-center gap-2.5">
-              <span className="h-2 w-2 rounded-full border border-dashed border-muted/60 shrink-0" />
+            <span className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full border border-line shrink-0" />
               <span>{noTagLabel}</span>
             </span>
             {!value && <Check size={14} className="shrink-0 text-accent" />}
@@ -138,15 +138,15 @@ const TagSelect = memo(function TagSelect({
                   onChange(t)
                   setIsOpen(false)
                 }}
-                className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-left transition-all cursor-pointer active:scale-[0.98] ${
+                className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded text-left transition-colors cursor-pointer uppercase ${
                   isSelected
-                    ? 'bg-accent/15 text-fg font-semibold'
-                    : 'text-muted hover:bg-raised/70 hover:text-fg'
+                    ? 'border-l-2 border-l-accent bg-surface-raised text-fg font-bold'
+                    : 'text-muted hover:bg-surface-raised hover:text-fg'
                 }`}
               >
-                <span className="flex items-center gap-2.5 truncate">
+                <span className="flex items-center gap-2 truncate">
                   <span
-                    className="h-2 w-2 rounded-full shrink-0"
+                    className="h-1.5 w-1.5 rounded-full shrink-0"
                     style={{ backgroundColor: color }}
                   />
                   <span className="truncate text-fg">{t}</span>
@@ -298,19 +298,16 @@ export const TodoList = memo(function TodoList({
   }
 
   return (
-    <section className="card border border-outline-variant/15 dark:border-white/[0.05] flex w-full max-w-md 2xl:max-w-lg min-h-[160px] sm:min-h-[180px] flex-col gap-3.5 sm:gap-4 p-5 sm:p-6">
+    <section className="card flex w-full max-w-md 2xl:max-w-lg min-h-[160px] sm:min-h-[180px] flex-col gap-4 p-5 sm:p-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-fg">{tr.todo.title}</h3>
-        <span className="text-xs text-muted">
-          {tr.todo.doneCount(todos.filter((x) => x.done).length, todos.length)}
+        <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-muted">{tr.todo.title}</h3>
+        <span className="font-mono text-[11px] text-muted tabular-nums">
+          [ {todos.filter((x) => x.done).length} / {todos.length} ]
         </span>
       </div>
 
       {/* Unified Input Group */}
-      <div className="flex items-center gap-1.5">
-        <span className="font-mono text-sm font-bold text-accent select-none shrink-0 pl-1">
-          &gt;
-        </span>
+      <div className="flex items-center gap-2">
         <input
           type="text"
           value={title}
@@ -322,7 +319,7 @@ export const TodoList = memo(function TodoList({
             }
           }}
           placeholder="enter new task..."
-          className="input h-[38px] min-w-0 flex-1 font-mono text-sm py-2"
+          className="input h-[38px] min-w-0 flex-1 font-mono text-xs py-2"
           maxLength={80}
         />
 
@@ -338,17 +335,17 @@ export const TodoList = memo(function TodoList({
           type="button"
           onClick={submitAdd}
           disabled={!title.trim()}
-          className="btn-primary shrink-0 h-[38px] w-[38px] p-0 flex items-center justify-center active:scale-[0.94] disabled:opacity-40 disabled:pointer-events-none"
+          className="btn-primary shrink-0 h-[38px] px-3.5 rounded-full flex items-center justify-center font-mono text-xs uppercase cursor-pointer"
           title={tr.todo.add}
           aria-label={tr.todo.add}
         >
-          <Plus size={18} />
+          <Plus size={15} />
         </button>
       </div>
 
       {todos.length === 0 ? (
-        <div className="flex flex-1 items-center justify-center py-4">
-          <p className="text-center text-sm text-muted">{tr.todo.empty}</p>
+        <div className="flex flex-1 items-center justify-center py-6">
+          <p className="font-mono text-xs text-muted uppercase tracking-wider">{tr.todo.empty}</p>
         </div>
       ) : (
         <ul ref={listRef} className="flex flex-col gap-1.5 2xl:gap-2">
@@ -361,12 +358,12 @@ export const TodoList = memo(function TodoList({
                 if (target.closest('button, input, select, textarea') || editingId === t.id) return
                 onFocus(t.id)
               }}
-              className={`group flex items-center gap-2 rounded-btn border px-3 py-2 2xl:px-4 2xl:py-3 transition-colors ${
+              className={`group flex items-center gap-2.5 rounded-lg border px-3 py-2.5 2xl:px-4 2xl:py-3 transition-colors ${
                 exitingIds.has(t.id) ? 'animate-todo-exit' : 'animate-todo-in'
               } ${
                 activeTodoId === t.id
-                  ? 'border-line border-l-2 border-l-accent bg-accent/[0.04] shadow-sm'
-                  : 'border-line hover:bg-raised/35'
+                  ? 'border-line border-l-2 border-l-accent bg-surface-raised/40'
+                  : 'border-line/70 hover:border-line hover:bg-surface-raised/20'
               }`}
             >
               <button
@@ -377,13 +374,9 @@ export const TodoList = memo(function TodoList({
                 }}
                 title={t.done ? tr.todo.reopen : tr.todo.done}
                 aria-label={t.done ? tr.todo.reopen : tr.todo.done}
-                className="font-mono text-xs font-bold select-none px-1 py-0.5 cursor-pointer shrink-0 transition-colors"
+                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border border-border-visible transition-colors cursor-pointer"
               >
-                {t.done ? (
-                  <span className="text-success font-bold">[X]</span>
-                ) : (
-                  <span className="text-muted hover:text-fg">[ ]</span>
-                )}
+                {t.done && <span className="h-2 w-2 rounded-[1px] bg-accent" />}
               </button>
 
               {editingId === t.id ? (
@@ -396,7 +389,7 @@ export const TodoList = memo(function TodoList({
                       else if (e.key === 'Escape') setEditingId(null)
                     }}
                     autoFocus
-                    className="input h-8 min-w-0 flex-1 py-1 text-sm font-mono"
+                    className="input h-8 min-w-0 flex-1 py-1 text-xs font-mono"
                     maxLength={80}
                   />
                   <TagSelect
@@ -410,20 +403,20 @@ export const TodoList = memo(function TodoList({
                   <button
                     type="button"
                     onClick={() => submitEdit(t.id)}
-                    className="btn-primary tap-spring flex h-8 w-8 shrink-0 items-center justify-center p-0"
+                    className="btn-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-full p-0"
                     title={tr.todo.save}
                     aria-label={tr.todo.save}
                   >
-                    <Check size={14} />
+                    <Check size={13} />
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingId(null)}
-                    className="btn-ghost tap-spring flex h-8 w-8 shrink-0 items-center justify-center p-0"
+                    className="btn-ghost flex h-8 w-8 shrink-0 items-center justify-center rounded-full p-0"
                     title={tr.todo.cancel}
                     aria-label={tr.todo.cancel}
                   >
-                    <X size={14} />
+                    <X size={13} />
                   </button>
                 </div>
               ) : (
@@ -432,7 +425,7 @@ export const TodoList = memo(function TodoList({
                     <div className="flex items-center gap-2">
                       <span
                         className={`relative truncate text-sm transition-colors duration-300 ${
-                          t.done ? 'text-muted opacity-60' : 'font-medium text-fg'
+                          t.done ? 'text-muted opacity-50' : 'font-medium text-fg'
                         }`}
                       >
                         {t.title}
@@ -440,31 +433,26 @@ export const TodoList = memo(function TodoList({
                       </span>
                       {activeTodoId === t.id && timerRunning && !t.done && (
                         <span className="flex h-1.5 w-1.5 items-center justify-center shrink-0">
-                          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
                         </span>
                       )}
                     </div>
-                    <span className="inline-flex items-center gap-1 font-mono text-[11px] tabular-nums text-muted">
-                      <Timer size={11} className="text-accent/80" /> x{t.pomodoros}
-                    </span>
+                    {t.pomodoros > 0 && (
+                      <span className="inline-flex items-center gap-1 font-mono text-[10px] tracking-wider uppercase text-muted">
+                        <Timer size={10} className="text-accent" /> {t.pomodoros}P
+                      </span>
+                    )}
                   </div>
                   {t.tag && (
-                    <span
-                      className="tag-badge shrink-0 rounded-badge border px-2 py-0.5 font-mono text-[10px] font-semibold"
-                      style={{
-                        backgroundColor: 'transparent',
-                        color: getTagColor(t.tag),
-                        borderColor: `${getTagColor(t.tag)}88`,
-                      }}
-                    >
-                      {`#[${t.tag}]`}
+                    <span className="shrink-0 rounded-full border border-line px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted">
+                      #{t.tag}
                     </span>
                   )}
                 </>
               )}
 
               {editingId !== t.id && (
-                <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
+                <div className="flex shrink-0 items-center gap-1 opacity-100 sm:opacity-0 transition-opacity duration-150 sm:group-hover:opacity-100 focus-within:opacity-100">
                   <button
                     type="button"
                     onClick={(e) => {
@@ -473,13 +461,13 @@ export const TodoList = memo(function TodoList({
                     }}
                     title={activeTodoId === t.id ? tr.todo.unselectFocus : tr.todo.selectFocus}
                     aria-label={activeTodoId === t.id ? tr.todo.unselectFocus : tr.todo.selectFocus}
-                    className={`rounded-sm p-1.5 transition-colors ${
+                    className={`rounded p-1 transition-colors ${
                       activeTodoId === t.id
                         ? 'bg-accent/20 text-accent'
-                        : 'text-muted hover:bg-raised hover:text-fg'
+                        : 'text-muted hover:bg-surface-raised hover:text-fg'
                     }`}
                   >
-                    <Target size={14} />
+                    <Target size={13} />
                   </button>
                   <button
                     type="button"
@@ -489,9 +477,9 @@ export const TodoList = memo(function TodoList({
                     }}
                     title={tr.todo.edit}
                     aria-label={tr.todo.edit}
-                    className="rounded-sm p-1.5 text-muted transition-colors hover:bg-raised hover:text-fg"
+                    className="rounded p-1 text-muted transition-colors hover:bg-surface-raised hover:text-fg"
                   >
-                    <Pencil size={14} />
+                    <Pencil size={13} />
                   </button>
                   <button
                     type="button"
@@ -501,9 +489,9 @@ export const TodoList = memo(function TodoList({
                     }}
                     title={tr.todo.delete}
                     aria-label={tr.todo.delete}
-                    className="tap-spring rounded-sm p-1.5 text-muted transition-colors hover:bg-raised hover:text-accent"
+                    className="rounded p-1 text-muted transition-colors hover:bg-surface-raised hover:text-accent"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={13} />
                   </button>
                 </div>
               )}

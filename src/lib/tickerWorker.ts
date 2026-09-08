@@ -53,7 +53,7 @@ export function getTickerWorker(): Worker {
     const blob = new Blob([WORKER_CODE], { type: 'application/javascript' })
     const blobUrl = URL.createObjectURL(blob)
     worker = new Worker(blobUrl)
-    URL.revokeObjectURL(blobUrl)
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
     worker.onerror = (err) => {
       console.warn('[tickerWorker] Worker error encountered, resetting instance:', err)
       terminateTickerWorker()

@@ -3,9 +3,9 @@ import { DEFAULT_MODE, DEFAULT_THEME, MODE_KEY, THEME_KEY } from '../themes'
 import type { ColorMode, ThemeId } from '../themes'
 
 const THEME_BG_HEX: Record<ThemeId, Record<ColorMode, string>> = {
-  gruvbox: {
-    dark: '#282828',
-    light: '#fbf1c7',
+  nothing: {
+    dark: '#000000',
+    light: '#f5f5f5',
   },
 }
 
@@ -16,7 +16,7 @@ const applyTheme = (id: ThemeId, mode: ColorMode): void => {
   document.documentElement.classList.toggle('dark', mode === 'dark')
 
   // Dynamically synchronize OS status bar & browser chrome theme-color
-  const hex = THEME_BG_HEX[id]?.[mode] ?? (mode === 'dark' ? '#282828' : '#fbf1c7')
+  const hex = THEME_BG_HEX[id]?.[mode] ?? (mode === 'dark' ? '#000000' : '#f5f5f5')
   let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
   if (!meta) {
     meta = document.createElement('meta')
@@ -27,9 +27,12 @@ const applyTheme = (id: ThemeId, mode: ColorMode): void => {
 }
 
 const VALID_THEMES: Record<string, ThemeId> = {
-  gruvbox: 'gruvbox',
-  'gruvbox-dark': 'gruvbox',
-  'gruvbox-light': 'gruvbox',
+  nothing: 'nothing',
+  'nothing-dark': 'nothing',
+  'nothing-light': 'nothing',
+  gruvbox: 'nothing',
+  'gruvbox-dark': 'nothing',
+  'gruvbox-light': 'nothing',
 }
 
 const VALID_MODES: Record<string, ColorMode> = {

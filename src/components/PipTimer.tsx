@@ -20,9 +20,9 @@ interface Props {
 }
 
 const BADGE: Record<PhaseId, string> = {
-  focus: 'bg-accent/15 text-accent',
-  shortBreak: 'bg-break/15 text-break',
-  longBreak: 'bg-long/15 text-long',
+  focus: 'border-accent/40 bg-accent/15 text-accent',
+  shortBreak: 'border-line bg-surface text-fg',
+  longBreak: 'border-line bg-surface text-fg',
 }
 
 export const PipTimer = memo(function PipTimer({
@@ -48,16 +48,16 @@ export const PipTimer = memo(function PipTimer({
   const running = status === 'running'
 
   return createPortal(
-    <div className="flex h-full min-h-screen w-full flex-col items-center justify-center gap-2 bg-canvas p-3 text-fg select-none">
+    <div className="flex h-full min-h-screen w-full flex-col items-center justify-center gap-2 bg-canvas p-3 text-fg select-none dot-grid-subtle">
       <span
-        className={`rounded-full border border-line px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest ${BADGE[phase]}`}
+        className={`rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest ${BADGE[phase]}`}
       >
         {phaseLabel}
       </span>
-      <span className="font-display font-bold text-4xl tabular-nums leading-none text-fg">{activeTime}</span>
+      <span className="font-display font-bold text-4xl tabular-nums leading-none tracking-tight text-fg">{activeTime}</span>
 
       {activeTodo && (
-        <span className="max-w-full truncate text-xs text-muted" title={activeTodo}>
+        <span className="max-w-full truncate font-mono text-xs text-muted" title={activeTodo}>
           {activeTodo}
         </span>
       )}
@@ -67,7 +67,7 @@ export const PipTimer = memo(function PipTimer({
           type="button"
           onClick={onToggle}
           title={running ? t.timer.pause : t.timer.start}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-on-accent transition-colors hover:bg-accent/80 active:scale-95 cursor-pointer shadow-md"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white transition-colors hover:bg-accent/90 active:scale-95 cursor-pointer"
         >
           {running ? <Pause size={18} /> : <Play size={18} className="translate-x-0.5" />}
         </button>
@@ -75,7 +75,7 @@ export const PipTimer = memo(function PipTimer({
           type="button"
           onClick={onSkip}
           title={`${t.shortcuts.skip} (N)`}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors hover:bg-raised active:scale-95 cursor-pointer"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors hover:bg-surface-raised active:scale-95 cursor-pointer"
         >
           <SkipForward size={14} />
         </button>
@@ -94,8 +94,8 @@ interface CanvasProps {
   enabled?: boolean
 }
 
-const CANVAS_BG = '#121418'
-const CANVAS_FG = '#f5f5f5'
+const CANVAS_BG = '#000000'
+const CANVAS_FG = '#ffffff'
 
 function renderPipCanvas(
   canvas: HTMLCanvasElement,
@@ -113,16 +113,16 @@ function renderPipCanvas(
   ctx.fillRect(0, 0, w, h)
 
   ctx.textAlign = 'center'
-  ctx.fillStyle = '#83a598'
-  ctx.font = '600 13px system-ui, -apple-system, sans-serif'
+  ctx.fillStyle = '#888888'
+  ctx.font = '700 11px "Space Mono", monospace'
   ctx.fillText(phaseLabel.toUpperCase(), w / 2, h / 2 - 28)
 
   ctx.fillStyle = CANVAS_FG
-  ctx.font = '700 36px ui-monospace, SFMono-Regular, monospace'
+  ctx.font = '700 36px "Doto", "Space Mono", monospace'
   ctx.fillText(time, w / 2, h / 2 + 8)
 
-  ctx.fillStyle = status === 'running' ? '#8ec07c' : '#fabd2f'
-  ctx.font = '500 12px system-ui, -apple-system, sans-serif'
+  ctx.fillStyle = status === 'running' ? '#d71921' : '#888888'
+  ctx.font = '700 11px "Space Mono", monospace'
   ctx.fillText(status === 'running' ? '● RUNNING' : '❚❚ PAUSED', w / 2, h / 2 + 34)
 }
 

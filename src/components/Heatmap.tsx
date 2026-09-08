@@ -14,11 +14,11 @@ const WEEKDAY_ROWS = [0, 1, 2, 3, 4, 5, 6]
 const DAY_LABELS = [0, 2, 4]
 
 function cellClass(minutes: number): string {
-  if (minutes <= 0) return 'bg-heatmap-l0 border border-heatmap-l0-border hover:border-accent/60'
+  if (minutes <= 0) return 'bg-heatmap-l0 border border-heatmap-l0-border hover:border-fg/60'
   if (minutes < 30) return 'bg-accent/25 border border-accent/35 hover:ring-1 hover:ring-accent'
   if (minutes < 60) return 'bg-accent/50 border border-accent/55 hover:ring-1 hover:ring-accent'
   if (minutes < 120) return 'bg-accent/75 border border-accent/75 hover:ring-1 hover:ring-accent'
-  return 'bg-accent border border-accent shadow-sm shadow-accent/25 hover:ring-1 hover:ring-accent'
+  return 'bg-accent border border-accent hover:ring-1 hover:ring-accent'
 }
 
 interface Tip {
@@ -140,17 +140,17 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
         typeof document !== 'undefined' &&
         createPortal(
           <div
-            className="pointer-events-none fixed z-[9999] flex flex-col gap-0.5 rounded-card border border-line bg-surface/95 px-3 py-2 text-xs font-medium text-fg shadow-2xl backdrop-blur-md transition-opacity duration-100"
+            className="pointer-events-none fixed z-[9999] flex flex-col gap-1 rounded-card border border-line-strong bg-surface px-3 py-2 font-mono text-xs text-fg shadow-none transition-opacity duration-100"
             style={{
               left: Math.max(12, Math.min(tip.x - 100, window.innerWidth - 220)),
               top: Math.max(12, tip.y - 68),
             }}
           >
-            <span className="font-semibold text-fg">{getFormattedDate(tip.cell)}</span>
-            <span className="text-[11px] font-mono tabular-nums text-muted">
+            <span className="font-bold uppercase tracking-wider text-fg">{getFormattedDate(tip.cell)}</span>
+            <span className="text-[11px] tabular-nums text-muted">
               {tip.cell.minutes > 0 ? (
                 <>
-                  <span className="font-semibold text-accent">
+                  <span className="font-bold text-accent">
                     {tip.cell.minutes} {lang === 'de' ? 'Min. Fokus' : 'min focus'}
                   </span>
                   <span> · </span>

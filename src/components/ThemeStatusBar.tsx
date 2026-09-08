@@ -1,12 +1,11 @@
 import { memo } from 'react'
 import type { PhaseId, TimerStatus } from '../types'
-import type { ColorMode, ThemeId } from '../themes'
+import type { ColorMode } from '../themes'
 import type { SyncStatus } from '../hooks/useSync'
 import { VimStatusLine } from './VimStatusLine'
 import { useFlowTimerTick, useTimerTick } from '../hooks/useTimerTick'
 
 interface ThemeStatusBarProps {
-  themeId?: ThemeId
   colorMode: ColorMode
   mode: 'pomodoro' | 'flow'
   phase: PhaseId

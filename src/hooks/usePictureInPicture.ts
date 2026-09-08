@@ -18,6 +18,7 @@ function copyStyles(win: Window): void {
   if (theme) win.document.documentElement.setAttribute('data-theme', theme)
   const mode = document.documentElement.getAttribute('data-mode')
   if (mode) win.document.documentElement.setAttribute('data-mode', mode)
+  win.document.documentElement.className = document.documentElement.className
   win.document.title = 'Pomau · Timer'
   win.document.documentElement.style.height = '100%'
   win.document.body.style.margin = '0'
@@ -148,11 +149,12 @@ export function usePictureInPicture(): PictureInPictureState {
         if (theme) pipWindow.document.documentElement.setAttribute('data-theme', theme)
         const colorMode = document.documentElement.getAttribute('data-mode')
         if (colorMode) pipWindow.document.documentElement.setAttribute('data-mode', colorMode)
+        pipWindow.document.documentElement.className = document.documentElement.className
       } catch {
         /* window might be closing */
       }
     })
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-mode'] })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-mode', 'class'] })
     return () => observer.disconnect()
   }, [pipWindow])
 
