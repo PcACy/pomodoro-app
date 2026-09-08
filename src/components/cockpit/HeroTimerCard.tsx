@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { RotateCcw, SkipForward, Plus } from 'lucide-react'
 import type { TimerMode, TimerStatus } from '../../types'
 import { useTranslation } from '../../hooks/useTranslation'
@@ -122,13 +122,66 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   const dayName = localDate.toLocaleDateString(locale, { weekday: 'long' })
   const dateFormatted = localDate.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
 
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isHovered, setIsHovered] = useState(false)
+
+  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return
+    const el = containerRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    el.style.setProperty('--mouse-x', `${x}px`)
+    el.style.setProperty('--mouse-y', `${y}px`)
+  }, [])
+
+  const handlePointerEnter = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return
+    setIsHovered(true)
+  }, [])
+
+  const handlePointerLeave = useCallback(() => {
+    setIsHovered(false)
+  }, [])
+
   return (
     <div
+      ref={containerRef}
+      onPointerMove={handlePointerMove}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
       className={`relative overflow-hidden rounded-card bg-surface border border-line p-5 sm:p-6 lg:p-7 flex flex-col justify-between select-none ${className}`}
     >
-      {/* Signature Nothing Dot-Matrix Canvas Grid - Subtle & non-distracting */}
+      {/* Signature Nothing Dot-Matrix Canvas Grid - Subtle baseline */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.04] dark:opacity-[0.07] [background-image:radial-gradient(currentColor_1px,transparent_1px)] [background-size:14px_14px] text-fg"
+        aria-hidden="true"
+      />
+
+      {/* Atmospheric cursor spotlight ambient glow */}
+      <div
+        className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ease-out ${
+          isHovered ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{
+          background:
+            'radial-gradient(circle 140px at var(--mouse-x, -999px) var(--mouse-y, -999px), rgb(var(--c-fg) / 0.035), transparent 80%)',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Interactive Cursor Spotlight Dot-Matrix Glow - Sharp illuminated dots following pointer */}
+      <div
+        className={`pointer-events-none absolute inset-0 text-fg transition-opacity duration-300 ease-out [background-image:radial-gradient(currentColor_1.5px,transparent_1.5px)] [background-size:14px_14px] ${
+          isHovered ? 'opacity-35 dark:opacity-50' : 'opacity-0'
+        }`}
+        style={{
+          maskImage:
+            'radial-gradient(circle 130px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 100%)',
+          WebkitMaskImage:
+            'radial-gradient(circle 130px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 100%)',
+        }}
         aria-hidden="true"
       />
 
