@@ -24,20 +24,32 @@ export function notify(
   if (!notificationsSupported() || Notification.permission !== 'granted') return
   try {
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-      void navigator.serviceWorker.ready.then((reg) => {
-        reg.showNotification(title, {
-          body,
-          icon: '/icon-192.svg',
-          actions,
-        } as NotificationOptions & { actions?: NotificationActionConfig[] })
-      })
+      void navigator.serviceWorker.ready
+        .then((reg) => {
+          const shown = reg.showNotification(title, {
+            body,
+            icon: '/icon-192.svg',
+            actions,
+          } as NotificationOptions & { actions?: NotificationActionConfig[] })
+          // showNotification returns a promise in modern browsers: a rejection
+          // (e.g. permission revoked mid-flight) must not become unhandled.
+          if (shown && typeof (shown as Promise<void>).catch === 'function') {
+            ;(shown as Promise<void>).catch(() => {
+              /* best effort */
+            })
+          }
+        })
+        .catch(() => {
+          /* service worker not ready */
+        })
       return
     }
     // Fallback: in non-SW context, do not pass actions array to avoid TypeError in Chromium
-    new Notification(title, {
+    const fallback = new Notification(title, {
       body,
       icon: '/icon-192.svg',
     })
+    fallback.onclick = () => window.focus()
   } catch {
     /* notification display failed */
   }

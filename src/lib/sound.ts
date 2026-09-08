@@ -77,6 +77,16 @@ export function playMicroClick(kind: ClickKind = 'tick'): void {
 
     osc.connect(gain)
     gain.connect(audio.destination)
+    // Detach nodes once the blip has played (same as the chime source):
+    // without this, rapid clicks accumulate live nodes in the audio graph.
+    osc.onended = () => {
+      try {
+        osc.disconnect()
+        gain.disconnect()
+      } catch {
+        /* already disconnected */
+      }
+    }
 
     if (kind === 'tick') {
       osc.type = 'triangle'

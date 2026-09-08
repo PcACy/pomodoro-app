@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { PhaseId, Session, Settings, TimerStatus } from '../types'
 import { MS_PER_MINUTE } from '../lib/time'
 import { getTickerWorker } from '../lib/tickerWorker'
@@ -8,7 +8,7 @@ import { fmtTime } from '../lib/time'
 import { getLang, translations } from '../lib/i18n'
 import { useTranslation } from './useTranslation'
 import { broadcastTimerState, subscribeBroadcast } from '../lib/broadcast'
-import { setTimerTickSnapshot } from '../lib/timerStore'
+import { getTimerTickSnapshot, setTimerTickSnapshot, subscribeTimerTick } from '../lib/timerStore'
 
 interface Options {
   settings: Settings
@@ -81,8 +81,10 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       if (!skipped) {
         nextCycle = cycle + 1
         const durationMs = Math.max(phases.focus * MS_PER_MINUTE, m.totalMs)
-        const sessionStart =
-          phaseStartedAtRef.current > 0 ? phaseStartedAtRef.current : Math.max(0, now - durationMs)
+        // Anchor start to the logged duration so span (end - start) always
+        // equals durationMs. Using the raw phase start would include paused
+        // time in the span and make exports/stats disagree on the length.
+        const sessionStart = Math.max(0, now - durationMs)
         onFocusCompleteRef.current({
           start: sessionStart,
           end: now,
@@ -214,7 +216,12 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       progress: total > 0 ? remainingMsRef.current / total : 0,
     })
 
-    setMachine((prev) => (prev.status === 'running' ? prev : { ...prev, status: 'running' }))
+    // Sync the ref immediately (see finishCurrentPhase): a second call in the
+    // same tick must see 'running', otherwise e.g. a fast double-toggle would
+    // run start() twice instead of start() then pause().
+    const nextMachine = { ...m, status: 'running' as TimerStatus }
+    machineRef.current = nextMachine
+    setMachine(nextMachine)
     broadcastTimerState({
       status: 'running',
       phase: m.phase,
@@ -240,7 +247,10 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       progress: total > 0 ? remaining / total : 0,
     })
 
-    setMachine((prev) => ({ ...prev, status: 'paused' }))
+    // Sync the ref immediately (see start()).
+    const nextMachine = { ...m, status: 'paused' as TimerStatus }
+    machineRef.current = nextMachine
+    setMachine(nextMachine)
     broadcastTimerState({
       status: 'paused',
       phase: m.phase,
@@ -278,7 +288,10 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       progress: 1,
     })
 
-    setMachine((prev) => ({ ...prev, status: 'idle' }))
+    // Sync the ref immediately (see start()).
+    const nextMachine = { ...m, status: 'idle' as TimerStatus }
+    machineRef.current = nextMachine
+    setMachine(nextMachine)
     broadcastTimerState({
       status: 'idle',
       phase: m.phase,
@@ -308,10 +321,10 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       progress: total > 0 ? rem / total : 0,
     })
 
-    setMachine((prev) => ({
-      ...prev,
-      totalMs: prev.totalMs + safeMs,
-    }))
+    // Sync the ref immediately (see start()).
+    const nextMachine = { ...m, totalMs: total }
+    machineRef.current = nextMachine
+    setMachine(nextMachine)
 
     broadcastTimerState({
       status: m.status,
@@ -405,7 +418,12 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
   }, [settings])
 
   const roundsBeforeLongBreak = settings.phases.roundsBeforeLongBreak
-  const curRem = remainingMsRef.current
+
+  // Live tick values: reading remainingMsRef during render would freeze
+  // `remainingMs`/`time`/`progress` between machine state changes, since
+  // ticks publish through the store without re-rendering this hook.
+  const liveTick = useSyncExternalStore(subscribeTimerTick, getTimerTickSnapshot)
+  const curRem = liveTick.remainingMs
   const curTot = machine.totalMs
 
   return {

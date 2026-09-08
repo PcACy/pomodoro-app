@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { STORAGE_KEYS, type TodoItem } from '../types'
 import { uid } from '../lib/uid'
 import { enqueue } from '../lib/syncQueue'
-import { readTodosLocal, writeTodosLocal } from '../lib/localTodos'
+import { readTodosLocal, sanitizeTodoItem, writeTodosLocal } from '../lib/localTodos'
 
 interface TodoPatch {
   title?: string
@@ -37,8 +37,17 @@ export function useTodos() {
           return
         }
         try {
-          const parsed = JSON.parse(e.newValue) as TodoItem[]
-          if (Array.isArray(parsed)) setTodos(parsed)
+          const parsed: unknown = JSON.parse(e.newValue)
+          if (Array.isArray(parsed)) {
+            // Sanitize like the initial read: another tab (or a corrupt
+            // write) must not inject malformed todo objects.
+            const valid: TodoItem[] = []
+            for (const item of parsed) {
+              const sanitized = sanitizeTodoItem(item)
+              if (sanitized) valid.push(sanitized)
+            }
+            setTodos(valid)
+          }
         } catch {
           /* ignore */
         }

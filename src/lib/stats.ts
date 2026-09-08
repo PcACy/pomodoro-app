@@ -28,7 +28,11 @@ export interface RangeBarStat {
   tags: BarTagBreakdown[]
 }
 
-const minutesOf = (s: Session): number => Math.round(s.durationMs / 60_000)
+/** Corrupt records (NaN/negative duration from bad imports) count as 0 instead of poisoning every aggregate with NaN. */
+const minutesOf = (s: Session): number => {
+  const d = s.durationMs
+  return typeof d === 'number' && Number.isFinite(d) && d > 0 ? Math.round(d / 60_000) : 0
+}
 
 export function filterSessionsByRange(sessions: Session[], range: TimeRange): Session[] {
   const now = new Date()

@@ -13,7 +13,11 @@ const fmtMinutesCompact = (minutes: number): string => {
   return `${m}m`
 }
 
-const minutesOf = (s: Session): number => Math.round(s.durationMs / MS_PER_MINUTE)
+/** Corrupt records (NaN/negative duration from bad imports) count as 0 instead of poisoning totals with NaN. */
+const minutesOf = (s: Session): number => {
+  const d = s.durationMs
+  return typeof d === 'number' && Number.isFinite(d) && d > 0 ? Math.round(d / MS_PER_MINUTE) : 0
+}
 
 interface DayExport {
   date: Date
@@ -57,7 +61,10 @@ export function buildDailyMarkdown(exportData: DayExport, todos?: TodoItem[]): s
 
   const byTag = new Map<string, { count: number; minutes: number }>()
   for (const s of sessions) {
-    const tag = s.tag ? sanitizeMarkdownText(s.tag) : 'Ohne Tag'
+    // Group by the raw tag and sanitize only when rendering: grouping by the
+    // sanitized text would merge distinct tags (e.g. a literal "Ohne Tag"
+    // with untagged sessions).
+    const tag = s.tag?.trim() ? s.tag.trim() : 'Ohne Tag'
     const cur = byTag.get(tag) ?? { count: 0, minutes: 0 }
     cur.count += 1
     cur.minutes += minutesOf(s)
@@ -67,7 +74,7 @@ export function buildDailyMarkdown(exportData: DayExport, todos?: TodoItem[]): s
     .sort((a, b) => b[1].minutes - a[1].minutes)
     .map(
       ([tag, { count, minutes }]) =>
-        `- [x] ${tag} (${count} ${count === 1 ? 'Session' : 'Sessions'} - ${minutes}m)`,
+        `- [x] ${sanitizeMarkdownText(tag)} (${count} ${count === 1 ? 'Session' : 'Sessions'} - ${minutes}m)`,
     )
 
   const rows = sessions.map((s) => {

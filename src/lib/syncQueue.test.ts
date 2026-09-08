@@ -58,7 +58,24 @@ describe('syncQueue', () => {
     drainQueue()
     enqueue(upsert('sessions', 's1'))
     requeue(batch)
-    expect(drainQueue()).toEqual([...batch, upsert('sessions', 's1')])
+    // Requeued ops carry an attempt counter for poison-op protection.
+    expect(drainQueue()).toEqual([
+      { ...upsert('todos', 'a'), attempts: 1 },
+      { ...upsert('todos', 'b'), attempts: 1 },
+      upsert('sessions', 's1'),
+    ])
+  })
+
+  it('requeue drops ops that fail persistently instead of retrying forever', () => {
+    enqueue(upsert('todos', 'a'))
+    for (let i = 0; i < 6; i++) {
+      const batch = drainQueue()
+      if (batch.length === 0) break
+      requeue(batch)
+    }
+    // After 5 failed attempts the op is dropped from the queue.
+    expect(drainQueue()).toEqual([])
+    expect(hasPendingOps()).toBe(false)
   })
 
   it('drainQueue empties the queue and hasPendingOps reflects it', () => {

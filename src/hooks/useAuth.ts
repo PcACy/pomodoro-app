@@ -25,6 +25,9 @@ export function useAuth() {
         .then(({ data }) => {
           if (!disposed) setUser(data.session?.user ?? null)
         })
+        .catch((e) => {
+          console.error('[auth] getSession failed:', e)
+        })
         .finally(() => {
           if (!disposed) setLoading(false)
         })

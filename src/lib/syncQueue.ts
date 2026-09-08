@@ -1,11 +1,18 @@
 type SyncTable = 'sessions' | 'todos'
 
 export type SyncOp =
-  | { kind: 'upsert'; table: SyncTable; id: string }
-  | { kind: 'delete'; table: SyncTable; id: string }
-  | { kind: 'replace'; table: SyncTable }
+  | { kind: 'upsert'; table: SyncTable; id: string; attempts?: number }
+  | { kind: 'delete'; table: SyncTable; id: string; attempts?: number }
+  | { kind: 'replace'; table: SyncTable; attempts?: number }
 
 const STORAGE_KEY = 'pomodoro.sync.queue'
+
+/**
+ * Ops that fail this often are dropped instead of retried forever: a
+ * permanently failing op (e.g. rejected by validation/RLS) would otherwise
+ * block the whole queue and hammer the backend on every backoff cycle.
+ */
+const MAX_ATTEMPTS = 5
 
 let memoryCache: SyncOp[] | null = null
 let lastRawString: string | null = null
@@ -86,7 +93,8 @@ const opKey = (op: SyncOp): string =>
  * Re-enqueue ops that failed to push, without clobbering newer ops that were
  * enqueued while the failed sync was in flight. Existing queue entries win:
  * e.g. a `delete` recorded mid-sync must not be resurrected by re-adding the
- * stale `upsert` from the drained batch.
+ * stale `upsert` from the drained batch. Each requeue counts an attempt; ops
+ * past MAX_ATTEMPTS are dropped with a warning instead of retried forever.
  */
 export function requeue(ops: SyncOp[]): void {
   if (ops.length === 0) return
@@ -96,7 +104,12 @@ export function requeue(ops: SyncOp[]): void {
   for (let i = ops.length - 1; i >= 0; i--) {
     const key = opKey(ops[i])
     if (!keys.has(key)) {
-      merged.unshift(ops[i])
+      const attempts = (ops[i].attempts ?? 0) + 1
+      if (attempts > MAX_ATTEMPTS) {
+        console.warn('[sync] dropping persistently failing op:', ops[i])
+        continue
+      }
+      merged.unshift({ ...ops[i], attempts })
       keys.add(key)
     }
   }

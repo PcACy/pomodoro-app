@@ -125,7 +125,12 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
     }
     const ops = drainQueue()
     if (ops.length === 0) return true
+    // Snapshot the user before pushing: a logout/login mid-push must not
+    // attribute drained ops to a different account.
     const userId = userRef.current.id
+    const ensureSameUser = (): void => {
+      if (userRef.current?.id !== userId) throw new Error('[sync] user changed mid-push')
+    }
     let cachedLocalTodos: TodoItem[] | null = null
     const getLocalTodos = (): TodoItem[] => {
       if (!cachedLocalTodos) {
@@ -133,8 +138,13 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
       }
       return cachedLocalTodos
     }
+    // Tables fully pushed before a later failure must NOT be requeued:
+    // upserts/deletes are idempotent, but re-pushing them on every retry
+    // wastes traffic and can resurrect rows deleted remotely meanwhile.
+    const pushedTables = new Set<string>()
     try {
       for (const table of ['sessions', 'todos'] as const) {
+        ensureSameUser()
         const tOps = ops.filter((o) => o.table === table)
         if (tOps.length === 0) continue
         const replace = tOps.some((o) => o.kind === 'replace')
@@ -196,12 +206,13 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
             if (resDel.error) throw resDel.error
           }
         }
+        pushedTables.add(table)
       }
       return true
     } catch (e) {
       console.error('[sync] push failed:', e)
       // Merge failed ops back without clobbering ops enqueued mid-sync.
-      requeue(ops)
+      requeue(ops.filter((o) => !pushedTables.has(o.table)))
       return false
     }
   }, [])
@@ -219,6 +230,9 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
       ])
       if (sess.error) throw sess.error
       if (todos.error) throw todos.error
+      // The user may have logged out while the pull was in flight: never
+      // merge another account's rows into the local store.
+      if (userRef.current?.id !== userId) return false
       await mergeSessionsIntoDb((sess.data ?? []).map((r) => rowToSession(r as SessionRow)))
       mergeRef.current((todos.data ?? []).map((r) => rowToTodo(r as TodoRow)))
       return true
@@ -272,7 +286,9 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
         busyRef.current = false
         if (syncAgainRef.current) {
           syncAgainRef.current = false
-          window.setTimeout(() => {
+          // Tracked in retryTimeoutRef so unmount clears it (no post-unmount
+          // setStatus / sync under a stale user).
+          retryTimeoutRef.current = window.setTimeout(() => {
             void sync(false)
           }, 50)
         }
