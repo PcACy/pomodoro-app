@@ -5,6 +5,7 @@ import { useTranslation } from '../hooks/useTranslation'
 import { playMicroClick } from '../lib/sound'
 import { useFlowTimerTick, useTimerTick } from '../hooks/useTimerTick'
 import { SlidingSegmentedControl } from './SlidingSegmentedControl'
+import { GlyphTimeDisplay } from './cockpit/GlyphTimeDisplay'
 
 interface Props {
   phaseLabel: string
@@ -61,39 +62,34 @@ export const Timer = memo(function Timer({
   const { t } = useTranslation()
   const timerTick = useTimerTick()
   const flowTick = useFlowTimerTick()
-
   const isFlow = mode === 'flow'
-  const activeTime = time ?? (isFlow ? flowTick.time : timerTick.time)
-  const activeProgress = progress ?? (isFlow ? 0 : timerTick.progress)
-  const activeFlowTime = flowTime ?? flowTick.time
-
-  const flowParts = (activeFlowTime || '00:00').split(':').map(Number)
-  let flowSeconds = 0
-  if (flowParts.length === 3) {
-    flowSeconds = (flowParts[0] || 0) * 3600 + (flowParts[1] || 0) * 60 + (flowParts[2] || 0)
-  } else if (flowParts.length === 2) {
-    flowSeconds = (flowParts[0] || 0) * 60 + (flowParts[1] || 0)
-  }
-  const flowMinutes = Math.floor(flowSeconds / 60)
 
   const running = isFlow ? flowStatus === 'running' : status === 'running'
-  const safeRounds = Number.isFinite(roundsBeforeLongBreak) && roundsBeforeLongBreak > 0
-    ? Math.floor(roundsBeforeLongBreak)
-    : 1
+  const shownTime = isFlow
+    ? running
+      ? flowTick.time
+      : flowTime || '00:00'
+    : running
+    ? timerTick.time
+    : time || '25:00'
+
+  const currentProgress = progress ?? 0
+  const filledSegments = Math.round(currentProgress * TOTAL_SEGMENTS)
+
+  const flowSeconds = Math.floor(flowTick.elapsedMs / 1000)
+  const flowMinutes = Math.floor(flowSeconds / 60)
+  const flowActiveIndex = (flowSeconds % TOTAL_SEGMENTS)
+
+  const safeRounds = Math.max(1, roundsBeforeLongBreak || 4)
   const currentRoundIndex = completedFocusInCycle % safeRounds
 
-  const shownLabel = isFlow ? t.timer.flow : phaseLabel
-  const shownTime = isFlow ? activeFlowTime : activeTime
-
-  // Mechanical Segmented Progress Calculation (20 discrete blocks, 2px gaps)
-  const currentProgress = Math.min(1, Math.max(0, activeProgress))
-  const filledSegments = Math.min(
-    TOTAL_SEGMENTS,
-    Math.max(0, Math.round(currentProgress * TOTAL_SEGMENTS)),
-  )
-
-  // Flow scanner position (sweeps across segments while running)
-  const flowActiveIndex = flowSeconds % TOTAL_SEGMENTS
+  const shownLabel = isFlow
+    ? running
+      ? 'FLOW'
+      : flowStatus === 'paused'
+      ? 'PAUSED'
+      : 'STANDBY'
+    : phaseLabel
 
   const handleToggleClick = useCallback(() => {
     playMicroClick(running ? 'tick' : 'pop')
@@ -106,7 +102,7 @@ export const Timer = memo(function Timer({
   }, [onReset])
 
   const handleSkipClick = useCallback(() => {
-    playMicroClick('toggle')
+    playMicroClick('tap')
     onSkip()
   }, [onSkip])
 
@@ -114,15 +110,15 @@ export const Timer = memo(function Timer({
     <section
       className={`group relative flex w-full flex-col items-center justify-between select-none ${
         borderless
-          ? 'max-w-xl gap-4 p-0 bg-transparent border-0 shadow-none'
+          ? 'max-w-2xl sm:max-w-3xl gap-5 sm:gap-6 p-0 bg-transparent border-0 shadow-none'
           : 'card max-w-md 2xl:max-w-lg gap-4 p-6 sm:p-7'
       }`}
     >
       {/* Active Task / Tag Pill */}
       {task && (
-        <div className="inline-flex max-w-full items-center gap-2 px-3 py-1 text-xs rounded-full border border-line bg-canvas text-fg font-mono">
+        <div className="inline-flex max-w-full items-center gap-2 px-3.5 py-1 text-xs rounded-full border border-line bg-canvas text-fg font-mono">
           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-          <span className="max-w-[180px] sm:max-w-[280px] truncate font-medium leading-none">
+          <span className="max-w-[200px] sm:max-w-[320px] truncate font-medium leading-none">
             {task}
           </span>
           {tag && (
@@ -148,9 +144,9 @@ export const Timer = memo(function Timer({
       {/* Nothing Hardware Widget Display */}
       <div className="flex flex-col items-center justify-between w-full my-1 text-center select-none">
         {/* Top Phase Header with Status Dot */}
-        <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-muted">
+        <div className="flex items-center gap-2 font-mono text-xs sm:text-sm uppercase tracking-widest text-muted">
           <span
-            className={`h-1.5 w-1.5 rounded-full ${
+            className={`h-2 w-2 rounded-full ${
               running ? 'bg-accent animate-pulse' : 'bg-muted/40'
             }`}
           />
@@ -161,19 +157,21 @@ export const Timer = memo(function Timer({
           </span>
         </div>
 
-        {/* Hero Time in Doto Dot-Matrix Font */}
-        <span
-          className={`font-display font-medium tabular-nums leading-none tracking-tight text-fg my-4 ${
-            large ? 'text-7xl sm:text-8xl' : 'text-6xl sm:text-7xl'
+        {/* Hero Time in Nothing Dot-Matrix Glyph SVG */}
+        <GlyphTimeDisplay
+          time={shownTime}
+          isRunning={running}
+          className={`w-full ${
+            large || borderless
+              ? 'max-w-[520px] sm:max-w-[640px] md:max-w-[720px] my-5 sm:my-8'
+              : 'max-w-[380px] sm:max-w-[440px] my-3'
           }`}
-        >
-          {shownTime}
-        </span>
+        />
 
-        {/* Sub-Metadata: Round Indicator or Flow Milestones */}
-        <div className="h-5 flex items-center justify-center font-mono text-[11px] text-muted tracking-wider uppercase mb-3">
+        {/* Sub-Metadata: Round Indicator + 4 Tactile LEDs or Flow Milestones */}
+        <div className="h-6 flex items-center justify-center font-mono text-xs sm:text-sm text-muted tracking-wider uppercase mb-3">
           {isFlow ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {[25, 50, 75].map((m) => {
                 const reached = flowMinutes >= m
                 return (
@@ -187,7 +185,7 @@ export const Timer = memo(function Timer({
               })}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <span>
                 ROUND {String(currentRoundIndex + 1).padStart(2, '0')} / {String(safeRounds).padStart(2, '0')}
               </span>
@@ -195,6 +193,27 @@ export const Timer = memo(function Timer({
               <span className="text-fg font-bold tabular-nums">
                 {Math.round(currentProgress * 100)}%
               </span>
+              {/* 4 Tactile Cycle LEDs */}
+              <div className="flex items-center gap-1.5 ml-1" title={`Cycle: ${currentRoundIndex + 1} of ${safeRounds}`}>
+                {Array.from({ length: safeRounds }).map((_, rIdx) => {
+                  const isCompleted = rIdx < currentRoundIndex
+                  const isCurrent = rIdx === currentRoundIndex
+                  return (
+                    <span
+                      key={rIdx}
+                      className={`h-2 w-2 rounded-full transition-colors ${
+                        isCompleted
+                          ? 'bg-fg'
+                          : isCurrent
+                          ? running
+                            ? 'bg-accent animate-pulse'
+                            : 'bg-accent/80'
+                          : 'border border-line bg-canvas'
+                      }`}
+                    />
+                  )
+                })}
+              </div>
             </div>
           )}
         </div>
@@ -206,7 +225,7 @@ export const Timer = memo(function Timer({
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label={shownLabel}
-          className="flex items-center w-full h-2.5 gap-[2px] px-1 py-0.5 rounded-sm bg-canvas border border-line/60"
+          className="flex items-center w-full h-3 gap-[2px] px-1 py-0.5 rounded-sm bg-canvas border border-line/60"
         >
           {Array.from({ length: TOTAL_SEGMENTS }).map((_, idx) => {
             let isFilled = false
@@ -228,10 +247,12 @@ export const Timer = memo(function Timer({
                 key={idx}
                 className={`flex-1 h-full rounded-none transition-colors duration-150 ${
                   isHighlight
-                    ? 'bg-accent'
+                    ? 'bg-accent animate-pulse'
                     : isFilled
-                      ? 'bg-fg'
-                      : 'bg-surface-raised/40'
+                    ? running
+                      ? 'bg-accent'
+                      : 'bg-fg'
+                    : 'bg-line/40'
                 }`}
               />
             )
@@ -240,13 +261,13 @@ export const Timer = memo(function Timer({
       </div>
 
       {/* Action Buttons: Nothing Pill Buttons (999px radius, Space Mono ALL CAPS) */}
-      <div className="grid grid-cols-3 gap-2.5 w-full font-mono select-none mt-1">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4 w-full font-mono select-none mt-2">
         <button
           type="button"
           onClick={handleResetClick}
           title={isFlow ? `${t.flow.discard} (R)` : `${t.shortcuts.reset} (R)`}
           aria-label={isFlow ? t.flow.discard : t.shortcuts.reset}
-          className="btn-secondary w-full py-2.5 px-3 text-xs font-bold tracking-wider uppercase active:scale-95"
+          className="btn-secondary w-full py-3 sm:py-3.5 px-4 text-xs sm:text-sm font-bold tracking-wider uppercase active:scale-95"
         >
           RESET
         </button>
@@ -256,7 +277,7 @@ export const Timer = memo(function Timer({
           onClick={handleToggleClick}
           title={running ? t.timer.pause : t.timer.start}
           aria-label={running ? t.timer.pause : t.timer.start}
-          className="btn-primary w-full py-2.5 px-3 text-xs font-bold tracking-wider uppercase active:scale-95"
+          className="btn-primary w-full py-3 sm:py-3.5 px-4 text-xs sm:text-sm font-bold tracking-wider uppercase active:scale-95"
         >
           {running ? 'PAUSE' : 'START'}
         </button>
@@ -266,7 +287,7 @@ export const Timer = memo(function Timer({
           onClick={handleSkipClick}
           title={isFlow ? `${t.flow.finish} (F)` : `${t.shortcuts.skip} (N)`}
           aria-label={isFlow ? t.flow.finish : t.shortcuts.skip}
-          className="btn-secondary w-full py-2.5 px-3 text-xs font-bold tracking-wider uppercase active:scale-95"
+          className="btn-secondary w-full py-3 sm:py-3.5 px-4 text-xs sm:text-sm font-bold tracking-wider uppercase active:scale-95"
         >
           {isFlow ? 'FINISH' : 'SKIP'}
         </button>
@@ -274,8 +295,8 @@ export const Timer = memo(function Timer({
 
       {/* Keyboard Shortcuts Hint */}
       <div
-        className={`flex items-center justify-center gap-2 text-[10px] text-muted font-mono tracking-wider uppercase mt-1 select-none transition-opacity duration-200 [@media(hover:none)]:hidden ${
-          running ? 'pointer-events-none opacity-0' : 'opacity-100'
+        className={`flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-muted font-mono tracking-wider uppercase mt-2 select-none transition-opacity duration-200 [@media(hover:none)]:hidden ${
+          running ? 'pointer-events-none opacity-0' : 'opacity-80'
         }`}
       >
         <span>SPACE: START/PAUSE</span>
@@ -291,12 +312,12 @@ export const Timer = memo(function Timer({
           aria-label={isZenMode ? t.zen.exitHint : t.zen.enterHint}
           className="hover:text-fg transition-colors cursor-pointer"
         >
-          Z: ZEN
+          ESC: EXIT ZEN
         </button>
       </div>
 
-      {/* PiP Button */}
-      {pipSupported && (
+      {/* PiP Button (only in standard bordered mode, never in Zen/borderless mode) */}
+      {!isZenMode && !borderless && pipSupported && (
         <div className="group/pip absolute bottom-3 right-3 z-10">
           <button
             type="button"

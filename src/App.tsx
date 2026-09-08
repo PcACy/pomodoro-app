@@ -419,7 +419,7 @@ export default function App() {
           </div>
 
           {/* Heroic Borderless Timer */}
-          <div className="relative z-10 flex flex-col items-center justify-center p-4">
+          <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-4xl p-4 sm:p-6">
             <Timer
               large
               borderless
@@ -435,7 +435,7 @@ export default function App() {
               onToggle={handleToggle}
               onSkip={handleSkip}
               onReset={handleReset}
-              pipSupported={pipSupported}
+              pipSupported={false}
               pipOpen={pipMode !== 'none'}
               onPipToggle={handlePipToggle}
               isZenMode={isZenMode}
