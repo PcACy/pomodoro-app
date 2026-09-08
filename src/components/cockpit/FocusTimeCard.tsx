@@ -30,7 +30,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
 
   return (
     <BentoCard
-      label="FOCUS TIME"
+      label="DAILY FOCUS"
       action={
         streak > 0 ? (
           <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full border border-line bg-canvas text-accent tracking-wider uppercase">

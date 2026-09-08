@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import type { Session, Settings } from '../../types'
-import { todayMinutes } from '../../lib/stats'
+import { weekMinutes } from '../../lib/stats'
 import { BentoCard } from './BentoCard'
 
 interface GoalLoadCardProps {
@@ -14,10 +14,13 @@ export const GoalLoadCard = memo(function GoalLoadCard({
   settings,
   className = '',
 }: GoalLoadCardProps) {
-  const currentMinutes = todayMinutes(sessions)
-  const targetMinutes = Math.round(settings.weeklyGoalMinutes / 5) || 120
-  const ratio = Math.max(0, currentMinutes / targetMinutes)
+  const currentWeekMinutes = weekMinutes(sessions)
+  const targetWeekMinutes = Math.max(60, settings.weeklyGoalMinutes || 300)
+  const ratio = Math.max(0, currentWeekMinutes / targetWeekMinutes)
   const percentage = Math.min(999, Math.round(ratio * 100))
+
+  const currentHours = (currentWeekMinutes / 60).toFixed(1)
+  const targetHours = (targetWeekMinutes / 60).toFixed(1)
 
   // Circular gauge parameters
   const radius = 38
@@ -28,7 +31,7 @@ export const GoalLoadCard = memo(function GoalLoadCard({
 
   return (
     <BentoCard
-      label="GOAL LOAD"
+      label="WEEKLY GOAL"
       className={className}
       contentClassName="items-center justify-center py-2"
     >
@@ -79,9 +82,9 @@ export const GoalLoadCard = memo(function GoalLoadCard({
         </div>
       </div>
 
-      {/* Subtitle / Details */}
+      {/* Subtitle / Details in Hours */}
       <div className="mt-2 text-center font-mono text-[10px] text-muted tracking-wider uppercase">
-        {currentMinutes} / {targetMinutes} MINS
+        {currentHours} / {targetHours} H
       </div>
     </BentoCard>
   )
