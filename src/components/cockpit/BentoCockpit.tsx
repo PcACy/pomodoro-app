@@ -8,6 +8,7 @@ import { ProjectsDistributionCard } from './ProjectsDistributionCard'
 import { QuickSettingsCard } from './QuickSettingsCard'
 import { SystemStatusCard } from './SystemStatusCard'
 import { TaskInboxCard } from './TaskInboxCard'
+import { SessionLogCard } from './SessionLogCard'
 
 interface BentoCockpitProps {
   // Timer props
@@ -165,19 +166,36 @@ export const BentoCockpit = memo(function BentoCockpit({
         </div>
       </section>
 
-      {/* 2. TASK INBOX (Card 8): Positioned below the initial fold, reached by scrolling down */}
-      <section className="w-full pt-6 pb-16 sm:pb-24">
-        <TaskInboxCard
-          todos={todos}
-          tags={settings.tags}
-          activeTodoId={activeTodoId}
-          onToggle={onTodoToggle}
-          onFocus={onTodoFocus}
-          onAdd={onTodoAdd}
-          onRemove={onTodoRemove}
-          onOpenTodoManager={onOpenTodoManager}
-          className="w-full"
-        />
+      {/* 2. TASK WORKSPACE & LOG (Below initial fold) */}
+      <section className="w-full pt-8 pb-16 sm:pb-24">
+        {/* Technical Section Divider */}
+        <div className="flex items-center gap-3 mb-4">
+          <span className="font-mono text-[10px] sm:text-xs text-muted/60 tracking-widest uppercase">
+            02 // TASKS & LOG
+          </span>
+          <div className="flex-1 h-[1px] bg-line/60" />
+        </div>
+
+        {/* 2-Column Balanced Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 items-stretch">
+          <TaskInboxCard
+            todos={todos}
+            tags={settings.tags}
+            activeTodoId={activeTodoId}
+            onToggle={onTodoToggle}
+            onFocus={onTodoFocus}
+            onAdd={onTodoAdd}
+            onRemove={onTodoRemove}
+            onOpenTodoManager={onOpenTodoManager}
+            className="h-full"
+          />
+
+          <SessionLogCard
+            sessions={sessions}
+            onOpenAnalyticsModal={onOpenAnalyticsModal}
+            className="h-full"
+          />
+        </div>
       </section>
     </div>
   )
