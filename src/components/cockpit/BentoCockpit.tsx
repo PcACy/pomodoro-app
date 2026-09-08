@@ -119,14 +119,16 @@ export const BentoCockpit = memo(function BentoCockpit({
           className="md:col-span-1 lg:col-span-1 min-h-[170px]"
         />
 
-        {/* 4. ACTIVE TASK: Now-playing card with animated waveform (Middle-Right) */}
+        {/* 4. ACTIVE TASK: Task card with metrics and quick complete (Middle-Right) */}
         <ActiveTaskCard
           activeTodo={activeTodo}
           isRunning={isRunning}
           remainingMs={remainingMs}
           totalMs={totalMs}
           time={time}
+          sessions={sessions}
           onOpenTodoManager={onOpenTodoManager}
+          onToggleDone={onTodoToggle}
           className="md:col-span-2 lg:col-span-2 min-h-[170px]"
         />
 

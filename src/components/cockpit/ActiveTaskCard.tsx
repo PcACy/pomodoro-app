@@ -1,8 +1,10 @@
-import { memo, useEffect, useState } from 'react'
-import type { TodoItem } from '../../types'
+import { memo } from 'react'
+import { Check } from 'lucide-react'
+import type { Session, TodoItem } from '../../types'
 import { BentoCard } from './BentoCard'
 import { getTagColor } from '../TodoList'
 import { useTimerTick } from '../../hooks/useTimerTick'
+import { playMicroClick } from '../../lib/sound'
 
 interface ActiveTaskCardProps {
   activeTodo: TodoItem | null
@@ -10,11 +12,11 @@ interface ActiveTaskCardProps {
   remainingMs: number
   totalMs: number
   time: string
+  sessions?: Session[]
   onOpenTodoManager?: () => void
+  onToggleDone?: (id: string) => void
   className?: string
 }
-
-const BAR_COUNT = 24
 
 export const ActiveTaskCard = memo(function ActiveTaskCard({
   activeTodo,
@@ -22,31 +24,14 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   remainingMs,
   totalMs,
   time,
+  sessions,
   onOpenTodoManager,
+  onToggleDone,
   className = '',
 }: ActiveTaskCardProps) {
   const timerTick = useTimerTick()
   const liveRemainingMs = isRunning ? timerTick.remainingMs : remainingMs
   const liveTime = isRunning ? (timerTick.time || time) : time
-  // Waveform visualization bars animation
-  const [waveHeights, setWaveHeights] = useState<number[]>(() =>
-    Array.from({ length: BAR_COUNT }, (_, i) => 20 + Math.sin(i * 0.8) * 15),
-  )
-
-  useEffect(() => {
-    if (!isRunning) return
-    const interval = setInterval(() => {
-      setWaveHeights(
-        Array.from({ length: BAR_COUNT }, (_, i) => {
-          // Dynamic pseudo-audio frequency animation
-          const t = Date.now() / 200
-          const base = Math.sin(i * 0.5 + t) * 30 + Math.cos(i * 0.8 - t * 0.7) * 20
-          return Math.max(12, Math.min(95, Math.abs(base) + 15))
-        }),
-      )
-    }, 120)
-    return () => clearInterval(interval)
-  }, [isRunning])
 
   const elapsedMs = Math.max(0, totalMs - liveRemainingMs)
   const elapsedMinutes = Math.floor(elapsedMs / 60_000)
@@ -59,6 +44,13 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
 
   const progressRatio = totalMs > 0 ? Math.min(1, Math.max(0, elapsedMs / totalMs)) : 0
   const tagColor = activeTodo?.tag ? getTagColor(activeTodo.tag) : undefined
+
+  const taskMinutes = activeTodo && sessions
+    ? sessions
+        .filter((s) => s.task && s.task.trim().toLowerCase() === activeTodo.title.trim().toLowerCase())
+        .reduce((sum, s) => sum + Math.round(s.durationMs / 60_000), 0)
+    : 0
+  const displayMinutes = taskMinutes > 0 ? taskMinutes : (activeTodo ? activeTodo.pomodoros * 25 : 0)
 
   return (
     <BentoCard
@@ -104,27 +96,40 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           </div>
         </div>
 
-        {/* Audio-Style Waveform Visualizer */}
-        <div
-          className="flex items-end gap-[2px] h-10 shrink-0 px-2 py-1 rounded bg-canvas/60 border border-line/40"
-          aria-hidden="true"
-        >
-          {waveHeights.map((h, i) => (
-            <div
-              key={i}
-              className={`w-[2px] rounded-full transition-all duration-100 ${
-                isRunning
-                  ? i % 4 === 0
-                    ? 'bg-accent'
-                    : 'bg-fg'
-                  : 'bg-line/60'
-              }`}
-              style={{
-                height: isRunning ? `${h}%` : `${15 + (i % 5) * 5}%`,
-              }}
-            />
-          ))}
-        </div>
+        {/* Right side: Task focus metric + Quick Done action */}
+        {activeTodo ? (
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="hidden sm:flex flex-col items-end text-right font-mono">
+              <span className="text-xs text-fg font-medium tabular-nums">
+                {displayMinutes} MIN
+              </span>
+              <span className="text-[9px] text-muted uppercase tracking-wider">
+                FOCUSED
+              </span>
+            </div>
+
+            {onToggleDone && (
+              <button
+                type="button"
+                onClick={() => {
+                  playMicroClick('tick')
+                  onToggleDone(activeTodo.id)
+                }}
+                className="h-8 px-3 rounded-full border border-line bg-canvas hover:border-fg/50 text-fg text-xs font-mono tracking-wider uppercase transition-colors flex items-center gap-1.5 cursor-pointer"
+                title="Mark task as completed"
+              >
+                <Check size={13} strokeWidth={2.5} />
+                <span>DONE</span>
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="shrink-0 flex items-center">
+            <span className="font-mono text-[10px] text-muted tracking-widest uppercase px-2.5 py-1 rounded border border-line/40 bg-canvas/30">
+              READY
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Scrubber / Progress Bar with Timestamps */}
