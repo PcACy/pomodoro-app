@@ -168,17 +168,6 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         aria-hidden="true"
       />
 
-      {/* Atmospheric cursor spotlight ambient glow - 60px compact falloff */}
-      <div
-        className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ease-out ${
-          isHovered ? 'opacity-100' : 'opacity-0'
-        }`}
-        style={{
-          background:
-            'radial-gradient(circle 60px at var(--mouse-x, -999px) var(--mouse-y, -999px), rgb(var(--c-fg) / 0.035), transparent 80%)',
-        }}
-        aria-hidden="true"
-      />
 
       {/* Interactive Cursor Spotlight Dot-Matrix Glow - Crisp 48px instant hardware focus */}
       <div
