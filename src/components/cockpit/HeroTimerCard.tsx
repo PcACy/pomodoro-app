@@ -226,7 +226,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             return (
               <div
                 key={i}
-                className={`flex-1 transition-colors duration-150 ${
+                className={`flex-1 h-1.5 rounded-full transition-colors duration-150 ${
                   isFilled ? 'bg-fg' : 'bg-line/40'
                 }`}
               />
@@ -242,7 +242,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
           <button
             type="button"
             onClick={handleToggleClick}
-            className="h-11 min-w-[180px] inline-flex items-center justify-center rounded-full border border-fg px-6 sm:px-8 font-mono text-xs leading-none tracking-widest uppercase font-semibold transition-colors active:scale-[0.98] cursor-pointer bg-fg text-canvas hover:opacity-90 shrink-0"
+            className="h-11 w-[190px] sm:w-[210px] inline-flex items-center justify-center rounded-full border border-fg px-4 sm:px-6 font-mono text-xs leading-none tracking-widest uppercase font-semibold transition-colors cursor-pointer bg-fg text-canvas hover:opacity-90 active:opacity-80 shrink-0"
           >
             {running ? t.timer.pause : t.timer.start}
           </button>

@@ -54,12 +54,13 @@ export const CatLogo: FC<CatLogoProps> = ({
         )}
 
         {/* Nose / Technical Focal Point */}
-        {isFocus ? (
-          /* Signature Nothing Red Signal Dot during Focus / Running */
-          <circle cx="12" cy="16.5" r="1.5" fill="#D71921" />
-        ) : (
-          <circle cx="12" cy="16.5" r="1" fill="currentColor" />
-        )}
+        <circle
+          cx="12"
+          cy="16.5"
+          r="1.25"
+          fill={isFocus ? '#D71921' : 'currentColor'}
+          className="transition-colors duration-150"
+        />
       </svg>
     </div>
   )

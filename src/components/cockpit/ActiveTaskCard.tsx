@@ -172,16 +172,22 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
     <BentoCard
       label="TRACK 01 // TAPE DECK"
       action={
-        isRunning ? (
-          <span className="h-5 min-w-[72px] inline-flex items-center justify-center gap-1.5 px-2.5 font-mono text-[9px] leading-none tracking-widest uppercase rounded-full border border-accent/60 text-accent bg-accent/10">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse [animation-duration:1s] shrink-0" />
-            <span>REC</span>
+        <span
+          className={`h-5 w-[76px] inline-flex items-center justify-center gap-1.5 px-2 font-mono text-[9px] leading-none tracking-widest uppercase rounded-full border transition-colors ${
+            isRunning
+              ? 'border-accent/60 text-accent bg-accent/10'
+              : 'border-line text-muted bg-canvas'
+          }`}
+        >
+          <span
+            className={`h-1.5 w-1.5 rounded-full shrink-0 transition-colors ${
+              isRunning ? 'bg-accent animate-pulse [animation-duration:1s]' : 'bg-muted/40'
+            }`}
+          />
+          <span className="truncate">
+            {isRunning ? 'REC' : hasProgress ? 'PAUSE' : 'STBY'}
           </span>
-        ) : (
-          <span className="h-5 min-w-[72px] inline-flex items-center justify-center px-2.5 font-mono text-[9px] leading-none tracking-widest uppercase rounded-full border border-line text-muted bg-canvas">
-            {hasProgress ? '|| PAUSE' : 'STBY'}
-          </span>
-        )
+        </span>
       }
       className={className}
       contentClassName="justify-between"
@@ -205,7 +211,9 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
               <span>UNTAGGED</span>
             )}
             <span>·</span>
-            <span>{activeTodo ? (isRunning ? 'IN PROGRESS' : 'STANDBY') : isRunning ? 'FREE SESSION' : 'STANDBY'}</span>
+            <span className="inline-block min-w-[96px]">
+              {activeTodo ? (isRunning ? 'IN PROGRESS' : 'STANDBY') : isRunning ? 'FREE SESSION' : 'STANDBY'}
+            </span>
           </div>
 
           {/* Mechanical tape counter */}
