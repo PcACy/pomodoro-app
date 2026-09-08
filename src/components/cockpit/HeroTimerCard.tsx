@@ -107,9 +107,9 @@ export const HeroTimerCard = memo(function HeroTimerCard({
     <div
       className={`relative overflow-hidden rounded-card bg-surface border border-line p-5 sm:p-6 lg:p-7 flex flex-col justify-between select-none ${className}`}
     >
-      {/* Signature Nothing Dot-Matrix Canvas Grid - ONLY on Hero Timer Card */}
+      {/* Signature Nothing Dot-Matrix Canvas Grid - Subtle & non-distracting */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.14] dark:opacity-[0.22] [background-image:radial-gradient(currentColor_1.5px,transparent_1.5px)] [background-size:14px_14px] text-fg"
+        className="pointer-events-none absolute inset-0 opacity-[0.04] dark:opacity-[0.07] [background-image:radial-gradient(currentColor_1px,transparent_1px)] [background-size:14px_14px] text-fg"
         aria-hidden="true"
       />
 
