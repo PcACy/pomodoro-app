@@ -24,7 +24,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
   const { t } = useTranslation()
   const untaggedLabel = t.todo.noTag
 
-  // Collect available tags with 'Chinese' as priority default if specified in design
+  // Collect only real user tags from settings and logged sessions
   const availableTags = useMemo(() => {
     const list: string[] = []
     const seen = new Set<string>()
@@ -37,30 +37,46 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
       }
     }
 
-    // Include 'Chinese' first to fulfill the default requirement CHINESE // ACTIVE TRACK
-    addTag('Chinese')
-
-    // Add tags from props / settings
+    // Real tags configured in user settings
     tags.forEach(addTag)
 
-    // Add tags from active sessions
+    // Real tags found in logged sessions
     sessions.forEach((s) => {
       if (s.tag) addTag(s.tag)
     })
 
-    // Fallbacks if still sparse
-    ;['Uni', 'Coding'].forEach(addTag)
-
     return list
   }, [tags, sessions])
 
-  const [selectedTagIndex, setSelectedTagIndex] = useState(0)
-  const activeTag = availableTags[selectedTagIndex % availableTags.length] || 'Chinese'
+  // Automatically select the project with the most focus time this week, or the first configured tag
+  const defaultTagIndex = useMemo(() => {
+    if (availableTags.length === 0) return 0
+    const weekStart = startOfWeek(new Date())
+    const stats = minutesByTag(sessions, weekStart, untaggedLabel)
+    let bestTag = ''
+    let maxMins = 0
+    for (const item of stats) {
+      if (item.minutes > maxMins && availableTags.some((t) => t.toLowerCase() === item.tag.toLowerCase())) {
+        maxMins = item.minutes
+        bestTag = item.tag
+      }
+    }
+    if (bestTag) {
+      const idx = availableTags.findIndex((t) => t.toLowerCase() === bestTag.toLowerCase())
+      if (idx !== -1) return idx
+    }
+    return 0
+  }, [availableTags, sessions, untaggedLabel])
+
+  const [selectedTagIndex, setSelectedTagIndex] = useState<number | null>(null)
+  const currentIndex = selectedTagIndex ?? defaultTagIndex
+  const activeTag = availableTags.length > 0 ? availableTags[currentIndex % availableTags.length] : 'GENERAL'
 
   const handleCycleTrack = useCallback(() => {
+    if (availableTags.length <= 1) return
     playMicroClick('tap')
-    setSelectedTagIndex((prev) => (prev + 1) % availableTags.length)
-  }, [availableTags.length])
+    setSelectedTagIndex((prev) => ((prev ?? defaultTagIndex) + 1) % availableTags.length)
+  }, [availableTags.length, defaultTagIndex])
 
   const { totalWeekMinutes, activeTrackWeekMinutes, dayMinutes, todayIdx } = useMemo(() => {
     const weekStart = startOfWeek(new Date())
@@ -127,11 +143,18 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
         <button
           type="button"
           onClick={handleCycleTrack}
-          className="flex items-center justify-between font-mono text-[10px] tracking-wider uppercase text-left group cursor-pointer select-none transition-opacity hover:opacity-85"
-          title="Click to cycle track"
+          disabled={availableTags.length <= 1}
+          className={`flex items-center justify-between font-mono text-[10px] tracking-wider uppercase text-left group select-none transition-opacity ${
+            availableTags.length > 1 ? 'cursor-pointer hover:opacity-85' : 'cursor-default'
+          }`}
+          title={availableTags.length > 1 ? 'Click to cycle track' : undefined}
         >
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-fg font-medium truncate group-hover:underline underline-offset-2 decoration-line">
+            <span
+              className={`text-fg font-medium truncate ${
+                availableTags.length > 1 ? 'group-hover:underline underline-offset-2 decoration-line' : ''
+              }`}
+            >
               {activeTag}
             </span>
             <span className="text-muted/60 shrink-0">// ACTIVE TRACK</span>
