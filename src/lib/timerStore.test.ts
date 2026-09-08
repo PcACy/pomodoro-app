@@ -13,40 +13,36 @@ describe('timerStore', () => {
     const listener = vi.fn()
     const unsubscribe = subscribeTimerTick(listener)
 
-    setTimerTickSnapshot({
-      remainingMs: 1500000,
-      time: '25:00',
-      progress: 1,
-    })
+    // Derive values guaranteed to differ from the (settings-derived) initial
+    // snapshot so the test holds regardless of stored focus duration.
+    const initial = getTimerTickSnapshot()
+    const first =
+      initial.remainingMs === 1500000
+        ? { remainingMs: 1499000, time: '24:59', progress: 0.999 }
+        : { remainingMs: 1500000, time: '25:00', progress: 1 }
 
-    expect(getTimerTickSnapshot()).toEqual({
-      remainingMs: 1500000,
-      time: '25:00',
-      progress: 1,
-    })
+    setTimerTickSnapshot(first)
+
+    expect(getTimerTickSnapshot()).toEqual(first)
     expect(listener).toHaveBeenCalledTimes(1)
 
     // Identical update should be ignored (no redundant notify)
-    setTimerTickSnapshot({
-      remainingMs: 1500000,
-      time: '25:00',
-      progress: 1,
-    })
+    setTimerTickSnapshot(first)
     expect(listener).toHaveBeenCalledTimes(1)
 
     // Different update should notify
-    setTimerTickSnapshot({
-      remainingMs: 1499000,
-      time: '24:59',
-      progress: 0.999,
-    })
+    const second =
+      first.remainingMs === 1500000
+        ? { remainingMs: 1499000, time: '24:59', progress: 0.999 }
+        : { remainingMs: 1498000, time: '24:58', progress: 0.998 }
+    setTimerTickSnapshot(second)
     expect(listener).toHaveBeenCalledTimes(2)
 
     unsubscribe()
     setTimerTickSnapshot({
-      remainingMs: 1498000,
-      time: '24:58',
-      progress: 0.998,
+      remainingMs: 1497000,
+      time: '24:57',
+      progress: 0.997,
     })
     expect(listener).toHaveBeenCalledTimes(2)
   })

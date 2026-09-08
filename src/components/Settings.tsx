@@ -19,6 +19,7 @@ import type { AccentColor, Settings, Session, TodoItem } from '../types'
 import type { ColorMode, ThemeId } from '../themes'
 import { useThemeColors } from '../hooks/useTheme'
 import { clearSessions, exportAll } from '../lib/db'
+import { dayKey } from '../lib/time'
 import { downloadText, sessionsToCsv, sessionsToJson, todosToCsv, todosToJson } from '../lib/dataExport'
 import { useTranslation } from '../hooks/useTranslation'
 import { playMicroClick } from '../lib/sound'
@@ -148,8 +149,12 @@ function NumberStepper({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value
     setLocalStr(raw)
+    // All stepper-backed settings are whole numbers (minutes / rounds).
+    // Reject decimals live so e.g. "12.5" can't leak a fractional phase or
+    // round count into the timer math.
+    if (!/^\d+$/.test(raw.trim())) return
     const parsed = Number(raw)
-    if (!Number.isNaN(parsed) && parsed >= min && parsed <= max) {
+    if (parsed >= min && parsed <= max) {
       onChange(parsed)
     }
   }
@@ -162,7 +167,7 @@ function NumberStepper({
       } else if (parsed > max) {
         onChange(max)
       } else {
-        onChange(parsed)
+        onChange(Math.round(parsed))
       }
       setLocalStr(null)
     }
@@ -313,7 +318,7 @@ export const SettingsPanel = memo(function SettingsPanel({
     prevCanAddRef.current = canAdd
   }, [canAdd])
 
-  const todayKey = new Date().toISOString().slice(0, 10)
+  const todayKey = dayKey(new Date())
 
   const getTagColor = useCallback(
     (tag: string): string => {
@@ -360,7 +365,7 @@ export const SettingsPanel = memo(function SettingsPanel({
   }
 
   const setPhaseDuration = (key: keyof Settings['phases'], value: number) => {
-    const v = Math.max(1, Math.min(180, value || 1))
+    const v = Math.max(1, Math.min(180, Math.round(value) || 1))
     update((s) => ({ ...s, phases: { ...s.phases, [key]: v } }))
   }
 
@@ -834,7 +839,7 @@ export const SettingsPanel = memo(function SettingsPanel({
             <NumberStepper
               value={settings.weeklyGoalMinutes}
               min={15}
-              max={24 * 60}
+              max={7 * 24 * 60}
               step={30}
               suffix={t.settings.minUnit}
               ariaLabel={t.settings.weeklyGoal}

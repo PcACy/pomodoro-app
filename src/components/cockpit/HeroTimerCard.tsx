@@ -47,11 +47,19 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   const timerTick = useTimerTick()
   const flowTick = useFlowTimerTick()
 
-  // Local live clock for date display
+  // Local live clock for date display (minute precision is enough; refresh
+  // on visibility return so the "NOW" label can't go stale in background tabs)
   const [localDate, setLocalDate] = useState(() => new Date())
   useEffect(() => {
-    const timer = setInterval(() => setLocalDate(new Date()), 1000)
-    return () => clearInterval(timer)
+    const timer = window.setInterval(() => setLocalDate(new Date()), 30_000)
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') setLocalDate(new Date())
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [])
 
   const isFlow = mode === 'flow'
@@ -63,6 +71,9 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   const running = isFlow ? flowStatus === 'running' : status === 'running'
   const shownLabel = isFlow ? t.timer.flow : phaseLabel
   const shownTime = isFlow ? activeFlowTime : activeTime
+  const safeRounds = Number.isFinite(roundsBeforeLongBreak) && roundsBeforeLongBreak > 0
+    ? Math.floor(roundsBeforeLongBreak)
+    : 1
 
   // Mechanical Segmented Progress (20 discrete blocks, 2px gap)
   // Fills additively from left to right (0% -> 100%)
@@ -190,7 +201,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
               {shownLabel}
             </div>
             <span className="font-mono text-[10px] text-muted tracking-wider">
-              ROUND {(completedFocusInCycle % roundsBeforeLongBreak) + 1} / {roundsBeforeLongBreak}
+              ROUND {(completedFocusInCycle % safeRounds) + 1} / {safeRounds}
             </span>
           </div>
         </div>

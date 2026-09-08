@@ -76,7 +76,10 @@ export const Timer = memo(function Timer({
   const flowMinutes = Math.floor(flowSeconds / 60)
 
   const running = isFlow ? flowStatus === 'running' : status === 'running'
-  const currentRoundIndex = completedFocusInCycle % roundsBeforeLongBreak
+  const safeRounds = Number.isFinite(roundsBeforeLongBreak) && roundsBeforeLongBreak > 0
+    ? Math.floor(roundsBeforeLongBreak)
+    : 1
+  const currentRoundIndex = completedFocusInCycle % safeRounds
 
   const shownLabel = isFlow ? t.timer.flow : phaseLabel
   const shownTime = isFlow ? activeFlowTime : activeTime
@@ -198,7 +201,7 @@ export const Timer = memo(function Timer({
           ) : (
             <div className="flex items-center gap-2">
               <span>
-                ROUND {String(currentRoundIndex + 1).padStart(2, '0')} / {String(roundsBeforeLongBreak).padStart(2, '0')}
+                ROUND {String(currentRoundIndex + 1).padStart(2, '0')} / {String(safeRounds).padStart(2, '0')}
               </span>
               <span className="text-muted/40">·</span>
               <span className="text-fg font-bold tabular-nums">

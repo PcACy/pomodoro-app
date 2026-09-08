@@ -30,6 +30,7 @@ export function useAuth() {
         })
 
       const { data: sub } = sb.auth.onAuthStateChange((_event, session) => {
+        if (disposed) return
         setUser(session?.user ?? null)
       })
       unsubscribe = () => sub.subscription.unsubscribe()

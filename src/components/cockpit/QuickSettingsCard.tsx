@@ -1,8 +1,29 @@
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 import type { Settings } from '../../types'
 import type { ColorMode } from '../../themes'
 import { BentoCard } from './BentoCard'
 import { playMicroClick } from '../../lib/sound'
+
+const SOUND_KEY = 'pomodoro.sound'
+const AUTO_BREAKS_KEY = 'pomodoro.auto_breaks'
+
+function readFlag(key: string, expectTrue: boolean): boolean {
+  try {
+    const raw = localStorage.getItem(key)
+    return expectTrue ? raw === 'true' : raw !== 'false'
+  } catch {
+    // Storage unavailable (private mode / blocked cookies): fall back to defaults.
+    return !expectTrue
+  }
+}
+
+function writeFlag(key: string, value: boolean): void {
+  try {
+    localStorage.setItem(key, String(value))
+  } catch {
+    /* storage unavailable */
+  }
+}
 
 interface QuickSettingsCardProps {
   settings?: Settings
@@ -26,18 +47,24 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
   className = '',
 }: QuickSettingsCardProps) {
   // Local quick toggle preferences synced to localStorage
-  const [soundEnabled, setSoundEnabled] = useState(
-    () => localStorage.getItem('pomodoro.sound') !== 'false',
-  )
-  const [autoBreaks, setAutoBreaks] = useState(
-    () => localStorage.getItem('pomodoro.auto_breaks') === 'true',
-  )
+  const [soundEnabled, setSoundEnabled] = useState(() => readFlag(SOUND_KEY, false))
+  const [autoBreaks, setAutoBreaks] = useState(() => readFlag(AUTO_BREAKS_KEY, true))
+
+  // Stay in sync when another tab (or the Settings panel) flips these flags.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === SOUND_KEY) setSoundEnabled(readFlag(SOUND_KEY, false))
+      else if (e.key === AUTO_BREAKS_KEY) setAutoBreaks(readFlag(AUTO_BREAKS_KEY, true))
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
 
   const toggleSound = useCallback(() => {
     playMicroClick('toggle')
     setSoundEnabled((prev) => {
       const next = !prev
-      localStorage.setItem('pomodoro.sound', String(next))
+      writeFlag(SOUND_KEY, next)
       return next
     })
   }, [])
@@ -46,7 +73,7 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
     playMicroClick('toggle')
     setAutoBreaks((prev) => {
       const next = !prev
-      localStorage.setItem('pomodoro.auto_breaks', String(next))
+      writeFlag(AUTO_BREAKS_KEY, next)
       return next
     })
   }, [])

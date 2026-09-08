@@ -13,6 +13,7 @@ interface ActiveTaskCardProps {
   totalMs: number
   time: string
   sessions?: Session[]
+  focusMinutes?: number
   onOpenTodoManager?: () => void
   onToggleDone?: (id: string) => void
   className?: string
@@ -25,6 +26,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   totalMs,
   time,
   sessions,
+  focusMinutes = 25,
   onOpenTodoManager,
   onToggleDone,
   className = '',
@@ -50,7 +52,8 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         .filter((s) => s.task && s.task.trim().toLowerCase() === activeTodo.title.trim().toLowerCase())
         .reduce((sum, s) => sum + Math.round(s.durationMs / 60_000), 0)
     : 0
-  const displayMinutes = taskMinutes > 0 ? taskMinutes : (activeTodo ? activeTodo.pomodoros * 25 : 0)
+  const minutesPerPomodoro = Number.isFinite(focusMinutes) && focusMinutes > 0 ? focusMinutes : 25
+  const displayMinutes = taskMinutes > 0 ? taskMinutes : (activeTodo ? activeTodo.pomodoros * minutesPerPomodoro : 0)
 
   return (
     <BentoCard

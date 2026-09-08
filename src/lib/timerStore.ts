@@ -11,11 +11,41 @@ export interface FlowTickSnapshot {
 
 type Listener = () => void
 
-let timerTickSnapshot: TimerTickSnapshot = {
-  remainingMs: 0,
-  time: '00:00',
-  progress: 0,
+/**
+ * Best-effort initial duration for first paint: the tick store starts at
+ * 00:00 until useTimer's mount effect publishes the real phase duration,
+ * which flashes "00:00" in the hero display, title and status bar on reload.
+ * Reading the validated stored focus length keeps first paint correct.
+ */
+function initialRemainingMs(): number {
+  const fallback = 25 * 60_000
+  try {
+    if (typeof localStorage === 'undefined') return fallback
+    const raw = localStorage.getItem('pomodoro.settings')
+    if (!raw) return fallback
+    const parsed = JSON.parse(raw) as { phases?: { focus?: unknown } } | null
+    const focus = parsed?.phases?.focus
+    if (typeof focus !== 'number' || !Number.isFinite(focus)) return fallback
+    const clamped = Math.max(1, Math.min(180, Math.round(focus)))
+    return clamped * 60_000
+  } catch {
+    return fallback
+  }
 }
+
+function fmtInitial(ms: number): string {
+  const totalSec = Math.max(0, Math.ceil(ms / 1000))
+  const m = Math.floor(totalSec / 60)
+  const s = totalSec % 60
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
+function initialTimerTickSnapshot(): TimerTickSnapshot {
+  const remainingMs = initialRemainingMs()
+  return { remainingMs, time: fmtInitial(remainingMs), progress: 1 }
+}
+
+let timerTickSnapshot: TimerTickSnapshot = initialTimerTickSnapshot()
 
 let flowTickSnapshot: FlowTickSnapshot = {
   elapsedMs: 0,

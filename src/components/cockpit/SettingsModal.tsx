@@ -57,13 +57,22 @@ export const SettingsModal = memo(function SettingsModal({
       }
     }
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    // Lock background scroll while the modal is open; restore on close.
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = prevOverflow
+    }
   }, [isOpen, onClose])
 
   if (!isOpen) return null
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Settings & Preferences"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-6 select-none backdrop-blur-[2px]"
       onClick={() => {
         playMicroClick('tap')

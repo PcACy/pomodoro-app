@@ -13,6 +13,7 @@ import {
 } from 'recharts'
 import { Calendar, Clock, Flame, Layers } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../types'
+import { DEFAULT_SETTINGS } from '../types'
 import type { ColorMode, ThemeId } from '../themes'
 import { useThemeColors } from '../hooks/useTheme'
 import {
@@ -172,7 +173,10 @@ export const Dashboard = memo(function Dashboard({
   const totalFocus = useMemo(() => totalFocusStats(filteredSessions), [filteredSessions])
   const avgDaily = useMemo(() => averageDailyFocusMinutes(filteredSessions), [filteredSessions])
   const pomFlow = useMemo(() => pomodoroVsFlowBreakdown(filteredSessions), [filteredSessions])
-  const goal = settings.weeklyGoalMinutes > 0 ? settings.weeklyGoalMinutes : 700
+  const goal =
+    settings.weeklyGoalMinutes > 0
+      ? settings.weeklyGoalMinutes
+      : DEFAULT_SETTINGS.weeklyGoalMinutes
   const goalPct = Math.min(100, Math.max(0, Math.round((totalFocus.totalMinutes / goal) * 100)))
 
   // Bar Chart Data & Y-Axis Scale

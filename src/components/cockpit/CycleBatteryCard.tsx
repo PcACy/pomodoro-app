@@ -4,6 +4,7 @@ import { BentoCard } from './BentoCard'
 interface CycleBatteryCardProps {
   completedFocusInCycle: number
   roundsBeforeLongBreak: number
+  focusMinutes?: number
   className?: string
 }
 
@@ -12,6 +13,7 @@ const TOTAL_SEGMENTS = 10
 export const CycleBatteryCard = memo(function CycleBatteryCard({
   completedFocusInCycle,
   roundsBeforeLongBreak,
+  focusMinutes = 25,
   className = '',
 }: CycleBatteryCardProps) {
   const currentCompleted = roundsBeforeLongBreak > 0
@@ -22,6 +24,7 @@ export const CycleBatteryCard = memo(function CycleBatteryCard({
 
   const filledSegments = Math.round(ratio * TOTAL_SEGMENTS)
   const remainingRounds = Math.max(0, roundsBeforeLongBreak - currentCompleted)
+  const minutesPerRound = Number.isFinite(focusMinutes) && focusMinutes > 0 ? focusMinutes : 25
 
   return (
     <BentoCard
@@ -63,7 +66,7 @@ export const CycleBatteryCard = memo(function CycleBatteryCard({
 
         {/* Next Milestone Subtitle */}
         <div className="mt-1.5 flex items-center justify-between font-mono text-[9px] text-muted tracking-wider uppercase">
-          <span>{remainingRounds <= 1 ? 'LONG BREAK NEXT' : `~ ${remainingRounds * 25}M TO LONG BREAK`}</span>
+          <span>{remainingRounds <= 1 ? 'LONG BREAK NEXT' : `~ ${remainingRounds * minutesPerRound}M TO LONG BREAK`}</span>
         </div>
       </div>
     </BentoCard>

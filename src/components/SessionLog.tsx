@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { Check, ChevronDown, Copy, Download, FileDown, FileJson, FileText, History, Search, StickyNote, Trash2, Upload } from 'lucide-react'
 import type { Session, TodoItem } from '../types'
-import { fmtDateTime, fmtDuration } from '../lib/time'
+import { dayKey, fmtDateTime, fmtDuration } from '../lib/time'
 import { buildDailyMarkdown, buildDayExport, copyMarkdown, downloadMarkdown } from '../lib/markdownExport'
 import { downloadText, sessionsToCsv, sessionsToJson } from '../lib/dataExport'
 import { importSessions } from '../lib/db'
@@ -67,6 +67,14 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
   const [copied, setCopied] = useState(false)
   const exportRef = useRef<HTMLDivElement>(null)
   const importRef = useRef<HTMLInputElement>(null)
+  const copyTimerRef = useRef<number | null>(null)
+
+  useEffect(
+    () => () => {
+      if (copyTimerRef.current != null) window.clearTimeout(copyTimerRef.current)
+    },
+    [],
+  )
 
   useEffect(() => {
     if (!open) return
@@ -88,7 +96,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
     )
   }, [sessions, query, locale])
 
-  const todayKey = new Date().toISOString().slice(0, 10)
+  const todayKey = dayKey(new Date())
 
   const handleImport = async (file: File) => {
     try {
@@ -129,7 +137,9 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
       try {
         await copyMarkdown(buildDailyMarkdown(buildDayExport(sessions, new Date()), todos))
         setCopied(true)
-        window.setTimeout(() => {
+        if (copyTimerRef.current != null) window.clearTimeout(copyTimerRef.current)
+        copyTimerRef.current = window.setTimeout(() => {
+          copyTimerRef.current = null
           setCopied(false)
           setOpen(false)
         }, 1200)

@@ -54,7 +54,9 @@ export const VimStatusLine = memo(function VimStatusLine({
     dotColor = 'bg-warning'
   }
 
-  const pct = Math.round(progress * 100)
+  const pct = Number.isFinite(progress)
+    ? Math.round(Math.min(1, Math.max(0, progress)) * 100)
+    : 0
 
   return (
     <footer

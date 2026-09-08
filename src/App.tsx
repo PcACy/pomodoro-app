@@ -18,7 +18,7 @@ import { useSync } from './hooks/useSync'
 import { useTranslation } from './hooks/useTranslation'
 import { addSession, updateSessionNotes } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
-import { initAudio, playMicroClick } from './lib/sound'
+import { playMicroClick } from './lib/sound'
 import { STORAGE_KEYS, type Session, type Settings, type TimerMode } from './types'
 import { Timer } from './components/Timer'
 import { PipTimer, PipCanvas } from './components/PipTimer'
@@ -222,18 +222,8 @@ export default function App() {
 
   useWakeLock(chromeStatus === 'running')
 
-  // Unlock the AudioContext on the first user gesture (autoplay policy).
-  useEffect(() => {
-    const unlock = () => initAudio()
-    window.addEventListener('pointerdown', unlock, { once: true })
-    window.addEventListener('keydown', unlock, { once: true })
-    window.addEventListener('touchstart', unlock, { once: true })
-    return () => {
-      window.removeEventListener('pointerdown', unlock)
-      window.removeEventListener('keydown', unlock)
-      window.removeEventListener('touchstart', unlock)
-    }
-  }, [])
+  // Note: AudioContext auto-unlock on first user gesture is handled centrally
+  // in lib/sound.ts (module-level once-listeners calling initAudio).
 
   useNotificationActions({
     onStartPhase: () => {

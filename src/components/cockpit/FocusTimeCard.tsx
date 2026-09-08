@@ -24,6 +24,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
   const hours = (currentMinutes / 60).toFixed(1)
   const targetHours = (targetMinutes / 60).toFixed(1)
   const ratio = Math.max(0, currentMinutes / targetMinutes)
+  const clampedPct = Math.min(100, Math.round(ratio * 100))
   const filledBlocks = Math.min(
     TOTAL_BLOCKS,
     Math.max(0, Math.round(ratio * TOTAL_BLOCKS)),
@@ -77,7 +78,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
         <div
           className="flex h-2 w-full gap-0.5"
           role="progressbar"
-          aria-valuenow={Math.round(ratio * 100)}
+          aria-valuenow={clampedPct}
           aria-valuemin={0}
           aria-valuemax={100}
         >

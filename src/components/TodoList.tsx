@@ -193,6 +193,16 @@ export const TodoList = memo(function TodoList({
 
   const activeTag = tag && tags.includes(tag) ? tag : ''
 
+  // The tag list can change while this component is mounted (tags added or
+  // removed in Settings, or synced from another tab). A selected tag that no
+  // longer exists would otherwise linger in state and pre-select a stale
+  // value the next time the dropdown opens.
+  useEffect(() => {
+    if (tag !== '' && !tags.includes(tag)) {
+      setTag(tags[0] ?? '')
+    }
+  }, [tags, tag])
+
   // --- Delete choreography: exit animation + FLIP glide for siblings -------
   // The removed row fades/slides out (transform+opacity only); after it is
   // unmounted, remaining rows are inverted by their vertical delta and eased

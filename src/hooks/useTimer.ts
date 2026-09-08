@@ -154,12 +154,18 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       progress: 1,
     })
 
-    setMachine({
+    // Publish the new machine state to the ref synchronously: setMachine only
+    // re-renders asynchronously, so a re-entrant finishCurrentPhase (worker tick
+    // + visibility reconcile firing back-to-back) would otherwise observe the
+    // stale phase and log the focus session a second time.
+    const nextMachine = {
       phase: nextPhase,
       status: nextStatus,
       totalMs: d,
       completedFocusInCycle: nextCycle,
-    })
+    }
+    machineRef.current = nextMachine
+    setMachine(nextMachine)
 
     broadcastTimerState({
       status: nextStatus,
@@ -337,12 +343,14 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
         if (p.phaseStartedAt != null) {
           phaseStartedAtRef.current = p.phaseStartedAt
         }
-        setMachine({
+        const nextMachine = {
           status: p.status,
           phase: p.phase,
           totalMs: p.totalMs,
           completedFocusInCycle: p.completedFocusInCycle,
-        })
+        }
+        machineRef.current = nextMachine
+        setMachine(nextMachine)
       }
     })
   }, [])

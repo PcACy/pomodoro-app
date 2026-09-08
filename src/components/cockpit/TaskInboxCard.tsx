@@ -129,49 +129,48 @@ export const TaskInboxCard = memo(function TaskInboxCard({
         {/* Quick Tag Selector Pill */}
         {tags.length > 0 && (
           <div className="relative shrink-0" ref={tagDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setIsTagDropdownOpen((prev) => !prev)}
-              className={`h-7 px-2.5 rounded-lg border text-[10px] font-mono tracking-wider uppercase transition-colors flex items-center gap-1.5 cursor-pointer select-none ${
+            <div
+              className={`h-7 px-2.5 rounded-lg border text-[10px] font-mono tracking-wider uppercase transition-colors flex items-center gap-1.5 select-none ${
                 selectedTag
                   ? 'border-fg/40 bg-surface text-fg'
                   : 'border-line bg-canvas text-muted hover:text-fg hover:border-fg/30'
               }`}
-              title="Select tag for this task"
             >
-              {selectedTag ? (
-                <>
-                  <span
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: getTagColor(selectedTag) }}
-                  />
-                  <span className="max-w-[70px] truncate">{selectedTag}</span>
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setSelectedTag('')
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.stopPropagation()
-                        setSelectedTag('')
-                      }
-                    }}
-                    className="ml-0.5 text-muted hover:text-fg"
-                    title="Remove tag"
-                  >
-                    ×
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="text-muted/70">#</span>
-                  <span>TAG</span>
-                </>
+              <button
+                type="button"
+                onClick={() => setIsTagDropdownOpen((prev) => !prev)}
+                aria-expanded={isTagDropdownOpen}
+                aria-haspopup="listbox"
+                className="flex min-w-0 flex-1 items-center gap-1.5 bg-transparent cursor-pointer"
+                title="Select tag for this task"
+              >
+                {selectedTag ? (
+                  <>
+                    <span
+                      className="h-1.5 w-1.5 rounded-full shrink-0"
+                      style={{ backgroundColor: getTagColor(selectedTag) }}
+                    />
+                    <span className="max-w-[70px] truncate">{selectedTag}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-muted/70">#</span>
+                    <span>TAG</span>
+                  </>
+                )}
+              </button>
+              {selectedTag && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedTag('')}
+                  className="ml-0.5 shrink-0 cursor-pointer text-muted hover:text-fg"
+                  title="Remove tag"
+                  aria-label="Remove tag"
+                >
+                  ×
+                </button>
               )}
-            </button>
+            </div>
 
             {isTagDropdownOpen && (
               <div className="absolute right-0 top-full mt-1 z-30 min-w-[130px] rounded-lg border border-line bg-surface p-1 shadow-lg backdrop-blur-md flex flex-col gap-0.5 font-mono text-[10px] tracking-wider uppercase">

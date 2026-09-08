@@ -135,6 +135,7 @@ export const BentoCockpit = memo(function BentoCockpit({
           totalMs={totalMs}
           time={time}
           sessions={sessions}
+          focusMinutes={settings.phases.focus}
           onOpenTodoManager={onOpenTodoManager}
           onToggleDone={onTodoToggle}
           className="md:col-span-2 lg:col-span-2 min-h-[170px]"
@@ -182,6 +183,7 @@ export const BentoCockpit = memo(function BentoCockpit({
         <CycleBatteryCard
           completedFocusInCycle={completedFocusInCycle}
           roundsBeforeLongBreak={roundsBeforeLongBreak}
+          focusMinutes={settings.phases.focus}
           className="md:col-span-1 lg:col-span-1 min-h-[170px]"
         />
 

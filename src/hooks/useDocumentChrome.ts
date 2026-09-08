@@ -129,7 +129,11 @@ export function useDocumentChrome(
       lastFaviconRef.current = { key: cacheKey, uri }
       link.href = uri
     }
+  }, [phase, status, time, mode, t])
 
+  // Reset tab chrome exactly once on unmount (not on every tick/phase change,
+  // which would briefly flash the default title and favicon).
+  useEffect(() => {
     return () => {
       document.title = 'Pomau'
       const linkEl = document.querySelector<HTMLLinkElement>('#dynamic-favicon')
@@ -137,7 +141,7 @@ export function useDocumentChrome(
         linkEl.href = DEFAULT_FAVICON
       }
     }
-  }, [phase, status, time, mode, t])
+  }, [])
 }
 
 interface DocumentChromeProps {
