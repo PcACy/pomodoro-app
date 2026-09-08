@@ -48,6 +48,8 @@ interface BentoCockpitProps {
   colorMode: ColorMode
   onToggleColorMode: () => void
   onOpenSettingsModal: () => void
+  isZenMode?: boolean
+  onToggleZen?: () => void
 }
 
 export const BentoCockpit = memo(function BentoCockpit({
@@ -80,6 +82,8 @@ export const BentoCockpit = memo(function BentoCockpit({
   colorMode,
   onToggleColorMode,
   onOpenSettingsModal,
+  isZenMode,
+  onToggleZen,
 }: BentoCockpitProps) {
   const isRunning = mode === 'flow' ? flowStatus === 'running' : status === 'running'
 
@@ -148,8 +152,10 @@ export const BentoCockpit = memo(function BentoCockpit({
         <QuickSettingsCard
           settings={settings}
           colorMode={colorMode}
+          isZenMode={isZenMode}
           onUpdateSettings={onUpdateSettings}
           onToggleColorMode={onToggleColorMode}
+          onToggleZen={onToggleZen}
           onOpenSettingsModal={onOpenSettingsModal}
           className="md:col-span-2 lg:col-span-2 min-h-[200px]"
         />

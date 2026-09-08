@@ -5,19 +5,23 @@ import { BentoCard } from './BentoCard'
 import { playMicroClick } from '../../lib/sound'
 
 interface QuickSettingsCardProps {
-  settings: Settings
+  settings?: Settings
   colorMode: ColorMode
-  onUpdateSettings: (updater: (s: Settings) => Settings) => void
+  isZenMode?: boolean
+  onUpdateSettings?: (updater: (s: Settings) => Settings) => void
   onToggleColorMode: () => void
+  onToggleZen?: () => void
   onOpenSettingsModal: () => void
   className?: string
 }
 
 export const QuickSettingsCard = memo(function QuickSettingsCard({
-  settings,
+  settings: _settings,
   colorMode,
-  onUpdateSettings,
+  isZenMode = false,
+  onUpdateSettings: _onUpdateSettings,
   onToggleColorMode,
+  onToggleZen,
   onOpenSettingsModal,
   className = '',
 }: QuickSettingsCardProps) {
@@ -46,14 +50,6 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
       return next
     })
   }, [])
-
-  const toggleLayout = useCallback(() => {
-    playMicroClick('toggle')
-    onUpdateSettings((s) => ({
-      ...s,
-      layoutMode: s.layoutMode === 'split' ? 'single' : 'split',
-    }))
-  }, [onUpdateSettings])
 
   return (
     <BentoCard
@@ -152,26 +148,29 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
           </button>
         </div>
 
-        {/* Toggle 4: Split Layout */}
+        {/* Toggle 4: Distraction Free (Immersive Zen Mode) */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-col">
-            <span className="font-sans text-xs text-fg font-medium">Zen Layout</span>
+            <span className="font-sans text-xs text-fg font-medium">Distraction Free</span>
             <span className="font-mono text-[9px] text-muted uppercase">
-              {settings.layoutMode === 'split' ? 'EXPANDED' : 'COMPACT'}
+              {isZenMode ? 'IMMERSIVE' : 'STANDBY'}
             </span>
           </div>
           <button
             type="button"
             role="switch"
-            aria-checked={settings.layoutMode === 'split'}
-            onClick={toggleLayout}
+            aria-checked={Boolean(isZenMode)}
+            onClick={() => {
+              playMicroClick('toggle')
+              onToggleZen?.()
+            }}
             className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
-              settings.layoutMode === 'split' ? 'bg-accent border-accent' : 'bg-canvas border-line'
+              isZenMode ? 'bg-accent border-accent' : 'bg-canvas border-line'
             }`}
           >
             <span
               className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                settings.layoutMode === 'split' ? 'translate-x-4' : 'translate-x-0 bg-muted'
+                isZenMode ? 'translate-x-4' : 'translate-x-0 bg-muted'
               }`}
             />
           </button>
