@@ -84,13 +84,19 @@ export const SettingsModal = memo(function SettingsModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-line">
-          <div>
-            <span className="font-mono text-[10px] sm:text-xs tracking-widest text-muted uppercase">
-              SETTINGS & PREFERENCES // HARDWARE
-            </span>
-            <h2 className="font-sans text-lg font-medium text-fg">
-              Configuration & Timers
+        <div className="flex items-center justify-between pb-3.5 border-b border-line">
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_8px_rgba(215,25,33,0.6)] shrink-0" />
+              <span className="font-mono text-[10px] sm:text-xs tracking-widest text-muted uppercase">
+                SETTINGS // SYSTEM CONFIG
+              </span>
+              <span className="rounded-full border border-line bg-canvas px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted">
+                V1.0
+              </span>
+            </div>
+            <h2 className="font-mono text-base font-bold uppercase tracking-tight text-fg">
+              Device Configuration
             </h2>
           </div>
 
@@ -100,7 +106,7 @@ export const SettingsModal = memo(function SettingsModal({
               playMicroClick('tap')
               onClose()
             }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
           >
             <X size={13} />
             <span>ESC</span>
