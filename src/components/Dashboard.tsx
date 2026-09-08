@@ -16,6 +16,7 @@ import type { Settings, Session, TodoItem } from '../types'
 import { DEFAULT_SETTINGS } from '../types'
 import type { ColorMode, ThemeId } from '../themes'
 import { useThemeColors } from '../hooks/useTheme'
+import { getTagColor } from './TodoList'
 import {
   averageDailyFocusMinutes,
   currentStreakDays,
@@ -39,7 +40,6 @@ import { useTranslation } from '../hooks/useTranslation'
 import type { Messages } from '../lib/i18n'
 import { SlidingSegmentedControl } from './SlidingSegmentedControl'
 
-type ThemeColors = ReturnType<typeof useThemeColors>
 
 const TIME_RANGES: TimeRange[] = ['week', 'month', 'all']
 
@@ -58,26 +58,37 @@ function MetricCard({
   value,
   sub,
   extra,
+  accentDot = false,
 }: {
   icon: React.ReactNode
   label: string
   value: string
   sub?: string
   extra?: React.ReactNode
+  accentDot?: boolean
 }) {
   return (
     <div className="card flex flex-col justify-between p-4 sm:p-5 transition-colors">
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line bg-canvas text-fg">
-          {icon}
-        </div>
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1 font-mono">
-          <p className="text-[10px] uppercase tracking-wider text-muted truncate">{label}</p>
-          <p className="text-xl font-bold tabular-nums text-fg truncate">{value}</p>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            {accentDot ? (
+              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse shrink-0" />
+            ) : (
+              <span className="h-1.5 w-1.5 rounded-full bg-line shrink-0" />
+            )}
+            <p className="text-[10px] uppercase tracking-wider text-muted truncate">{label}</p>
+          </div>
+          <p className="font-doto text-2xl sm:text-3xl font-bold tracking-tight text-fg tabular-nums truncate">
+            {value}
+          </p>
+        </div>
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-canvas text-muted">
+          {icon}
         </div>
       </div>
       {sub && <p className="mt-2.5 truncate font-mono text-[11px] tabular-nums text-muted">{sub}</p>}
-      {extra && <div className="mt-2">{extra}</div>}
+      {extra && <div className="mt-2.5">{extra}</div>}
     </div>
   )
 }
@@ -93,10 +104,9 @@ interface CustomBarTooltipProps {
 function BarChartTooltip({
   active,
   payload,
-  colors,
   lang,
   t,
-}: CustomBarTooltipProps & { colors: ThemeColors; lang: string; t: Messages }) {
+}: CustomBarTooltipProps & { lang: string; t: Messages }) {
   if (!active || !payload || !payload.length) return null
   const data = payload[0].payload
   const hasTags = data.tags && data.tags.length > 0
@@ -115,13 +125,19 @@ function BarChartTooltip({
 
       {hasTags && (
         <div className="flex flex-col gap-1 pt-0.5">
-          {data.tags.map((tg, idx) => {
-            const tagColor = tg.color || colors.chart[idx % colors.chart.length]
+          {data.tags.map((tg) => {
+            const tagColor = getTagColor(tg.tag)
             return (
               <div key={tg.tag} className="flex items-center justify-between gap-3 text-[11px]">
                 <span className="flex items-center gap-1.5 truncate text-muted">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: tagColor }} />
-                  <span className="max-w-[110px] truncate">{tg.tag}</span>
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full"
+                    style={{
+                      backgroundColor: tagColor,
+                      boxShadow: `0 0 8px ${tagColor}66`,
+                    }}
+                  />
+                  <span className="max-w-[110px] truncate text-fg/90">{tg.tag}</span>
                 </span>
                 <span className="font-bold tabular-nums text-fg">{tg.minutes}m</span>
               </div>
@@ -195,11 +211,11 @@ export const Dashboard = memo(function Dashboard({
 
   // Tag Distribution Data
   const tagData = useMemo(() => {
-    return minutesByTag(filteredSessions, undefined, t.todo.noTag).map((item, i) => ({
+    return minutesByTag(filteredSessions, undefined, t.todo.noTag).map((item) => ({
       ...item,
-      color: colors.chart[i % colors.chart.length],
+      color: getTagColor(item.tag),
     }))
-  }, [filteredSessions, colors, t.todo.noTag])
+  }, [filteredSessions, t.todo.noTag])
 
   // Hour distribution (time of day)
   const hourData = useMemo(() => sessionsByHour(filteredSessions), [filteredSessions])
@@ -239,7 +255,7 @@ export const Dashboard = memo(function Dashboard({
       <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Total Focus in Range */}
         <MetricCard
-          icon={<Clock size={18} />}
+          icon={<Clock size={15} />}
           label={timeRange === 'week' ? t.dashboard.weeklyGoal : t.dashboard.totalFocusTime}
           value={fmtDuration(totalFocus.totalMinutes * 60_000, lang)}
           sub={
@@ -251,7 +267,7 @@ export const Dashboard = memo(function Dashboard({
 
         {/* Card 2: Ø Daily Focus per Active Day */}
         <MetricCard
-          icon={<Calendar size={18} />}
+          icon={<Calendar size={15} />}
           label={t.dashboard.avgDailyFocus}
           value={avgDaily.avgMinutes > 0 ? fmtDuration(avgDaily.avgMinutes * 60_000, lang) : '0 min'}
           sub={t.dashboard.avgDailyFocusSub(
@@ -262,26 +278,27 @@ export const Dashboard = memo(function Dashboard({
 
         {/* Card 3: Daily Streak */}
         <MetricCard
-          icon={<Flame size={18} className="text-warning" />}
+          icon={<Flame size={15} className="text-fg" />}
           label={t.dashboard.streak}
           value={`${streak} ${streak === 1 ? t.dashboard.day : t.dashboard.days}`}
           sub={streak > 0 ? t.dashboard.streakActive : t.dashboard.streakReset}
+          accentDot={streak > 0}
         />
 
         {/* Card 4: Pomodoro vs Flow Breakdown */}
         <MetricCard
-          icon={<Layers size={18} />}
+          icon={<Layers size={15} />}
           label={t.dashboard.pomodoroVsFlow}
           value={`${pomFlow.pomodoroPct}% / ${pomFlow.flowPct}%`}
           sub={t.dashboard.pomodoroRatio(pomFlow.pomodoroPct, pomFlow.flowPct)}
           extra={
-            <div className="h-1.5 w-full overflow-hidden rounded-none bg-canvas border border-line flex">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-canvas border border-line flex gap-0.5 p-0.5">
               <div
-                className="h-full bg-fg transition-all duration-300"
+                className="h-full bg-fg rounded-full transition-all duration-300"
                 style={{ width: `${pomFlow.pomodoroPct}%` }}
               />
               <div
-                className="h-full bg-accent transition-all duration-300"
+                className="h-full bg-accent rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(215,25,33,0.5)]"
                 style={{ width: `${pomFlow.flowPct}%` }}
               />
             </div>
@@ -314,7 +331,7 @@ export const Dashboard = memo(function Dashboard({
               tickLine={false}
             />
             <Tooltip
-              content={<BarChartTooltip colors={colors} lang={lang} t={t} />}
+              content={<BarChartTooltip lang={lang} t={t} />}
               cursor={{ fill: colors.raised, opacity: 0.3 }}
             />
             <Bar dataKey="minutes" fill={colors.fg} radius={[0, 0, 0, 0]} />
@@ -363,7 +380,13 @@ export const Dashboard = memo(function Dashboard({
               <div className="mt-3 flex flex-wrap justify-center gap-x-3 gap-y-1.5">
                 {tagData.map((tItem) => (
                   <span key={tItem.tag} className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-muted">
-                    <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: tItem.color }} />
+                    <span
+                      className="h-1.5 w-1.5 rounded-full shrink-0"
+                      style={{
+                        backgroundColor: tItem.color,
+                        boxShadow: `0 0 8px ${tItem.color}66`,
+                      }}
+                    />
                     <span className="truncate max-w-[120px]">{tItem.tag}</span>
                     <span className="font-bold tabular-nums text-fg">({tItem.minutes}m)</span>
                   </span>

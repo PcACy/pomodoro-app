@@ -6,6 +6,8 @@ import { buildDailyMarkdown, buildDayExport, copyMarkdown, downloadMarkdown } fr
 import { downloadText, sessionsToCsv, sessionsToJson } from '../lib/dataExport'
 import { importSessions } from '../lib/db'
 import { useTranslation } from '../hooks/useTranslation'
+import { getTagColor } from './TodoList'
+import { playMicroClick } from '../lib/sound'
 
 interface Props {
   sessions: Session[]
@@ -31,20 +33,36 @@ const SessionRow = memo(function SessionRow({ s, locale }: { s: Session; locale:
           {hasNote && (
             <button
               type="button"
-              onClick={() => setOpen((o) => !o)}
+              onClick={() => {
+                playMicroClick('tap')
+                setOpen((o) => !o)
+              }}
               title={open ? 'Notiz ausblenden' : 'Notiz anzeigen'}
-              className={`rounded-full border p-1.5 transition-colors ${
+              className={`rounded-full border p-1.5 transition-colors cursor-pointer ${
                 open
-                  ? 'border-accent bg-accent/15 text-accent'
-                  : 'border-line text-muted hover:border-fg/40 hover:text-fg'
+                  ? 'border-accent bg-accent/15 text-accent shadow-[0_0_8px_rgba(215,25,33,0.3)]'
+                  : 'border-line bg-canvas text-muted hover:border-fg/40 hover:text-fg'
               }`}
             >
-              <StickyNote size={13} />
+              <StickyNote size={12} />
             </button>
           )}
-          <span className="rounded-full border border-line bg-surface px-2.5 py-0.5 font-mono text-[10px] text-muted">
-            {s.tag || '—'}
-          </span>
+          {s.tag ? (
+            <span className="flex items-center gap-1.5 rounded-full border border-line bg-canvas px-2.5 py-0.5 font-mono text-[10px] text-fg/90">
+              <span
+                className="h-1.5 w-1.5 rounded-full shrink-0"
+                style={{
+                  backgroundColor: getTagColor(s.tag),
+                  boxShadow: `0 0 8px ${getTagColor(s.tag)}66`,
+                }}
+              />
+              <span>{s.tag}</span>
+            </span>
+          ) : (
+            <span className="rounded-full border border-line bg-surface px-2.5 py-0.5 font-mono text-[10px] text-muted">
+              —
+            </span>
+          )}
           <span className="w-16 text-right font-mono text-xs tabular-nums text-fg">
             {fmtDuration(s.durationMs, locale === 'de-DE' ? 'de' : 'en')}
           </span>
@@ -174,41 +192,55 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
               e.target.value = ''
             }}
           />
-          <button type="button" onClick={() => importRef.current?.click()} className="btn-ghost h-9 px-3 text-xs">
-            <Upload size={14} /> {t.sessionLog.import}
+          <button
+            type="button"
+            onClick={() => {
+              playMicroClick('tap')
+              importRef.current?.click()
+            }}
+            className="flex h-8 items-center gap-1.5 rounded-full border border-line bg-canvas px-3 font-mono text-xs text-muted hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
+          >
+            <Upload size={13} /> {t.sessionLog.import}
           </button>
 
           <div className="relative" ref={exportRef}>
             <button
               type="button"
-              onClick={() => setOpen((o) => !o)}
-              className="btn-ghost h-9 px-3 text-xs"
+              onClick={() => {
+                playMicroClick('tap')
+                setOpen((o) => !o)
+              }}
+              className="flex h-8 items-center gap-1.5 rounded-full border border-line bg-canvas px-3 font-mono text-xs text-muted hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
               aria-haspopup="menu"
               aria-expanded={open}
             >
-              <Download size={14} /> {t.sessionLog.export} <ChevronDown size={14} />
+              <Download size={13} /> {t.sessionLog.export} <ChevronDown size={12} />
             </button>
             {open && (
               <div
                 role="menu"
-                className="absolute right-0 top-full z-20 mt-2 w-64 rounded-card border border-line-strong bg-surface p-1.5"
+                className="absolute right-0 top-full z-20 mt-2 w-64 rounded-card border border-line-strong bg-surface p-1.5 shadow-none"
               >
                 <button
                   type="button"
                   role="menuitem"
                   onClick={() => {
+                    playMicroClick('tap')
                     handleMdDownload()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised cursor-pointer"
                 >
                   <FileText size={14} className="text-muted" /> {t.sessionLog.mdDownload}
                 </button>
                 <button
                   type="button"
                   role="menuitem"
-                  onClick={handleMdCopy}
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised"
+                  onClick={() => {
+                    playMicroClick('tap')
+                    handleMdCopy()
+                  }}
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised cursor-pointer"
                 >
                   {copied ? (
                     <Check size={14} className="text-accent" />
@@ -221,10 +253,11 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
                   type="button"
                   role="menuitem"
                   onClick={() => {
+                    playMicroClick('tap')
                     handleSessionsCsv()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised cursor-pointer"
                 >
                   <FileDown size={14} className="text-muted" /> {t.sessionLog.csv}
                 </button>
@@ -232,10 +265,11 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
                   type="button"
                   role="menuitem"
                   onClick={() => {
+                    playMicroClick('tap')
                     handleSessionsJson()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised cursor-pointer"
                 >
                   <FileJson size={14} className="text-muted" /> {t.sessionLog.json}
                 </button>
@@ -244,24 +278,27 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
           </div>
 
           <div className="relative">
-            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.sessionLog.searchPlaceholder}
-              className="h-9 w-40 rounded-full border border-line bg-surface pl-9 pr-3.5 font-mono text-xs text-fg placeholder:text-muted focus:border-fg focus:outline-none sm:w-56"
+              className="h-8 w-40 rounded-full border border-line bg-canvas pl-8 pr-3.5 font-mono text-xs text-fg placeholder:text-muted/60 focus:border-fg focus:outline-none sm:w-56 transition-colors"
             />
           </div>
 
           <button
             type="button"
-            onClick={onClear}
+            onClick={() => {
+              playMicroClick('tap')
+              onClear()
+            }}
             disabled={sessions.length === 0}
-            className="btn-ghost h-9 w-9 rounded-full p-0 text-xs disabled:pointer-events-none disabled:opacity-30"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-canvas text-muted hover:border-accent hover:text-accent disabled:pointer-events-none disabled:opacity-30 transition-colors cursor-pointer"
             title={t.sessionLog.clearAll}
           >
-            <Trash2 size={14} />
+            <Trash2 size={13} />
           </button>
         </div>
       </div>
