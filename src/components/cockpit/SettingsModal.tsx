@@ -73,7 +73,7 @@ export const SettingsModal = memo(function SettingsModal({
       role="dialog"
       aria-modal="true"
       aria-label="Settings & Preferences"
-      className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-6 select-none backdrop-blur-[2px]"
+      className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-6 select-none"
       onClick={() => {
         playMicroClick('tap')
         onClose()

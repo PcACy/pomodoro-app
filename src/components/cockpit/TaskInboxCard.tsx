@@ -176,7 +176,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
             </div>
 
             {isTagDropdownOpen && (
-              <div className="absolute right-0 top-full mt-1 z-30 min-w-[130px] rounded-lg border border-line bg-surface p-1 shadow-lg backdrop-blur-md flex flex-col gap-0.5 font-mono text-[10px] tracking-wider uppercase">
+              <div className="absolute right-0 top-full mt-1 z-30 min-w-[130px] rounded-lg border border-line bg-surface p-1 shadow-none flex flex-col gap-0.5 font-mono text-[10px] tracking-wider uppercase">
                 <button
                   type="button"
                   onClick={() => {
