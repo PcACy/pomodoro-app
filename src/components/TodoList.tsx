@@ -381,6 +381,7 @@ export const TodoList = memo(function TodoList({
               onClick={(e) => {
                 const target = e.target as HTMLElement
                 if (target.closest('button, input, select, textarea') || editingId === t.id) return
+                playMicroClick('toggle')
                 onFocus(t.id)
               }}
               className={`group flex items-center gap-2.5 rounded-lg border px-3 py-2.5 2xl:px-4 2xl:py-3 transition-colors ${
@@ -488,6 +489,7 @@ export const TodoList = memo(function TodoList({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation()
+                      playMicroClick('toggle')
                       onFocus(t.id)
                     }}
                     title={activeTodoId === t.id ? tr.todo.unselectFocus : tr.todo.selectFocus}

@@ -188,6 +188,14 @@ export default function App() {
     [],
   )
 
+  const handleFocusTodoFromModal = useCallback(
+    (id: string) => {
+      handleFocusTodo(id)
+      setIsTodoModalOpen(false)
+    },
+    [handleFocusTodo],
+  )
+
   const handleToggleZen = useCallback(() => {
     setIsZenMode((prev) => !prev)
   }, [])
@@ -507,7 +515,7 @@ export default function App() {
         onToggle={todosApi.toggle}
         onEdit={todosApi.edit}
         onRemove={todosApi.remove}
-        onFocus={handleFocusTodo}
+        onFocus={handleFocusTodoFromModal}
       />
 
       <AnalyticsModal
