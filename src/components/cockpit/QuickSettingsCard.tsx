@@ -60,7 +60,9 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  const toggleSound = useCallback(() => {
+
+  const toggleSound = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation()
     playMicroClick('toggle')
     setSoundEnabled((prev) => {
       const next = !prev
@@ -69,7 +71,8 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
     })
   }, [])
 
-  const toggleAutoBreaks = useCallback(() => {
+  const toggleAutoBreaks = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation()
     playMicroClick('toggle')
     setAutoBreaks((prev) => {
       const next = !prev
@@ -84,7 +87,8 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
       action={
         <button
           type="button"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation()
             playMicroClick('tap')
             onOpenSettingsModal()
           }}
@@ -93,14 +97,25 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
           MORE ↗
         </button>
       }
-      className={className}
+      onClick={() => {
+        playMicroClick('tap')
+        onOpenSettingsModal()
+      }}
+      className={`cursor-pointer hover:border-fg/30 transition-colors ${className}`}
       contentClassName="justify-between"
     >
       <div className="flex flex-col gap-3 my-auto">
         {/* Toggle 1: Dark Mode */}
-        <div className="flex items-center justify-between gap-2">
+        <div
+          onClick={(e) => {
+            e.stopPropagation()
+            playMicroClick('toggle')
+            onToggleColorMode()
+          }}
+          className="flex items-center justify-between gap-2 cursor-pointer group"
+        >
           <div className="flex flex-col">
-            <span className="font-sans text-xs text-fg font-medium">Dark Mode</span>
+            <span className="font-sans text-xs text-fg font-medium group-hover:text-fg transition-colors">Dark Mode</span>
             <span className="font-mono text-[9px] text-muted uppercase">
               {colorMode === 'dark' ? 'OLED BLACK' : 'PAPER WHITE'}
             </span>
@@ -109,7 +124,8 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
             type="button"
             role="switch"
             aria-checked={colorMode === 'dark'}
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation()
               playMicroClick('toggle')
               onToggleColorMode()
             }}
@@ -126,9 +142,12 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
         </div>
 
         {/* Toggle 2: Sound FX */}
-        <div className="flex items-center justify-between gap-2">
+        <div
+          onClick={toggleSound}
+          className="flex items-center justify-between gap-2 cursor-pointer group"
+        >
           <div className="flex flex-col">
-            <span className="font-sans text-xs text-fg font-medium">Sound Effects</span>
+            <span className="font-sans text-xs text-fg font-medium group-hover:text-fg transition-colors">Sound Effects</span>
             <span className="font-mono text-[9px] text-muted uppercase">
               {soundEnabled ? 'ACTIVE' : 'MUTED'}
             </span>
@@ -151,9 +170,12 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
         </div>
 
         {/* Toggle 3: Auto-Start Breaks */}
-        <div className="flex items-center justify-between gap-2">
+        <div
+          onClick={toggleAutoBreaks}
+          className="flex items-center justify-between gap-2 cursor-pointer group"
+        >
           <div className="flex flex-col">
-            <span className="font-sans text-xs text-fg font-medium">Auto Breaks</span>
+            <span className="font-sans text-xs text-fg font-medium group-hover:text-fg transition-colors">Auto Breaks</span>
             <span className="font-mono text-[9px] text-muted uppercase">
               {autoBreaks ? 'AUTOMATIC' : 'MANUAL'}
             </span>
@@ -176,9 +198,16 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
         </div>
 
         {/* Toggle 4: Distraction Free (Immersive Zen Mode) */}
-        <div className="flex items-center justify-between gap-2">
+        <div
+          onClick={(e) => {
+            e.stopPropagation()
+            playMicroClick('toggle')
+            onToggleZen?.()
+          }}
+          className="flex items-center justify-between gap-2 cursor-pointer group"
+        >
           <div className="flex flex-col">
-            <span className="font-sans text-xs text-fg font-medium">Distraction Free</span>
+            <span className="font-sans text-xs text-fg font-medium group-hover:text-fg transition-colors">Distraction Free</span>
             <span className="font-mono text-[9px] text-muted uppercase">
               {isZenMode ? 'IMMERSIVE' : 'STANDBY'}
             </span>
@@ -187,7 +216,8 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
             type="button"
             role="switch"
             aria-checked={Boolean(isZenMode)}
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation()
               playMicroClick('toggle')
               onToggleZen?.()
             }}
