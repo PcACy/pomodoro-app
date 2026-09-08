@@ -159,28 +159,43 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         aria-hidden="true"
       />
 
-      {/* Atmospheric cursor spotlight ambient glow */}
+      {/* Atmospheric cursor spotlight ambient glow - 95px compact falloff */}
       <div
         className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ease-out ${
           isHovered ? 'opacity-100' : 'opacity-0'
         }`}
         style={{
           background:
-            'radial-gradient(circle 140px at var(--mouse-x, -999px) var(--mouse-y, -999px), rgb(var(--c-fg) / 0.035), transparent 80%)',
+            'radial-gradient(circle 95px at var(--mouse-x, -999px) var(--mouse-y, -999px), rgb(var(--c-fg) / 0.04), transparent 80%)',
         }}
         aria-hidden="true"
       />
 
-      {/* Interactive Cursor Spotlight Dot-Matrix Glow - Sharp illuminated dots following pointer */}
+      {/* Interactive Cursor Spotlight Dot-Matrix Glow - Crisp 85px focus with punchy core */}
       <div
         className={`pointer-events-none absolute inset-0 text-fg transition-opacity duration-300 ease-out [background-image:radial-gradient(currentColor_1.5px,transparent_1.5px)] [background-size:14px_14px] ${
-          isHovered ? 'opacity-35 dark:opacity-50' : 'opacity-0'
+          isHovered ? 'opacity-40 dark:opacity-55' : 'opacity-0'
         }`}
         style={{
           maskImage:
-            'radial-gradient(circle 130px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 100%)',
+            'radial-gradient(circle 85px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 20%, transparent 100%)',
           WebkitMaskImage:
-            'radial-gradient(circle 130px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 100%)',
+            'radial-gradient(circle 85px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 20%, transparent 100%)',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Hardware Glass Edge - Subtle hairline border reflection near pointer */}
+      <div
+        className={`pointer-events-none absolute inset-0 rounded-card transition-opacity duration-300 ease-out ${
+          isHovered ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{
+          border: '1px solid rgb(var(--c-fg) / 0.28)',
+          maskImage:
+            'radial-gradient(circle 100px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 100%)',
+          WebkitMaskImage:
+            'radial-gradient(circle 100px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 100%)',
         }}
         aria-hidden="true"
       />
