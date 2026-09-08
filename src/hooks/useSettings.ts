@@ -26,6 +26,12 @@ function mergeWithDefaults(stored: Partial<Settings> | undefined): Settings {
       ? s.weeklyGoalMinutes
       : DEFAULT_SETTINGS.weeklyGoalMinutes,
   )
+  const dailyGoalMinutes = Math.max(
+    0,
+    typeof s.dailyGoalMinutes === 'number' && Number.isFinite(s.dailyGoalMinutes)
+      ? s.dailyGoalMinutes
+      : DEFAULT_SETTINGS.dailyGoalMinutes,
+  )
   const rawTags = Array.isArray(s.tags)
     ? s.tags.filter((t): t is string => typeof t === 'string' && t.trim().length > 0).map((t) => t.slice(0, 50))
     : []
@@ -34,6 +40,7 @@ function mergeWithDefaults(stored: Partial<Settings> | undefined): Settings {
 
   return {
     phases,
+    dailyGoalMinutes,
     weeklyGoalMinutes,
     tags,
     layoutMode,

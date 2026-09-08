@@ -136,6 +136,9 @@ export interface Messages {
     cycleHint: string
     weeklyGoal: string
     weeklyGoalHint: string
+    dailyGoal: string
+    dailyGoalHint: string
+    dailyGoalHours: (hours: number) => string
     minutes: string
     tags: string
     tagsHint: string
@@ -333,6 +336,9 @@ const de: Messages = {
     cycleHint: 'Nach wie vielen Fokus-Runden folgt eine lange Pause?',
     weeklyGoal: 'Wochenziel',
     weeklyGoalHint: 'Ziel-Fokuszeit pro Woche.',
+    dailyGoal: 'Tagesziel',
+    dailyGoalHint: 'Ziel-Fokuszeit pro Tag.',
+    dailyGoalHours: (h) => `≈ ${h.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Std./Tag`,
     minutes: 'Minuten',
     tags: 'Tags',
     tagsHint: 'Kategorien für die Aufgaben-Zuweisung.',
@@ -536,6 +542,9 @@ const en: Messages = {
     cycleHint: 'After how many focus rounds follows a long break?',
     weeklyGoal: 'Weekly goal',
     weeklyGoalHint: 'Target focus time per week.',
+    dailyGoal: 'Daily goal',
+    dailyGoalHint: 'Target focus time per day.',
+    dailyGoalHours: (h) => `≈ ${h.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} hrs/day`,
     minutes: 'minutes',
     tags: 'Tags',
     tagsHint: 'Categories for task assignment.',

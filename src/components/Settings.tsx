@@ -689,8 +689,8 @@ export const SettingsPanel = memo(function SettingsPanel({
         {/* Subtle Divider */}
         <div className="my-6 border-t border-line/50" />
 
-        {/* Cycle & Weekly Goal in 2 Columns with Equalized Heights */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        {/* Cycle, Daily Goal & Weekly Goal in 3 Columns with Equalized Heights */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
           <div className="flex flex-col justify-between gap-2">
             <div className="flex min-h-[38px] flex-col justify-center">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-fg">{t.settings.cycle}</span>
@@ -711,6 +711,32 @@ export const SettingsPanel = memo(function SettingsPanel({
               }
             />
             <div className="h-4" /> {/* Height balancer */}
+          </div>
+
+          <div className="flex flex-col justify-between gap-2">
+            <div className="flex min-h-[38px] flex-col justify-center">
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-fg">{t.settings.dailyGoal}</span>
+              <p className="font-mono text-[11px] text-muted line-clamp-1">{t.settings.dailyGoalHint}</p>
+            </div>
+            <NumberStepper
+              value={settings.dailyGoalMinutes}
+              min={15}
+              max={24 * 60}
+              step={15}
+              suffix={t.settings.minUnit}
+              ariaLabel={t.settings.dailyGoal}
+              onChange={(val) =>
+                update((s) => ({
+                  ...s,
+                  dailyGoalMinutes: val,
+                }))
+              }
+            />
+            <div className="flex items-center justify-center">
+              <span className="font-mono text-[11px] text-muted">
+                {t.settings.dailyGoalHours(settings.dailyGoalMinutes / 60)}
+              </span>
+            </div>
           </div>
 
           <div className="flex flex-col justify-between gap-2">

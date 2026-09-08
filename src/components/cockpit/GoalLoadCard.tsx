@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import { Settings as SettingsIcon } from 'lucide-react'
 import type { Session, Settings } from '../../types'
 import { weekMinutes } from '../../lib/stats'
 import { BentoCard } from './BentoCard'
@@ -6,12 +7,14 @@ import { BentoCard } from './BentoCard'
 interface GoalLoadCardProps {
   sessions: Session[]
   settings: Settings
+  onOpenSettings?: () => void
   className?: string
 }
 
 export const GoalLoadCard = memo(function GoalLoadCard({
   sessions,
   settings,
+  onOpenSettings,
   className = '',
 }: GoalLoadCardProps) {
   const currentWeekMinutes = weekMinutes(sessions)
@@ -32,7 +35,23 @@ export const GoalLoadCard = memo(function GoalLoadCard({
   return (
     <BentoCard
       label="WEEKLY GOAL"
-      className={className}
+      action={
+        onOpenSettings ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onOpenSettings()
+            }}
+            title="Edit Weekly Goal"
+            className="text-muted hover:text-fg transition-colors p-0.5 cursor-pointer"
+          >
+            <SettingsIcon size={12} />
+          </button>
+        ) : null
+      }
+      onClick={onOpenSettings}
+      className={`${onOpenSettings ? 'cursor-pointer hover:border-fg/30 transition-colors' : ''} ${className}`}
       contentClassName="items-center justify-center py-2"
     >
       <div className="relative flex items-center justify-center">

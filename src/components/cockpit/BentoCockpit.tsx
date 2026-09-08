@@ -115,6 +115,7 @@ export const BentoCockpit = memo(function BentoCockpit({
         <GoalLoadCard
           sessions={sessions}
           settings={settings}
+          onOpenSettings={onOpenSettingsModal}
           className="md:col-span-1 lg:col-span-1 min-h-[170px]"
         />
 
@@ -122,6 +123,7 @@ export const BentoCockpit = memo(function BentoCockpit({
         <FocusTimeCard
           sessions={sessions}
           settings={settings}
+          onOpenSettings={onOpenSettingsModal}
           className="md:col-span-1 lg:col-span-1 min-h-[170px]"
         />
 

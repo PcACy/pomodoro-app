@@ -12,6 +12,7 @@ export interface PhaseConfig {
 
 export interface Settings {
   phases: PhaseConfig
+  dailyGoalMinutes: number
   weeklyGoalMinutes: number
   tags: string[]
   layoutMode: LayoutMode
@@ -48,6 +49,7 @@ export const DEFAULT_SETTINGS: Settings = {
     roundsBeforeLongBreak: 4,
   },
   weeklyGoalMinutes: 5 * 60,
+  dailyGoalMinutes: 120,
   tags: ['Uni', 'Projekt', 'Coding'],
   layoutMode: 'split',
 }
