@@ -5,6 +5,7 @@ import { useTranslation } from '../../hooks/useTranslation'
 import { useFlowTimerTick, useTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
 import { GlyphTimeDisplay } from './GlyphTimeDisplay'
+import { HeroDotGridCanvas } from './HeroDotGridCanvas'
 import { SlidingSegmentedControl } from '../SlidingSegmentedControl'
 
 interface HeroTimerCardProps {
@@ -126,11 +127,8 @@ export const HeroTimerCard = memo(function HeroTimerCard({
     <div
       className={`relative overflow-hidden rounded-card bg-surface border border-line p-5 sm:p-6 lg:p-7 flex flex-col justify-between select-none ${className}`}
     >
-      {/* Signature Nothing Dot-Matrix Canvas Grid - Subtle baseline */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.04] dark:opacity-[0.07] [background-image:radial-gradient(currentColor_1px,transparent_1px)] [background-size:14px_14px] text-fg"
-        aria-hidden="true"
-      />
+      {/* Interactive Dot-Matrix background (proximity ripple, hero only) */}
+      <HeroDotGridCanvas />
 
       {/* Header Bar */}
       <div className="relative z-10 flex items-center justify-between gap-2 mb-4">
