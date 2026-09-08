@@ -481,16 +481,16 @@ textarea:focus:not(:focus-visible) {
   animation: modal-panel-out 140ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
-/* --- Mechanical Tape Deck Slot Insertion / Ejection --------------------- */
-/* Cassette shell slides down into the well from above and settles into the spindles */
-@keyframes cassette-slide-in {
+/* --- Mechanical Tape Reel Drop-in / Lift-out --------------------- */
+/* Only the tape reels and connecting ribbon drop down onto the stationary spindles */
+@keyframes reel-drop-in {
   0% {
-    opacity: 0.2;
-    transform: translateY(-28px);
+    opacity: 0.15;
+    transform: translateY(-26px);
   }
   65% {
     opacity: 1;
-    transform: translateY(2px);
+    transform: translateY(1.5px);
   }
   100% {
     opacity: 1;
@@ -498,27 +498,15 @@ textarea:focus:not(:focus-visible) {
   }
 }
 
-/* Cassette lifts smoothly up and out of the slot on eject */
-@keyframes cassette-slide-out {
+/* Tape reels lift smoothly up and off the spindles on eject */
+@keyframes reel-lift-out {
   0% {
     opacity: 1;
     transform: translateY(0);
   }
   100% {
     opacity: 0;
-    transform: translateY(-26px);
-  }
-}
-
-/* Magnetic read/record head engages upwards into the tape path */
-@keyframes head-engage {
-  0% {
-    transform: translateY(4px);
-    opacity: 0.3;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
+    transform: translateY(-24px);
   }
 }
 
@@ -532,16 +520,12 @@ textarea:focus:not(:focus-visible) {
   }
 }
 
-.animate-cassette-in {
-  animation: cassette-slide-in 300ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+.animate-reel-in {
+  animation: reel-drop-in 280ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
 }
 
-.animate-cassette-out {
-  animation: cassette-slide-out 220ms cubic-bezier(0.4, 0, 1, 1) both;
-}
-
-.animate-head-engage {
-  animation: head-engage 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.animate-reel-out {
+  animation: reel-lift-out 220ms cubic-bezier(0.4, 0, 1, 1) both;
 }
 
 .animate-track-fade {

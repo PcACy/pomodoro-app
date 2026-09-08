@@ -269,28 +269,56 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
 
         {/* Stationary Cassette Window Frame - Never hops or shifts */}
         <div className="shrink-0 relative overflow-hidden rounded-xl border border-black/10 bg-black/[0.02] p-2 dark:border-white/5 dark:bg-white/[0.02]">
-          {/* Inner Cassette Carriage - Slides smoothly into/out of slot */}
-          <div
-            className={`flex flex-col items-center ${
-              cassetteAnim === 'insert'
-                ? 'animate-cassette-in'
-                : cassetteAnim === 'eject'
-                  ? 'animate-cassette-out'
-                  : ''
-            }`}
-          >
-            <div className="flex items-center gap-1.5 sm:gap-2 text-fg">
-              <Reel packWidth={activeTodo ? leftPack : 1.5} spinning={spinning} dim={!activeTodo} />
-              <Reel packWidth={activeTodo ? rightPack : 1.5} spinning={spinning} reverse dim={!activeTodo} />
+          <div className="flex flex-col items-center">
+            {/* Reel and Spindle Mount */}
+            <div className="relative">
+              {/* Standby Spindles: permanently mounted in the chassis */}
+              <div
+                className={`flex items-center gap-1.5 sm:gap-2 text-fg pointer-events-none transition-opacity duration-150 ${
+                  activeTodo && cassetteAnim !== 'eject' ? 'opacity-0' : 'opacity-100'
+                }`}
+                aria-hidden="true"
+              >
+                <Reel packWidth={1.5} spinning={false} dim />
+                <Reel packWidth={1.5} spinning={false} reverse dim />
+              </div>
+
+              {/* Active Tape Reels: drops down onto spindles on insert / lifts off on eject */}
+              {(activeTodo || cassetteAnim === 'eject') && (
+                <div
+                  className={`absolute inset-0 flex items-center gap-1.5 sm:gap-2 text-fg ${
+                    cassetteAnim === 'insert'
+                      ? 'animate-reel-in'
+                      : cassetteAnim === 'eject'
+                        ? 'animate-reel-out'
+                        : ''
+                  }`}
+                >
+                  <Reel packWidth={leftPack} spinning={spinning} />
+                  <Reel packWidth={rightPack} spinning={spinning} reverse />
+                </div>
+              )}
             </div>
-            {/* Tape path + head */}
-            <div
-              className={`relative mt-1.5 h-3 w-full ${
-                activeTodo && cassetteAnim === 'insert' ? 'animate-head-engage' : ''
-              }`}
-              aria-hidden="true"
-            >
-              <div className="absolute left-3 right-3 top-0 h-px bg-fg/20" />
+
+            {/* Tape path + head: stationary mounts with animated active ribbon overlay */}
+            <div className="relative mt-1.5 h-3 w-full" aria-hidden="true">
+              {/* Standby tape ribbon: permanently stationary */}
+              <div className="absolute left-3 right-3 top-0 h-px bg-fg/15" />
+
+              {/* Active tape ribbon: drops in / lifts out with the active reels */}
+              {(activeTodo || cassetteAnim === 'eject') && (
+                <div
+                  className={`absolute left-3 right-3 top-0 h-px bg-fg/40 ${
+                    cassetteAnim === 'insert'
+                      ? 'animate-reel-in'
+                      : cassetteAnim === 'eject'
+                        ? 'animate-reel-out'
+                        : ''
+                  }`}
+                />
+              )}
+
+              {/* Fixed magnetic head: 100% stationary chassis mount */}
               <div className="absolute left-1/2 top-[3px] flex -translate-x-1/2 items-end gap-[3px]">
                 <span className="h-1.5 w-px bg-fg/30" />
                 <span className="h-[5px] w-2.5 rounded-[1px] border border-fg/30 bg-canvas" />
