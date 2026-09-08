@@ -1,19 +1,14 @@
 import { memo } from 'react'
 import { Check } from 'lucide-react'
-import type { Session, TodoItem, TimerMode } from '../../types'
+import type { Session, TodoItem } from '../../types'
 import { BentoCard } from './BentoCard'
 import { getTagColor } from '../TodoList'
-import { useFlowTimerTick, useTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
 
 interface ActiveTaskCardProps {
   activeTodo: TodoItem | null
   todos?: TodoItem[]
   isRunning: boolean
-  remainingMs: number
-  totalMs: number
-  time?: string
-  mode?: TimerMode
   sessions?: Session[]
   focusMinutes?: number
   onOpenTodoManager?: () => void
@@ -26,10 +21,6 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   activeTodo,
   todos = [],
   isRunning,
-  remainingMs,
-  totalMs,
-  time = '25:00',
-  mode = 'pomodoro',
   sessions,
   focusMinutes = 25,
   onOpenTodoManager,
@@ -37,30 +28,6 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   onFocus,
   className = '',
 }: ActiveTaskCardProps) {
-  const timerTick = useTimerTick()
-  const flowTick = useFlowTimerTick()
-  const isFlowMode = mode === 'flow'
-  // The pomodoro tick is meaningless in flow mode (and vice versa): only use
-  // the tick of the active mode, otherwise the bar counts the wrong clock.
-  const liveRemainingMs = !isFlowMode && isRunning ? timerTick.remainingMs : remainingMs
-  const liveTime = !isFlowMode && isRunning ? (timerTick.time || time) : time
-
-  const elapsedMs = isFlowMode
-    ? Math.max(0, flowTick.elapsedMs)
-    : Math.max(0, totalMs - liveRemainingMs)
-  const elapsedMinutes = Math.floor(elapsedMs / 60_000)
-  const elapsedSeconds = Math.floor((elapsedMs % 60_000) / 1000)
-  const elapsedStr = `${String(elapsedMinutes).padStart(2, '0')}:${String(elapsedSeconds).padStart(2, '0')}`
-
-  const totalMinutes = Math.floor(totalMs / 60_000)
-  const totalSeconds = Math.floor((totalMs % 60_000) / 1000)
-  const totalStr = `${String(totalMinutes).padStart(2, '0')}:${String(totalSeconds).padStart(2, '0')}`
-
-  // Paused-session percentage for the center status readout (number only —
-  // the session progress bar lives exclusively in the Hero card).
-  const pausedPct = isFlowMode || totalMs <= 0
-    ? 0
-    : Math.round((Math.min(1, Math.max(0, elapsedMs / totalMs))) * 100)
   const tagColor = activeTodo?.tag ? getTagColor(activeTodo.tag) : undefined
 
   const taskMinutes = activeTodo && sessions
@@ -74,14 +41,6 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   const openTodos = todos.filter((x) => !x.done)
   const quickPick = openTodos.slice(0, 3)
   const remainingPickCount = openTodos.length - quickPick.length
-
-  const centerStatus = isRunning
-    ? isFlowMode
-      ? `+${flowTick.time}`
-      : `-${liveTime}`
-    : pausedPct > 0
-      ? `${pausedPct}%`
-      : 'STANDBY'
 
   return (
     <BentoCard
@@ -210,26 +169,6 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           NO OPEN TASKS — ADD ONE IN [TASK INBOX]
         </p>
       )}
-
-      {/* Elapsed / Status / Total readout (number only — no progress visualization) */}
-      <div className="mt-4">
-        <div className="flex items-start justify-between font-mono tabular-nums">
-          <span className="flex flex-col gap-0.5">
-            <span className="text-sm text-fg font-medium">{elapsedStr}</span>
-            <span className="text-[8px] text-muted tracking-wider uppercase">ELAPSED</span>
-          </span>
-          <span className="flex flex-col items-center gap-0.5">
-            <span className="text-[10px] text-muted tracking-wider uppercase">{centerStatus}</span>
-            <span className="text-[8px] text-muted/70 tracking-wider uppercase">
-              {isRunning ? 'LEFT' : pausedPct > 0 ? 'DONE' : 'STATUS'}
-            </span>
-          </span>
-          <span className="flex flex-col items-end gap-0.5">
-            <span className="text-sm text-muted">{isFlowMode ? flowTick.time : totalStr}</span>
-            <span className="text-[8px] text-muted/70 tracking-wider uppercase">TOTAL</span>
-          </span>
-        </div>
-      </div>
     </BentoCard>
   )
 })
