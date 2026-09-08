@@ -1,9 +1,10 @@
 import { memo, useState, useCallback, useRef, useEffect, type KeyboardEvent } from 'react'
-import { Check, Maximize2, Plus, Target } from 'lucide-react'
+import { Check, Maximize2, Plus, Target, Trash2 } from 'lucide-react'
 import type { TodoItem } from '../../types'
 import { BentoCard } from './BentoCard'
 import { getTagColor } from '../TodoList'
 import { playMicroClick } from '../../lib/sound'
+import { useTranslation } from '../../hooks/useTranslation'
 
 interface TaskInboxCardProps {
   todos: TodoItem[]
@@ -12,6 +13,7 @@ interface TaskInboxCardProps {
   onToggle: (id: string) => void
   onFocus: (id: string) => void
   onAdd: (title: string, tag: string) => void
+  onRemove: (id: string) => void
   onOpenTodoManager: () => void
   className?: string
 }
@@ -33,9 +35,11 @@ export const TaskInboxCard = memo(function TaskInboxCard({
   onToggle,
   onFocus,
   onAdd,
+  onRemove,
   onOpenTodoManager,
   className = '',
 }: TaskInboxCardProps) {
+  const { t: tr } = useTranslation()
   const [quickTitle, setQuickTitle] = useState('')
   const [selectedTag, setSelectedTag] = useState('')
   const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false)
@@ -294,6 +298,19 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                       <Target size={12} />
                     </button>
                   )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      playMicroClick('tap')
+                      onRemove(todo.id)
+                    }}
+                    title={tr.todo.delete}
+                    aria-label={tr.todo.delete}
+                    className="opacity-0 group-hover:opacity-100 p-1 text-muted hover:text-accent transition-opacity cursor-pointer"
+                  >
+                    <Trash2 size={12} />
+                  </button>
                 </div>
               </div>
             )

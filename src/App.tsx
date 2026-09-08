@@ -377,6 +377,7 @@ export default function App() {
             onTodoToggle={todosApi.toggle}
             onTodoFocus={handleFocusTodo}
             onTodoAdd={todosApi.add}
+            onTodoRemove={todosApi.remove}
             onOpenTodoManager={() => setIsTodoModalOpen(true)}
             sessions={sessions}
             settings={settings}

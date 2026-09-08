@@ -35,6 +35,7 @@ interface BentoCockpitProps {
   onTodoToggle: (id: string) => void
   onTodoFocus: (id: string) => void
   onTodoAdd: (title: string, tag: string) => void
+  onTodoRemove: (id: string) => void
   onOpenTodoManager: () => void
 
   // Analytics & Sessions
@@ -73,6 +74,7 @@ export const BentoCockpit = memo(function BentoCockpit({
   onTodoToggle,
   onTodoFocus,
   onTodoAdd,
+  onTodoRemove,
   onOpenTodoManager,
   sessions,
   settings,
@@ -166,6 +168,7 @@ export const BentoCockpit = memo(function BentoCockpit({
           onToggle={onTodoToggle}
           onFocus={onTodoFocus}
           onAdd={onTodoAdd}
+          onRemove={onTodoRemove}
           onOpenTodoManager={onOpenTodoManager}
           className="md:col-span-2 lg:col-span-4"
         />
