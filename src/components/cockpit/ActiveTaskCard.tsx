@@ -173,12 +173,12 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
       label="TRACK 01 // TAPE DECK"
       action={
         isRunning ? (
-          <span className="flex items-center gap-1.5 rounded-full border border-accent/60 px-2.5 py-0.5 font-mono text-[9px] tracking-widest uppercase text-accent">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse [animation-duration:1s]" />
+          <span className="h-5 min-w-[58px] inline-flex items-center justify-center gap-1.5 px-2.5 font-mono text-[9px] leading-none tracking-widest uppercase rounded-full border border-accent/60 text-accent bg-accent/10">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse [animation-duration:1s] shrink-0" />
             <span>REC</span>
           </span>
         ) : (
-          <span className="rounded-full border border-line bg-canvas px-2.5 py-0.5 font-mono text-[9px] tracking-widest uppercase text-muted">
+          <span className="h-5 min-w-[58px] inline-flex items-center justify-center px-2.5 font-mono text-[9px] leading-none tracking-widest uppercase rounded-full border border-line text-muted bg-canvas">
             {hasProgress ? '|| PAUSE' : 'STBY'}
           </span>
         )
@@ -192,7 +192,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           <h3 className={`font-sans font-medium text-lg sm:text-xl truncate ${activeTodo ? 'text-fg' : 'text-muted'}`}>
             {activeTodo?.title || '[ NO TAPE INSERTED // SELECT TASK ]'}
           </h3>
-          <div className="mt-1.5 flex items-center gap-2 font-mono text-[10px] text-muted tracking-wider uppercase">
+          <div className="mt-1 h-5 flex items-center gap-2 font-mono text-[10px] text-muted tracking-wider uppercase leading-none">
             {activeTodo?.tag ? (
               <span className="flex items-center gap-1.5 rounded-full border border-line bg-canvas px-2 py-px">
                 <span
