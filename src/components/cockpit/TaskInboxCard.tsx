@@ -1,4 +1,4 @@
-import { memo, useState, useCallback, type KeyboardEvent } from 'react'
+import { memo, useState, useCallback, useRef, useEffect, type KeyboardEvent } from 'react'
 import { Check, Maximize2, Plus, Target } from 'lucide-react'
 import type { TodoItem } from '../../types'
 import { BentoCard } from './BentoCard'
@@ -7,6 +7,7 @@ import { playMicroClick } from '../../lib/sound'
 
 interface TaskInboxCardProps {
   todos: TodoItem[]
+  tags?: string[]
   activeTodoId: string | null
   onToggle: (id: string) => void
   onFocus: (id: string) => void
@@ -15,8 +16,19 @@ interface TaskInboxCardProps {
   className?: string
 }
 
+function parseTaskInput(input: string, fallbackTag: string): { title: string; tag: string } {
+  const hashMatch = input.match(/#([\w\u00C0-\u017F-]+)/)
+  if (hashMatch) {
+    const tag = hashMatch[1]
+    const title = input.replace(hashMatch[0], '').trim()
+    return { title: title || input.trim(), tag }
+  }
+  return { title: input.trim(), tag: fallbackTag }
+}
+
 export const TaskInboxCard = memo(function TaskInboxCard({
   todos,
+  tags = [],
   activeTodoId,
   onToggle,
   onFocus,
@@ -25,20 +37,52 @@ export const TaskInboxCard = memo(function TaskInboxCard({
   className = '',
 }: TaskInboxCardProps) {
   const [quickTitle, setQuickTitle] = useState('')
+  const [selectedTag, setSelectedTag] = useState('')
+  const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false)
+  const tagDropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isTagDropdownOpen) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (tagDropdownRef.current && !tagDropdownRef.current.contains(e.target as Node)) {
+        setIsTagDropdownOpen(false)
+      }
+    }
+    const handleEscape = (e: globalThis.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsTagDropdownOpen(false)
+      }
+    }
+    document.addEventListener('pointerdown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('pointerdown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isTagDropdownOpen])
 
   const pendingTodos = todos.filter((t) => !t.done).slice(0, 4)
   const remainingCount = Math.max(0, todos.filter((t) => !t.done).length - 4)
 
+  const submitTask = useCallback(() => {
+    if (!quickTitle.trim()) return
+    const { title, tag } = parseTaskInput(quickTitle, selectedTag)
+    if (!title) return
+    playMicroClick('pop')
+    onAdd(title, tag)
+    setQuickTitle('')
+    setSelectedTag('')
+    setIsTagDropdownOpen(false)
+  }, [quickTitle, selectedTag, onAdd])
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && quickTitle.trim()) {
+      if (e.key === 'Enter') {
         e.preventDefault()
-        playMicroClick('pop')
-        onAdd(quickTitle.trim(), '')
-        setQuickTitle('')
+        submitTask()
       }
     },
-    [quickTitle, onAdd],
+    [submitTask],
   )
 
   return (
@@ -60,27 +104,113 @@ export const TaskInboxCard = memo(function TaskInboxCard({
       className={className}
     >
       {/* Quick Add Bar */}
-      <div className="relative mb-3 flex items-center">
-        <input
-          type="text"
-          value={quickTitle}
-          onChange={(e) => setQuickTitle(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="+ Add quick task (Press Enter)..."
-          className="w-full rounded-lg border border-line bg-canvas px-3 py-1.5 text-xs text-fg placeholder:text-muted/60 font-sans focus:outline-none focus:border-fg/50 transition-colors"
-        />
-        {quickTitle.trim() && (
-          <button
-            type="button"
-            onClick={() => {
-              playMicroClick('pop')
-              onAdd(quickTitle.trim(), '')
-              setQuickTitle('')
-            }}
-            className="absolute right-1.5 rounded p-1 text-muted hover:text-fg cursor-pointer"
-          >
-            <Plus size={14} />
-          </button>
+      <div className="relative mb-3 flex items-center gap-2">
+        <div className="relative flex-1 flex items-center">
+          <input
+            type="text"
+            value={quickTitle}
+            onChange={(e) => setQuickTitle(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="+ Add quick task (#tag or select)..."
+            className="w-full rounded-lg border border-line bg-canvas pl-3 pr-8 py-1.5 text-xs text-fg placeholder:text-muted/60 font-sans focus:outline-none focus:border-fg/50 transition-colors"
+          />
+          {quickTitle.trim() && (
+            <button
+              type="button"
+              onClick={submitTask}
+              className="absolute right-1.5 rounded p-1 text-muted hover:text-fg cursor-pointer"
+              title="Add task"
+            >
+              <Plus size={14} />
+            </button>
+          )}
+        </div>
+
+        {/* Quick Tag Selector Pill */}
+        {tags.length > 0 && (
+          <div className="relative shrink-0" ref={tagDropdownRef}>
+            <button
+              type="button"
+              onClick={() => setIsTagDropdownOpen((prev) => !prev)}
+              className={`h-7 px-2.5 rounded-lg border text-[10px] font-mono tracking-wider uppercase transition-colors flex items-center gap-1.5 cursor-pointer select-none ${
+                selectedTag
+                  ? 'border-fg/40 bg-surface text-fg'
+                  : 'border-line bg-canvas text-muted hover:text-fg hover:border-fg/30'
+              }`}
+              title="Select tag for this task"
+            >
+              {selectedTag ? (
+                <>
+                  <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: getTagColor(selectedTag) }}
+                  />
+                  <span className="max-w-[70px] truncate">{selectedTag}</span>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSelectedTag('')
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.stopPropagation()
+                        setSelectedTag('')
+                      }
+                    }}
+                    className="ml-0.5 text-muted hover:text-fg"
+                    title="Remove tag"
+                  >
+                    ×
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-muted/70">#</span>
+                  <span>TAG</span>
+                </>
+              )}
+            </button>
+
+            {isTagDropdownOpen && (
+              <div className="absolute right-0 top-full mt-1 z-30 min-w-[130px] rounded-lg border border-line bg-surface p-1 shadow-lg backdrop-blur-md flex flex-col gap-0.5 font-mono text-[10px] tracking-wider uppercase">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedTag('')
+                    setIsTagDropdownOpen(false)
+                  }}
+                  className={`px-2 py-1 rounded text-left flex items-center justify-between hover:bg-canvas transition-colors cursor-pointer ${
+                    !selectedTag ? 'text-fg font-medium bg-canvas/60' : 'text-muted'
+                  }`}
+                >
+                  <span>OHNE TAG</span>
+                  {!selectedTag && <span className="text-[9px]">✓</span>}
+                </button>
+                {tags.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => {
+                      setSelectedTag(tag)
+                      setIsTagDropdownOpen(false)
+                    }}
+                    className={`px-2 py-1 rounded text-left flex items-center gap-1.5 hover:bg-canvas transition-colors cursor-pointer ${
+                      selectedTag === tag ? 'text-fg font-medium bg-canvas/60' : 'text-muted'
+                    }`}
+                  >
+                    <span
+                      className="h-1.5 w-1.5 rounded-full"
+                      style={{ backgroundColor: getTagColor(tag) }}
+                    />
+                    <span className="truncate flex-1">{tag}</span>
+                    {selectedTag === tag && <span className="text-[9px]">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
 

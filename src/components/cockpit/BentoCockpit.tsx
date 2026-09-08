@@ -155,6 +155,7 @@ export const BentoCockpit = memo(function BentoCockpit({
         {/* 8. PROJECTS DISTRIBUTION: Multi-row segmented bars (like Storage in screenshot) */}
         <ProjectsDistributionCard
           sessions={sessions}
+          tags={settings.tags}
           className="md:col-span-2 lg:col-span-2 min-h-[170px]"
         />
 
@@ -173,6 +174,7 @@ export const BentoCockpit = memo(function BentoCockpit({
         {/* 11. TASK INBOX: Full-width / 4-column card at bottom */}
         <TaskInboxCard
           todos={todos}
+          tags={settings.tags}
           activeTodoId={activeTodoId}
           onToggle={onTodoToggle}
           onFocus={onTodoFocus}
