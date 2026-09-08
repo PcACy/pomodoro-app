@@ -21,6 +21,44 @@ interface ActiveTaskCardProps {
   className?: string
 }
 
+// One pick row: fixed height so every slot state stays pixel-identical.
+function PickRow({ todo, onFocus }: { todo: TodoItem; onFocus?: (id: string) => void }) {
+  return (
+    <li className="flex h-[60px] items-center justify-between gap-3">
+      <button
+        type="button"
+        onClick={() => {
+          playMicroClick('tap')
+          onFocus?.(todo.id)
+        }}
+        className="min-w-0 flex-1 text-left group cursor-pointer"
+        title={`Focus ${todo.title}`}
+      >
+        <span className="block truncate font-sans text-sm text-fg/90 group-hover:text-fg transition-colors">
+          {todo.title}
+        </span>
+        <span className="block font-mono text-[9px] text-muted tracking-wider uppercase truncate">
+          {todo.tag || 'UNTAGGED'} · {todo.pomodoros} POMOS
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          playMicroClick('tick')
+          onFocus?.(todo.id)
+        }}
+        className="shrink-0 font-mono text-[10px] tracking-widest uppercase text-muted hover:text-fg transition-colors cursor-pointer px-2 min-h-[44px]"
+      >
+        FOCUS
+      </button>
+    </li>
+  )
+}
+
+// Fixed-height pick slot: always label + exactly 3 rows + footer, so the
+// card never changes height when tasks are added, focused or completed.
+const SLOT_ROWS = 3
+
 // Stylized tape reel: static tape-pack ring (width = remaining tape) with a
 // rotating 3-spoke hub on top. Pure outline geometry, no glow.
 function Reel({
@@ -119,8 +157,12 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   const displayMinutes = taskMinutes > 0 ? taskMinutes : (activeTodo ? activeTodo.pomodoros * minutesPerPomodoro : 0)
 
   const openTodos = todos.filter((x) => !x.done)
-  const quickPick = openTodos.slice(0, 3)
-  const remainingPickCount = openTodos.length - quickPick.length
+  // Focused: offer the other open todos as tape switch. Empty: quick-pick.
+  // Either way the slot below renders exactly SLOT_ROWS rows.
+  const pickPool = activeTodo ? openTodos.filter((x) => x.id !== activeTodo.id) : openTodos
+  const pickTodos = pickPool.slice(0, SLOT_ROWS)
+  const remainingPickCount = pickPool.length - pickTodos.length
+  const fillerCount = Math.max(0, SLOT_ROWS - pickTodos.length)
 
   // Left reel unwinds (ring thins), right reel takes up (ring thickens).
   const leftPack = 1.5 + 4.5 * (1 - ratio)
@@ -236,55 +278,41 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         )}
       </div>
 
-      {/* Quick-pick: one-click focus for the next open todos (no modal needed) */}
-      {!activeTodo && quickPick.length > 0 && (
-        <ul className="mt-3 divide-y divide-line border-t border-line/60">
-          {quickPick.map((todo) => (
-            <li key={todo.id} className="flex items-center justify-between gap-3 py-2">
-              <button
-                type="button"
-                onClick={() => {
-                  playMicroClick('tap')
-                  onFocus?.(todo.id)
-                }}
-                className="min-w-0 flex-1 text-left group cursor-pointer"
-                title={`Focus ${todo.title}`}
-              >
-                <span className="block truncate font-sans text-sm text-fg/90 group-hover:text-fg transition-colors">
-                  {todo.title}
-                </span>
-                <span className="block font-mono text-[9px] text-muted tracking-wider uppercase truncate">
-                  {todo.tag || 'UNTAGGED'} · {todo.pomodoros} POMOS
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  playMicroClick('tick')
-                  onFocus?.(todo.id)
-                }}
-                className="shrink-0 font-mono text-[10px] tracking-widest uppercase text-muted hover:text-fg transition-colors cursor-pointer px-2 py-2 min-h-[44px]"
-              >
-                FOCUS
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {!activeTodo && quickPick.length > 0 && remainingPickCount > 0 && (
-        <button
-          type="button"
-          onClick={onOpenTodoManager}
-          className="mt-1 font-mono text-[10px] tracking-widest uppercase text-muted hover:text-fg transition-colors cursor-pointer text-left"
-        >
-          +{remainingPickCount} MORE
-        </button>
-      )}
-      {!activeTodo && openTodos.length === 0 && (
-        <p className="mt-3 border-t border-line/60 pt-2.5 font-mono text-[10px] tracking-wider uppercase text-muted">
-          NO OPEN TASKS — ADD ONE IN [TASK INBOX]
-        </p>
-      )}
+      {/* Pick slot: fixed label + exactly 3 rows + footer — height never moves */}
+      <div className="mt-3 border-t border-line/60 pt-1">
+        <div className="flex h-5 items-center justify-between font-mono text-[9px] tracking-widest uppercase">
+          <span className="text-muted">
+            {activeTodo ? 'UP NEXT // SWITCH TAPE' : 'LOAD TAPE // QUICK PICK'}
+          </span>
+          {remainingPickCount > 0 ? (
+            <button
+              type="button"
+              onClick={onOpenTodoManager}
+              className="text-muted hover:text-fg transition-colors cursor-pointer"
+            >
+              +{remainingPickCount} MORE
+            </button>
+          ) : (
+            <span aria-hidden="true" className="invisible">
+              +0 MORE
+            </span>
+          )}
+        </div>
+        {pickPool.length === 0 ? (
+          <p className="flex h-[180px] items-center font-mono text-[10px] tracking-wider uppercase text-muted">
+            {activeTodo ? 'NO OTHER TAPES QUEUED' : 'NO OPEN TASKS — ADD ONE IN [TASK INBOX]'}
+          </p>
+        ) : (
+          <ul className="divide-y divide-line">
+            {pickTodos.map((todo) => (
+              <PickRow key={todo.id} todo={todo} onFocus={onFocus} />
+            ))}
+            {Array.from({ length: fillerCount }).map((_, i) => (
+              <li key={`filler-${i}`} aria-hidden="true" className="h-[60px]" />
+            ))}
+          </ul>
+        )}
+      </div>
     </BentoCard>
   )
 })
