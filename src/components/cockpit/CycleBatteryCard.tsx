@@ -63,10 +63,9 @@ export const CycleBatteryCard = memo(function CycleBatteryCard({
 
         {/* Next Milestone Subtitle */}
         <div className="mt-1.5 flex items-center justify-between font-mono text-[9px] text-muted tracking-wider uppercase">
-          <span>{remainingRounds === 0 ? 'LONG BREAK NEXT' : `~ ${remainingRounds * 25}M TO LONG BREAK`}</span>
+          <span>{remainingRounds <= 1 ? 'LONG BREAK NEXT' : `~ ${remainingRounds * 25}M TO LONG BREAK`}</span>
         </div>
       </div>
     </BentoCard>
   )
 })
-

@@ -134,8 +134,17 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
 
     const d = phaseDuration(settingsRef.current, nextPhase)
     cycleRef.current = nextCycle
-    phaseStartedAtRef.current = now
-    endRef.current = now + d
+
+    const autoBreaks =
+      typeof localStorage !== 'undefined'
+        ? localStorage.getItem('pomodoro.auto_breaks') === 'true'
+        : false
+    const shouldRun = skipped || (m.phase === 'focus' ? autoBreaks : false)
+    const nextStatus: TimerStatus = shouldRun ? 'running' : 'idle'
+    const targetEnd = shouldRun ? now + d : null
+
+    phaseStartedAtRef.current = shouldRun ? now : 0
+    endRef.current = targetEnd
     remainingMsRef.current = d
     totalMsRef.current = d
 
@@ -147,19 +156,19 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
 
     setMachine({
       phase: nextPhase,
-      status: 'running',
+      status: nextStatus,
       totalMs: d,
       completedFocusInCycle: nextCycle,
     })
 
     broadcastTimerState({
-      status: 'running',
+      status: nextStatus,
       phase: nextPhase,
       totalMs: d,
       remainingMs: d,
-      targetEnd: now + d,
+      targetEnd,
       completedFocusInCycle: nextCycle,
-      phaseStartedAt: now,
+      phaseStartedAt: phaseStartedAtRef.current,
     })
   }, [])
 

@@ -32,12 +32,15 @@ const isActivatableTarget = (el: EventTarget | null): boolean => {
   return !!node && typeof node.closest === 'function' && node.closest(ACTIVATABLE_SELECTOR) !== null
 }
 
-export function useKeyboard(handlers: ShortcutHandlers): void {
+export function useKeyboard(handlers: ShortcutHandlers, enabled = true): void {
   const handlersRef = useRef(handlers)
+  const enabledRef = useRef(enabled)
   handlersRef.current = handlers
+  enabledRef.current = enabled
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (!enabledRef.current) return
       // Never hijack typing inside form fields or rich-text editors.
       if (isTextEntryTarget(e.target)) return
       // Never hijack browser/OS shortcuts (Ctrl/Cmd+R reload, Cmd+Z undo, …)

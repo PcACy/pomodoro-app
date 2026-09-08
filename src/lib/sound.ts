@@ -6,6 +6,11 @@ let ctx: AudioContext | null = null
 let buffers: Record<ChimeKind, AudioBuffer | null> = { focus: null, break: null }
 let initialized = false
 
+export function isSoundEnabled(): boolean {
+  if (typeof localStorage === 'undefined') return true
+  return localStorage.getItem('pomodoro.sound') !== 'false'
+}
+
 function createCtx(): AudioContext | null {
   try {
     const AC =
@@ -61,6 +66,7 @@ function getBuffer(audio: AudioContext, kind: ChimeKind): AudioBuffer | null {
 type ClickKind = 'tick' | 'tap' | 'toggle' | 'pop' | 'tab'
 
 export function playMicroClick(kind: ClickKind = 'tick'): void {
+  if (!isSoundEnabled()) return
   try {
     const audio = ensureCtx()
     if (!audio) return
@@ -157,6 +163,7 @@ if (typeof window !== 'undefined') {
 
 export function playChime(kind: ChimeKind = 'focus'): void {
   playHaptic(kind === 'focus' ? [40, 60, 80] : [50, 50])
+  if (!isSoundEnabled()) return
   try {
     const audio = ensureCtx()
     if (!audio) return

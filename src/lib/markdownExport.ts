@@ -135,6 +135,10 @@ export function downloadMarkdown(markdown: string, key: string): void {
   const a = document.createElement('a')
   a.href = url
   a.download = `pomodoro-${key}.md`
+  document.body.appendChild(a)
   a.click()
-  URL.revokeObjectURL(url)
+  window.setTimeout(() => {
+    a.remove()
+    URL.revokeObjectURL(url)
+  }, 200)
 }

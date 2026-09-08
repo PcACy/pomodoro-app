@@ -83,6 +83,7 @@ export function useDocumentChrome(
   time: string,
   progress: number,
   remainingMs: number,
+  mode: TimerMode = 'pomodoro',
 ): void {
   const { t } = useTranslation()
   const progressRef = useRef(progress)
@@ -93,10 +94,11 @@ export function useDocumentChrome(
 
   useEffect(() => {
     const paused = status === 'paused'
+    const phaseLabel = mode === 'flow' ? t.timer.flow : t.phases[phase]
     const nextTitle =
       status === 'idle'
         ? 'Pomau'
-        : `${time} (${t.phases[phase]}) - Pomau${paused ? ` (${t.paused})` : ''}`
+        : `${time} (${phaseLabel}) - Pomau${paused ? ` (${t.paused})` : ''}`
 
     if (document.title !== nextTitle) {
       document.title = nextTitle
@@ -109,16 +111,19 @@ export function useDocumentChrome(
       return
     }
 
-    const mins = Math.max(1, Math.ceil(remainingMsRef.current / MS_PER_MINUTE))
+    const mins =
+      mode === 'flow'
+        ? Math.floor(remainingMsRef.current / MS_PER_MINUTE)
+        : Math.max(1, Math.ceil(remainingMsRef.current / MS_PER_MINUTE))
     // 60 progress steps around the circle (matches discrete visual change)
     const progressBucket = Math.round(progressRef.current * 60)
-    const cacheKey = `${phase}:${status}:${mins}:${progressBucket}`
+    const cacheKey = `${mode}:${phase}:${status}:${mins}:${progressBucket}`
 
     if (lastFaviconRef.current.key !== cacheKey) {
       const uri = canvasFaviconDataUri(
         phase,
         status === 'running',
-        progressRef.current,
+        mode === 'flow' ? 1 : progressRef.current,
         remainingMsRef.current,
       )
       lastFaviconRef.current = { key: cacheKey, uri }
@@ -132,7 +137,7 @@ export function useDocumentChrome(
         linkEl.href = DEFAULT_FAVICON
       }
     }
-  }, [phase, status, time, t])
+  }, [phase, status, time, mode, t])
 }
 
 interface DocumentChromeProps {
@@ -151,6 +156,6 @@ export const DocumentChrome = memo(function DocumentChrome({ phase, status, mode
   const progress = isFlow ? 0 : timerTick.progress
   const remaining = isFlow ? flowTick.elapsedMs : timerTick.remainingMs
 
-  useDocumentChrome(phase, status, time, progress, remaining)
+  useDocumentChrome(phase, status, time, progress, remaining, mode)
   return null
 })

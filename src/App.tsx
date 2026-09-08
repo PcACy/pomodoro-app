@@ -197,14 +197,20 @@ export default function App() {
     setIsZenMode(false)
   }, [])
 
-  useKeyboard({
-    onToggle: handleToggle,
-    onSkip: handleSkip,
-    onReset: handleReset,
-    onFlowFinish: handleFlowFinish,
-    onToggleZen: handleToggleZen,
-    onExitZen: isZenMode ? handleExitZen : undefined,
-  })
+  const isModalOpen =
+    isSettingsModalOpen || isAnalyticsModalOpen || isTodoModalOpen || pendingSessionId != null
+
+  useKeyboard(
+    {
+      onToggle: handleToggle,
+      onSkip: handleSkip,
+      onReset: handleReset,
+      onFlowFinish: handleFlowFinish,
+      onToggleZen: handleToggleZen,
+      onExitZen: isZenMode ? handleExitZen : undefined,
+    },
+    !isModalOpen,
+  )
 
   const chromePhase = mode === 'flow' ? 'focus' : timer.phase
   const chromeStatus = mode === 'flow' ? flow.status : timer.status
@@ -234,7 +240,7 @@ export default function App() {
       if (mode === 'flow') {
         if (flow.status !== 'running') flow.toggle()
       } else if (timer.status !== 'running') {
-        timer.toggle()
+        timer.start()
       }
     },
     onAddTime: () => {
@@ -362,30 +368,7 @@ export default function App() {
       </header>
 
       <main className="flex w-full flex-1 flex-col items-center justify-center gap-6 py-2 sm:py-4 pb-20 sm:pb-24">
-        {isZenMode ? (
-          <div className="mx-auto flex w-full max-w-xl flex-col items-center justify-center py-8">
-            <Timer
-              large
-              phaseLabel={timer.phaseLabel}
-              status={timer.status}
-              completedFocusInCycle={timer.completedFocusInCycle}
-              roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
-              mode={mode}
-              flowStatus={flow.status}
-              task={sessionTask}
-              tag={sessionTag}
-              onModeChange={handleModeChange}
-              onToggle={handleToggle}
-              onSkip={handleSkip}
-              onReset={handleReset}
-              pipSupported={pipSupported}
-              pipOpen={pipMode !== 'none'}
-              onPipToggle={handlePipToggle}
-              isZenMode={isZenMode}
-              onToggleZen={handleToggleZen}
-            />
-          </div>
-        ) : (
+        {!isZenMode && (
           <BentoCockpit
             phaseLabel={timer.phaseLabel}
             status={timer.status}

@@ -43,7 +43,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   onAddTime,
   className = '',
 }: HeroTimerCardProps) {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const timerTick = useTimerTick()
   const flowTick = useFlowTimerTick()
 
@@ -106,8 +106,9 @@ export const HeroTimerCard = memo(function HeroTimerCard({
     onAddTime?.(5)
   }, [onAddTime])
 
-  const dayName = localDate.toLocaleDateString('en-US', { weekday: 'long' })
-  const dateFormatted = localDate.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
+  const locale = lang === 'de' ? 'de-DE' : 'en-US'
+  const dayName = localDate.toLocaleDateString(locale, { weekday: 'long' })
+  const dateFormatted = localDate.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
 
   return (
     <div
