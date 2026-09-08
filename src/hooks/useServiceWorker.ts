@@ -5,11 +5,12 @@ interface ServiceWorkerState {
   reload: () => void
 }
 
-const CHECK_INTERVAL_MS = 15 * 60 * 1000 // Check every 15 minutes
+const CHECK_INTERVAL_MS = 5 * 60 * 1000 // Check every 5 minutes
 
 export function useServiceWorker(): ServiceWorkerState {
   const [updateAvailable, setUpdateAvailable] = useState(false)
   const waitingWorkerRef = useRef<ServiceWorker | null>(null)
+  const registrationRef = useRef<ServiceWorkerRegistration | null>(null)
   const reloadingRef = useRef(false)
   const initialVersionRef = useRef<string | null>(
     typeof __APP_BUILD_VERSION__ !== 'undefined' ? __APP_BUILD_VERSION__ : null,
@@ -19,22 +20,54 @@ export function useServiceWorker(): ServiceWorkerState {
     if (reloadingRef.current) return
     reloadingRef.current = true
 
-    if (waitingWorkerRef.current) {
-      waitingWorkerRef.current.postMessage({ type: 'SKIP_WAITING' })
+    const waiting = waitingWorkerRef.current
+    if (waiting) {
+      waiting.postMessage({ type: 'SKIP_WAITING' })
+      // Give the new worker a moment to activate (controllerchange reloads).
+      // Fallback: navigation is network-first, so even a plain reload loads
+      // the fresh index.html + hashed assets.
+      setTimeout(() => {
+        if (reloadingRef.current) {
+          reloadingRef.current = false
+          window.location.reload()
+        }
+      }, 1500)
+    } else {
+      // Update seen via version.json before the new worker finished
+      // installing: a plain reload fetches the new bundle (network-first).
+      reloadingRef.current = false
+      window.location.reload()
     }
-    // Fallback only: onControllerChange clears the flag and reloads first,
-    // so this fires solely when no controller change arrives.
-    setTimeout(() => {
-      if (reloadingRef.current) {
-        reloadingRef.current = false
-        window.location.reload()
-      }
-    }, 100)
   }, [])
 
   useEffect(() => {
     let disposed = false
-    let registration: ServiceWorkerRegistration | null = null
+
+    const handleWaitingWorker = (worker: ServiceWorker) => {
+      waitingWorkerRef.current = worker
+      if (!disposed) setUpdateAvailable(true)
+    }
+
+    // Tracks an installing worker through to 'installed'. The upfront state
+    // check covers the race where register() itself triggered the update and
+    // the worker already finished installing before updatefound was observed.
+    const trackInstalling = (worker: ServiceWorker) => {
+      if (worker.state === 'installed') {
+        if (navigator.serviceWorker.controller) handleWaitingWorker(worker)
+        return
+      }
+      const onStateChange = () => {
+        if (disposed) {
+          worker.removeEventListener('statechange', onStateChange)
+          return
+        }
+        if (worker.state === 'installed') {
+          worker.removeEventListener('statechange', onStateChange)
+          if (navigator.serviceWorker.controller) handleWaitingWorker(worker)
+        }
+      }
+      worker.addEventListener('statechange', onStateChange)
+    }
 
     const checkVersionJson = async () => {
       if (!initialVersionRef.current) return
@@ -54,32 +87,13 @@ export function useServiceWorker(): ServiceWorkerState {
     }
 
     const checkForUpdates = () => {
-      if (registration) {
-        registration.update().catch(() => {})
-      }
+      registrationRef.current?.update().catch(() => {})
       void checkVersionJson()
     }
 
-    const handleWaitingWorker = (worker: ServiceWorker) => {
-      waitingWorkerRef.current = worker
-      setUpdateAvailable(true)
-    }
-
     const onUpdateFound = () => {
-      const newWorker = registration?.installing
-      if (!newWorker) return
-
-      const onStateChange = () => {
-        if (disposed) {
-          newWorker.removeEventListener('statechange', onStateChange)
-          return
-        }
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          newWorker.removeEventListener('statechange', onStateChange)
-          handleWaitingWorker(newWorker)
-        }
-      }
-      newWorker.addEventListener('statechange', onStateChange)
+      const worker = registrationRef.current?.installing
+      if (worker) trackInstalling(worker)
     }
 
     const onControllerChange = () => {
@@ -98,11 +112,14 @@ export function useServiceWorker(): ServiceWorkerState {
         .register('/sw.js')
         .then((reg) => {
           if (disposed) return
-          registration = reg
+          registrationRef.current = reg
 
-          // If there is already a worker waiting from a previous background check
+          // Worker already waiting from a previous background check, or
+          // install triggered by register() itself (missed updatefound race).
           if (reg.waiting && navigator.serviceWorker.controller) {
             handleWaitingWorker(reg.waiting)
+          } else if (reg.installing) {
+            trackInstalling(reg.installing)
           }
 
           reg.addEventListener('updatefound', onUpdateFound)
@@ -117,22 +134,25 @@ export function useServiceWorker(): ServiceWorkerState {
     const onVisibility = () => {
       if (document.visibilityState === 'visible') checkForUpdates()
     }
-    const onOnline = () => checkForUpdates()
 
     document.addEventListener('visibilitychange', onVisibility)
-    window.addEventListener('online', onOnline)
+    window.addEventListener('online', checkForUpdates)
+    window.addEventListener('focus', checkForUpdates)
+    window.addEventListener('pageshow', checkForUpdates)
 
     const intervalId = setInterval(checkForUpdates, CHECK_INTERVAL_MS)
 
     return () => {
       disposed = true
       clearInterval(intervalId)
-      registration?.removeEventListener('updatefound', onUpdateFound)
+      registrationRef.current?.removeEventListener('updatefound', onUpdateFound)
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange)
       }
       document.removeEventListener('visibilitychange', onVisibility)
-      window.removeEventListener('online', onOnline)
+      window.removeEventListener('online', checkForUpdates)
+      window.removeEventListener('focus', checkForUpdates)
+      window.removeEventListener('pageshow', checkForUpdates)
     }
   }, [])
 
