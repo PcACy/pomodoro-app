@@ -65,10 +65,11 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   const shownTime = isFlow ? activeFlowTime : activeTime
 
   // Mechanical Segmented Progress (20 discrete blocks, 2px gap)
-  const currentProgress = Math.min(1, Math.max(0, activeProgress))
+  // Fills additively from left to right (0% -> 100%)
+  const elapsedRatio = 1 - Math.min(1, Math.max(0, activeProgress))
   const filledSegments = Math.min(
     TOTAL_SEGMENTS,
-    Math.max(0, Math.round(currentProgress * TOTAL_SEGMENTS)),
+    Math.max(0, Math.round(elapsedRatio * TOTAL_SEGMENTS)),
   )
 
   const flowParts = (activeFlowTime || '00:00').split(':').map(Number)
@@ -78,7 +79,12 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   } else if (flowParts.length === 2) {
     flowSeconds = (flowParts[0] || 0) * 60 + (flowParts[1] || 0)
   }
-  const flowActiveIndex = flowSeconds % TOTAL_SEGMENTS
+  // Benchmark 25 mins (= 1500 sec) for full 20-block flow bar (1 block every 75 sec)
+  const flowRatio = Math.min(1, flowSeconds / 1500)
+  const flowFilledSegments = Math.min(
+    TOTAL_SEGMENTS,
+    Math.max(0, Math.round(flowRatio * TOTAL_SEGMENTS)),
+  )
 
   const handleToggleClick = useCallback(() => {
     playMicroClick(running ? 'tick' : 'pop')
@@ -192,16 +198,16 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         <div
           className="mt-6 flex h-2 w-full gap-0.5"
           role="progressbar"
-          aria-valuenow={Math.round(currentProgress * 100)}
+          aria-valuenow={Math.round((isFlow ? flowRatio : elapsedRatio) * 100)}
           aria-valuemin={0}
           aria-valuemax={100}
         >
           {Array.from({ length: TOTAL_SEGMENTS }).map((_, i) => {
-            const isFilled = isFlow ? i === flowActiveIndex : i < filledSegments
+            const isFilled = isFlow ? i < flowFilledSegments : i < filledSegments
             return (
               <div
                 key={i}
-                className={`flex-1 transition-colors duration-100 ${
+                className={`flex-1 transition-colors duration-150 ${
                   isFilled
                     ? running
                       ? 'bg-accent'
