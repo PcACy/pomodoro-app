@@ -289,16 +289,8 @@ export default function App() {
               state={isRunning ? chromePhase : 'idle'}
             />
           </div>
-          <div className="flex items-center gap-2 font-mono">
+          <div className="flex items-center font-mono">
             <h1 className="text-sm font-bold tracking-widest uppercase text-fg">Pomau</h1>
-            <span
-              className={`inline-block h-1.5 w-1.5 rounded-full ${
-                isRunning ? 'bg-accent animate-pulse' : 'bg-muted/40'
-              }`}
-            />
-            <span className="hidden sm:inline text-[10px] text-muted tracking-widest uppercase">
-              // COCKPIT
-            </span>
           </div>
         </div>
 
