@@ -355,7 +355,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex w-full flex-1 flex-col items-center justify-start gap-6 pt-6 pb-20 sm:pb-24">
+      <main className="flex w-full flex-1 flex-col items-center justify-start pt-2 sm:pt-3">
         {!isZenMode && (
           <BentoCockpit
             phaseLabel={timer.phaseLabel}

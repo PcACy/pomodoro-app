@@ -86,82 +86,87 @@ export const BentoCockpit = memo(function BentoCockpit({
   const isRunning = mode === 'flow' ? flowStatus === 'running' : status === 'running'
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-3 sm:py-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 auto-rows-auto">
-        {/* 1. HERO TIMER: Large 2x2 card (Top-Left, Cols 1-2, Rows 1-2) */}
-        <HeroTimerCard
-          phaseLabel={phaseLabel}
-          status={status}
-          time={time}
-          progress={progress}
-          mode={mode}
-          flowStatus={flowStatus}
-          flowTime={flowTime}
-          completedFocusInCycle={completedFocusInCycle}
-          roundsBeforeLongBreak={roundsBeforeLongBreak}
-          onModeChange={onModeChange}
-          onToggle={onToggle}
-          onSkip={onSkip}
-          onReset={onReset}
-          onAddTime={onAddTime}
-          className="md:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[320px] sm:min-h-[360px]"
-        />
+    <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
+      {/* 1. Cockpit Bento Grid (Cards 1-7): Heroic instrument panel fitting the initial viewport */}
+      <section className="w-full min-h-[calc(100dvh-5rem)] flex flex-col justify-start py-2 sm:py-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 auto-rows-auto">
+          {/* 1. HERO TIMER: Large 2x2 card (Top-Left, Cols 1-2, Rows 1-2) */}
+          <HeroTimerCard
+            phaseLabel={phaseLabel}
+            status={status}
+            time={time}
+            progress={progress}
+            mode={mode}
+            flowStatus={flowStatus}
+            flowTime={flowTime}
+            completedFocusInCycle={completedFocusInCycle}
+            roundsBeforeLongBreak={roundsBeforeLongBreak}
+            onModeChange={onModeChange}
+            onToggle={onToggle}
+            onSkip={onSkip}
+            onReset={onReset}
+            onAddTime={onAddTime}
+            className="md:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[320px] sm:min-h-[360px]"
+          />
 
-        {/* 2. GOAL LOAD: Circular dial gauge (Top-Right Row 1, Col 3) */}
-        <GoalLoadCard
-          sessions={sessions}
-          settings={settings}
-          onOpenSettings={onOpenSettingsModal}
-          className="md:col-span-1 lg:col-span-1 min-h-[170px]"
-        />
+          {/* 2. GOAL LOAD: Circular dial gauge (Top-Right Row 1, Col 3) */}
+          <GoalLoadCard
+            sessions={sessions}
+            settings={settings}
+            onOpenSettings={onOpenSettingsModal}
+            className="md:col-span-1 lg:col-span-1 min-h-[170px]"
+          />
 
-        {/* 3. FOCUS TIME: Today's focus goal + 24h timeline (Top-Right Row 1, Col 4) */}
-        <FocusTimeCard
-          sessions={sessions}
-          settings={settings}
-          onOpenSettings={onOpenSettingsModal}
-          className="md:col-span-1 lg:col-span-1 min-h-[170px]"
-        />
+          {/* 3. FOCUS TIME: Today's focus goal + 24h timeline (Top-Right Row 1, Col 4) */}
+          <FocusTimeCard
+            sessions={sessions}
+            settings={settings}
+            onOpenSettings={onOpenSettingsModal}
+            className="md:col-span-1 lg:col-span-1 min-h-[170px]"
+          />
 
-        {/* 4. ACTIVE TASK: Task card with metrics and quick complete (Top-Right Row 2, Cols 3-4) */}
-        <ActiveTaskCard
-          activeTodo={activeTodo}
-          todos={todos}
-          isRunning={isRunning}
-          remainingMs={remainingMs}
-          totalMs={totalMs}
-          mode={mode}
-          sessions={sessions}
-          focusMinutes={settings.phases.focus}
-          onOpenTodoManager={onOpenTodoManager}
-          onToggleDone={onTodoToggle}
-          onFocus={onTodoFocus}
-          className="md:col-span-2 lg:col-span-2 min-h-[170px]"
-        />
+          {/* 4. ACTIVE TASK: Task card with metrics and quick complete (Top-Right Row 2, Cols 3-4) */}
+          <ActiveTaskCard
+            activeTodo={activeTodo}
+            todos={todos}
+            isRunning={isRunning}
+            remainingMs={remainingMs}
+            totalMs={totalMs}
+            mode={mode}
+            sessions={sessions}
+            focusMinutes={settings.phases.focus}
+            onOpenTodoManager={onOpenTodoManager}
+            onToggleDone={onTodoToggle}
+            onFocus={onTodoFocus}
+            className="md:col-span-2 lg:col-span-2 min-h-[170px]"
+          />
 
-        {/* 5. PROJECTS DISTRIBUTION: Multi-row segmented bars (Row 3, Cols 1-2) */}
-        <ProjectsDistributionCard
-          sessions={sessions}
-          tags={settings.tags}
-          className="md:col-span-2 lg:col-span-2 min-h-[170px]"
-        />
+          {/* 5. PROJECTS DISTRIBUTION: Multi-row segmented bars (Row 3, Cols 1-2) */}
+          <ProjectsDistributionCard
+            sessions={sessions}
+            tags={settings.tags}
+            className="md:col-span-2 lg:col-span-2 min-h-[170px]"
+          />
 
-        {/* 6. DAILY STREAK & PERFORMANCE (Row 3, Col 3) */}
-        <SystemStatusCard
-          sessions={sessions}
-          onOpenAnalyticsModal={onOpenAnalyticsModal}
-          className="md:col-span-1 lg:col-span-1 min-h-[170px]"
-        />
+          {/* 6. DAILY STREAK & PERFORMANCE (Row 3, Col 3) */}
+          <SystemStatusCard
+            sessions={sessions}
+            onOpenAnalyticsModal={onOpenAnalyticsModal}
+            className="md:col-span-1 lg:col-span-1 min-h-[170px]"
+          />
 
-        {/* 7. QUICK SETTINGS: Compact 1x1 mechanical toggles (Row 3, Col 4) */}
-        <QuickSettingsCard
-          isZenMode={isZenMode}
-          onToggleZen={onToggleZen}
-          onOpenSettingsModal={onOpenSettingsModal}
-          className="md:col-span-1 lg:col-span-1 min-h-[170px]"
-        />
+          {/* 7. QUICK SETTINGS: Compact 1x1 mechanical toggles (Row 3, Col 4) */}
+          <QuickSettingsCard
+            isZenMode={isZenMode}
+            onToggleZen={onToggleZen}
+            onOpenSettingsModal={onOpenSettingsModal}
+            className="md:col-span-1 lg:col-span-1 min-h-[170px]"
+          />
+        </div>
+      </section>
 
-        {/* 8. TASK INBOX: Full-width / 4-column card directly below (Row 4) */}
+      {/* 2. TASK INBOX (Card 8): Positioned below the initial fold, reached by scrolling down */}
+      <section className="w-full pt-6 pb-16 sm:pb-24">
         <TaskInboxCard
           todos={todos}
           tags={settings.tags}
@@ -171,9 +176,9 @@ export const BentoCockpit = memo(function BentoCockpit({
           onAdd={onTodoAdd}
           onRemove={onTodoRemove}
           onOpenTodoManager={onOpenTodoManager}
-          className="md:col-span-2 lg:col-span-4"
+          className="w-full"
         />
-      </div>
+      </section>
     </div>
   )
 })
