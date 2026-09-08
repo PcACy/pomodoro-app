@@ -278,7 +278,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     endRef.current = null
     phaseStartedAtRef.current = 0
     const m = machineRef.current
-    const total = m.totalMs
+    const total = phaseDuration(settingsRef.current, m.phase)
     remainingMsRef.current = total
     totalMsRef.current = total
 
@@ -289,7 +289,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     })
 
     // Sync the ref immediately (see start()).
-    const nextMachine = { ...m, status: 'idle' as TimerStatus }
+    const nextMachine = { ...m, status: 'idle' as TimerStatus, totalMs: total }
     machineRef.current = nextMachine
     setMachine(nextMachine)
     broadcastTimerState({
