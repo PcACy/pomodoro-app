@@ -123,9 +123,10 @@ export const GlyphTimeDisplay = memo(function GlyphTimeDisplay({
   // Parse time characters (e.g. ['2', '5', ':', '0', '0'])
   const chars = time.split('')
 
-  // Compute total width
-  // Red dot: 1 col (DOT_SIZE) + RED_DOT_GAP
-  let currentX = DOT_SIZE + RED_DOT_GAP
+  // Compute total width with symmetrical padding so digits are exactly centered
+  // Left padding accounts for the red status dot + gap
+  const LEFT_PADDING = DOT_SIZE + RED_DOT_GAP
+  let currentX = LEFT_PADDING
   const charPositions: { char: string; x: number; matrix: number[][] }[] = []
 
   for (let i = 0; i < chars.length; i++) {
@@ -136,16 +137,17 @@ export const GlyphTimeDisplay = memo(function GlyphTimeDisplay({
     currentX += charWidth + DIGIT_GAP
   }
 
-  const totalWidth = currentX - DIGIT_GAP + 2
+  const digitsSpan = (currentX - DIGIT_GAP) - LEFT_PADDING
+  const totalWidth = LEFT_PADDING + digitsSpan + LEFT_PADDING
   const totalHeight = 7 * STEP - DOT_GAP
 
   return (
-    <div className={`relative flex items-center select-none ${className}`}>
+    <div className={`relative flex items-center justify-center select-none ${className || 'w-full max-w-[340px] sm:max-w-[400px] lg:max-w-[430px] my-auto py-2'}`}>
       <span className="sr-only">{time}</span>
 
       <svg
         viewBox={`0 0 ${totalWidth} ${totalHeight}`}
-        className="w-full h-auto max-h-[85px] max-w-[340px] sm:max-w-[400px] lg:max-w-[430px] overflow-visible"
+        className="w-full h-auto overflow-visible"
         aria-hidden="true"
       >
         {/* Red Status Dot on the left (Row 3, vertically centered) */}

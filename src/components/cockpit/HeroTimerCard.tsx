@@ -161,7 +161,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
       {/* Hero Glyph Display */}
       <div className="relative z-10 flex-1 flex flex-col justify-center py-2 sm:py-3">
         {/* Glyph Dot-Matrix Clock with Red Status Dot */}
-        <div className="my-1">
+        <div className="my-1 flex justify-center">
           <GlyphTimeDisplay time={shownTime} isRunning={running} />
         </div>
 

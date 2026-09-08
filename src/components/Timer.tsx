@@ -142,7 +142,7 @@ export const Timer = memo(function Timer({
       />
 
       {/* Nothing Hardware Widget Display */}
-      <div className="flex flex-col items-center justify-between w-full my-1 text-center select-none">
+      <div className="flex flex-col items-center justify-center w-full my-1 text-center select-none">
         {/* Top Phase Header with Status Dot */}
         <div className="flex items-center gap-2 font-mono text-xs sm:text-sm uppercase tracking-widest text-muted">
           <span
