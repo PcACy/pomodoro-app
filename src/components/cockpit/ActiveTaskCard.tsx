@@ -52,12 +52,11 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   const totalSeconds = Math.floor((totalMs % 60_000) / 1000)
   const totalStr = `${String(totalMinutes).padStart(2, '0')}:${String(totalSeconds).padStart(2, '0')}`
 
-  const progressRatio = isFlowMode
-    ? 0 // flow has no fixed target; ticks stay empty, elapsed counts up
-    : totalMs > 0
-      ? Math.min(1, Math.max(0, elapsedMs / totalMs))
-      : 0
-  const QUARTERS = [0.25, 0.5, 0.75, 1]
+  // Paused-session percentage for the center status readout (number only —
+  // the session progress bar lives exclusively in the Hero card).
+  const pausedPct = isFlowMode || totalMs <= 0
+    ? 0
+    : Math.round((Math.min(1, Math.max(0, elapsedMs / totalMs))) * 100)
   const tagColor = activeTodo?.tag ? getTagColor(activeTodo.tag) : undefined
 
   const taskMinutes = activeTodo && sessions
@@ -154,7 +153,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         )}
       </div>
 
-      {/* Elapsed / Total readout + Quarter ticks */}
+      {/* Elapsed / Total readout (number only — no progress visualization) */}
       <div className="mt-4">
         <div className="flex items-baseline justify-between font-mono tabular-nums">
           <span className="text-sm text-fg font-medium">{elapsedStr}</span>
@@ -163,29 +162,11 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
               ? isFlowMode
                 ? `+${flowTick.time}`
                 : `-${liveTime}`
-              : progressRatio > 0
-                ? `${Math.round(progressRatio * 100)}%`
+              : pausedPct > 0
+                ? `${pausedPct}%`
                 : 'STANDBY'}
           </span>
           <span className="text-sm text-muted">{isFlowMode ? flowTick.time : totalStr}</span>
-        </div>
-        <div className="mt-2 flex w-full gap-[2px]" role="progressbar" aria-valuenow={Math.round(progressRatio * 100)} aria-valuemin={0} aria-valuemax={100}>
-          {QUARTERS.map((q) => (
-            <div
-              key={q}
-              title={`${Math.round(q * 100)}%`}
-              className={`h-2 flex-1 rounded-none transition-colors duration-150 ${
-                progressRatio >= q ? 'bg-fg' : 'bg-line/40'
-              }`}
-            />
-          ))}
-        </div>
-        <div className="mt-1.5 flex items-center justify-between font-mono text-[9px] text-muted tracking-wider uppercase">
-          <span>0%</span>
-          <span>25</span>
-          <span>50</span>
-          <span>75</span>
-          <span>100%</span>
         </div>
       </div>
     </BentoCard>
