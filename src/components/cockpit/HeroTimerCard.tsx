@@ -6,7 +6,7 @@ import { useFlowTimerTick, useTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
 import { GlyphTimeDisplay } from './GlyphTimeDisplay'
 import { SlidingSegmentedControl } from '../SlidingSegmentedControl'
-import { InteractiveGridCanvas } from './InteractiveGridCanvas'
+import { InteractiveGridCanvas, type InteractiveGridCanvasHandle } from './InteractiveGridCanvas'
 
 interface HeroTimerCardProps {
   phaseLabel: string
@@ -124,10 +124,10 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   const dateFormatted = localDate.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const gridCanvasRef = useRef<InteractiveGridCanvasHandle>(null)
   const [isHovered, setIsHovered] = useState(false)
 
   const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return
     const el = containerRef.current
     if (!el) return
     const rect = el.getBoundingClientRect()
@@ -135,11 +135,19 @@ export const HeroTimerCard = memo(function HeroTimerCard({
     const y = e.clientY - rect.top
     el.style.setProperty('--mouse-x', `${x}px`)
     el.style.setProperty('--mouse-y', `${y}px`)
+    gridCanvasRef.current?.addPoint(x, y)
   }, [])
 
   const handlePointerEnter = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return
     setIsHovered(true)
+    const el = containerRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    el.style.setProperty('--mouse-x', `${x}px`)
+    el.style.setProperty('--mouse-y', `${y}px`)
+    gridCanvasRef.current?.addPoint(x, y)
   }, [])
 
   const handlePointerLeave = useCallback(() => {
@@ -172,11 +180,26 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         aria-hidden="true"
       />
 
-      {/* Interactive Phosphor Decay LED Matrix Trail - 500ms organic wake */}
+      {/* Interactive Cursor Spotlight Dot-Matrix Glow - Crisp 85px instant hardware focus */}
+      <div
+        className={`pointer-events-none absolute inset-0 text-fg transition-opacity duration-300 ease-out [background-image:radial-gradient(currentColor_1.5px,transparent_1.5px)] [background-size:14px_14px] ${
+          isHovered ? 'opacity-40 dark:opacity-55' : 'opacity-0'
+        }`}
+        style={{
+          maskImage:
+            'radial-gradient(circle 85px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 20%, transparent 100%)',
+          WebkitMaskImage:
+            'radial-gradient(circle 85px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 20%, transparent 100%)',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Interactive Phosphor Decay LED Matrix Trail - 600ms organic wake behind cursor */}
       <InteractiveGridCanvas
+        ref={gridCanvasRef}
         gridSize={14}
-        spotlightRadius={48}
-        decayDurationMs={500}
+        spotlightRadius={55}
+        decayDurationMs={600}
       />
 
       {/* Hardware Glass Edge - Subtle hairline border reflection near pointer */}
