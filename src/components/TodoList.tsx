@@ -387,7 +387,7 @@ export const TodoList = memo(function TodoList({
                 exitingIds.has(t.id) ? 'animate-todo-exit' : 'animate-todo-in'
               } ${
                 activeTodoId === t.id
-                  ? 'border-line border-l-2 border-l-accent bg-surface-raised/40'
+                  ? 'border-fg bg-surface-raised/40'
                   : 'border-line/70 hover:border-line hover:bg-surface-raised/20'
               }`}
             >
@@ -401,7 +401,7 @@ export const TodoList = memo(function TodoList({
                 aria-label={t.done ? tr.todo.reopen : tr.todo.done}
                 className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border border-border-visible transition-colors cursor-pointer"
               >
-                {t.done && <span className="h-2 w-2 rounded-[1px] bg-accent" />}
+                {t.done && <span className="h-2 w-2 rounded-[1px] bg-fg" />}
               </button>
 
               {editingId === t.id ? (
@@ -464,7 +464,7 @@ export const TodoList = memo(function TodoList({
                     </div>
                     {t.pomodoros > 0 && (
                       <span className="inline-flex items-center gap-1 font-mono text-[10px] tracking-wider uppercase text-muted">
-                        <Timer size={10} className="text-accent" /> {t.pomodoros}P
+                        <Timer size={10} className="text-muted" /> {t.pomodoros}P
                       </span>
                     )}
                   </div>
@@ -494,7 +494,7 @@ export const TodoList = memo(function TodoList({
                     aria-label={activeTodoId === t.id ? tr.todo.unselectFocus : tr.todo.selectFocus}
                     className={`rounded p-1 transition-colors ${
                       activeTodoId === t.id
-                        ? 'bg-accent/20 text-accent'
+                        ? 'bg-fg text-canvas'
                         : 'text-muted hover:bg-surface-raised hover:text-fg'
                     }`}
                   >
