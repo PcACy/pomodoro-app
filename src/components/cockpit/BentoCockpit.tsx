@@ -126,6 +126,7 @@ export const BentoCockpit = memo(function BentoCockpit({
         {/* 4. ACTIVE TASK: Task card with metrics and quick complete (Top-Right Row 2, Cols 3-4) */}
         <ActiveTaskCard
           activeTodo={activeTodo}
+          todos={todos}
           isRunning={isRunning}
           remainingMs={remainingMs}
           totalMs={totalMs}
@@ -135,6 +136,7 @@ export const BentoCockpit = memo(function BentoCockpit({
           focusMinutes={settings.phases.focus}
           onOpenTodoManager={onOpenTodoManager}
           onToggleDone={onTodoToggle}
+          onFocus={onTodoFocus}
           className="md:col-span-2 lg:col-span-2 min-h-[170px]"
         />
 

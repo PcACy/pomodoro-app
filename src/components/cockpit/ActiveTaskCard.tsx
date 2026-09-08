@@ -8,6 +8,7 @@ import { playMicroClick } from '../../lib/sound'
 
 interface ActiveTaskCardProps {
   activeTodo: TodoItem | null
+  todos?: TodoItem[]
   isRunning: boolean
   remainingMs: number
   totalMs: number
@@ -17,11 +18,13 @@ interface ActiveTaskCardProps {
   focusMinutes?: number
   onOpenTodoManager?: () => void
   onToggleDone?: (id: string) => void
+  onFocus?: (id: string) => void
   className?: string
 }
 
 export const ActiveTaskCard = memo(function ActiveTaskCard({
   activeTodo,
+  todos = [],
   isRunning,
   remainingMs,
   totalMs,
@@ -31,6 +34,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   focusMinutes = 25,
   onOpenTodoManager,
   onToggleDone,
+  onFocus,
   className = '',
 }: ActiveTaskCardProps) {
   const timerTick = useTimerTick()
@@ -67,6 +71,18 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   const minutesPerPomodoro = Number.isFinite(focusMinutes) && focusMinutes > 0 ? focusMinutes : 25
   const displayMinutes = taskMinutes > 0 ? taskMinutes : (activeTodo ? activeTodo.pomodoros * minutesPerPomodoro : 0)
 
+  const openTodos = todos.filter((x) => !x.done)
+  const quickPick = openTodos.slice(0, 3)
+  const remainingPickCount = openTodos.length - quickPick.length
+
+  const centerStatus = isRunning
+    ? isFlowMode
+      ? `+${flowTick.time}`
+      : `-${liveTime}`
+    : pausedPct > 0
+      ? `${pausedPct}%`
+      : 'STANDBY'
+
   return (
     <BentoCard
       label="ACTIVE TASK"
@@ -75,15 +91,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           <span className="font-mono text-[9px] px-2 py-0.5 rounded-full border border-line bg-canvas text-fg tracking-wider uppercase">
             {activeTodo.pomodoros} POMOS
           </span>
-        ) : (
-          <button
-            type="button"
-            onClick={onOpenTodoManager}
-            className="font-mono text-[9px] px-2 py-0.5 rounded-full border border-line bg-canvas text-muted hover:text-fg hover:border-fg/40 tracking-wider uppercase transition-colors cursor-pointer"
-          >
-            + ASSIGN
-          </button>
-        )
+        ) : null
       }
       className={className}
       contentClassName="justify-between"
@@ -145,28 +153,79 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
             <button
               type="button"
               onClick={onOpenTodoManager}
-              className="font-mono text-[10px] text-muted hover:text-fg tracking-widest uppercase px-4 py-2 min-h-[44px] rounded-full border border-line/50 hover:border-fg/40 bg-canvas/40 transition-colors cursor-pointer"
+              className="font-mono text-[10px] text-fg tracking-widest uppercase px-4 min-h-[44px] rounded-full border border-fg/40 hover:border-fg bg-canvas transition-colors cursor-pointer"
             >
-              CHOOSE TASK
+              ASSIGN TASK
             </button>
           </div>
         )}
       </div>
 
-      {/* Elapsed / Total readout (number only — no progress visualization) */}
+      {/* Quick-pick: one-click focus for the next open todos (no modal needed) */}
+      {!activeTodo && quickPick.length > 0 && (
+        <ul className="mt-3 divide-y divide-line border-t border-line/60">
+          {quickPick.map((todo) => (
+            <li key={todo.id} className="flex items-center justify-between gap-3 py-2">
+              <button
+                type="button"
+                onClick={() => {
+                  playMicroClick('tap')
+                  onFocus?.(todo.id)
+                }}
+                className="min-w-0 flex-1 text-left group cursor-pointer"
+                title={`Focus ${todo.title}`}
+              >
+                <span className="block truncate font-sans text-sm text-fg/90 group-hover:text-fg transition-colors">
+                  {todo.title}
+                </span>
+                <span className="block font-mono text-[9px] text-muted tracking-wider uppercase truncate">
+                  {todo.tag || 'UNTAGGED'} · {todo.pomodoros} POMOS
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playMicroClick('tick')
+                  onFocus?.(todo.id)
+                }}
+                className="shrink-0 font-mono text-[10px] tracking-widest uppercase text-muted hover:text-fg transition-colors cursor-pointer px-2 py-2 min-h-[44px]"
+              >
+                FOCUS
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {!activeTodo && quickPick.length > 0 && remainingPickCount > 0 && (
+        <button
+          type="button"
+          onClick={onOpenTodoManager}
+          className="mt-1 font-mono text-[10px] tracking-widest uppercase text-muted hover:text-fg transition-colors cursor-pointer text-left"
+        >
+          +{remainingPickCount} MORE
+        </button>
+      )}
+      {!activeTodo && openTodos.length === 0 && (
+        <p className="mt-3 border-t border-line/60 pt-2.5 font-mono text-[10px] tracking-wider uppercase text-muted">
+          NO OPEN TASKS — ADD ONE IN [TASK INBOX]
+        </p>
+      )}
+
+      {/* Elapsed / Status / Total readout (number only — no progress visualization) */}
       <div className="mt-4">
-        <div className="flex items-baseline justify-between font-mono tabular-nums">
-          <span className="text-sm text-fg font-medium">{elapsedStr}</span>
-          <span className="text-[10px] text-muted tracking-wider uppercase">
-            {isRunning
-              ? isFlowMode
-                ? `+${flowTick.time}`
-                : `-${liveTime}`
-              : pausedPct > 0
-                ? `${pausedPct}%`
-                : 'STANDBY'}
+        <div className="flex items-start justify-between font-mono tabular-nums">
+          <span className="flex flex-col gap-0.5">
+            <span className="text-sm text-fg font-medium">{elapsedStr}</span>
+            <span className="text-[8px] text-muted tracking-wider uppercase">ELAPSED</span>
           </span>
-          <span className="text-sm text-muted">{isFlowMode ? flowTick.time : totalStr}</span>
+          <span className="flex flex-col items-center gap-0.5">
+            <span className="text-[10px] text-muted tracking-wider uppercase">{centerStatus}</span>
+            <span className="text-[8px] text-muted/70 tracking-wider uppercase">STATUS</span>
+          </span>
+          <span className="flex flex-col items-end gap-0.5">
+            <span className="text-sm text-muted">{isFlowMode ? flowTick.time : totalStr}</span>
+            <span className="text-[8px] text-muted/70 tracking-wider uppercase">TOTAL</span>
+          </span>
         </div>
       </div>
     </BentoCard>
