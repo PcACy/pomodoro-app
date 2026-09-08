@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { ArrowUpFromLine, Square } from 'lucide-react'
 import type { Session, TodoItem, TimerMode } from '../../types'
 import { BentoCard } from './BentoCard'
@@ -168,6 +168,35 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   const leftPack = 1.5 + 4.5 * (1 - ratio)
   const rightPack = 1.5 + 4.5 * ratio
 
+  const [cassetteAnim, setCassetteAnim] = useState<'insert' | 'eject' | ''>('')
+  const [textAnimKey, setTextAnimKey] = useState<string>('')
+  const prevTodoIdRef = useRef<string | null>(activeTodo?.id ?? null)
+  const isFirstRender = useRef(true)
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    const prevId = prevTodoIdRef.current
+    const currId = activeTodo?.id ?? null
+
+    if (prevId !== currId) {
+      prevTodoIdRef.current = currId
+      if (currId != null) {
+        setCassetteAnim('insert')
+        setTextAnimKey(currId)
+        const t = setTimeout(() => setCassetteAnim(''), 280)
+        return () => clearTimeout(t)
+      } else {
+        setCassetteAnim('eject')
+        setTextAnimKey('empty')
+        const t = setTimeout(() => setCassetteAnim(''), 250)
+        return () => clearTimeout(t)
+      }
+    }
+  }, [activeTodo?.id])
+
   return (
     <BentoCard
       label="TRACK 01 // TAPE DECK"
@@ -193,8 +222,8 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
       contentClassName="justify-between"
     >
       <div className="flex items-center justify-between gap-4">
-        {/* Track info */}
-        <div className="min-w-0 flex-1">
+        {/* Track info with smooth reveal animation */}
+        <div key={textAnimKey} className="min-w-0 flex-1 animate-tape-text">
           <h3 className={`font-sans font-medium text-lg sm:text-xl truncate ${activeTodo ? 'text-fg' : 'text-muted'}`}>
             {activeTodo?.title || '[ NO TAPE INSERTED // SELECT TASK ]'}
           </h3>
@@ -238,8 +267,16 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           </div>
         </div>
 
-        {/* Dual reels in cassette window */}
-        <div className="shrink-0 rounded-xl border border-black/10 bg-black/[0.02] p-2 dark:border-white/5 dark:bg-white/[0.02]">
+        {/* Dual reels in cassette window with mechanical slide & snap-in animation */}
+        <div
+          className={`shrink-0 rounded-xl border border-black/10 bg-black/[0.02] p-2 dark:border-white/5 dark:bg-white/[0.02] ${
+            cassetteAnim === 'insert'
+              ? 'animate-tape-insert'
+              : cassetteAnim === 'eject'
+                ? 'animate-tape-eject'
+                : ''
+          }`}
+        >
           <div className="flex items-center gap-1.5 sm:gap-2 text-fg">
             <Reel packWidth={activeTodo ? leftPack : 1.5} spinning={spinning} dim={!activeTodo} />
             <Reel packWidth={activeTodo ? rightPack : 1.5} spinning={spinning} reverse dim={!activeTodo} />
@@ -261,10 +298,15 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         <button
           type="button"
           onClick={() => {
-            playMicroClick('toggle')
-            onOpenTodoManager?.()
+            if (activeTodo) {
+              playMicroClick('pop')
+              onFocus?.(activeTodo.id)
+            } else {
+              playMicroClick('toggle')
+              onOpenTodoManager?.()
+            }
           }}
-          title={activeTodo ? 'Change tape' : 'Insert tape'}
+          title={activeTodo ? 'Eject tape (standby)' : 'Insert tape'}
           className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-md border border-line bg-canvas font-mono text-[11px] tracking-widest uppercase text-muted transition-colors hover:border-fg/40 hover:text-fg active:translate-y-px cursor-pointer"
         >
           <ArrowUpFromLine size={13} />
