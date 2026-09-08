@@ -5,6 +5,7 @@ import { useTranslation } from '../../hooks/useTranslation'
 import { useFlowTimerTick, useTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
 import { GlyphTimeDisplay } from './GlyphTimeDisplay'
+import { SlidingSegmentedControl } from '../SlidingSegmentedControl'
 
 interface HeroTimerCardProps {
   phaseLabel: string
@@ -145,36 +146,16 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         </div>
 
         {/* Mode Selector Pill (Pomodoro / Flow) */}
-        <div className="flex items-center rounded-full bg-canvas border border-line p-0.5 font-mono text-[10px]">
-          <button
-            type="button"
-            onClick={() => {
-              playMicroClick('tab')
-              onModeChange('pomodoro')
-            }}
-            className={`rounded-full px-2.5 py-0.5 uppercase tracking-wider transition-colors cursor-pointer ${
-              mode === 'pomodoro'
-                ? 'bg-fg text-canvas font-bold'
-                : 'text-muted hover:text-fg'
-            }`}
-          >
-            Pomo
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              playMicroClick('tab')
-              onModeChange('flow')
-            }}
-            className={`rounded-full px-2.5 py-0.5 uppercase tracking-wider transition-colors cursor-pointer ${
-              mode === 'flow'
-                ? 'bg-fg text-canvas font-bold'
-                : 'text-muted hover:text-fg'
-            }`}
-          >
-            Flow
-          </button>
-        </div>
+        <SlidingSegmentedControl<'pomodoro' | 'flow'>
+          options={[
+            { value: 'pomodoro', label: 'Pomo' },
+            { value: 'flow', label: 'Flow' },
+          ]}
+          value={mode === 'flow' ? 'flow' : 'pomodoro'}
+          onChange={(newMode) => onModeChange(newMode)}
+          size="sm"
+          ariaLabel="Timer Mode"
+        />
       </div>
 
       {/* Hero Glyph Display */}

@@ -73,14 +73,14 @@ export const SettingsModal = memo(function SettingsModal({
       role="dialog"
       aria-modal="true"
       aria-label="Settings & Preferences"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-6 select-none backdrop-blur-[2px]"
+      className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-6 select-none backdrop-blur-[2px]"
       onClick={() => {
         playMicroClick('tap')
         onClose()
       }}
     >
       <div
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-card bg-surface border border-line p-5 sm:p-7 flex flex-col gap-4 shadow-none"
+        className="modal-panel relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-card bg-surface border border-line p-5 sm:p-7 flex flex-col gap-4 shadow-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

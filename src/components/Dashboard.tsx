@@ -37,6 +37,7 @@ import { SessionLog } from './SessionLog'
 import { clearSessions } from '../lib/db'
 import { useTranslation } from '../hooks/useTranslation'
 import type { Messages } from '../lib/i18n'
+import { SlidingSegmentedControl } from './SlidingSegmentedControl'
 
 type ThemeColors = ReturnType<typeof useThemeColors>
 
@@ -217,37 +218,21 @@ export const Dashboard = memo(function Dashboard({
       {/* Dashboard Top Header with Segmented Range Filter */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-mono text-sm font-bold uppercase tracking-widest text-fg">{t.dashboard.periodOverview}</h2>
-        <div
-          role="tablist"
-          aria-label={t.dashboard.periodOverview}
-          className="inline-flex items-center p-1 rounded-full border border-line bg-canvas font-mono text-xs uppercase"
-        >
-          {TIME_RANGES.map((r) => {
-            const label =
+        <SlidingSegmentedControl<TimeRange>
+          options={TIME_RANGES.map((r) => ({
+            value: r,
+            label:
               r === 'week'
                 ? t.dashboard.rangeWeek
                 : r === 'month'
                 ? t.dashboard.rangeMonth
-                : t.dashboard.rangeAllTime
-            const isActive = timeRange === r
-            return (
-              <button
-                key={r}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                onClick={() => setTimeRange(r)}
-                className={`px-3.5 py-1 rounded-full text-[11px] font-bold tracking-wider transition-colors cursor-pointer ${
-                  isActive
-                    ? 'bg-fg text-canvas'
-                    : 'text-muted hover:text-fg'
-                }`}
-              >
-                {label}
-              </button>
-            )
-          })}
-        </div>
+                : t.dashboard.rangeAllTime,
+          }))}
+          value={timeRange}
+          onChange={setTimeRange}
+          size="sm"
+          ariaLabel={t.dashboard.periodOverview}
+        />
       </div>
 
       {/* 4 Responsive KPI Metric Cards */}

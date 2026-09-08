@@ -4,6 +4,7 @@ import type { TimerStatus, TimerMode } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
 import { playMicroClick } from '../lib/sound'
 import { useFlowTimerTick, useTimerTick } from '../hooks/useTimerTick'
+import { SlidingSegmentedControl } from './SlidingSegmentedControl'
 
 interface Props {
   phaseLabel: string
@@ -133,29 +134,16 @@ export const Timer = memo(function Timer({
       )}
 
       {/* Nothing Segmented Control: Timer Mode */}
-      <div
-        role="tablist"
-        aria-label="Timer Modus"
-        className="inline-flex items-center p-1 rounded-full border border-line bg-canvas font-mono text-xs select-none"
-      >
-        {MODES.map((m) => {
-          const isSelected = mode === m
-          return (
-            <button
-              key={m}
-              type="button"
-              role="tab"
-              aria-selected={isSelected}
-              onClick={() => onModeChange(m)}
-              className={`px-4 py-1 rounded-full uppercase tracking-wider text-[11px] font-bold transition-colors cursor-pointer ${
-                isSelected ? 'bg-fg text-canvas' : 'text-muted hover:text-fg'
-              }`}
-            >
-              {m}
-            </button>
-          )
-        })}
-      </div>
+      <SlidingSegmentedControl<TimerMode>
+        options={MODES.map((m) => ({
+          value: m,
+          label: m,
+        }))}
+        value={mode}
+        onChange={onModeChange}
+        size="md"
+        ariaLabel="Timer Modus"
+      />
 
       {/* Nothing Hardware Widget Display */}
       <div className="flex flex-col items-center justify-between w-full my-1 text-center select-none">

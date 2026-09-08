@@ -25,6 +25,7 @@ import { useTranslation } from '../hooks/useTranslation'
 import { playMicroClick } from '../lib/sound'
 import type { SyncStatus } from '../hooks/useSync'
 import type { GitHubProfile } from '../hooks/useAuth'
+import { SlidingSegmentedControl } from './SlidingSegmentedControl'
 
 interface AccentOption {
   id: AccentColor
@@ -454,36 +455,33 @@ export const SettingsPanel = memo(function SettingsPanel({
             <h3 className="text-xs font-bold uppercase tracking-widest text-muted">{t.settings.language}</h3>
             <p className="text-[11px] text-muted">{t.settings.languageHint}</p>
           </div>
-          <div
-            role="tablist"
-            aria-label={t.settings.language}
-            className="inline-flex items-center p-1 rounded-full border border-line bg-canvas font-mono text-xs select-none w-full sm:w-auto"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={lang === 'de'}
-              onClick={() => setLang('de')}
-              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-full flex items-center justify-center gap-1.5 text-xs font-bold transition-colors cursor-pointer uppercase ${
-                lang === 'de' ? 'bg-fg text-canvas' : 'text-muted hover:text-fg'
-              }`}
-            >
-              <span>DE</span>
-              <span className="hidden sm:inline">Deutsch</span>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={lang === 'en'}
-              onClick={() => setLang('en')}
-              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-full flex items-center justify-center gap-1.5 text-xs font-bold transition-colors cursor-pointer uppercase ${
-                lang === 'en' ? 'bg-fg text-canvas' : 'text-muted hover:text-fg'
-              }`}
-            >
-              <span>EN</span>
-              <span className="hidden sm:inline">English</span>
-            </button>
-          </div>
+          <SlidingSegmentedControl<'de' | 'en'>
+            options={[
+              {
+                value: 'de',
+                label: (
+                  <span className="flex items-center gap-1.5">
+                    <span>DE</span>
+                    <span className="hidden sm:inline">Deutsch</span>
+                  </span>
+                ),
+              },
+              {
+                value: 'en',
+                label: (
+                  <span className="flex items-center gap-1.5">
+                    <span>EN</span>
+                    <span className="hidden sm:inline">English</span>
+                  </span>
+                ),
+              },
+            ]}
+            value={lang}
+            onChange={setLang}
+            size="md"
+            fullWidth
+            ariaLabel={t.settings.language}
+          />
         </div>
       </div>
 
@@ -494,36 +492,25 @@ export const SettingsPanel = memo(function SettingsPanel({
             <h3 className="text-xs font-bold uppercase tracking-widest text-muted">{t.settings.colorMode}</h3>
             <p className="text-[11px] text-muted">{t.settings.colorModeHint}</p>
           </div>
-          <div
-            role="tablist"
-            aria-label={t.settings.colorMode}
-            className="inline-flex items-center p-1 rounded-full border border-line bg-canvas font-mono text-xs select-none w-full sm:w-auto"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={colorMode === 'dark'}
-              onClick={() => onColorModeChange('dark')}
-              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold transition-colors cursor-pointer uppercase ${
-                colorMode === 'dark' ? 'bg-fg text-canvas' : 'text-muted hover:text-fg'
-              }`}
-            >
-              <Moon size={13} />
-              <span>{t.settings.dark}</span>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={colorMode === 'light'}
-              onClick={() => onColorModeChange('light')}
-              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold transition-colors cursor-pointer uppercase ${
-                colorMode === 'light' ? 'bg-fg text-canvas' : 'text-muted hover:text-fg'
-              }`}
-            >
-              <Sun size={13} />
-              <span>{t.settings.light}</span>
-            </button>
-          </div>
+          <SlidingSegmentedControl<ColorMode>
+            options={[
+              {
+                value: 'dark',
+                label: t.settings.dark,
+                icon: <Moon size={13} />,
+              },
+              {
+                value: 'light',
+                label: t.settings.light,
+                icon: <Sun size={13} />,
+              },
+            ]}
+            value={colorMode}
+            onChange={onColorModeChange}
+            size="md"
+            fullWidth
+            ariaLabel={t.settings.colorMode}
+          />
         </div>
 
         {/* Subtle Divider */}
