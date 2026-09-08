@@ -241,16 +241,16 @@ function NumberStepper({
 
 interface Preset {
   id: 'classic' | 'deepWork' | 'ultradian'
-  labelKey: 'presetClassic' | 'presetDeepWork' | 'presetUltradian'
+  name: { de: string; en: string }
   focus: number
   shortBreak: number
   longBreak: number
 }
 
 const PRESETS: Preset[] = [
-  { id: 'classic', labelKey: 'presetClassic', focus: 25, shortBreak: 5, longBreak: 15 },
-  { id: 'deepWork', labelKey: 'presetDeepWork', focus: 50, shortBreak: 10, longBreak: 30 },
-  { id: 'ultradian', labelKey: 'presetUltradian', focus: 90, shortBreak: 20, longBreak: 30 },
+  { id: 'classic', name: { de: 'Klassisch', en: 'Classic' }, focus: 25, shortBreak: 5, longBreak: 15 },
+  { id: 'deepWork', name: { de: 'Deep Work', en: 'Deep Work' }, focus: 50, shortBreak: 10, longBreak: 30 },
+  { id: 'ultradian', name: { de: 'Ultradian', en: 'Ultradian' }, focus: 90, shortBreak: 20, longBreak: 30 },
 ]
 
 function ProfileAvatar({ avatarUrl, name }: { avatarUrl?: string; name: string }) {
@@ -469,12 +469,13 @@ export const SettingsPanel = memo(function SettingsPanel({
           <span className="text-[11px] uppercase tracking-wider text-muted">
             {t.settings.presets}
           </span>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {PRESETS.map((p) => {
               const active =
                 settings.phases.focus === p.focus &&
                 settings.phases.shortBreak === p.shortBreak &&
                 settings.phases.longBreak === p.longBreak
+              const presetName = lang === 'de' ? p.name.de : p.name.en
               return (
                 <button
                   key={p.id}
@@ -491,13 +492,27 @@ export const SettingsPanel = memo(function SettingsPanel({
                       },
                     }))
                   }}
-                  className={`rounded-full border px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors active:scale-95 cursor-pointer ${
+                  className={`group relative flex flex-col items-center justify-center rounded-card border py-2 px-1.5 sm:px-2 font-mono transition-all duration-150 active:scale-[0.98] cursor-pointer ${
                     active
-                      ? 'border-fg bg-fg text-canvas font-bold'
+                      ? 'border-fg bg-fg text-canvas'
                       : 'border-line bg-canvas text-muted hover:border-fg/40 hover:text-fg'
                   }`}
                 >
-                  {t.settings[p.labelKey]}
+                  <div className="flex items-center justify-center gap-1.5 max-w-full">
+                    {active && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_8px_rgba(215,25,33,0.8)] shrink-0" />
+                    )}
+                    <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate">
+                      {presetName}
+                    </span>
+                  </div>
+                  <span
+                    className={`mt-0.5 text-[9px] sm:text-[10px] tracking-wider tabular-nums font-mono ${
+                      active ? 'text-canvas/75' : 'text-muted/60 group-hover:text-muted'
+                    }`}
+                  >
+                    {p.focus} / {p.shortBreak} {t.settings.minUnit}
+                  </span>
                 </button>
               )
             })}
