@@ -72,9 +72,14 @@ export const TodoManagerModal = memo(function TodoManagerModal({
             <span className="font-mono text-[10px] sm:text-xs tracking-widest text-muted uppercase">
               TASK MANAGER // INBOX & ARCHIVE
             </span>
-            <h2 className="font-sans text-lg font-medium text-fg">
-              Manage Tasks & Projects
-            </h2>
+            <div className="flex items-center gap-3 mt-0.5">
+              <h2 className="font-sans text-lg font-medium text-fg">
+                Manage Tasks & Projects
+              </h2>
+              <span className="rounded-full border border-line bg-canvas px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted">
+                {todos.filter((x) => x.done).length} / {todos.length} DONE
+              </span>
+            </div>
           </div>
 
           <button

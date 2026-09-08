@@ -2,6 +2,7 @@ import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 
 import { Check, ChevronDown, Pencil, Plus, Target, Timer, Trash2, X } from 'lucide-react'
 import type { TodoItem } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
+import { playMicroClick } from '../lib/sound'
 
 export const TAG_PALETTE = [
   '#d71921', // Nothing Red
@@ -75,7 +76,7 @@ const TagSelect = memo(function TagSelect({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`flex h-[38px] cursor-pointer items-center gap-1.5 px-3.5 rounded-full border text-xs font-mono uppercase tracking-wider select-none transition-colors ${
+        className={`flex h-7 cursor-pointer items-center gap-1.5 px-2.5 rounded-full border text-[11px] font-mono uppercase tracking-wider select-none transition-colors ${
           value
             ? 'border-fg/40 bg-canvas text-fg'
             : 'border-line bg-canvas text-muted hover:border-fg/40 hover:text-fg'
@@ -88,7 +89,10 @@ const TagSelect = memo(function TagSelect({
           <>
             <span
               className="h-1.5 w-1.5 shrink-0 rounded-full"
-              style={{ backgroundColor: selectedColor || '#ffffff' }}
+              style={{
+                backgroundColor: selectedColor || '#ffffff',
+                boxShadow: selectedColor ? `0 0 8px ${selectedColor}66` : undefined,
+              }}
             />
             <span className="max-w-[80px] sm:max-w-[110px] truncate">{value}</span>
           </>
@@ -96,7 +100,7 @@ const TagSelect = memo(function TagSelect({
           <span>{noTagLabel}</span>
         )}
         <ChevronDown
-          size={13}
+          size={12}
           className={`shrink-0 text-muted transition-transform duration-200 ${
             isOpen ? 'rotate-180 text-fg' : ''
           }`}
@@ -147,7 +151,10 @@ const TagSelect = memo(function TagSelect({
                 <span className="flex items-center gap-2 truncate">
                   <span
                     className="h-1.5 w-1.5 rounded-full shrink-0"
-                    style={{ backgroundColor: color }}
+                    style={{
+                      backgroundColor: color,
+                      boxShadow: `0 0 8px ${color}66`,
+                    }}
                   />
                   <span className="truncate text-fg">{t}</span>
                 </span>
@@ -287,7 +294,16 @@ export const TodoList = memo(function TodoList({
   const submitAdd = () => {
     const trimmed = title.trim()
     if (!trimmed) return
-    onAdd(trimmed, activeTag)
+    const hashMatch = trimmed.match(/#([\w\u00C0-\u017F-]+)/)
+    let parsedTitle = trimmed
+    let parsedTag = activeTag
+    if (hashMatch) {
+      parsedTag = hashMatch[1]
+      parsedTitle = trimmed.replace(hashMatch[0], '').trim()
+    }
+    if (!parsedTitle) return
+    playMicroClick('pop')
+    onAdd(parsedTitle, parsedTag)
     setTitle('')
   }
 
@@ -308,16 +324,9 @@ export const TodoList = memo(function TodoList({
   }
 
   return (
-    <section className="card flex w-full max-w-md 2xl:max-w-lg min-h-[160px] sm:min-h-[180px] flex-col gap-4 p-5 sm:p-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-muted">{tr.todo.title}</h3>
-        <span className="font-mono text-[11px] text-muted tabular-nums">
-          [ {todos.filter((x) => x.done).length} / {todos.length} ]
-        </span>
-      </div>
-
-      {/* Unified Input Group */}
-      <div className="flex items-center gap-2">
+    <section className="flex w-full flex-col gap-4">
+      {/* Integrated Hardware Pill Input */}
+      <div className="relative flex w-full items-center rounded-full border border-line bg-canvas pl-4 pr-1.5 py-1.5 transition-colors focus-within:border-fg">
         <input
           type="text"
           value={title}
@@ -328,34 +337,46 @@ export const TodoList = memo(function TodoList({
               submitAdd()
             }
           }}
-          placeholder="enter new task..."
-          className="input h-[38px] min-w-0 flex-1 font-mono text-xs py-2"
+          placeholder={tr.todo.addPlaceholder || 'enter new task...'}
+          className="w-full bg-transparent font-mono text-xs text-fg placeholder:text-muted/60 focus:outline-none min-w-0 pr-2"
           maxLength={80}
         />
 
-        <TagSelect
-          value={activeTag}
-          tags={tags}
-          onChange={setTag}
-          noTagLabel={tr.todo.noTag}
-          title={tr.todo.selectTag || tr.todo.tag}
-        />
+        <div className="flex items-center gap-1.5 shrink-0">
+          <TagSelect
+            value={activeTag}
+            tags={tags}
+            onChange={setTag}
+            noTagLabel={tr.todo.noTag}
+            title={tr.todo.selectTag || tr.todo.tag}
+          />
 
-        <button
-          type="button"
-          onClick={submitAdd}
-          disabled={!title.trim()}
-          className="btn-primary shrink-0 h-[38px] px-3.5 rounded-full flex items-center justify-center font-mono text-xs uppercase cursor-pointer"
-          title={tr.todo.add}
-          aria-label={tr.todo.add}
-        >
-          <Plus size={15} />
-        </button>
+          <kbd className="hidden select-none rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-[9px] text-muted/60 sm:inline-block">
+            ⏎
+          </kbd>
+
+          <button
+            type="button"
+            onClick={submitAdd}
+            disabled={!title.trim()}
+            className={`flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150 ${
+              title.trim()
+                ? 'cursor-pointer bg-fg text-canvas opacity-100 hover:bg-accent hover:text-white active:scale-95'
+                : 'pointer-events-none cursor-not-allowed bg-transparent text-muted opacity-30'
+            }`}
+            title={tr.todo.add}
+            aria-label={tr.todo.add}
+          >
+            <Plus size={15} />
+          </button>
+        </div>
       </div>
 
       {todos.length === 0 ? (
-        <div className="flex flex-1 items-center justify-center py-6">
-          <p className="font-mono text-xs text-muted uppercase tracking-wider">{tr.todo.empty}</p>
+        <div className="flex flex-1 items-center justify-center py-10">
+          <span className="font-mono text-xs text-muted uppercase tracking-widest px-3 py-1.5 rounded-full border border-line/50 bg-canvas/40">
+            [ 0 TASKS IN INBOX · STANDBY ]
+          </span>
         </div>
       ) : (
         <ul ref={listRef} className="flex flex-col gap-1.5 2xl:gap-2">
@@ -454,8 +475,15 @@ export const TodoList = memo(function TodoList({
                     )}
                   </div>
                   {t.tag && (
-                    <span className="shrink-0 rounded-full border border-line px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted">
-                      #{t.tag}
+                    <span className="flex items-center gap-1.5 shrink-0 rounded-full border border-line bg-canvas px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-fg/90">
+                      <span
+                        className="h-1.5 w-1.5 rounded-full shrink-0"
+                        style={{
+                          backgroundColor: getTagColor(t.tag),
+                          boxShadow: `0 0 8px ${getTagColor(t.tag)}66`,
+                        }}
+                      />
+                      <span>{t.tag}</span>
                     </span>
                   )}
                 </>
