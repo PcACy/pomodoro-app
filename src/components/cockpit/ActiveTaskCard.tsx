@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { ArrowLeftRight, Square } from 'lucide-react'
+import { ArrowUpFromLine, Square } from 'lucide-react'
 import type { Session, TodoItem, TimerMode } from '../../types'
 import { BentoCard } from './BentoCard'
 import { getTagColor } from '../TodoList'
@@ -169,14 +169,14 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           {/* Mechanical tape counter */}
           <div className="mt-3 flex items-center gap-2.5">
             <div
-              className="flex rounded border border-line bg-canvas divide-x divide-line overflow-hidden"
+              className="flex rounded border border-fg/20 bg-black divide-x divide-white/10 overflow-hidden"
               role="status"
               aria-label={`Tape counter: ${counterDigits.join('')} minutes elapsed`}
             >
               {counterDigits.map((d, i) => (
                 <span
                   key={i}
-                  className="w-6 py-1 text-center font-mono text-sm font-medium tabular-nums text-fg"
+                  className="w-5 py-1 text-center font-mono text-sm font-medium tabular-nums text-white"
                 >
                   {d}
                 </span>
@@ -188,10 +188,21 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           </div>
         </div>
 
-        {/* Dual reels */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 text-fg">
-          <Reel packWidth={activeTodo ? leftPack : 1.5} spinning={spinning} dim={!activeTodo} />
-          <Reel packWidth={activeTodo ? rightPack : 1.5} spinning={spinning} reverse dim={!activeTodo} />
+        {/* Dual reels in cassette window */}
+        <div className="shrink-0 rounded-xl border border-black/10 bg-black/[0.02] p-2 dark:border-white/5 dark:bg-white/[0.02]">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-fg">
+            <Reel packWidth={activeTodo ? leftPack : 1.5} spinning={spinning} dim={!activeTodo} />
+            <Reel packWidth={activeTodo ? rightPack : 1.5} spinning={spinning} reverse dim={!activeTodo} />
+          </div>
+          {/* Tape path + head */}
+          <div className="relative mt-1.5 h-3" aria-hidden="true">
+            <div className="absolute left-3 right-3 top-0 h-px bg-fg/20" />
+            <div className="absolute left-1/2 top-[3px] flex -translate-x-1/2 items-end gap-[3px]">
+              <span className="h-1.5 w-px bg-fg/30" />
+              <span className="h-[5px] w-2.5 rounded-[1px] border border-fg/30 bg-canvas" />
+              <span className="h-1.5 w-px bg-fg/30" />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -206,8 +217,8 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           title={activeTodo ? 'Change tape' : 'Insert tape'}
           className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-md border border-line bg-canvas font-mono text-[11px] tracking-widest uppercase text-muted transition-colors hover:border-fg/40 hover:text-fg active:translate-y-px cursor-pointer"
         >
-          <ArrowLeftRight size={13} />
-          <span>{activeTodo ? 'CHG' : 'INSERT'}</span>
+          <ArrowUpFromLine size={13} />
+          <span>{activeTodo ? 'EJECT' : 'INSERT'}</span>
         </button>
         {activeTodo && onToggleDone && (
           <button
@@ -217,7 +228,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
               onToggleDone(activeTodo.id)
             }}
             title="Stop and complete track"
-            className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-md border border-line bg-canvas font-mono text-[11px] tracking-widest uppercase text-fg transition-colors hover:border-fg active:translate-y-px cursor-pointer"
+            className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-md border border-line bg-canvas font-mono text-[11px] tracking-widest uppercase text-fg transition-colors hover:bg-fg hover:text-canvas hover:border-fg active:translate-y-px cursor-pointer"
           >
             <Square size={11} />
             <span>DONE</span>
