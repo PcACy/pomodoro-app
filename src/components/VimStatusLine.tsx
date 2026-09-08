@@ -61,7 +61,7 @@ export const VimStatusLine = memo(function VimStatusLine({
     >
       <div className="flex items-center gap-3 overflow-hidden">
         {/* Status Pill with perfectly centered text */}
-        <div className="inline-flex items-center justify-center rounded-full border border-line bg-surface px-3 py-1 text-[10px] font-bold leading-none text-fg tracking-wider shrink-0">
+        <div className="inline-flex items-center justify-center min-w-[64px] rounded-full border border-line bg-surface px-3 py-1 text-[10px] font-bold leading-none text-fg tracking-wider shrink-0">
           <span>{statusLabel}</span>
         </div>
 

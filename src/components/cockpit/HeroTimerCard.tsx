@@ -176,7 +176,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
 
           <div className="flex items-center gap-2">
             {isFlow ? (
-              <div className="inline-flex items-center font-mono text-xs tracking-wider uppercase text-fg">
+              <div className="inline-flex min-w-[110px] items-center font-mono text-xs tracking-wider uppercase text-fg">
                 <span>{running ? 'FLOW ACTIVE' : 'FREE FLOW'}</span>
               </div>
             ) : (

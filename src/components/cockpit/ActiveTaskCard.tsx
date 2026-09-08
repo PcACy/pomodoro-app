@@ -173,12 +173,12 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
       label="TRACK 01 // TAPE DECK"
       action={
         isRunning ? (
-          <span className="h-5 min-w-[58px] inline-flex items-center justify-center gap-1.5 px-2.5 font-mono text-[9px] leading-none tracking-widest uppercase rounded-full border border-accent/60 text-accent bg-accent/10">
+          <span className="h-5 min-w-[72px] inline-flex items-center justify-center gap-1.5 px-2.5 font-mono text-[9px] leading-none tracking-widest uppercase rounded-full border border-accent/60 text-accent bg-accent/10">
             <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse [animation-duration:1s] shrink-0" />
             <span>REC</span>
           </span>
         ) : (
-          <span className="h-5 min-w-[58px] inline-flex items-center justify-center px-2.5 font-mono text-[9px] leading-none tracking-widest uppercase rounded-full border border-line text-muted bg-canvas">
+          <span className="h-5 min-w-[72px] inline-flex items-center justify-center px-2.5 font-mono text-[9px] leading-none tracking-widest uppercase rounded-full border border-line text-muted bg-canvas">
             {hasProgress ? '|| PAUSE' : 'STBY'}
           </span>
         )
