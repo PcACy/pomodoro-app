@@ -2,7 +2,6 @@ import { memo } from 'react'
 import type { Session } from '../../types'
 import { minutesByTag } from '../../lib/stats'
 import { BentoCard } from './BentoCard'
-import { getTagColor } from '../TodoList'
 import { useTranslation } from '../../hooks/useTranslation'
 
 interface ProjectsDistributionCardProps {
@@ -11,7 +10,7 @@ interface ProjectsDistributionCardProps {
   className?: string
 }
 
-const SEGMENT_COUNT = 20
+const STRIP_SEGMENTS = 20
 
 export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
   sessions,
@@ -47,6 +46,40 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
   // Display top 3 categories
   const displayRows = rows.slice(0, 3)
 
+  // Single stacked share strip: discrete blocks split by largest remainder,
+  // differentiated by opacity (100/60/30) — no color, no per-row bars.
+  const RANK_OPACITY = ['opacity-100', 'opacity-60', 'opacity-30']
+  const stripBlocks: number[] = (() => {
+    if (totalTodayMinutes <= 0) return []
+    const quotas = displayRows.map((r) => (r.minutes / totalTodayMinutes) * STRIP_SEGMENTS)
+    const base = quotas.map((q) => Math.floor(q))
+    let rest = STRIP_SEGMENTS - base.reduce((a, b) => a + b, 0)
+    const order = quotas
+      .map((q, i) => ({ i, frac: q - Math.floor(q) }))
+      .sort((a, b) => b.frac - a.frac)
+    const alloc = [...base]
+    for (const { i } of order) {
+      if (rest <= 0) break
+      if (displayRows[i].minutes > 0) {
+        alloc[i] += 1
+        rest -= 1
+      }
+    }
+    // Guarantee a visible block for any active tag lost to rounding
+    displayRows.forEach((r, i) => {
+      if (r.minutes > 0 && alloc[i] === 0 && alloc.some((a) => a > 1)) {
+        const donor = alloc.findIndex((a) => a > 1)
+        alloc[donor] -= 1
+        alloc[i] = 1
+      }
+    })
+    const blocks: number[] = []
+    alloc.forEach((count, tagIdx) => {
+      for (let k = 0; k < count; k++) blocks.push(tagIdx)
+    })
+    return blocks
+  })()
+
   return (
     <BentoCard
       label={`PROJECTS · ${Math.round(totalTodayMinutes)} MINS`}
@@ -58,46 +91,48 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
       className={className}
       contentClassName="justify-between"
     >
-      <div className="flex-1 flex flex-col justify-between py-1 gap-2">
-        <div className="flex-1 flex flex-col justify-center gap-3">
-          {displayRows.map((row) => {
-            const ratio = totalTodayMinutes > 0 ? row.minutes / totalTodayMinutes : 0
-            const filled = totalTodayMinutes > 0 && row.minutes > 0
-              ? Math.min(SEGMENT_COUNT, Math.max(1, Math.round(ratio * SEGMENT_COUNT)))
-              : 0
+      <div className="flex-1 flex flex-col justify-between py-1 gap-3">
+        {/* Stacked share strip */}
+        <div
+          className="flex h-2 w-full gap-[2px]"
+          role="img"
+          aria-label={
+            totalTodayMinutes > 0
+              ? `Tag shares today: ${displayRows.map((r) => `${r.tag} ${r.minutes} minutes`).join(', ')}`
+              : 'No activity today'
+          }
+        >
+          {totalTodayMinutes > 0 ? (
+            stripBlocks.map((tagIdx, i) => (
+              <div
+                key={i}
+                title={`${displayRows[tagIdx].tag} (${displayRows[tagIdx].minutes}m)`}
+                className={`flex-1 rounded-none bg-fg transition-colors duration-150 ${RANK_OPACITY[Math.min(tagIdx, RANK_OPACITY.length - 1)]}`}
+              />
+            ))
+          ) : (
+            Array.from({ length: STRIP_SEGMENTS }).map((_, i) => (
+              <div key={i} className="flex-1 rounded-none bg-line/40" />
+            ))
+          )}
+        </div>
+
+        {/* Stat rows: label left, value right — no per-row bars */}
+        <div className="flex-1 flex flex-col justify-center gap-2.5">
+          {displayRows.map((row, rank) => {
             const hours = (row.minutes / 60).toFixed(1)
-            const tagColor = getTagColor(row.tag)
 
             return (
-              <div key={row.tag} className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between font-mono text-[10px] tracking-wider uppercase">
-                  <span className="flex items-center gap-1.5 text-muted">
-                    <span
-                      className="h-1.5 w-1.5 rounded-full"
-                      style={{
-                        backgroundColor: tagColor,
-                      }}
-                    />
-                    <span className="text-fg/90 font-medium">{row.tag}</span>
-                  </span>
-                  <span className="text-fg/80 tabular-nums">
-                    {row.minutes > 0 ? `${hours} H` : '0 H'}
-                  </span>
-                </div>
-
-                {/* Segmented bar for this category */}
-                <div className="flex h-2 w-full gap-[2px]">
-                  {Array.from({ length: SEGMENT_COUNT }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`flex-1 rounded-none transition-colors duration-150 ${
-                        i < filled
-                          ? 'bg-fg'
-                          : 'bg-line/40'
-                      }`}
-                    />
-                  ))}
-                </div>
+              <div key={row.tag} className="flex items-center justify-between font-mono text-[10px] tracking-wider uppercase">
+                <span className="flex min-w-0 items-center gap-1.5 text-muted">
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full bg-fg shrink-0 ${RANK_OPACITY[Math.min(rank, RANK_OPACITY.length - 1)]}`}
+                  />
+                  <span className="text-fg/90 font-medium truncate">{row.tag}</span>
+                </span>
+                <span className="text-fg/80 tabular-nums shrink-0">
+                  {row.minutes > 0 ? `${hours} H` : '0 H'}
+                </span>
               </div>
             )
           })}

@@ -53,10 +53,11 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   const totalStr = `${String(totalMinutes).padStart(2, '0')}:${String(totalSeconds).padStart(2, '0')}`
 
   const progressRatio = isFlowMode
-    ? 0 // flow has no fixed target; the bar stays empty, elapsed counts up
+    ? 0 // flow has no fixed target; ticks stay empty, elapsed counts up
     : totalMs > 0
       ? Math.min(1, Math.max(0, elapsedMs / totalMs))
       : 0
+  const QUARTERS = [0.25, 0.5, 0.75, 1]
   const tagColor = activeTodo?.tag ? getTagColor(activeTodo.tag) : undefined
 
   const taskMinutes = activeTodo && sessions
@@ -153,21 +154,11 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         )}
       </div>
 
-      {/* Segmented Progress Bar with Timestamps */}
+      {/* Elapsed / Total readout + Quarter ticks */}
       <div className="mt-4">
-        <div className="flex h-1.5 w-full gap-[2px]" role="progressbar" aria-valuenow={Math.round(progressRatio * 100)} aria-valuemin={0} aria-valuemax={100}>
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div
-              key={i}
-              className={`flex-1 rounded-none transition-colors duration-150 ${
-                i < Math.round(progressRatio * 20) ? 'bg-fg' : 'bg-line/40'
-              }`}
-            />
-          ))}
-        </div>
-        <div className="mt-1.5 flex items-center justify-between font-mono text-[9px] text-muted tracking-wider tabular-nums">
-          <span>{elapsedStr}</span>
-          <span className="text-fg/80 font-medium">
+        <div className="flex items-baseline justify-between font-mono tabular-nums">
+          <span className="text-sm text-fg font-medium">{elapsedStr}</span>
+          <span className="text-[10px] text-muted tracking-wider uppercase">
             {isRunning
               ? isFlowMode
                 ? `+${flowTick.time}`
@@ -176,7 +167,25 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
                 ? `${Math.round(progressRatio * 100)}%`
                 : 'STANDBY'}
           </span>
-          <span>{isFlowMode ? flowTick.time : totalStr}</span>
+          <span className="text-sm text-muted">{isFlowMode ? flowTick.time : totalStr}</span>
+        </div>
+        <div className="mt-2 flex w-full gap-[2px]" role="progressbar" aria-valuenow={Math.round(progressRatio * 100)} aria-valuemin={0} aria-valuemax={100}>
+          {QUARTERS.map((q) => (
+            <div
+              key={q}
+              title={`${Math.round(q * 100)}%`}
+              className={`h-2 flex-1 rounded-none transition-colors duration-150 ${
+                progressRatio >= q ? 'bg-fg' : 'bg-line/40'
+              }`}
+            />
+          ))}
+        </div>
+        <div className="mt-1.5 flex items-center justify-between font-mono text-[9px] text-muted tracking-wider uppercase">
+          <span>0%</span>
+          <span>25</span>
+          <span>50</span>
+          <span>75</span>
+          <span>100%</span>
         </div>
       </div>
     </BentoCard>
