@@ -197,7 +197,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
       } else {
         setCassetteAnim('eject')
         setTextAnimKey('empty')
-        const t = setTimeout(() => setCassetteAnim(''), 280)
+        const t = setTimeout(() => setCassetteAnim(''), 240)
         return () => clearTimeout(t)
       }
     }
@@ -280,8 +280,12 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
             <div className="relative">
               {/* Standby Spindles: permanently mounted in the chassis */}
               <div
-                className={`flex items-center gap-1.5 sm:gap-2 text-fg pointer-events-none transition-opacity duration-150 ${
-                  activeTodo && cassetteAnim !== 'eject' ? 'opacity-0' : 'opacity-100'
+                className={`flex items-center gap-1.5 sm:gap-2 text-fg pointer-events-none transition-opacity duration-200 ${
+                  activeTodo
+                    ? 'opacity-0'
+                    : cassetteAnim === 'eject'
+                      ? 'opacity-100 delay-100'
+                      : 'opacity-100'
                 }`}
                 aria-hidden="true"
               >

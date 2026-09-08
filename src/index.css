@@ -498,19 +498,11 @@ textarea:focus:not(:focus-visible) {
   }
 }
 
-/* Mechanical two-stage spring pop on tape eject */
-@keyframes reel-spring-eject {
+/* Smooth mechanical spring release on tape eject (rapid spring impulse, smooth deceleration out) */
+@keyframes reel-eject {
   0% {
     opacity: 1;
     transform: translateY(0);
-  }
-  38% {
-    opacity: 0.95;
-    transform: translateY(-16px);
-  }
-  58% {
-    opacity: 0.85;
-    transform: translateY(-13px);
   }
   100% {
     opacity: 0;
@@ -533,7 +525,7 @@ textarea:focus:not(:focus-visible) {
 }
 
 .animate-reel-out {
-  animation: reel-spring-eject 280ms ease-out both;
+  animation: reel-eject 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .animate-track-fade {
