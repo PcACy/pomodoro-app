@@ -156,7 +156,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                         backgroundColor: getTagColor(selectedTag),
                       }}
                     />
-                    <span className="max-w-[70px] truncate">{selectedTag}</span>
+                    <span className="max-w-[70px] truncate uppercase">{selectedTag}</span>
                   </>
                 ) : (
                   <>
@@ -211,7 +211,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                         backgroundColor: getTagColor(tag),
                       }}
                     />
-                    <span className="truncate flex-1">{tag}</span>
+                    <span className="truncate flex-1 uppercase">{tag}</span>
                     {selectedTag === tag && <span className="text-[9px]">✓</span>}
                   </button>
                 ))}
@@ -266,7 +266,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                   <span className="font-sans text-xs truncate">{todo.title}</span>
 
                   {todo.tag && (
-                    <span className="flex items-center gap-1 font-mono text-[9px] text-muted shrink-0">
+                    <span className="flex items-center gap-1 font-mono text-[9px] text-muted shrink-0 uppercase tracking-wider">
                       <span
                         className="h-1.5 w-1.5 rounded-full"
                         style={{
