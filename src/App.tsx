@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
-import { BarChart3, Settings as SettingsIcon, Timer as TimerIcon } from 'lucide-react'
+import { BarChart3, PictureInPicture2, Settings as SettingsIcon } from 'lucide-react'
 import { useSettings } from './hooks/useSettings'
 import { useLocalState } from './hooks/useLocalState'
 import { useSessions } from './hooks/useSessions'
@@ -20,41 +20,25 @@ import { addSession, updateSessionNotes } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
 import { initAudio, playMicroClick } from './lib/sound'
 import { STORAGE_KEYS, type Session, type Settings, type TimerMode } from './types'
-import type { Messages } from './lib/i18n'
 import { Timer } from './components/Timer'
-import { QuickStats } from './components/QuickStats'
-import { DayTimeline } from './components/DayTimeline'
 import { PipTimer, PipCanvas } from './components/PipTimer'
-import { TodoList } from './components/TodoList'
 import { CatLogo } from './components/CatLogo'
 import { ThemeStatusBar } from './components/ThemeStatusBar'
 import { ThemeBackground } from './components/ThemeBackground'
+import { BentoCockpit } from './components/cockpit/BentoCockpit'
+import { TodoManagerModal } from './components/cockpit/TodoManagerModal'
+import { AnalyticsModal } from './components/cockpit/AnalyticsModal'
+import { SettingsModal } from './components/cockpit/SettingsModal'
 
-const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })))
-const SettingsPanel = lazy(() => import('./components/Settings').then((m) => ({ default: m.SettingsPanel })))
 const ReflectionModal = lazy(() => import('./components/ReflectionModal').then((m) => ({ default: m.ReflectionModal })))
-
-type Tab = 'timer' | 'dashboard' | 'settings'
-
-// Module-scope constant: recreating these icon elements on every render
-// (including every 250ms timer tick) is wasted allocation work.
-const TABS: { id: Tab; icon: React.ReactNode }[] = [
-  { id: 'timer', icon: <TimerIcon size={16} /> },
-  { id: 'dashboard', icon: <BarChart3 size={16} /> },
-  { id: 'settings', icon: <SettingsIcon size={16} /> },
-]
-
-const TAB_LABEL_KEYS: Record<Tab, keyof Messages['nav']> = {
-  timer: 'timer',
-  dashboard: 'statistics',
-  settings: 'settings',
-}
 
 export default function App() {
   const { t } = useTranslation()
   const [themeId, , colorMode, setColorMode] = useTheme()
   const [settings, updateSettings] = useSettings()
-  const [tab, setTab] = useState<Tab>('timer')
+  const [isTodoModalOpen, setIsTodoModalOpen] = useState(false)
+  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [isZenMode, setIsZenMode] = useState(false)
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null)
   const [mode, setMode] = useLocalState<TimerMode>(STORAGE_KEYS.mode, 'pomodoro')
@@ -201,19 +185,9 @@ export default function App() {
     [],
   )
 
-  const handleTabChange = useCallback((nextTab: Tab) => {
-    playMicroClick('tab')
-    setIsZenMode(false)
-    setTab(nextTab)
-  }, [])
-
   const handleToggleZen = useCallback(() => {
-    setIsZenMode((prev) => {
-      const next = !prev
-      if (next && tab !== 'timer') setTab('timer')
-      return next
-    })
-  }, [tab])
+    setIsZenMode((prev) => !prev)
+  }, [])
 
   const handleExitZen = useCallback(() => {
     setIsZenMode(false)
@@ -235,7 +209,6 @@ export default function App() {
   const { updateAvailable, reload } = useServiceWorker()
   const { pipWindow, isSupported: pipSupported, open: openPip, close: closePip, mode: pipMode, canvasRef, videoRef } =
     usePictureInPicture()
-  const zenRunning = tab === 'timer' && chromeStatus === 'running'
 
   useWakeLock(chromeStatus === 'running')
 
@@ -295,7 +268,7 @@ export default function App() {
   }, [timer.phase, timer.status, timer.totalMs, t.phases])
 
   return (
-    <div className="min-h-screen min-h-[100dvh] flex flex-col justify-between py-4 px-4 sm:px-8 max-w-6xl mx-auto relative w-full">
+    <div className="min-h-screen min-h-[100dvh] flex flex-col justify-between py-4 px-3 sm:px-6 lg:px-8 max-w-7xl 2xl:max-w-[1440px] mx-auto relative w-full">
       {/* Dynamic Document Title & Favicon Manager (Isolated from App re-renders) */}
       <DocumentChrome phase={chromePhase} status={chromeStatus} mode={mode} />
 
@@ -312,7 +285,7 @@ export default function App() {
         isRunning={isRunning}
       />
 
-      <header className="flex w-full items-center justify-between gap-4">
+      <header className="flex w-full items-center justify-between gap-4 py-2 px-1">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors">
             <CatLogo
@@ -321,162 +294,126 @@ export default function App() {
               state={isRunning ? chromePhase : 'idle'}
             />
           </div>
-          <div className="flex items-center gap-1.5 font-mono">
+          <div className="flex items-center gap-2 font-mono">
             <h1 className="text-sm font-bold tracking-widest uppercase text-fg">Pomau</h1>
             <span
               className={`inline-block h-1.5 w-1.5 rounded-full ${
                 isRunning ? 'bg-accent animate-pulse' : 'bg-muted/40'
               }`}
             />
+            <span className="hidden sm:inline text-[10px] text-muted tracking-widest uppercase">
+              // COCKPIT
+            </span>
           </div>
         </div>
 
-        <nav
-          role="tablist"
-          aria-label="Navigation"
-          className={`relative flex items-center select-none rounded-full border border-line bg-surface p-1 transition-opacity duration-500 ${
-            zenRunning ? 'opacity-20 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
-          }`}
-        >
-          {TABS.map((tb) => {
-            const isSelected = tab === tb.id
-            return (
-              <button
-                key={tb.id}
-                type="button"
-                role="tab"
-                aria-selected={isSelected}
-                aria-label={t.nav[TAB_LABEL_KEYS[tb.id]]}
-                onClick={() => handleTabChange(tb.id)}
-                className={`relative z-10 flex min-h-[32px] sm:min-h-[34px] items-center justify-center gap-1.5 whitespace-nowrap shrink-0 rounded-full px-3 sm:px-4 py-1 font-mono text-[11px] sm:text-xs uppercase tracking-wider transition-colors duration-150 cursor-pointer ${
-                  isSelected
-                    ? 'bg-fg text-canvas font-bold'
-                    : 'text-muted hover:text-fg'
-                }`}
-              >
-                {tb.icon}
-                <span className="hidden sm:inline">{t.nav[TAB_LABEL_KEYS[tb.id]]}</span>
-              </button>
-            )
-          })}
-        </nav>
+        <div className="flex items-center gap-2 font-mono text-xs">
+          {/* Picture-in-Picture Button */}
+          {pipSupported && (
+            <button
+              type="button"
+              onClick={handlePipToggle}
+              title={pipMode !== 'none' ? 'Close PiP' : 'Picture-in-Picture'}
+              aria-label="Picture-in-Picture"
+              className={`flex items-center justify-center h-8 w-8 rounded-full border transition-colors cursor-pointer ${
+                pipMode !== 'none'
+                  ? 'border-accent bg-surface-raised text-accent'
+                  : 'border-line bg-surface hover:border-fg/40 text-muted hover:text-fg'
+              }`}
+            >
+              <PictureInPicture2 size={14} />
+            </button>
+          )}
+
+          {/* Analytics Modal Trigger */}
+          <button
+            type="button"
+            onClick={() => {
+              playMicroClick('tab')
+              setIsAnalyticsModalOpen(true)
+            }}
+            title={t.nav.statistics}
+            aria-label={t.nav.statistics}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line bg-surface hover:border-fg/40 text-muted hover:text-fg uppercase tracking-wider transition-colors cursor-pointer text-[11px]"
+          >
+            <BarChart3 size={13} />
+            <span className="hidden md:inline">{t.nav.statistics}</span>
+          </button>
+
+          {/* Settings Modal Trigger */}
+          <button
+            type="button"
+            onClick={() => {
+              playMicroClick('tab')
+              setIsSettingsModalOpen(true)
+            }}
+            title={t.nav.settings}
+            aria-label={t.nav.settings}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line bg-surface hover:border-fg/40 text-muted hover:text-fg uppercase tracking-wider transition-colors cursor-pointer text-[11px]"
+          >
+            <SettingsIcon size={13} />
+            <span className="hidden md:inline">{t.nav.settings}</span>
+          </button>
+        </div>
       </header>
 
-      <main className="flex w-full flex-1 flex-col items-center justify-center gap-6 py-4 sm:py-6 pb-20 sm:pb-24">
-        <div key={tab} className="animate-tab-enter flex w-full flex-1 flex-col items-center justify-center my-auto">
-          {tab === 'timer' && (
-            settings.layoutMode === 'single' ? (
-              <div className="mx-auto flex w-full max-w-xl 2xl:max-w-2xl flex-col items-center gap-6">
-                <Timer
-                  large
-                  phaseLabel={timer.phaseLabel}
-                  status={timer.status}
-                  completedFocusInCycle={timer.completedFocusInCycle}
-                  roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
-                  mode={mode}
-                  flowStatus={flow.status}
-                  task={sessionTask}
-                  tag={sessionTag}
-                  onModeChange={handleModeChange}
-                  onToggle={handleToggle}
-                  onSkip={handleSkip}
-                  onReset={handleReset}
-                  pipSupported={pipSupported}
-                  pipOpen={pipMode !== 'none'}
-                  onPipToggle={handlePipToggle}
-                  isZenMode={isZenMode}
-                  onToggleZen={handleToggleZen}
-                />
-                <TodoList
-                  todos={todosApi.todos}
-                  tags={settings.tags}
-                  activeTodoId={activeTodoId}
-                  timerRunning={isRunning}
-                  onAdd={todosApi.add}
-                  onToggle={todosApi.toggle}
-                  onEdit={todosApi.edit}
-                  onRemove={todosApi.remove}
-                  onFocus={handleFocusTodo}
-                />
-                <QuickStats sessions={sessions} settings={settings} />
-                <DayTimeline sessions={sessions} />
-              </div>
-            ) : (
-              <div className="mx-auto grid w-full max-w-5xl 2xl:max-w-6xl grid-cols-1 items-start justify-items-center gap-6 lg:grid-cols-2">
-                <Timer
-                  phaseLabel={timer.phaseLabel}
-                  status={timer.status}
-                  completedFocusInCycle={timer.completedFocusInCycle}
-                  roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
-                  mode={mode}
-                  flowStatus={flow.status}
-                  task={sessionTask}
-                  tag={sessionTag}
-                  onModeChange={handleModeChange}
-                  onToggle={handleToggle}
-                  onSkip={handleSkip}
-                  onReset={handleReset}
-                  pipSupported={pipSupported}
-                  pipOpen={pipMode !== 'none'}
-                  onPipToggle={handlePipToggle}
-                  isZenMode={isZenMode}
-                  onToggleZen={handleToggleZen}
-                />
-                <div className="flex w-full max-w-md 2xl:max-w-lg flex-col gap-6">
-                  <TodoList
-                    todos={todosApi.todos}
-                    tags={settings.tags}
-                    activeTodoId={activeTodoId}
-                    timerRunning={isRunning}
-                    onAdd={todosApi.add}
-                    onToggle={todosApi.toggle}
-                    onEdit={todosApi.edit}
-                    onRemove={todosApi.remove}
-                    onFocus={handleFocusTodo}
-                  />
-                  <QuickStats sessions={sessions} settings={settings} />
-                </div>
-                <div className="col-span-full w-full">
-                  <DayTimeline sessions={sessions} />
-                </div>
-              </div>
-            )
-          )}
-          {tab === 'dashboard' && (
-            <Suspense fallback={<div className="flex h-64 w-full items-center justify-center text-sm text-muted animate-pulse">Laden...</div>}>
-              <Dashboard
-                sessions={sessions}
-                settings={settings}
-                themeId={themeId}
-                colorMode={colorMode}
-                todos={todosApi.todos}
-                onImportSettings={handleImportSettings}
-              />
-            </Suspense>
-          )}
-          {tab === 'settings' && (
-            <Suspense fallback={<div className="flex h-64 w-full items-center justify-center text-sm text-muted animate-pulse">Laden...</div>}>
-              <SettingsPanel
-                settings={settings}
-                update={updateSettings}
-                themeId={themeId}
-                colorMode={colorMode}
-                onColorModeChange={setColorMode}
-                sessions={sessions}
-                todos={todosApi.todos}
-                syncStatus={sync.status}
-                syncPending={sync.pending}
-                syncLastSyncAt={sync.lastSyncAt}
-                syncProfile={auth.profile}
-                syncAvailable={auth.available}
-                syncLoading={auth.loading}
-                onSyncLogin={auth.login}
-                onSyncLogout={auth.logout}
-                onSyncNow={handleSyncNow}
-              />
-            </Suspense>
-          )}
-        </div>
+      <main className="flex w-full flex-1 flex-col items-center justify-center gap-6 py-2 sm:py-4 pb-20 sm:pb-24">
+        {isZenMode ? (
+          <div className="mx-auto flex w-full max-w-xl flex-col items-center justify-center py-8">
+            <Timer
+              large
+              phaseLabel={timer.phaseLabel}
+              status={timer.status}
+              completedFocusInCycle={timer.completedFocusInCycle}
+              roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
+              mode={mode}
+              flowStatus={flow.status}
+              task={sessionTask}
+              tag={sessionTag}
+              onModeChange={handleModeChange}
+              onToggle={handleToggle}
+              onSkip={handleSkip}
+              onReset={handleReset}
+              pipSupported={pipSupported}
+              pipOpen={pipMode !== 'none'}
+              onPipToggle={handlePipToggle}
+              isZenMode={isZenMode}
+              onToggleZen={handleToggleZen}
+            />
+          </div>
+        ) : (
+          <BentoCockpit
+            phaseLabel={timer.phaseLabel}
+            status={timer.status}
+            time={timer.time}
+            progress={timer.progress}
+            remainingMs={timer.remainingMs}
+            totalMs={timer.totalMs}
+            mode={mode}
+            flowStatus={flow.status}
+            flowTime={flow.time}
+            completedFocusInCycle={timer.completedFocusInCycle}
+            roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
+            onModeChange={handleModeChange}
+            onToggle={handleToggle}
+            onSkip={handleSkip}
+            onReset={handleReset}
+            onAddTime={(mins) => timer.addTime(mins * 60_000)}
+            todos={todosApi.todos}
+            activeTodoId={activeTodoId}
+            activeTodo={activeTodo}
+            onTodoToggle={todosApi.toggle}
+            onTodoFocus={handleFocusTodo}
+            onTodoAdd={todosApi.add}
+            onOpenTodoManager={() => setIsTodoModalOpen(true)}
+            sessions={sessions}
+            settings={settings}
+            onUpdateSettings={updateSettings}
+            colorMode={colorMode}
+            onToggleColorMode={() => setColorMode(colorMode === 'dark' ? 'light' : 'dark')}
+            onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+          />
+        )}
       </main>
 
       {/* Immersive Borderless Zen Mode Overlay */}
@@ -587,6 +524,53 @@ export default function App() {
           <ReflectionModal onSave={handleSaveNote} onSkip={handleSkipNote} />
         </Suspense>
       )}
+
+      {/* Modals for Expanded Views */}
+      <TodoManagerModal
+        isOpen={isTodoModalOpen}
+        onClose={() => setIsTodoModalOpen(false)}
+        todos={todosApi.todos}
+        tags={settings.tags}
+        activeTodoId={activeTodoId}
+        timerRunning={isRunning}
+        onAdd={todosApi.add}
+        onToggle={todosApi.toggle}
+        onEdit={todosApi.edit}
+        onRemove={todosApi.remove}
+        onFocus={handleFocusTodo}
+      />
+
+      <AnalyticsModal
+        isOpen={isAnalyticsModalOpen}
+        onClose={() => setIsAnalyticsModalOpen(false)}
+        sessions={sessions}
+        settings={settings}
+        themeId={themeId}
+        colorMode={colorMode}
+        todos={todosApi.todos}
+        onImportSettings={handleImportSettings}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        settings={settings}
+        update={updateSettings}
+        themeId={themeId}
+        colorMode={colorMode}
+        onColorModeChange={setColorMode}
+        sessions={sessions}
+        todos={todosApi.todos}
+        syncStatus={sync.status}
+        syncPending={sync.pending}
+        syncLastSyncAt={sync.lastSyncAt}
+        syncProfile={auth.profile}
+        syncAvailable={auth.available}
+        syncLoading={auth.loading}
+        onSyncLogin={auth.login}
+        onSyncLogout={auth.logout}
+        onSyncNow={handleSyncNow}
+      />
 
       {/* Theme-specific Dynamic Status Bar */}
       <ThemeStatusBar
