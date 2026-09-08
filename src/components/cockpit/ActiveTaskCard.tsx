@@ -24,7 +24,7 @@ interface ActiveTaskCardProps {
 // One pick row: fixed height so every slot state stays pixel-identical.
 function PickRow({ todo, onFocus }: { todo: TodoItem; onFocus?: (id: string) => void }) {
   return (
-    <li className="flex h-[60px] items-center justify-between gap-3">
+    <li className="flex h-[40px] items-center justify-between gap-3">
       <button
         type="button"
         onClick={() => {
@@ -47,7 +47,7 @@ function PickRow({ todo, onFocus }: { todo: TodoItem; onFocus?: (id: string) => 
           playMicroClick('tick')
           onFocus?.(todo.id)
         }}
-        className="shrink-0 font-mono text-[10px] tracking-widest uppercase text-muted hover:text-fg transition-colors cursor-pointer px-2 min-h-[44px]"
+        className="shrink-0 font-mono text-[10px] tracking-widest uppercase text-muted hover:text-fg transition-colors cursor-pointer px-2 min-h-[40px]"
       >
         FOCUS
       </button>
@@ -55,9 +55,9 @@ function PickRow({ todo, onFocus }: { todo: TodoItem; onFocus?: (id: string) => 
   )
 }
 
-// Fixed-height pick slot: always label + exactly 3 rows + footer, so the
-// card never changes height when tasks are added, focused or completed.
-const SLOT_ROWS = 3
+// Fixed-height pick slot: label + exactly one 40px next-track row —
+// total card height stays compact and never moves.
+const SLOT_ROWS = 1
 
 // Stylized tape reel: static tape-pack ring (width = remaining tape) with a
 // rotating 3-spoke hub on top. Pure outline geometry, no glow.
@@ -299,7 +299,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           )}
         </div>
         {pickPool.length === 0 ? (
-          <p className="flex h-[180px] items-center font-mono text-[10px] tracking-wider uppercase text-muted">
+          <p className="flex h-[40px] items-center font-mono text-[10px] tracking-wider uppercase text-muted">
             {activeTodo ? 'NO OTHER TAPES QUEUED' : 'NO OPEN TASKS — ADD ONE IN [TASK INBOX]'}
           </p>
         ) : (
@@ -308,7 +308,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
               <PickRow key={todo.id} todo={todo} onFocus={onFocus} />
             ))}
             {Array.from({ length: fillerCount }).map((_, i) => (
-              <li key={`filler-${i}`} aria-hidden="true" className="h-[60px]" />
+              <li key={`filler-${i}`} aria-hidden="true" className="h-[40px]" />
             ))}
           </ul>
         )}
