@@ -1,14 +1,18 @@
 import { memo } from 'react'
-import { Check } from 'lucide-react'
-import type { Session, TodoItem } from '../../types'
+import { ArrowLeftRight, Square } from 'lucide-react'
+import type { Session, TodoItem, TimerMode } from '../../types'
 import { BentoCard } from './BentoCard'
 import { getTagColor } from '../TodoList'
+import { useFlowTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
 
 interface ActiveTaskCardProps {
   activeTodo: TodoItem | null
   todos?: TodoItem[]
   isRunning: boolean
+  remainingMs: number
+  totalMs: number
+  mode?: TimerMode
   sessions?: Session[]
   focusMinutes?: number
   onOpenTodoManager?: () => void
@@ -17,10 +21,66 @@ interface ActiveTaskCardProps {
   className?: string
 }
 
+// Stylized tape reel: static tape-pack ring (width = remaining tape) with a
+// rotating 3-spoke hub on top. Pure outline geometry, no glow.
+function Reel({
+  packWidth,
+  spinning,
+  reverse = false,
+  dim = false,
+}: {
+  packWidth: number
+  spinning: boolean
+  reverse?: boolean
+  dim?: boolean
+}) {
+  return (
+    <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0" aria-hidden="true">
+      {/* Tape pack: static ring, width grows/shrinks as tape winds */}
+      <svg viewBox="0 0 64 64" className="absolute inset-0 h-full w-full">
+        <circle
+          cx="32"
+          cy="32"
+          r="26"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={packWidth}
+          className={dim ? 'text-line/60' : 'text-fg/80'}
+        />
+      </svg>
+      {/* Hub + spokes: rotates while the deck is running */}
+      <svg
+        viewBox="0 0 64 64"
+        className={`absolute inset-0 h-full w-full animate-spin [animation-duration:3.5s] ${
+          reverse ? '[animation-direction:reverse]' : ''
+        } ${spinning ? '' : '[animation-play-state:paused]'}`}
+      >
+        <circle cx="32" cy="32" r="17" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-fg/50" />
+        {[0, 120, 240].map((deg) => (
+          <line
+            key={deg}
+            x1="32"
+            y1="32"
+            x2={32 + 13 * Math.cos(((deg - 90) * Math.PI) / 180)}
+            y2={32 + 13 * Math.sin(((deg - 90) * Math.PI) / 180)}
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className="text-fg/50"
+          />
+        ))}
+        <circle cx="32" cy="32" r="4" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-fg" />
+      </svg>
+    </div>
+  )
+}
+
 export const ActiveTaskCard = memo(function ActiveTaskCard({
   activeTodo,
   todos = [],
   isRunning,
+  remainingMs,
+  totalMs,
+  mode = 'pomodoro',
   sessions,
   focusMinutes = 25,
   onOpenTodoManager,
@@ -28,7 +88,27 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   onFocus,
   className = '',
 }: ActiveTaskCardProps) {
+  const flowTick = useFlowTimerTick()
+  const isFlowMode = mode === 'flow'
   const tagColor = activeTodo?.tag ? getTagColor(activeTodo.tag) : undefined
+
+  // Tape position: elapsed / total. Flow has no fixed length — packs rest
+  // centered while the counter runs up.
+  const elapsedMs = activeTodo
+    ? isFlowMode
+      ? Math.max(0, flowTick.elapsedMs)
+      : Math.max(0, totalMs - remainingMs)
+    : 0
+  const ratio = activeTodo && !isFlowMode && totalMs > 0
+    ? Math.min(1, Math.max(0, elapsedMs / totalMs))
+    : 0.5
+  const hasProgress = elapsedMs > 0
+  const spinning = isRunning && activeTodo != null
+
+  // Mechanical 3-digit tape counter: elapsed session minutes, 000–999.
+  const counterDigits = String(Math.min(999, Math.floor(elapsedMs / 60_000)))
+    .padStart(3, '0')
+    .split('')
 
   const taskMinutes = activeTodo && sessions
     ? sessions
@@ -42,33 +122,40 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   const quickPick = openTodos.slice(0, 3)
   const remainingPickCount = openTodos.length - quickPick.length
 
+  // Left reel unwinds (ring thins), right reel takes up (ring thickens).
+  const leftPack = 1.5 + 4.5 * (1 - ratio)
+  const rightPack = 1.5 + 4.5 * ratio
+
   return (
     <BentoCard
-      label="ACTIVE TASK"
+      label="TRACK 01 // TAPE DECK"
       action={
-        activeTodo ? (
-          <span className="font-mono text-[9px] px-2 py-0.5 rounded-full border border-line bg-canvas text-fg tracking-wider uppercase">
-            {activeTodo.pomodoros} POMOS
+        isRunning ? (
+          <span className="flex items-center gap-1.5 rounded-full border border-accent/60 px-2.5 py-0.5 font-mono text-[9px] tracking-widest uppercase text-accent">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse [animation-duration:1s]" />
+            <span>REC</span>
           </span>
-        ) : null
+        ) : (
+          <span className="rounded-full border border-line bg-canvas px-2.5 py-0.5 font-mono text-[9px] tracking-widest uppercase text-muted">
+            {hasProgress ? '|| PAUSE' : 'STBY'}
+          </span>
+        )
       }
       className={className}
       contentClassName="justify-between"
     >
       <div className="flex items-center justify-between gap-4">
-        {/* Task Title & Details */}
+        {/* Track info */}
         <div className="min-w-0 flex-1">
           <h3 className={`font-sans font-medium text-lg sm:text-xl truncate ${activeTodo ? 'text-fg' : 'text-muted'}`}>
-            {activeTodo?.title || 'No active task selected'}
+            {activeTodo?.title || '[ NO TAPE INSERTED // SELECT TASK ]'}
           </h3>
-          <div className="mt-1 flex items-center gap-2 font-mono text-[10px] text-muted tracking-wider uppercase">
+          <div className="mt-1.5 flex items-center gap-2 font-mono text-[10px] text-muted tracking-wider uppercase">
             {activeTodo?.tag ? (
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5 rounded-full border border-line bg-canvas px-2 py-px">
                 <span
                   className="h-1.5 w-1.5 rounded-full"
-                  style={{
-                    backgroundColor: tagColor,
-                  }}
+                  style={{ backgroundColor: tagColor }}
                 />
                 <span className="text-fg/80">{activeTodo.tag}</span>
               </span>
@@ -78,45 +165,63 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
             <span>·</span>
             <span>{activeTodo ? (isRunning ? 'IN PROGRESS' : 'STANDBY') : isRunning ? 'FREE SESSION' : 'STANDBY'}</span>
           </div>
+
+          {/* Mechanical tape counter */}
+          <div className="mt-3 flex items-center gap-2.5">
+            <div
+              className="flex rounded border border-line bg-canvas divide-x divide-line overflow-hidden"
+              role="status"
+              aria-label={`Tape counter: ${counterDigits.join('')} minutes elapsed`}
+            >
+              {counterDigits.map((d, i) => (
+                <span
+                  key={i}
+                  className="w-6 py-1 text-center font-mono text-sm font-medium tabular-nums text-fg"
+                >
+                  {d}
+                </span>
+              ))}
+            </div>
+            <span className="font-mono text-[9px] text-muted tracking-wider uppercase tabular-nums">
+              {activeTodo ? `${displayMinutes} MIN FOCUSED` : 'COUNTER'}
+            </span>
+          </div>
         </div>
 
-        {/* Right side: Task focus metric + Quick Done action */}
-        {activeTodo ? (
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="hidden sm:flex flex-col items-end text-right font-mono">
-              <span className="text-xs text-fg font-medium tabular-nums">
-                {displayMinutes} MIN
-              </span>
-              <span className="text-[9px] text-muted uppercase tracking-wider">
-                FOCUSED
-              </span>
-            </div>
+        {/* Dual reels */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 text-fg">
+          <Reel packWidth={activeTodo ? leftPack : 1.5} spinning={spinning} dim={!activeTodo} />
+          <Reel packWidth={activeTodo ? rightPack : 1.5} spinning={spinning} reverse dim={!activeTodo} />
+        </div>
+      </div>
 
-            {onToggleDone && (
-              <button
-                type="button"
-                onClick={() => {
-                  playMicroClick('tick')
-                  onToggleDone(activeTodo.id)
-                }}
-                className="min-h-[44px] px-4 rounded-full border border-line bg-canvas hover:border-fg/50 text-fg text-xs font-mono tracking-wider uppercase transition-colors flex items-center gap-1.5 cursor-pointer"
-                title="Mark task as completed"
-              >
-                <Check size={13} strokeWidth={2.5} />
-                <span>DONE</span>
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="shrink-0 flex items-center">
-            <button
-              type="button"
-              onClick={onOpenTodoManager}
-              className="font-mono text-[10px] text-fg tracking-widest uppercase px-4 min-h-[44px] rounded-full border border-fg/40 hover:border-fg bg-canvas transition-colors cursor-pointer"
-            >
-              ASSIGN TASK
-            </button>
-          </div>
+      {/* Transport keys */}
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            playMicroClick('toggle')
+            onOpenTodoManager?.()
+          }}
+          title={activeTodo ? 'Change tape' : 'Insert tape'}
+          className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-md border border-line bg-canvas font-mono text-[11px] tracking-widest uppercase text-muted transition-colors hover:border-fg/40 hover:text-fg active:translate-y-px cursor-pointer"
+        >
+          <ArrowLeftRight size={13} />
+          <span>{activeTodo ? 'CHG' : 'INSERT'}</span>
+        </button>
+        {activeTodo && onToggleDone && (
+          <button
+            type="button"
+            onClick={() => {
+              playMicroClick('tick')
+              onToggleDone(activeTodo.id)
+            }}
+            title="Stop and complete track"
+            className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-md border border-line bg-canvas font-mono text-[11px] tracking-widest uppercase text-fg transition-colors hover:border-fg active:translate-y-px cursor-pointer"
+          >
+            <Square size={11} />
+            <span>DONE</span>
+          </button>
         )}
       </div>
 

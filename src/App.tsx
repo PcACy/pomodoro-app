@@ -366,6 +366,8 @@ export default function App() {
             status={timer.status}
             time={timer.time}
             progress={timer.progress}
+            remainingMs={timer.remainingMs}
+            totalMs={timer.totalMs}
             mode={mode}
             flowStatus={flow.status}
             flowTime={flow.time}

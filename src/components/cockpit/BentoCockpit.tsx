@@ -15,6 +15,8 @@ interface BentoCockpitProps {
   status: TimerStatus
   time?: string
   progress?: number
+  remainingMs: number
+  totalMs: number
   mode: TimerMode
   flowStatus: TimerStatus
   flowTime?: string
@@ -54,6 +56,8 @@ export const BentoCockpit = memo(function BentoCockpit({
   status,
   time,
   progress,
+  remainingMs,
+  totalMs,
   mode,
   flowStatus,
   flowTime,
@@ -124,6 +128,9 @@ export const BentoCockpit = memo(function BentoCockpit({
           activeTodo={activeTodo}
           todos={todos}
           isRunning={isRunning}
+          remainingMs={remainingMs}
+          totalMs={totalMs}
+          mode={mode}
           sessions={sessions}
           focusMinutes={settings.phases.focus}
           onOpenTodoManager={onOpenTodoManager}
