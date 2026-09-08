@@ -146,65 +146,64 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
           </span>
         </button>
 
-        {/* 7-Column Centered VU-Meter LED Equalizer Grid */}
-        <div className="flex-1 flex items-center justify-center py-1">
-          <div className="flex items-center justify-center gap-2 sm:gap-3.5">
-            {DAY_LABELS.map((label, dayIdx) => {
-              const dayMins = dayMinutes[dayIdx] ?? 0
-              const isToday = dayIdx === todayIdx
+        {/* 7-Column Full-Width VU-Meter LED Equalizer Grid */}
+        <div className="w-full grid grid-cols-7 gap-2.5 sm:gap-3 px-1 my-3">
+          {DAY_LABELS.map((label, dayIdx) => {
+            const dayMins = dayMinutes[dayIdx] ?? 0
+            const isToday = dayIdx === todayIdx
 
-              // 1 block = 30 min, up to 6 blocks (180 min)
-              const activeCount =
-                dayMins > 0 ? Math.min(6, Math.max(1, Math.ceil(dayMins / MINUTES_PER_BLOCK))) : 0
+            // 1 block = 30 min, up to 6 blocks (180 min)
+            const activeCount =
+              dayMins > 0 ? Math.min(6, Math.max(1, Math.ceil(dayMins / MINUTES_PER_BLOCK))) : 0
 
-              return (
-                <div
-                  key={dayIdx}
-                  className="flex flex-col items-center gap-1.5"
-                  title={`${label}: ${dayMins} MIN`}
+            return (
+              <div
+                key={dayIdx}
+                className="flex flex-col items-center gap-1.5 w-full"
+                title={`${label}: ${dayMins} MIN`}
+              >
+                {/* Day header letter */}
+                <span
+                  className={`font-mono text-[9px] sm:text-[10px] tracking-wider uppercase select-none ${
+                    isToday ? 'text-fg dark:text-white font-medium' : 'text-muted/60 font-normal'
+                  }`}
                 >
-                  {/* Day header letter */}
-                  <span
-                    className={`font-mono text-[9px] sm:text-[10px] tracking-wider uppercase select-none ${
-                      isToday ? 'text-fg font-bold' : 'text-muted/60 font-normal'
-                    }`}
-                  >
-                    {label}
-                  </span>
+                  {label}
+                </span>
 
-                  {/* Vertical LED Column (6 segments stacked top to bottom) */}
-                  <div
-                    className="flex flex-col gap-1 sm:gap-1.5"
-                    role="img"
-                    aria-label={`${label}: ${dayMins} minutes (${activeCount}/6 segments)`}
-                  >
-                    {LED_LEVELS.map((level) => {
-                      const isActive = activeCount >= level
-                      const isPeak = isActive && activeCount === level
+                {/* Vertical LED Column (6 flat slabs stacked top to bottom) */}
+                <div
+                  className="w-full flex flex-col gap-1.5"
+                  role="img"
+                  aria-label={`${label}: ${dayMins} minutes (${activeCount}/6 segments)`}
+                >
+                  {LED_LEVELS.map((level) => {
+                    const isActive = activeCount >= level
+                    const isPeak = isActive && activeCount === level
 
-                      let segmentStyle =
-                        'bg-black/[0.04] border border-black/5 dark:bg-white/[0.04] dark:border-white/5'
+                    let segmentStyle = isToday
+                      ? 'bg-black/[0.04] border border-black/15 dark:bg-white/[0.04] dark:border-white/15'
+                      : 'bg-black/[0.04] border border-black/5 dark:bg-white/[0.04] dark:border-white/5'
 
-                      if (isActive) {
-                        if (isToday && isPeak) {
-                          segmentStyle = 'bg-[#EB1E23] border border-[#EB1E23]'
-                        } else {
-                          segmentStyle = 'bg-fg border border-fg'
-                        }
+                    if (isActive) {
+                      if (isToday && isPeak) {
+                        segmentStyle = 'bg-[#EB1E23] border border-[#EB1E23]'
+                      } else {
+                        segmentStyle = 'bg-fg border border-fg'
                       }
+                    }
 
-                      return (
-                        <div
-                          key={level}
-                          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-[1px] transition-colors duration-150 ${segmentStyle}`}
-                        />
-                      )
-                    })}
-                  </div>
+                    return (
+                      <div
+                        key={level}
+                        className={`w-full h-2 sm:h-2.5 rounded-[2px] transition-colors duration-150 ${segmentStyle}`}
+                      />
+                    )
+                  })}
                 </div>
-              )
-            })}
-          </div>
+              </div>
+            )
+          })}
         </div>
 
         {/* Fixed Footer Status Line */}
