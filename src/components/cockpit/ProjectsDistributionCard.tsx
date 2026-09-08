@@ -1,6 +1,7 @@
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import type { Session } from '../../types'
 import { minutesByTag } from '../../lib/stats'
+import { addDays, sameDay, startOfWeek } from '../../lib/time'
 import { BentoCard } from './BentoCard'
 import { useTranslation } from '../../hooks/useTranslation'
 
@@ -10,7 +11,15 @@ interface ProjectsDistributionCardProps {
   className?: string
 }
 
-const STRIP_SEGMENTS = 20
+const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+// Second opacity step at 30+ minutes (opacity before color, Spec §3)
+const SOLID_THRESHOLD_MIN = 30
+
+interface DisplayRow {
+  tag: string
+  weekMinutes: number
+  dayMinutes: number[]
+}
 
 export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
   sessions,
@@ -18,71 +27,56 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
   className = '',
 }: ProjectsDistributionCardProps) {
   const { t } = useTranslation()
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  // Localized untagged bucket, matching Dashboard/TodoList (a hardcoded
-  // German label would never merge with the translated "No tag" bucket).
-  const tagStats = minutesByTag(sessions, today, t.todo.noTag)
-  const totalTodayMinutes = tagStats.reduce((sum, t) => sum + t.minutes, 0)
+  const untaggedLabel = t.todo.noTag
 
   // Configured user tags or fallback
   const configuredTags = tags.length > 0 ? tags : ['Uni', 'Projekt', 'Coding']
 
-  // Start with today's active tags (sorted descending by minutes)
-  const rows: { tag: string; minutes: number }[] = tagStats.map((t) => ({
-    tag: t.tag,
-    minutes: t.minutes,
-  }))
-
-  // Pad up to at least 3 rows using configured tags not already present
-  for (const confTag of configuredTags) {
-    if (rows.length >= 3) break
-    if (!rows.some((r) => r.tag.toLowerCase() === confTag.toLowerCase())) {
-      rows.push({ tag: confTag, minutes: 0 })
-    }
-  }
-
-  // Display top 3 categories
-  const displayRows = rows.slice(0, 3)
-
-  // Single stacked share strip: discrete blocks split by largest remainder,
-  // differentiated by opacity (100/60/30) — no color, no per-row bars.
-  const RANK_OPACITY = ['opacity-100', 'opacity-60', 'opacity-30']
-  const stripBlocks: number[] = (() => {
-    if (totalTodayMinutes <= 0) return []
-    const quotas = displayRows.map((r) => (r.minutes / totalTodayMinutes) * STRIP_SEGMENTS)
-    const base = quotas.map((q) => Math.floor(q))
-    let rest = STRIP_SEGMENTS - base.reduce((a, b) => a + b, 0)
-    const order = quotas
-      .map((q, i) => ({ i, frac: q - Math.floor(q) }))
-      .sort((a, b) => b.frac - a.frac)
-    const alloc = [...base]
-    for (const { i } of order) {
-      if (rest <= 0) break
-      if (displayRows[i].minutes > 0) {
-        alloc[i] += 1
-        rest -= 1
+  const { displayRows, totalWeekMinutes, todayIdx } = useMemo(() => {
+    const weekStart = startOfWeek(new Date())
+    const today = new Date()
+    let tIdx = 0
+    for (let i = 0; i < 7; i++) {
+      if (sameDay(addDays(weekStart, i), today)) {
+        tIdx = i
+        break
       }
     }
-    // Guarantee a visible block for any active tag lost to rounding
-    displayRows.forEach((r, i) => {
-      if (r.minutes > 0 && alloc[i] === 0 && alloc.some((a) => a > 1)) {
-        const donor = alloc.findIndex((a) => a > 1)
-        alloc[donor] -= 1
-        alloc[i] = 1
+
+    const minutesFor = (tag: string, day: Date): number =>
+      sessions
+        .filter((s) => sameDay(new Date(s.start), day))
+        .filter((s) => (s.tag?.trim() || untaggedLabel) === tag)
+        .reduce((sum, s) => {
+          const d = s.durationMs
+          return sum + (typeof d === 'number' && Number.isFinite(d) && d > 0 ? Math.round(d / 60_000) : 0)
+        }, 0)
+
+    // Start with this week's active tags (sorted descending by week minutes)
+    const weekStats = minutesByTag(sessions, weekStart, untaggedLabel)
+    const rows: DisplayRow[] = weekStats.map((item) => {
+      const dayMinutes = DAY_LABELS.map((_, i) => minutesFor(item.tag, addDays(weekStart, i)))
+      return { tag: item.tag, weekMinutes: dayMinutes.reduce((a, b) => a + b, 0), dayMinutes }
+    })
+
+    // Pad up to at least 3 rows using configured tags not already present
+    for (const confTag of configuredTags) {
+      if (rows.length >= 3) break
+      if (!rows.some((r) => r.tag.toLowerCase() === confTag.toLowerCase())) {
+        rows.push({ tag: confTag, weekMinutes: 0, dayMinutes: DAY_LABELS.map(() => 0) })
       }
-    })
-    const blocks: number[] = []
-    alloc.forEach((count, tagIdx) => {
-      for (let k = 0; k < count; k++) blocks.push(tagIdx)
-    })
-    return blocks
-  })()
+    }
+
+    const total = rows.reduce((sum, r) => sum + r.weekMinutes, 0)
+    return { displayRows: rows.slice(0, 3), totalWeekMinutes: total, todayIdx: tIdx }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessions, untaggedLabel, configuredTags.join('|')])
+
+  const totalWeekHours = (totalWeekMinutes / 60).toFixed(1)
 
   return (
     <BentoCard
-      label={`PROJECTS · ${Math.round(totalTodayMinutes)} MINS`}
+      label={`PROJECTS · ${totalWeekHours} H WEEK`}
       action={
         <span className="font-mono text-[9px] px-2 py-0.5 rounded-full border border-line bg-canvas text-muted tracking-wider uppercase">
           {configuredTags.length} {configuredTags.length === 1 ? 'TAG' : 'TAGS'}
@@ -92,57 +86,67 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
       contentClassName="justify-between"
     >
       <div className="flex-1 flex flex-col justify-between py-1 gap-3">
-        {/* Stacked share strip */}
-        <div
-          className="flex h-2 w-full gap-[2px]"
-          role="img"
-          aria-label={
-            totalTodayMinutes > 0
-              ? `Tag shares today: ${displayRows.map((r) => `${r.tag} ${r.minutes} minutes`).join(', ')}`
-              : 'No activity today'
-          }
-        >
-          {totalTodayMinutes > 0 ? (
-            stripBlocks.map((tagIdx, i) => (
-              <div
+        {/* Weekday header, aligned to the 7 day columns */}
+        <div className="flex gap-[2px]" aria-hidden="true">
+          <div className="flex-1" />
+          <div className="flex-[7] flex gap-[2px]">
+            {DAY_LABELS.map((d, i) => (
+              <span
                 key={i}
-                title={`${displayRows[tagIdx].tag} (${displayRows[tagIdx].minutes}m)`}
-                className={`flex-1 rounded-none bg-fg transition-colors duration-150 ${RANK_OPACITY[Math.min(tagIdx, RANK_OPACITY.length - 1)]}`}
-              />
-            ))
-          ) : (
-            Array.from({ length: STRIP_SEGMENTS }).map((_, i) => (
-              <div key={i} className="flex-1 rounded-none bg-line/40" />
-            ))
-          )}
+                className={`flex-1 text-center font-mono text-[8px] tracking-wider uppercase ${
+                  i === todayIdx ? 'text-fg font-bold' : 'text-muted/70'
+                }`}
+              >
+                {d}
+              </span>
+            ))}
+          </div>
         </div>
 
-        {/* Stat rows: label left, value right — no per-row bars */}
-        <div className="flex-1 flex flex-col justify-center gap-2.5">
-          {displayRows.map((row, rank) => {
-            const hours = (row.minutes / 60).toFixed(1)
+        {/* Per-tag rows: label + 7-day dot matrix (Mon–Sun squares) */}
+        <div className="flex-1 flex flex-col justify-center gap-3">
+          {displayRows.map((row) => {
+            const hours = (row.weekMinutes / 60).toFixed(1)
 
             return (
-              <div key={row.tag} className="flex items-center justify-between font-mono text-[10px] tracking-wider uppercase">
-                <span className="flex min-w-0 items-center gap-1.5 text-muted">
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full bg-fg shrink-0 ${RANK_OPACITY[Math.min(rank, RANK_OPACITY.length - 1)]}`}
-                  />
+              <div key={row.tag} className="flex items-center gap-2">
+                <div className="flex-1 min-w-0 flex items-center justify-between font-mono text-[10px] tracking-wider uppercase">
                   <span className="text-fg/90 font-medium truncate">{row.tag}</span>
-                </span>
-                <span className="text-fg/80 tabular-nums shrink-0">
-                  {row.minutes > 0 ? `${hours} H` : '0 H'}
-                </span>
+                  <span className="text-fg/80 tabular-nums shrink-0 ml-2">
+                    {row.weekMinutes > 0 ? `${hours} H` : '0 H'}
+                  </span>
+                </div>
+                <div
+                  className="flex-[7] flex gap-[2px]"
+                  role="img"
+                  aria-label={`${row.tag} this week: ${row.dayMinutes
+                    .map((m, i) => `${DAY_LABELS[i]} ${m} minutes`)
+                    .join(', ')}`}
+                >
+                  {row.dayMinutes.map((mins, i) => (
+                    <div
+                      key={i}
+                      title={`${DAY_LABELS[i]}: ${mins} MIN`}
+                      className={`h-2.5 flex-1 rounded-none transition-colors duration-150 ${
+                        mins >= SOLID_THRESHOLD_MIN
+                          ? 'bg-fg'
+                          : mins > 0
+                            ? 'bg-fg/60'
+                            : 'bg-line/40'
+                      } ${i === todayIdx ? 'outline outline-1 outline-fg/50' : ''}`}
+                    />
+                  ))}
+                </div>
               </div>
             )
           })}
         </div>
 
-        {totalTodayMinutes === 0 && (
+        {totalWeekMinutes === 0 && (
           <div className="pt-2 border-t border-line/40 flex items-center justify-between font-mono text-[9px] text-muted tracking-widest uppercase">
             <span className="flex items-center gap-1.5">
               <span className="h-1 w-1 rounded-full bg-muted/60" />
-              <span>NO ACTIVITY TODAY</span>
+              <span>NO ACTIVITY THIS WEEK</span>
             </span>
             <span className="text-fg/60">STANDBY</span>
           </div>
