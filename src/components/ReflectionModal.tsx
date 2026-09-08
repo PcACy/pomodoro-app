@@ -14,6 +14,7 @@ export function ReflectionModal({ onSave, onSkip }: Props) {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+  const timerRef = useRef<number | null>(null)
 
   /**
    * Plays the inverse exit animation (backdrop fade + panel settle, ~150ms)
@@ -24,7 +25,7 @@ export function ReflectionModal({ onSave, onSkip }: Props) {
     if (closingRef.current) return
     closingRef.current = true
     setClosing(true)
-    window.setTimeout(commit, 150)
+    timerRef.current = window.setTimeout(commit, 150)
   }, [])
 
   const handleSave = useCallback(
@@ -38,6 +39,10 @@ export function ReflectionModal({ onSave, onSkip }: Props) {
     inputRef.current?.focus()
     return () => {
       previousFocusRef.current?.focus?.()
+      if (timerRef.current != null) {
+        window.clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
     }
   }, [])
 

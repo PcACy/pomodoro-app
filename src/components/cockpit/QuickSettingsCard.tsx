@@ -3,28 +3,14 @@ import { BentoCard } from './BentoCard'
 import { playMicroClick } from '../../lib/sound'
 import { isNotifyEffective, writeNotifyFlag } from '../../lib/notify'
 import { MechanicalSwitch } from '../MechanicalSwitch'
-
-const SOUND_KEY = 'pomodoro.sound'
-const AUTO_BREAKS_KEY = 'pomodoro.auto_breaks'
-const NOTIFY_KEY = 'pomodoro.notifications'
-
-function readFlag(key: string, expectTrue: boolean): boolean {
-  try {
-    const raw = localStorage.getItem(key)
-    return expectTrue ? raw === 'true' : raw !== 'false'
-  } catch {
-    // Storage unavailable (private mode / blocked cookies): fall back to defaults.
-    return !expectTrue
-  }
-}
-
-function writeFlag(key: string, value: boolean): void {
-  try {
-    localStorage.setItem(key, String(value))
-  } catch {
-    /* storage unavailable */
-  }
-}
+import {
+  SOUND_KEY,
+  AUTO_BREAKS_KEY,
+  NOTIFY_KEY,
+  readFlag,
+  writeFlag,
+  subscribeFlags,
+} from '../../lib/flagsStore'
 
 interface QuickSettingsCardProps {
   isZenMode?: boolean
@@ -39,22 +25,20 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
   onOpenSettingsModal,
   className = '',
 }: QuickSettingsCardProps) {
-  // Local quick toggle preferences synced to localStorage
+  // Local quick toggle preferences synced to localStorage & intra-tab bus
   const [soundEnabled, setSoundEnabled] = useState(() => readFlag(SOUND_KEY, false))
   const [autoBreaks, setAutoBreaks] = useState(() => readFlag(AUTO_BREAKS_KEY, true))
   // Shared effective-state initializer: identical to the Settings panel, so
   // both toggles render the same value for the same stored flag.
   const [notifyEnabled, setNotifyEnabled] = useState(() => isNotifyEffective())
 
-  // Stay in sync when another tab (or the Settings panel) flips these flags.
+  // Stay in sync when another tab OR the Settings panel in the same tab flips these flags.
   useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === SOUND_KEY) setSoundEnabled(readFlag(SOUND_KEY, false))
-      else if (e.key === AUTO_BREAKS_KEY) setAutoBreaks(readFlag(AUTO_BREAKS_KEY, true))
-      else if (e.key === NOTIFY_KEY) setNotifyEnabled(isNotifyEffective())
-    }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+    return subscribeFlags((key) => {
+      if (!key || key === SOUND_KEY) setSoundEnabled(readFlag(SOUND_KEY, false))
+      if (!key || key === AUTO_BREAKS_KEY) setAutoBreaks(readFlag(AUTO_BREAKS_KEY, true))
+      if (!key || key === NOTIFY_KEY) setNotifyEnabled(isNotifyEffective())
+    })
   }, [])
 
   const handleToggleZen = useCallback(() => {

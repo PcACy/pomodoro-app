@@ -113,9 +113,11 @@ export default function App() {
       void addSession(s)
         .then((id) => setPendingSessionId(id))
         .catch(() => showToast(t.errors.saveFailed))
-      incrementPomodoros(activeTodoId)
+      if (activeTodoId && activeTodo) {
+        incrementPomodoros(activeTodoId)
+      }
     },
-    [activeTodoId, incrementPomodoros, showToast, t],
+    [activeTodoId, activeTodo, incrementPomodoros, showToast, t],
   )
 
   const handleSaveNote = useCallback(
@@ -194,6 +196,16 @@ export default function App() {
       setIsTodoModalOpen(false)
     },
     [handleFocusTodo],
+  )
+
+  const handleTodoRemove = useCallback(
+    (id: string) => {
+      if (activeTodoId === id) {
+        setActiveTodoId(null)
+      }
+      todosApi.remove(id)
+    },
+    [activeTodoId, todosApi],
   )
 
   const handleToggleZen = useCallback(() => {
@@ -388,7 +400,7 @@ export default function App() {
             onTodoToggle={todosApi.toggle}
             onTodoFocus={handleFocusTodo}
             onTodoAdd={todosApi.add}
-            onTodoRemove={todosApi.remove}
+            onTodoRemove={handleTodoRemove}
             onOpenTodoManager={() => setIsTodoModalOpen(true)}
             sessions={sessions}
             settings={settings}
@@ -514,7 +526,7 @@ export default function App() {
         onAdd={todosApi.add}
         onToggle={todosApi.toggle}
         onEdit={todosApi.edit}
-        onRemove={todosApi.remove}
+        onRemove={handleTodoRemove}
         onFocus={handleFocusTodoFromModal}
       />
 

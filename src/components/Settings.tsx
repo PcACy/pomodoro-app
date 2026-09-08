@@ -30,26 +30,13 @@ import { SlidingSegmentedControl } from './SlidingSegmentedControl'
 import { getTagColor } from './TodoList'
 import { MechanicalSwitch } from './MechanicalSwitch'
 
-const SOUND_KEY = 'pomodoro.sound'
-const AUTO_BREAKS_KEY = 'pomodoro.auto_breaks'
-
-function readFlag(key: string, expectTrue: boolean): boolean {
-  try {
-    const raw = localStorage.getItem(key)
-    return expectTrue ? raw === 'true' : raw !== 'false'
-  } catch {
-    return !expectTrue
-  }
-}
-
-function writeFlag(key: string, value: boolean): void {
-  try {
-    localStorage.setItem(key, String(value))
-    window.dispatchEvent(new Event('storage'))
-  } catch {
-    /* storage unavailable */
-  }
-}
+import {
+  SOUND_KEY,
+  AUTO_BREAKS_KEY,
+  readFlag,
+  writeFlag,
+  subscribeFlags,
+} from '../lib/flagsStore'
 
 interface NumberStepperProps {
   value: number
@@ -321,13 +308,11 @@ export const SettingsPanel = memo(function SettingsPanel({
 
   // Listen for storage events across tabs / components
   useEffect(() => {
-    const handleStorage = () => {
-      setSoundEnabled(readFlag(SOUND_KEY, false))
-      setAutoBreaks(readFlag(AUTO_BREAKS_KEY, true))
+    return subscribeFlags((key) => {
+      if (!key || key === SOUND_KEY) setSoundEnabled(readFlag(SOUND_KEY, false))
+      if (!key || key === AUTO_BREAKS_KEY) setAutoBreaks(readFlag(AUTO_BREAKS_KEY, true))
       setNotifyEnabled(isNotifyEffective())
-    }
-    window.addEventListener('storage', handleStorage)
-    return () => window.removeEventListener('storage', handleStorage)
+    })
   }, [])
 
   const toggleSound = useCallback(() => {

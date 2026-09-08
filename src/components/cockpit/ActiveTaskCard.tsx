@@ -151,7 +151,10 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   const taskMinutes = activeTodo && sessions
     ? sessions
         .filter((s) => s.task && s.task.trim().toLowerCase() === activeTodo.title.trim().toLowerCase())
-        .reduce((sum, s) => sum + Math.round(s.durationMs / 60_000), 0)
+        .reduce((sum, s) => {
+          const d = s.durationMs
+          return sum + (typeof d === 'number' && Number.isFinite(d) && d > 0 ? Math.round(d / 60_000) : 0)
+        }, 0)
     : 0
   const minutesPerPomodoro = Number.isFinite(focusMinutes) && focusMinutes > 0 ? focusMinutes : 25
   const displayMinutes = taskMinutes > 0 ? taskMinutes : (activeTodo ? activeTodo.pomodoros * minutesPerPomodoro : 0)

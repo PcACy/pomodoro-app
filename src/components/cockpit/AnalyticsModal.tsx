@@ -4,6 +4,7 @@ import type { Session, Settings, TodoItem } from '../../types'
 import type { ColorMode } from '../../themes'
 import { Dashboard } from '../Dashboard'
 import { playMicroClick } from '../../lib/sound'
+import { lockBodyScroll } from '../../lib/modalScrollLock'
 
 interface AnalyticsModalProps {
   isOpen: boolean
@@ -33,12 +34,10 @@ export const AnalyticsModal = memo(function AnalyticsModal({
       }
     }
     window.addEventListener('keydown', handleKeyDown)
-    // Lock background scroll while the modal is open; restore on close.
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const unlock = lockBodyScroll()
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = prevOverflow
+      unlock()
     }
   }, [isOpen, onClose])
 

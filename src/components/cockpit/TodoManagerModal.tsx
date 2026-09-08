@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 import type { TodoItem } from '../../types'
 import { TodoList } from '../TodoList'
 import { playMicroClick } from '../../lib/sound'
+import { lockBodyScroll } from '../../lib/modalScrollLock'
 
 interface TodoManagerModalProps {
   isOpen: boolean
@@ -40,12 +41,10 @@ export const TodoManagerModal = memo(function TodoManagerModal({
       }
     }
     window.addEventListener('keydown', handleKeyDown)
-    // Lock background scroll while the modal is open; restore on close.
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const unlock = lockBodyScroll()
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = prevOverflow
+      unlock()
     }
   }, [isOpen, onClose])
 

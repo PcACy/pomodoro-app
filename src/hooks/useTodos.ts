@@ -109,10 +109,12 @@ export function useTodos() {
   const incrementPomodoros = useCallback(
     (id: string | null) => {
       if (!id) return
-      updateTodos((prev) =>
-        prev.map((t) => (t.id === id ? withUpdatedAt({ ...t, pomodoros: t.pomodoros + 1 }) : t)),
-      )
-      enqueue({ kind: 'upsert', table: 'todos', id })
+      updateTodos((prev) => {
+        const target = prev.find((t) => t.id === id)
+        if (!target) return prev
+        enqueue({ kind: 'upsert', table: 'todos', id })
+        return prev.map((t) => (t.id === id ? withUpdatedAt({ ...t, pomodoros: t.pomodoros + 1 }) : t))
+      })
     },
     [updateTodos],
   )

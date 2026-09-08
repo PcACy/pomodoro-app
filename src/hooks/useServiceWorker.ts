@@ -48,6 +48,8 @@ export function useServiceWorker(): ServiceWorkerState {
       if (!disposed) setUpdateAvailable(true)
     }
 
+    const trackedCleanups = new Set<() => void>()
+
     // Tracks an installing worker through to 'installed'. The upfront state
     // check covers the race where register() itself triggered the update and
     // the worker already finished installing before updatefound was observed.
@@ -56,16 +58,22 @@ export function useServiceWorker(): ServiceWorkerState {
         if (navigator.serviceWorker.controller) handleWaitingWorker(worker)
         return
       }
+      let detach = () => {}
       const onStateChange = () => {
         if (disposed) {
-          worker.removeEventListener('statechange', onStateChange)
+          detach()
           return
         }
         if (worker.state === 'installed') {
-          worker.removeEventListener('statechange', onStateChange)
+          detach()
           if (navigator.serviceWorker.controller) handleWaitingWorker(worker)
         }
       }
+      detach = () => {
+        worker.removeEventListener('statechange', onStateChange)
+        trackedCleanups.delete(detach)
+      }
+      trackedCleanups.add(detach)
       worker.addEventListener('statechange', onStateChange)
     }
 
@@ -145,6 +153,8 @@ export function useServiceWorker(): ServiceWorkerState {
     return () => {
       disposed = true
       clearInterval(intervalId)
+      trackedCleanups.forEach((fn) => fn())
+      trackedCleanups.clear()
       registrationRef.current?.removeEventListener('updatefound', onUpdateFound)
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange)

@@ -6,6 +6,7 @@ import type { SyncStatus } from '../../hooks/useSync'
 import type { GitHubProfile } from '../../hooks/useAuth'
 import { SettingsPanel } from '../Settings'
 import { playMicroClick } from '../../lib/sound'
+import { lockBodyScroll } from '../../lib/modalScrollLock'
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -55,12 +56,10 @@ export const SettingsModal = memo(function SettingsModal({
       }
     }
     window.addEventListener('keydown', handleKeyDown)
-    // Lock background scroll while the modal is open; restore on close.
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const unlock = lockBodyScroll()
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = prevOverflow
+      unlock()
     }
   }, [isOpen, onClose])
 

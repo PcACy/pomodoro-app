@@ -19,12 +19,10 @@ export function readNotifyFlag(): boolean {
   }
 }
 
+import { writeFlag } from './flagsStore'
+
 export function writeNotifyFlag(value: boolean): void {
-  try {
-    localStorage.setItem(NOTIFY_KEY, String(value))
-  } catch {
-    /* storage unavailable */
-  }
+  writeFlag(NOTIFY_KEY, value)
 }
 
 /**

@@ -120,7 +120,8 @@ export const GlyphTimeDisplay = memo(function GlyphTimeDisplay({
   className = '',
 }: GlyphTimeDisplayProps) {
   // Parse time characters (e.g. ['2', '5', ':', '0', '0'])
-  const chars = time.split('')
+  const safeTime = time && time.trim() ? time : '00:00'
+  const chars = safeTime.split('')
 
   // Fixed slot per character: digit matrices fill the slot, the narrow colon
   // matrix is centered inside it — total width and every glyph position stay
@@ -136,8 +137,8 @@ export const GlyphTimeDisplay = memo(function GlyphTimeDisplay({
     charPositions.push({ char, x, dx, matrix })
   }
 
-  const totalWidth = chars.length * SLOT_WIDTH + (chars.length - 1) * DIGIT_GAP
-  const totalHeight = 7 * STEP - DOT_GAP
+  const totalWidth = Math.max(0, chars.length * SLOT_WIDTH + Math.max(0, chars.length - 1) * DIGIT_GAP)
+  const totalHeight = Math.max(0, 7 * STEP - DOT_GAP)
 
   return (
     <div className={`relative flex items-center justify-center tabular-nums select-none ${className || 'w-full max-w-[340px] sm:max-w-[400px] lg:max-w-[430px] my-auto py-2'}`}>
