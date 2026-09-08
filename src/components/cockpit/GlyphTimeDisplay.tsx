@@ -113,20 +113,16 @@ const DOT_SIZE = 5.5
 const DOT_GAP = 3.5
 const STEP = DOT_SIZE + DOT_GAP // 9px per grid unit
 const DIGIT_GAP = 2 * STEP // 18px between characters
-const RED_DOT_GAP = 2.5 * STEP // spacing between red dot and first digit
 
 export const GlyphTimeDisplay = memo(function GlyphTimeDisplay({
   time,
-  isRunning = false,
+  isRunning: _isRunning = false,
   className = '',
 }: GlyphTimeDisplayProps) {
   // Parse time characters (e.g. ['2', '5', ':', '0', '0'])
   const chars = time.split('')
 
-  // Compute total width with symmetrical padding so digits are exactly centered
-  // Left padding accounts for the red status dot + gap
-  const LEFT_PADDING = DOT_SIZE + RED_DOT_GAP
-  let currentX = LEFT_PADDING
+  let currentX = 0
   const charPositions: { char: string; x: number; matrix: number[][] }[] = []
 
   for (let i = 0; i < chars.length; i++) {
@@ -137,8 +133,7 @@ export const GlyphTimeDisplay = memo(function GlyphTimeDisplay({
     currentX += charWidth + DIGIT_GAP
   }
 
-  const digitsSpan = (currentX - DIGIT_GAP) - LEFT_PADDING
-  const totalWidth = LEFT_PADDING + digitsSpan + LEFT_PADDING
+  const totalWidth = currentX - DIGIT_GAP
   const totalHeight = 7 * STEP - DOT_GAP
 
   return (
@@ -150,17 +145,6 @@ export const GlyphTimeDisplay = memo(function GlyphTimeDisplay({
         className="w-full h-auto overflow-visible"
         aria-hidden="true"
       >
-        {/* Red Status Dot on the left (Row 3, vertically centered) */}
-        <rect
-          x="0"
-          y={3 * STEP}
-          width={DOT_SIZE}
-          height={DOT_SIZE}
-          rx="1.2"
-          fill="currentColor"
-          className={`text-accent ${isRunning ? 'animate-pulse' : ''}`}
-        />
-
         {/* Lit Matrix Digits */}
         {charPositions.map(({ x, matrix }, charIdx) => (
           <g key={charIdx} transform={`translate(${x}, 0)`}>

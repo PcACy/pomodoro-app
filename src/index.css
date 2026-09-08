@@ -36,13 +36,13 @@
   --warning: 212 168 67;
   --interactive: 91 155 246;
 
-  /* Mapped Framework Tokens */
-  --c-canvas: var(--black);
-  --c-surface: var(--surface);
-  --c-raised: var(--surface-raised);
-  --c-line: var(--border-visible);
-  --c-fg: var(--text-primary);
-  --c-muted: var(--text-secondary);
+  /* Mapped Framework Tokens (Direct values to avoid browser IACVT nested-var issues) */
+  --c-canvas: 0 0 0;
+  --c-surface: 17 17 17;
+  --c-raised: 26 26 26;
+  --c-line: 51 51 51;
+  --c-fg: 232 232 232;
+  --c-muted: 153 153 153;
   --c-accent: var(--accent);
   --c-accent-strong: var(--accent-strong);
   --c-on-accent: 255 255 255;
@@ -108,13 +108,13 @@
   --warning: 212 168 67;
   --interactive: 0 122 255;
 
-  /* Mapped Framework Tokens */
-  --c-canvas: var(--black);
-  --c-surface: var(--surface);
-  --c-raised: var(--surface-raised);
-  --c-line: var(--border-visible);
-  --c-fg: var(--text-primary);
-  --c-muted: var(--text-secondary);
+  /* Mapped Framework Tokens (Direct values to avoid browser IACVT nested-var issues) */
+  --c-canvas: 245 245 245;
+  --c-surface: 255 255 255;
+  --c-raised: 240 240 240;
+  --c-line: 204 204 204;
+  --c-fg: 26 26 26;
+  --c-muted: 102 102 102;
   --c-accent: var(--accent);
   --c-accent-strong: var(--accent-strong);
   --c-on-accent: 255 255 255;

@@ -141,7 +141,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             }`}
           />
           <span className="font-mono text-[10px] sm:text-xs tracking-widest text-muted uppercase">
-            POMODORO // INSTRUMENT
+            {isFlow ? 'FLOW' : 'POMODORO'} // INSTRUMENT
           </span>
         </div>
 
@@ -160,7 +160,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
 
       {/* Hero Glyph Display */}
       <div className="relative z-10 flex-1 flex flex-col justify-center py-2 sm:py-3">
-        {/* Glyph Dot-Matrix Clock with Red Status Dot */}
+        {/* Glyph Dot-Matrix Clock */}
         <div className="my-1 flex justify-center">
           <GlyphTimeDisplay time={shownTime} isRunning={running} />
         </div>
@@ -177,40 +177,42 @@ export const HeroTimerCard = memo(function HeroTimerCard({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-line bg-canvas text-fg font-mono text-xs uppercase tracking-wider">
-              <span className={`h-1.5 w-1.5 rounded-full ${running ? 'bg-accent animate-pulse' : 'bg-muted'}`} />
-              {shownLabel}
-            </div>
             {isFlow ? (
-              <div className="inline-flex items-center gap-1.5 font-mono text-[10px] text-muted tracking-wider uppercase">
-                <span className={`h-1.5 w-1.5 rounded-full ${running ? 'bg-accent animate-pulse' : 'bg-line'}`} />
-                <span>{running ? 'FLOW ACTIVE' : 'FREE FLOW'}</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-line bg-canvas text-fg font-mono text-xs uppercase tracking-wider">
+                <span className={`h-1.5 w-1.5 rounded-full ${running ? 'bg-accent animate-pulse' : 'bg-muted'}`} />
+                {running ? 'FLOW ACTIVE' : 'FREE FLOW'}
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted tracking-wider">
-                <span>ROUND {(completedFocusInCycle % safeRounds) + 1} / {safeRounds}</span>
-                <div className="flex items-center gap-1 ml-0.5" title={`Cycle: ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`}>
-                  {Array.from({ length: safeRounds }).map((_, rIdx) => {
-                    const currentRoundIdx = completedFocusInCycle % safeRounds
-                    const isCompleted = rIdx < currentRoundIdx
-                    const isCurrent = rIdx === currentRoundIdx
-                    return (
-                      <span
-                        key={rIdx}
-                        className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                          isCompleted
-                            ? 'bg-fg'
-                            : isCurrent
-                            ? running
-                              ? 'bg-accent animate-pulse'
-                              : 'bg-accent/80'
-                            : 'border border-line bg-canvas'
-                        }`}
-                      />
-                    )
-                  })}
+              <>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-line bg-canvas text-fg font-mono text-xs uppercase tracking-wider">
+                  <span className={`h-1.5 w-1.5 rounded-full ${running ? 'bg-accent animate-pulse' : 'bg-muted'}`} />
+                  {shownLabel}
                 </div>
-              </div>
+                <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted tracking-wider">
+                  <span>ROUND {(completedFocusInCycle % safeRounds) + 1} / {safeRounds}</span>
+                  <div className="flex items-center gap-1 ml-0.5" title={`Cycle: ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`}>
+                    {Array.from({ length: safeRounds }).map((_, rIdx) => {
+                      const currentRoundIdx = completedFocusInCycle % safeRounds
+                      const isCompleted = rIdx < currentRoundIdx
+                      const isCurrent = rIdx === currentRoundIdx
+                      return (
+                        <span
+                          key={rIdx}
+                          className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                            isCompleted
+                              ? 'bg-fg'
+                              : isCurrent
+                              ? running
+                                ? 'bg-accent animate-pulse'
+                                : 'bg-accent/80'
+                              : 'border border-line bg-canvas'
+                          }`}
+                        />
+                      )
+                    })}
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -251,7 +253,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             className={`rounded-full px-6 sm:px-8 py-2.5 font-mono text-xs tracking-widest uppercase font-semibold transition-all active:scale-[0.98] cursor-pointer ${
               running
                 ? 'bg-accent text-white hover:bg-accent/90'
-                : 'bg-fg text-canvas hover:opacity-90'
+                : 'bg-fg text-canvas dark:text-black text-white hover:opacity-90'
             }`}
           >
             {running ? t.timer.pause : t.timer.start}
