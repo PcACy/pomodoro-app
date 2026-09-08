@@ -86,38 +86,37 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
       contentClassName="justify-between"
     >
       <div className="flex-1 flex flex-col justify-between py-1 gap-3">
-        {/* Weekday header, aligned to the 7 day columns */}
+        {/* Weekday header, full width above the day columns */}
         <div className="flex gap-[2px]" aria-hidden="true">
-          <div className="flex-1" />
-          <div className="flex-[7] flex gap-[2px]">
-            {DAY_LABELS.map((d, i) => (
-              <span
-                key={i}
-                className={`flex-1 text-center font-mono text-[8px] tracking-wider uppercase ${
-                  i === todayIdx ? 'text-fg font-bold' : 'text-muted/70'
-                }`}
-              >
-                {d}
-              </span>
-            ))}
-          </div>
+          {DAY_LABELS.map((d, i) => (
+            <span
+              key={i}
+              className={`flex-1 text-center font-mono text-[8px] tracking-wider uppercase ${
+                i === todayIdx ? 'text-fg font-bold' : 'text-muted/70'
+              }`}
+            >
+              {d}
+            </span>
+          ))}
         </div>
 
-        {/* Per-tag rows: label + 7-day dot matrix (Mon–Sun squares) */}
+        {/* Per-tag rows: full-width label line + full-width 7-day dot matrix */}
         <div className="flex-1 flex flex-col justify-center gap-3">
           {displayRows.map((row) => {
             const hours = (row.weekMinutes / 60).toFixed(1)
 
             return (
-              <div key={row.tag} className="flex items-center gap-2">
-                <div className="flex-1 min-w-0 flex items-center justify-between font-mono text-[10px] tracking-wider uppercase">
-                  <span className="text-fg/90 font-medium truncate">{row.tag}</span>
-                  <span className="text-fg/80 tabular-nums shrink-0 ml-2">
+              <div key={row.tag} className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-2 font-mono text-[10px] tracking-wider uppercase">
+                  <span className="text-fg/90 font-medium truncate" title={row.tag}>
+                    {row.tag}
+                  </span>
+                  <span className="text-fg/80 tabular-nums shrink-0">
                     {row.weekMinutes > 0 ? `${hours} H` : '0 H'}
                   </span>
                 </div>
                 <div
-                  className="flex-[7] flex gap-[2px]"
+                  className="flex gap-[2px]"
                   role="img"
                   aria-label={`${row.tag} this week: ${row.dayMinutes
                     .map((m, i) => `${DAY_LABELS[i]} ${m} minutes`)
