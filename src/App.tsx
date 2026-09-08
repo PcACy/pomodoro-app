@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
-import { BarChart3, PictureInPicture2, Settings as SettingsIcon } from 'lucide-react'
+import { BarChart3, Moon, PictureInPicture2, Settings as SettingsIcon, Sun } from 'lucide-react'
 import { useSettings } from './hooks/useSettings'
 import { useLocalState } from './hooks/useLocalState'
 import { useSessions } from './hooks/useSessions'
@@ -311,6 +311,21 @@ export default function App() {
               <PictureInPicture2 size={14} />
             </button>
           )}
+
+          {/* Dark / Light Mode Toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              playMicroClick('toggle')
+              setColorMode(colorMode === 'dark' ? 'light' : 'dark')
+            }}
+            title={colorMode === 'dark' ? 'Light mode' : 'Dark mode'}
+            aria-label={colorMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-pressed={colorMode === 'light'}
+            className="flex items-center justify-center h-8 w-8 rounded-full border border-line bg-surface hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer"
+          >
+            {colorMode === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+          </button>
 
           {/* Analytics Modal Trigger */}
           <button
