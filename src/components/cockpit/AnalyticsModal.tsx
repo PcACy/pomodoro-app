@@ -58,7 +58,7 @@ export const AnalyticsModal = memo(function AnalyticsModal({
       }}
     >
       <div
-        className="modal-panel relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-card bg-surface border border-line p-5 sm:p-7 flex flex-col gap-4 shadow-none"
+        className="modal-panel relative w-full max-w-[480px] max-h-[90vh] overflow-y-auto rounded-card bg-surface border border-line p-5 sm:p-7 flex flex-col gap-4 shadow-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

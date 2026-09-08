@@ -25,12 +25,8 @@ export const GoalLoadCard = memo(function GoalLoadCard({
   const currentHours = (currentWeekMinutes / 60).toFixed(1)
   const targetHours = (targetWeekMinutes / 60).toFixed(1)
 
-  // Circular gauge parameters
-  const radius = 38
-  const circumference = 2 * Math.PI * radius
-  // Gauge sweeps around 270 degrees (starts at 135 deg, ends at 405 deg)
-  const arcSweep = 0.75 * circumference
-  const strokeDashoffset = arcSweep * (1 - Math.min(1, ratio))
+  const SEGMENTS = 20
+  const filled = Math.min(SEGMENTS, Math.max(0, Math.round(Math.min(1, ratio) * SEGMENTS)))
 
   return (
     <BentoCard
@@ -52,53 +48,26 @@ export const GoalLoadCard = memo(function GoalLoadCard({
       }
       onClick={onOpenSettings}
       className={`${onOpenSettings ? 'cursor-pointer hover:border-fg/30 transition-colors' : ''} ${className}`}
-      contentClassName="items-center justify-center py-2"
+      contentClassName="justify-between py-2"
     >
-      <div className="relative flex items-center justify-center">
-        <svg
-          className="w-28 h-28 transform -rotate-90"
-          viewBox="0 0 100 100"
-          aria-hidden="true"
-        >
-          {/* Background track */}
-          <circle
-            cx="50"
-            cy="50"
-            r={radius}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="7"
-            className="text-line/40"
-            strokeDasharray={`${arcSweep} ${circumference}`}
-            strokeLinecap="round"
-            transform="rotate(135 50 50)"
-          />
-          {/* Active progress arc */}
-          <circle
-            cx="50"
-            cy="50"
-            r={radius}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="7"
-            className={ratio >= 1 ? 'text-accent' : 'text-fg'}
-            strokeDasharray={`${arcSweep} ${circumference}`}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-            transform="rotate(135 50 50)"
-            style={{
-              transition: 'stroke-dashoffset 0.4s cubic-bezier(0.2, 0, 0, 1)',
-            }}
-          />
-        </svg>
+      {/* Center Value Display */}
+      <div className="flex items-baseline gap-1.5">
+        <span className="font-sans text-3xl font-medium tracking-tight text-fg tabular-nums">
+          {percentage}
+        </span>
+        <span className="font-mono text-xs text-muted uppercase">%</span>
+      </div>
 
-        {/* Center Percentage Display */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-display text-2xl font-medium tracking-tight text-fg tabular-nums">
-            {percentage}
-            <span className="text-xs text-muted font-mono ml-0.5">%</span>
-          </span>
-        </div>
+      {/* Segmented Mechanical Progress Bar */}
+      <div className="mt-3 flex h-2 w-full gap-[2px]" role="progressbar" aria-valuenow={percentage} aria-valuemin={0} aria-valuemax={100}>
+        {Array.from({ length: SEGMENTS }).map((_, i) => (
+          <div
+            key={i}
+            className={`flex-1 rounded-none transition-colors duration-150 ${
+              i < filled ? (ratio >= 1 ? 'bg-accent' : 'bg-fg') : 'bg-line/40'
+            }`}
+          />
+        ))}
       </div>
 
       {/* Subtitle / Details in Hours */}

@@ -50,7 +50,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
       action={
         <div className="flex items-center gap-1.5">
           {streak > 0 && (
-            <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full border border-line bg-canvas text-accent tracking-wider uppercase">
+            <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full border border-line bg-canvas text-fg tracking-wider uppercase">
               {streak}D STREAK
             </span>
           )}
@@ -77,7 +77,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
       <div className="my-auto flex items-baseline justify-between gap-2">
         <div>
           <div className="flex items-baseline gap-1.5">
-            <span className="font-display text-3xl sm:text-4xl font-medium tracking-tight text-fg tabular-nums">
+            <span className="font-sans text-3xl sm:text-4xl font-medium tracking-tight text-fg tabular-nums">
               {hours}
             </span>
             <span className="font-mono text-xs text-muted uppercase">H</span>
@@ -96,7 +96,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
 
       {/* 24-Hour Timeline Bar with Red Needle */}
       <div className="mt-3">
-        <div className="relative h-3 w-full rounded-sm bg-canvas border border-line/60 overflow-hidden">
+        <div className="relative h-3 w-full rounded-none bg-canvas border border-line/60 overflow-hidden">
           {/* Hour tick marks */}
           <div className="absolute inset-0 flex justify-between pointer-events-none opacity-30">
             {Array.from({ length: 9 }).map((_, i) => (
@@ -116,7 +116,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
               <div
                 key={session.id}
                 title={`${session.task || 'Session'} (${durMin}m)`}
-                className="absolute top-0.5 bottom-0.5 rounded-[1px] bg-fg/80 hover:bg-fg transition-colors"
+                className="absolute top-0.5 bottom-0.5 rounded-none bg-fg/80 hover:bg-fg transition-colors"
                 style={{
                   left: `${leftPct}%`,
                   width: `${Math.max(0.5, widthPct)}%`,
@@ -137,7 +137,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
         <div className="mt-1 flex items-center justify-between font-mono text-[8px] sm:text-[9px] text-muted tracking-wider tabular-nums">
           <span>00:00</span>
           <span>12:00</span>
-          <span className="text-accent font-medium">NOW {timeStr}</span>
+          <span className="text-muted font-medium">NOW {timeStr}</span>
           <span>24:00</span>
         </div>
       </div>

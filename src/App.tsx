@@ -389,7 +389,7 @@ export default function App() {
 
           {/* Floating Minimalist Top Exit Badge (auto-fades on idle during focus) */}
           <div
-            className={`fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${
+            className={`fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-all duration-200 ${
               !isRunning || isMouseActive
                 ? 'opacity-100 translate-y-0'
                 : 'opacity-0 -translate-y-2 pointer-events-none'
@@ -451,10 +451,9 @@ export default function App() {
         <div
           key={toast.id}
           role="status"
-          className="animate-fade-in fixed bottom-8 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-full border border-line bg-surface px-4 py-2 font-mono text-xs text-fg select-none"
+          className="w-full pb-16 text-center font-mono text-[11px] uppercase tracking-widest text-muted select-none"
         >
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-          <span className="tracking-wide">{toast.message}</span>
+          [{toast.message}]
         </div>
       )}
 

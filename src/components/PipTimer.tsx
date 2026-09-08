@@ -20,7 +20,7 @@ interface Props {
 }
 
 const BADGE: Record<PhaseId, string> = {
-  focus: 'border-accent/40 bg-accent/15 text-accent',
+  focus: 'border-fg bg-fg text-canvas',
   shortBreak: 'border-line bg-surface text-fg',
   longBreak: 'border-line bg-surface text-fg',
 }
@@ -67,7 +67,7 @@ export const PipTimer = memo(function PipTimer({
           type="button"
           onClick={onToggle}
           title={running ? t.timer.pause : t.timer.start}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white transition-colors hover:bg-accent/90 active:scale-95 cursor-pointer"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-fg text-canvas transition-colors hover:opacity-90 active:scale-95 cursor-pointer"
         >
           {running ? <Pause size={18} /> : <Play size={18} className="translate-x-0.5" />}
         </button>

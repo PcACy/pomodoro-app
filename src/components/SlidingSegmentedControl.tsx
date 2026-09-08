@@ -91,7 +91,7 @@ export function SlidingSegmentedControl<T extends string>({
       <div
         className={`absolute top-0 left-0 rounded-full bg-fg pointer-events-none ${
           indicator.ready
-            ? 'transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none'
+            ? 'transition-all duration-200 ease-out motion-reduce:transition-none'
             : 'opacity-0'
         }`}
         style={{

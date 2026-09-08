@@ -101,7 +101,6 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
                   className="h-1.5 w-1.5 rounded-full"
                   style={{
                     backgroundColor: tagColor,
-                    boxShadow: tagColor ? `0 0 8px ${tagColor}66` : undefined,
                   }}
                 />
                 <span className="text-fg/80">{activeTodo.tag}</span>
@@ -133,7 +132,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
                   playMicroClick('tick')
                   onToggleDone(activeTodo.id)
                 }}
-                className="h-8 px-3 rounded-full border border-line bg-canvas hover:border-fg/50 text-fg text-xs font-mono tracking-wider uppercase transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="min-h-[44px] px-4 rounded-full border border-line bg-canvas hover:border-fg/50 text-fg text-xs font-mono tracking-wider uppercase transition-colors flex items-center gap-1.5 cursor-pointer"
                 title="Mark task as completed"
               >
                 <Check size={13} strokeWidth={2.5} />
@@ -146,7 +145,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
             <button
               type="button"
               onClick={onOpenTodoManager}
-              className="font-mono text-[10px] text-muted hover:text-fg tracking-widest uppercase px-2.5 py-1 rounded-full border border-line/50 hover:border-fg/40 bg-canvas/40 transition-colors cursor-pointer"
+              className="font-mono text-[10px] text-muted hover:text-fg tracking-widest uppercase px-4 py-2 min-h-[44px] rounded-full border border-line/50 hover:border-fg/40 bg-canvas/40 transition-colors cursor-pointer"
             >
               CHOOSE TASK
             </button>
@@ -154,15 +153,17 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         )}
       </div>
 
-      {/* Scrubber / Progress Bar with Timestamps */}
+      {/* Segmented Progress Bar with Timestamps */}
       <div className="mt-4">
-        <div className="relative h-1 w-full bg-line/40 rounded-full overflow-hidden">
-          <div
-            className={`absolute top-0 bottom-0 left-0 transition-all duration-200 ${
-              isRunning ? 'bg-accent' : 'bg-fg'
-            }`}
-            style={{ width: `${progressRatio * 100}%` }}
-          />
+        <div className="flex h-1.5 w-full gap-[2px]" role="progressbar" aria-valuenow={Math.round(progressRatio * 100)} aria-valuemin={0} aria-valuemax={100}>
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div
+              key={i}
+              className={`flex-1 rounded-none transition-colors duration-150 ${
+                i < Math.round(progressRatio * 20) ? 'bg-fg' : 'bg-line/40'
+              }`}
+            />
+          ))}
         </div>
         <div className="mt-1.5 flex items-center justify-between font-mono text-[9px] text-muted tracking-wider tabular-nums">
           <span>{elapsedStr}</span>

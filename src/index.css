@@ -65,7 +65,7 @@
   --c-chart-5: 215 25 33;
   --c-chart-6: 74 158 92;
   --c-chart-7: 212 168 67;
-  --c-chart-8: 91 155 246;
+  --c-chart-8: 102 102 102;
 
   /* Structural Geometry: Flat surfaces, 1px border separation, no shadows */
   --radius-card: 16px;
@@ -137,7 +137,7 @@
   --c-chart-5: 215 25 33;
   --c-chart-6: 74 158 92;
   --c-chart-7: 212 168 67;
-  --c-chart-8: 0 122 255;
+  --c-chart-8: 102 102 102;
 
   /* Structural Geometry */
   --radius-card: 16px;
@@ -175,40 +175,7 @@ html[data-accent='red'] {
   --accent-subtle: rgba(215, 25, 33, 0.15) !important;
 }
 
-:root[data-accent='orange'],
-html[data-accent='orange'] {
-  --accent: 250 93 41 !important;
-  --accent-strong: 250 93 41 !important;
-  --accent-subtle: rgba(250, 93, 41, 0.15) !important;
-}
-
-:root[data-accent='blue'],
-html[data-accent='blue'] {
-  --accent: 56 189 248 !important;
-  --accent-strong: 56 189 248 !important;
-  --accent-subtle: rgba(56, 189, 248, 0.15) !important;
-}
-
-:root[data-accent='green'],
-html[data-accent='green'] {
-  --accent: 34 197 94 !important;
-  --accent-strong: 34 197 94 !important;
-  --accent-subtle: rgba(34, 197, 94, 0.15) !important;
-}
-
-:root[data-accent='monochrome'],
-html[data-accent='monochrome'] {
-  --accent: 255 255 255 !important;
-  --accent-strong: 255 255 255 !important;
-  --accent-subtle: rgba(255, 255, 255, 0.15) !important;
-}
-
-:root[data-mode='light'][data-accent='monochrome'],
-html[data-mode='light'][data-accent='monochrome'] {
-  --accent: 26 26 26 !important;
-  --accent-strong: 0 0 0 !important;
-  --accent-subtle: rgba(0, 0, 0, 0.12) !important;
-}
+/* Nothing spec: only signal red #D71921. No orange/blue/green/monochrome accents. */
 
 /* =========================================================================
    DOT-MATRIX MOTIF & BACKGROUNDS

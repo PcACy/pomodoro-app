@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { RotateCcw, SkipForward, Plus } from 'lucide-react'
 import type { TimerMode, TimerStatus } from '../../types'
 import { useTranslation } from '../../hooks/useTranslation'
@@ -6,7 +6,6 @@ import { useFlowTimerTick, useTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
 import { GlyphTimeDisplay } from './GlyphTimeDisplay'
 import { SlidingSegmentedControl } from '../SlidingSegmentedControl'
-import { InteractiveGridCanvas, type InteractiveGridCanvasHandle } from './InteractiveGridCanvas'
 
 interface HeroTimerCardProps {
   phaseLabel: string
@@ -99,110 +98,37 @@ export const HeroTimerCard = memo(function HeroTimerCard({
     Math.max(0, Math.round(flowRatio * TOTAL_SEGMENTS)),
   )
 
-  const handleToggleClick = useCallback(() => {
+  const handleToggleClick = () => {
     playMicroClick(running ? 'tick' : 'pop')
     onToggle()
-  }, [running, onToggle])
+  }
 
-  const handleResetClick = useCallback(() => {
+  const handleResetClick = () => {
     playMicroClick('tap')
     onReset()
-  }, [onReset])
+  }
 
-  const handleSkipClick = useCallback(() => {
+  const handleSkipClick = () => {
     playMicroClick('toggle')
     onSkip()
-  }, [onSkip])
+  }
 
-  const handleAddFive = useCallback(() => {
+  const handleAddFive = () => {
     playMicroClick('tap')
     onAddTime?.(5)
-  }, [onAddTime])
+  }
 
   const locale = lang === 'de' ? 'de-DE' : 'en-US'
   const dayName = localDate.toLocaleDateString(locale, { weekday: 'long' })
   const dateFormatted = localDate.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
 
-  const containerRef = useRef<HTMLDivElement>(null)
-  const gridCanvasRef = useRef<InteractiveGridCanvasHandle>(null)
-  const [isHovered, setIsHovered] = useState(false)
-
-  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const el = containerRef.current
-    if (!el) return
-    const rect = el.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    el.style.setProperty('--mouse-x', `${x}px`)
-    el.style.setProperty('--mouse-y', `${y}px`)
-    gridCanvasRef.current?.addPoint(x, y)
-  }, [])
-
-  const handlePointerEnter = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    setIsHovered(true)
-    const el = containerRef.current
-    if (!el) return
-    const rect = el.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    el.style.setProperty('--mouse-x', `${x}px`)
-    el.style.setProperty('--mouse-y', `${y}px`)
-    gridCanvasRef.current?.addPoint(x, y)
-  }, [])
-
-  const handlePointerLeave = useCallback(() => {
-    setIsHovered(false)
-  }, [])
-
   return (
     <div
-      ref={containerRef}
-      onPointerMove={handlePointerMove}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
       className={`relative overflow-hidden rounded-card bg-surface border border-line p-5 sm:p-6 lg:p-7 flex flex-col justify-between select-none ${className}`}
     >
       {/* Signature Nothing Dot-Matrix Canvas Grid - Subtle baseline */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.04] dark:opacity-[0.07] [background-image:radial-gradient(currentColor_1px,transparent_1px)] [background-size:14px_14px] text-fg"
-        aria-hidden="true"
-      />
-
-
-      {/* Interactive Cursor Spotlight Dot-Matrix Glow - Crisp 48px instant hardware focus */}
-      <div
-        className={`pointer-events-none absolute inset-0 text-fg transition-opacity duration-300 ease-out [background-image:radial-gradient(currentColor_1.5px,transparent_1.5px)] [background-size:14px_14px] ${
-          isHovered ? 'opacity-40 dark:opacity-55' : 'opacity-0'
-        }`}
-        style={{
-          maskImage:
-            'radial-gradient(circle 48px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 15%, transparent 100%)',
-          WebkitMaskImage:
-            'radial-gradient(circle 48px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 15%, transparent 100%)',
-        }}
-        aria-hidden="true"
-      />
-
-      {/* Interactive Phosphor Decay LED Matrix Trail - 550ms organic wake behind cursor */}
-      <InteractiveGridCanvas
-        ref={gridCanvasRef}
-        gridSize={14}
-        spotlightRadius={42}
-        decayDurationMs={550}
-      />
-
-      {/* Hardware Glass Edge - Subtle hairline border reflection near pointer */}
-      <div
-        className={`pointer-events-none absolute inset-0 rounded-card transition-opacity duration-300 ease-out ${
-          isHovered ? 'opacity-100' : 'opacity-0'
-        }`}
-        style={{
-          border: '1px solid rgb(var(--c-fg) / 0.28)',
-          maskImage:
-            'radial-gradient(circle 70px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 100%)',
-          WebkitMaskImage:
-            'radial-gradient(circle 70px at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 100%)',
-        }}
         aria-hidden="true"
       />
 
@@ -277,9 +203,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
                           isCompleted
                             ? 'bg-fg'
                             : isCurrent
-                              ? running
-                                ? 'bg-accent animate-pulse'
-                                : 'bg-accent/80'
+                              ? 'bg-fg'
                               : 'border border-line bg-canvas'
                         }`}
                       />
@@ -305,11 +229,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
               <div
                 key={i}
                 className={`flex-1 transition-colors duration-150 ${
-                  isFilled
-                    ? running
-                      ? 'bg-accent'
-                      : 'bg-fg'
-                    : 'bg-line/40'
+                  isFilled ? 'bg-fg' : 'bg-line/40'
                 }`}
               />
             )
@@ -324,11 +244,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
           <button
             type="button"
             onClick={handleToggleClick}
-            className={`rounded-full px-6 sm:px-8 py-2.5 font-mono text-xs tracking-widest uppercase font-semibold transition-all active:scale-[0.98] cursor-pointer ${
-              running
-                ? 'bg-accent text-white hover:bg-accent/90'
-                : 'bg-fg text-canvas dark:text-black text-white hover:opacity-90'
-            }`}
+            className="rounded-full px-6 sm:px-8 py-2.5 font-mono text-xs tracking-widest uppercase font-semibold transition-colors active:scale-[0.98] cursor-pointer bg-fg text-canvas hover:opacity-90"
           >
             {running ? t.timer.pause : t.timer.start}
           </button>

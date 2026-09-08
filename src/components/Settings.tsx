@@ -57,13 +57,7 @@ interface AccentOption {
   colorHex: string
 }
 
-const ACCENT_OPTIONS: AccentOption[] = [
-  { id: 'red', labelKey: 'accentRed', colorHex: '#D71921' },
-  { id: 'orange', labelKey: 'accentOrange', colorHex: '#FA5D29' },
-  { id: 'blue', labelKey: 'accentBlue', colorHex: '#38BDF8' },
-  { id: 'green', labelKey: 'accentGreen', colorHex: '#22C55E' },
-  { id: 'monochrome', labelKey: 'accentMonochrome', colorHex: '#FFFFFF' },
-]
+const ACCENT_OPTIONS: AccentOption[] = [{ id: 'red', labelKey: 'accentRed', colorHex: '#D71921' }]
 
 interface NumberStepperProps {
   value: number
@@ -228,7 +222,7 @@ function NumberStepper({
           onChange={handleInputChange}
           onBlur={handleBlur}
           aria-label={ariaLabel}
-          className="w-12 bg-transparent text-center font-doto text-base font-bold tabular-nums text-fg focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="w-12 bg-transparent text-center font-mono text-sm font-medium tabular-nums text-fg focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />
         {suffix && (
           <span className="select-none font-mono text-[10px] uppercase text-muted tracking-wider">
@@ -506,7 +500,7 @@ export const SettingsPanel = memo(function SettingsPanel({
                 >
                   <div className="flex items-center justify-center gap-1.5 max-w-full">
                     {active && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_8px_rgba(215,25,33,0.8)] shrink-0" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
                     )}
                     <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate">
                       {presetName}
@@ -948,7 +942,6 @@ export const SettingsPanel = memo(function SettingsPanel({
                     className="h-2 w-2 shrink-0 rounded-full"
                     style={{
                       backgroundColor: tagColor,
-                      boxShadow: `0 0 8px ${tagColor}66`,
                     }}
                   />
                   <span className="max-w-[160px] truncate">{tag}</span>
@@ -1003,13 +996,13 @@ export const SettingsPanel = memo(function SettingsPanel({
           </div>
         ) : syncStatus === 'syncing' || syncLoading ? (
           <div className="flex items-center gap-2 text-xs text-muted">
-            <Loader2 size={14} className="animate-spin text-accent" />
+            <Loader2 size={14} className="animate-spin text-muted" />
             <span>{t.sync.syncing}</span>
           </div>
         ) : syncStatus === 'offline' || syncStatus === 'error' ? (
           <div className="flex flex-wrap items-center gap-3">
             <span className="flex items-center gap-2 text-xs text-accent">
-              <span className="h-2 w-2 rounded-full bg-accent shadow-[0_0_8px_rgba(215,25,33,0.6)]" />
+              <span className="h-2 w-2 rounded-full bg-accent" />
               {t.sync.offline}
             </span>
             <button

@@ -50,9 +50,9 @@ export const SystemStatusCard = memo(function SystemStatusCard({
         onOpenAnalyticsModal?.()
       }}
     >
-      {/* Center Highlight: Doto Digit + Label */}
+      {/* Center Highlight: Digit + Label */}
       <div className="flex items-center gap-2.5">
-        <span className="font-doto text-3xl sm:text-4xl font-bold text-fg tracking-tight tabular-nums">
+        <span className="font-sans text-3xl sm:text-4xl font-medium text-fg tracking-tight tabular-nums">
           {streak}
         </span>
         <div className="flex flex-col">
@@ -69,7 +69,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
       </div>
 
       {/* 7-Day Matrix for Current Week (Mon-Sun) */}
-      <div className="flex items-center justify-between gap-1 px-1.5 py-1.5 rounded bg-canvas/60 border border-line/40">
+      <div className="flex items-center justify-between gap-[2px] px-1.5 py-1.5 rounded-none bg-canvas border border-line">
         {WEEK_DAYS.map((dayName, i) => {
           const dayDate = addDays(weekStart, i)
           const isCurrentDay = sameDay(dayDate, today)
@@ -85,13 +85,11 @@ export const SystemStatusCard = memo(function SystemStatusCard({
                 {dayName}
               </span>
               <div
-                className={`h-2 w-2 rounded-full transition-all ${
+                className={`h-2 w-2 rounded-none transition-colors ${
                   hasLogged
-                    ? isCurrentDay
-                      ? 'bg-accent'
-                      : 'bg-fg'
+                    ? 'bg-fg'
                     : isCurrentDay
-                      ? 'border border-accent/80'
+                      ? 'border border-fg'
                       : 'bg-line/40'
                 }`}
               />

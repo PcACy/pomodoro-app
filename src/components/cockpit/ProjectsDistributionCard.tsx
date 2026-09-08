@@ -11,7 +11,7 @@ interface ProjectsDistributionCardProps {
   className?: string
 }
 
-const SEGMENT_COUNT = 24
+const SEGMENT_COUNT = 20
 
 export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
   sessions,
@@ -76,7 +76,6 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
                       className="h-1.5 w-1.5 rounded-full"
                       style={{
                         backgroundColor: tagColor,
-                        boxShadow: `0 0 8px ${tagColor}66`,
                       }}
                     />
                     <span className="text-fg/90 font-medium">{row.tag}</span>
@@ -87,11 +86,11 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
                 </div>
 
                 {/* Segmented bar for this category */}
-                <div className="flex h-2 w-full gap-0.5">
+                <div className="flex h-2 w-full gap-[2px]">
                   {Array.from({ length: SEGMENT_COUNT }).map((_, i) => (
                     <div
                       key={i}
-                      className={`flex-1 rounded-[0.5px] transition-colors duration-150 ${
+                      className={`flex-1 rounded-none transition-colors duration-150 ${
                         i < filled
                           ? 'bg-fg'
                           : 'bg-line/40'

@@ -43,9 +43,7 @@ export const MechanicalSwitch = memo(function MechanicalSwitch({
       </span>
       <span
         className={`pointer-events-none inline-block h-3.5 w-3.5 rounded-full transition-transform duration-150 ease-out ${
-          checked
-            ? 'translate-x-4 bg-accent shadow-[0_0_8px_rgba(215,25,33,0.6)]'
-            : 'translate-x-0 bg-muted/60'
+          checked ? 'translate-x-4 bg-accent' : 'translate-x-0 bg-muted/60'
         }`}
       />
     </button>

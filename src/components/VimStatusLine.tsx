@@ -57,7 +57,7 @@ export const VimStatusLine = memo(function VimStatusLine({
     <footer
       role="contentinfo"
       aria-label="Nothing Instrument Panel"
-      className="sticky bottom-0 z-30 flex w-full items-center justify-between border-t border-line bg-canvas/95 px-4 py-2 font-mono text-[11px] text-muted select-none uppercase tracking-wider"
+      className="sticky bottom-0 z-30 flex w-full items-center justify-between border-t border-line bg-canvas px-4 py-2 font-mono text-[11px] text-muted select-none uppercase tracking-wider"
     >
       <div className="flex items-center gap-3 overflow-hidden">
         {/* Status Pill with perfectly centered text */}

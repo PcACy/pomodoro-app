@@ -15,10 +15,10 @@ const DAY_LABELS = [0, 2, 4]
 
 function cellClass(minutes: number): string {
   if (minutes <= 0) return 'bg-heatmap-l0 border border-heatmap-l0-border hover:border-fg/60'
-  if (minutes < 30) return 'bg-accent/25 border border-accent/35 hover:ring-1 hover:ring-accent'
-  if (minutes < 60) return 'bg-accent/50 border border-accent/55 hover:ring-1 hover:ring-accent'
-  if (minutes < 120) return 'bg-accent/75 border border-accent/75 hover:ring-1 hover:ring-accent'
-  return 'bg-accent border border-accent hover:ring-1 hover:ring-accent'
+  if (minutes < 30) return 'bg-line/60 border border-line hover:border-fg/60'
+  if (minutes < 60) return 'bg-muted/60 border border-muted hover:border-fg/60'
+  if (minutes < 120) return 'bg-fg/60 border border-fg/60 hover:border-fg'
+  return 'bg-fg border border-fg hover:border-fg'
 }
 
 interface Tip {
@@ -115,7 +115,7 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
                     key={cell.key}
                     role="img"
                     aria-label={t.heatmap.tooltip(cell.minutes, cell.count, getFormattedDate(cell))}
-                    className={`h-3 w-3 cursor-pointer rounded-[2px] transition-transform duration-100 hover:scale-125 hover:z-20 ${cellClass(
+                    className={`h-3 w-3 cursor-pointer rounded-none transition-colors duration-100 hover:border hover:border-fg hover:z-20 ${cellClass(
                       cell.minutes,
                     )}`}
                     onMouseMove={(e) => handleMove(e, cell)}
@@ -131,7 +131,7 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
       <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-muted select-none">
         <span>{t.heatmap.less}</span>
         {LEVELS.map((m) => (
-          <span key={m} className={`h-3 w-3 rounded-[2px] ${cellClass(m)}`} />
+          <span key={m} className={`h-3 w-3 rounded-none ${cellClass(m)}`} />
         ))}
         <span>{t.heatmap.more}</span>
       </div>
@@ -140,7 +140,7 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
         typeof document !== 'undefined' &&
         createPortal(
           <div
-            className="pointer-events-none fixed z-[9999] flex flex-col gap-1 rounded-card border border-line-strong bg-surface px-3 py-2 font-mono text-xs text-fg shadow-none transition-opacity duration-100"
+            className="pointer-events-none fixed z-[9999] flex flex-col gap-1 rounded-sm border border-line bg-surface px-3 py-2 font-mono text-xs text-fg shadow-none transition-opacity duration-100"
             style={{
               left: Math.max(12, Math.min(tip.x - 100, window.innerWidth - 220)),
               top: Math.max(12, tip.y - 68),
@@ -150,7 +150,7 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
             <span className="text-[11px] tabular-nums text-muted">
               {tip.cell.minutes > 0 ? (
                 <>
-                  <span className="font-bold text-accent">
+                  <span className="font-bold text-fg">
                     {tip.cell.minutes} {lang === 'de' ? 'Min. Fokus' : 'min focus'}
                   </span>
                   <span> · </span>

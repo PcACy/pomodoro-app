@@ -4,19 +4,12 @@ import type { TodoItem } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
 import { playMicroClick } from '../lib/sound'
 
-const TAG_PALETTE = [
-  '#d71921', // Nothing Red
-  '#fa5d29', // CMF Orange
-  '#38bdf8', // Electric Blue
-  '#22c55e', // Matrix Green
-  '#f59e0b', // Cyber Amber
-  '#a855f7', // Electric Violet
-  '#fb7185', // Neon Rose
-  '#34d399', // Mint Green
-]
+const TAG_PALETTE = ['#999999', '#E8E8E8', '#666666'] as const
+const URGENT_TAGS = new Set(['urgent', 'wichtig', 'dringend', 'critical'])
 
 export function getTagColor(tag: string): string {
   if (!tag) return '#666666'
+  if (URGENT_TAGS.has(tag.trim().toLowerCase())) return '#d71921'
   let hash = 0
   for (let i = 0; i < tag.length; i++) {
     hash = (hash << 5) - hash + tag.charCodeAt(i)
@@ -91,7 +84,6 @@ const TagSelect = memo(function TagSelect({
               className="h-1.5 w-1.5 shrink-0 rounded-full"
               style={{
                 backgroundColor: selectedColor || '#ffffff',
-                boxShadow: selectedColor ? `0 0 8px ${selectedColor}66` : undefined,
               }}
             />
             <span className="max-w-[80px] sm:max-w-[110px] truncate">{value}</span>
@@ -153,7 +145,6 @@ const TagSelect = memo(function TagSelect({
                     className="h-1.5 w-1.5 rounded-full shrink-0"
                     style={{
                       backgroundColor: color,
-                      boxShadow: `0 0 8px ${color}66`,
                     }}
                   />
                   <span className="truncate text-fg">{t}</span>
@@ -483,7 +474,6 @@ export const TodoList = memo(function TodoList({
                         className="h-1.5 w-1.5 rounded-full shrink-0"
                         style={{
                           backgroundColor: getTagColor(t.tag),
-                          boxShadow: `0 0 8px ${getTagColor(t.tag)}66`,
                         }}
                       />
                       <span>{t.tag}</span>

@@ -17,7 +17,7 @@ export const ThemeBackground = memo(function ThemeBackground({
     >
       {/* Nothing Canvas: OLED Black (#000000) or Technical Off-White (#F5F5F5) */}
       <div
-        className="absolute inset-0 transition-colors duration-500"
+        className="absolute inset-0 transition-colors duration-200"
         style={{
           backgroundColor: isDark ? '#000000' : '#f5f5f5',
         }}

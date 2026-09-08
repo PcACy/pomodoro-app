@@ -40,7 +40,7 @@ const SessionRow = memo(function SessionRow({ s, locale }: { s: Session; locale:
               title={open ? 'Notiz ausblenden' : 'Notiz anzeigen'}
               className={`rounded-full border p-1.5 transition-colors cursor-pointer ${
                 open
-                  ? 'border-accent bg-accent/15 text-accent shadow-[0_0_8px_rgba(215,25,33,0.3)]'
+                  ? 'border-accent bg-accent/15 text-accent'
                   : 'border-line bg-canvas text-muted hover:border-fg/40 hover:text-fg'
               }`}
             >
@@ -53,7 +53,6 @@ const SessionRow = memo(function SessionRow({ s, locale }: { s: Session; locale:
                 className="h-1.5 w-1.5 rounded-full shrink-0"
                 style={{
                   backgroundColor: getTagColor(s.tag),
-                  boxShadow: `0 0 8px ${getTagColor(s.tag)}66`,
                 }}
               />
               <span>{s.tag}</span>
@@ -83,6 +82,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
   const exportRef = useRef<HTMLDivElement>(null)
   const importRef = useRef<HTMLInputElement>(null)
   const copyTimerRef = useRef<number | null>(null)
@@ -138,10 +138,10 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
         onImportSettings(importedSettings)
       }
       if (!rawSessions && !importedSettings) {
-        alert(t.sessionLog.importFailed)
+        setImportError(t.sessionLog.importFailed)
       }
     } catch {
-      alert(t.sessionLog.importFailed)
+      setImportError(t.sessionLog.importFailed)
     }
   }
 
@@ -219,7 +219,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
             {open && (
               <div
                 role="menu"
-                className="absolute right-0 top-full z-20 mt-2 w-64 rounded-card border border-line-strong bg-surface p-1.5 shadow-none"
+                className="absolute right-0 top-full z-20 mt-2 w-64 rounded-sm border border-line bg-surface p-1.5 shadow-none"
               >
                 <button
                   type="button"
@@ -284,7 +284,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.sessionLog.searchPlaceholder}
-              className="h-8 w-40 rounded-full border border-line bg-canvas pl-8 pr-3.5 font-mono text-xs text-fg placeholder:text-muted/60 focus:border-fg focus:outline-none sm:w-56 transition-colors"
+              className="h-11 w-40 rounded-[8px] border border-line bg-canvas pl-8 pr-3.5 font-mono text-xs text-fg placeholder:text-muted/60 focus:border-fg focus:outline-none sm:w-56 transition-colors"
             />
           </div>
 
@@ -302,6 +302,12 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
           </button>
         </div>
       </div>
+
+      {importError && (
+        <p role="status" className="font-mono text-[11px] uppercase tracking-wider text-accent">
+          [ERROR: {importError}]
+        </p>
+      )}
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-10 text-center">

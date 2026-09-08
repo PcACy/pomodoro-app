@@ -132,8 +132,8 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
           className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
         >
           <div className="flex flex-col min-w-0">
-            <span className="font-sans text-[11px] text-fg font-medium truncate group-hover:text-fg transition-colors">
-              Zen Mode
+            <span className="font-mono text-[11px] text-fg tracking-wider uppercase truncate group-hover:text-fg transition-colors">
+              ZEN MODE
             </span>
             <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
               {isZenMode ? 'IMMERSIVE' : 'STANDBY'}
@@ -155,8 +155,8 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
           className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
         >
           <div className="flex flex-col min-w-0">
-            <span className="font-sans text-[11px] text-fg font-medium truncate group-hover:text-fg transition-colors">
-              Sound FX
+            <span className="font-mono text-[11px] text-fg tracking-wider uppercase truncate group-hover:text-fg transition-colors">
+              SOUND FX
             </span>
             <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
               {soundEnabled ? 'ACTIVE' : 'MUTED'}
@@ -178,8 +178,8 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
           className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
         >
           <div className="flex flex-col min-w-0">
-            <span className="font-sans text-[11px] text-fg font-medium truncate group-hover:text-fg transition-colors">
-              Auto Breaks
+            <span className="font-mono text-[11px] text-fg tracking-wider uppercase truncate group-hover:text-fg transition-colors">
+              AUTO BREAKS
             </span>
             <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
               {autoBreaks ? 'AUTO' : 'MANUAL'}
@@ -201,8 +201,8 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
           className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
         >
           <div className="flex flex-col min-w-0">
-            <span className="font-sans text-[11px] text-fg font-medium truncate group-hover:text-fg transition-colors">
-              Desktop Alerts
+            <span className="font-mono text-[11px] text-fg tracking-wider uppercase truncate group-hover:text-fg transition-colors">
+              DESKTOP ALERTS
             </span>
             <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
               {notifyEnabled ? 'ACTIVE' : 'MUTED'}

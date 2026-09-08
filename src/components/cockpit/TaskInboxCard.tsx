@@ -116,7 +116,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
             onChange={(e) => setQuickTitle(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="+ Add quick task (#tag or select)..."
-            className="w-full rounded-lg border border-line bg-canvas pl-3 pr-8 py-1.5 text-xs text-fg placeholder:text-muted/60 font-sans focus:outline-none focus:border-fg/50 transition-colors"
+            className="w-full rounded-[8px] border border-line bg-canvas pl-3 pr-8 py-1.5 text-xs text-fg placeholder:text-muted/60 font-mono focus:outline-none focus:border-fg/50 transition-colors"
           />
           {quickTitle.trim() && (
             <button
@@ -154,7 +154,6 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                       className="h-1.5 w-1.5 rounded-full shrink-0"
                       style={{
                         backgroundColor: getTagColor(selectedTag),
-                        boxShadow: `0 0 8px ${getTagColor(selectedTag)}66`,
                       }}
                     />
                     <span className="max-w-[70px] truncate">{selectedTag}</span>
@@ -210,7 +209,6 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                       className="h-1.5 w-1.5 rounded-full"
                       style={{
                         backgroundColor: getTagColor(tag),
-                        boxShadow: `0 0 8px ${getTagColor(tag)}66`,
                       }}
                     />
                     <span className="truncate flex-1">{tag}</span>
@@ -241,9 +239,9 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                   playMicroClick('tap')
                   onFocus(todo.id)
                 }}
-                className={`group flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg border transition-all cursor-pointer ${
+                className={`group flex items-center justify-between gap-2.5 px-3 py-2 rounded-[8px] border transition-colors cursor-pointer ${
                   isActive
-                    ? 'border-accent bg-surface-raised text-fg'
+                    ? 'border-fg bg-surface-raised text-fg'
                     : 'border-line/60 bg-canvas/40 hover:border-line hover:bg-canvas text-fg/90'
                 }`}
               >
@@ -273,7 +271,6 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                         className="h-1.5 w-1.5 rounded-full"
                         style={{
                           backgroundColor: tagColor,
-                          boxShadow: tagColor ? `0 0 8px ${tagColor}66` : undefined,
                         }}
                       />
                       <span>{todo.tag}</span>

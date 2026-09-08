@@ -85,7 +85,7 @@ export const SettingsModal = memo(function SettingsModal({
         <div className="flex items-center justify-between pb-3.5 border-b border-line">
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_8px_rgba(215,25,33,0.6)] shrink-0" />
+              <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
               <span className="font-mono text-[10px] sm:text-xs tracking-widest text-muted uppercase">
                 SETTINGS // SYSTEM CONFIG
               </span>

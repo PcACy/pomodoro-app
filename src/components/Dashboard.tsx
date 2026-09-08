@@ -80,7 +80,7 @@ function MetricCard({
             <p className="text-[10px] uppercase tracking-wider text-muted truncate">{label}</p>
           </div>
           <p
-            className={`font-doto font-bold tracking-tight text-fg tabular-nums truncate ${
+            className={`font-sans font-medium tracking-tight text-fg tabular-nums truncate ${
               value.length > 7 ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl'
             }`}
           >
@@ -116,7 +116,7 @@ function BarChartTooltip({
   const hasTags = data.tags && data.tags.length > 0
 
   return (
-    <div className="flex min-w-[170px] flex-col gap-1.5 rounded-lg border border-line bg-surface p-3 font-mono text-xs text-fg shadow-none">
+    <div className="flex min-w-[170px] flex-col gap-1.5 rounded-sm border border-line bg-surface p-3 font-mono text-xs text-fg shadow-none">
       <div className="border-b border-line pb-1.5">
         <p className="font-bold uppercase text-fg">{data.fullLabel}</p>
         <div className="mt-0.5 flex items-baseline justify-between gap-3 text-[11px]">
@@ -138,7 +138,6 @@ function BarChartTooltip({
                     className="h-1.5 w-1.5 shrink-0 rounded-full"
                     style={{
                       backgroundColor: tagColor,
-                      boxShadow: `0 0 8px ${tagColor}66`,
                     }}
                   />
                   <span className="max-w-[110px] truncate text-fg/90">{tg.tag}</span>
@@ -227,13 +226,16 @@ export const Dashboard = memo(function Dashboard({
 
   const yAxisConfig = useMemo(() => getYAxisConfig(maxMinutes), [maxMinutes])
 
-  // Tag Distribution Data
+  // Tag Distribution Data — monochrome opacity steps (Nothing spec: opacity before color)
   const tagData = useMemo(() => {
-    return minutesByTag(filteredSessions, undefined, t.todo.noTag).map((item) => ({
+    const items = minutesByTag(filteredSessions, undefined, t.todo.noTag)
+    const steps = [1, 0.6, 0.35, 0.22, 0.14]
+    return items.map((item, idx) => ({
       ...item,
-      color: getTagColor(item.tag),
+      color: item.tag === '__NOTAG__' ? colors.muted : colors.fg,
+      opacity: steps[Math.min(idx, steps.length - 1)],
     }))
-  }, [filteredSessions, t.todo.noTag])
+  }, [filteredSessions, t.todo.noTag, colors.fg, colors.muted])
 
   // Hour distribution (time of day)
   const hourData = useMemo(() => sessionsByHour(filteredSessions), [filteredSessions])
@@ -310,17 +312,17 @@ export const Dashboard = memo(function Dashboard({
           value={`${pomFlow.pomodoroPct}% / ${pomFlow.flowPct}%`}
           sub={t.dashboard.pomodoroRatio(pomFlow.pomodoroPct, pomFlow.flowPct)}
           extra={
-            <div className="h-2 w-full overflow-hidden rounded-full bg-canvas border border-line flex gap-0.5 p-0.5">
+            <div className="h-2 w-full bg-canvas border border-line flex gap-[2px]">
               {pomFlow.pomodoroPct === 0 && pomFlow.flowPct === 0 ? (
-                <div className="h-full w-full bg-line/20 rounded-full" />
+                <div className="h-full w-full bg-line/20 rounded-none" />
               ) : (
                 <>
                   <div
-                    className="h-full bg-fg rounded-full transition-all duration-300"
+                    className="h-full bg-fg rounded-none transition-colors duration-150"
                     style={{ width: `${pomFlow.pomodoroPct}%` }}
                   />
                   <div
-                    className="h-full bg-accent rounded-full transition-all duration-300"
+                    className="h-full bg-muted rounded-none transition-colors duration-150"
                     style={{ width: `${pomFlow.flowPct}%` }}
                   />
                 </>
@@ -385,7 +387,7 @@ export const Dashboard = memo(function Dashboard({
                     stroke={colors.surface}
                   >
                     {tagData.map((entry) => (
-                      <Cell key={entry.tag} fill={entry.color} />
+                      <Cell key={entry.tag} fill={entry.color} fillOpacity={entry.opacity} />
                     ))}
                   </Pie>
                   <Tooltip
@@ -408,7 +410,7 @@ export const Dashboard = memo(function Dashboard({
                       className="h-1.5 w-1.5 rounded-full shrink-0"
                       style={{
                         backgroundColor: tItem.color,
-                        boxShadow: `0 0 8px ${tItem.color}66`,
+                        opacity: tItem.opacity,
                       }}
                     />
                     <span className="truncate max-w-[120px]">{tItem.tag}</span>
