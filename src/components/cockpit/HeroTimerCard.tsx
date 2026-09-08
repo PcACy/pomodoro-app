@@ -178,13 +178,11 @@ export const HeroTimerCard = memo(function HeroTimerCard({
 
           <div className="flex items-center gap-2">
             {isFlow ? (
-              <div className="inline-flex items-center gap-1.5 font-mono text-xs tracking-wider uppercase text-fg">
-                <span className={`h-1.5 w-1.5 rounded-full ${running ? 'bg-accent animate-pulse' : 'bg-muted'}`} />
+              <div className="inline-flex items-center font-mono text-xs tracking-wider uppercase text-fg">
                 <span>{running ? 'FLOW ACTIVE' : 'FREE FLOW'}</span>
               </div>
             ) : (
               <div className="inline-flex items-center gap-2 font-mono text-xs tracking-wider uppercase">
-                <span className={`h-1.5 w-1.5 rounded-full ${running ? 'bg-accent animate-pulse' : 'bg-muted'}`} />
                 <span className="text-fg font-medium">{shownLabel}</span>
                 <span className="text-line">//</span>
                 <span className="text-muted text-[10px] sm:text-xs">
@@ -193,18 +191,13 @@ export const HeroTimerCard = memo(function HeroTimerCard({
                 <div className="flex items-center gap-1 ml-0.5" title={`Cycle: ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`}>
                   {Array.from({ length: safeRounds }).map((_, rIdx) => {
                     const currentRoundIdx = completedFocusInCycle % safeRounds
-                    const isCompleted = rIdx < currentRoundIdx
-                    const isCurrent = rIdx === currentRoundIdx
+                    const isFilled = rIdx <= currentRoundIdx
                     return (
                       <span
                         key={rIdx}
                         className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                          isCompleted
+                          isFilled
                             ? 'bg-fg'
-                            : isCurrent
-                            ? running
-                              ? 'bg-accent animate-pulse'
-                              : 'bg-accent/80'
                             : 'border border-line bg-canvas'
                         }`}
                       />
