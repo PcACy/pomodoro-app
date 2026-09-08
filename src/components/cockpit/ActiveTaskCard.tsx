@@ -99,7 +99,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
       <div className="flex items-center justify-between gap-4">
         {/* Task Title & Details */}
         <div className="min-w-0 flex-1">
-          <h3 className="font-sans font-medium text-lg sm:text-xl text-fg truncate">
+          <h3 className={`font-sans font-medium text-lg sm:text-xl truncate ${activeTodo ? 'text-fg' : 'text-muted'}`}>
             {activeTodo?.title || 'No active task selected'}
           </h3>
           <div className="mt-1 flex items-center gap-2 font-mono text-[10px] text-muted tracking-wider uppercase">
@@ -117,7 +117,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
               <span>UNTAGGED</span>
             )}
             <span>·</span>
-            <span>{isRunning ? 'IN PROGRESS' : 'STANDBY'}</span>
+            <span>{activeTodo ? (isRunning ? 'IN PROGRESS' : 'STANDBY') : isRunning ? 'FREE SESSION' : 'STANDBY'}</span>
           </div>
         </div>
 
@@ -220,7 +220,9 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           </span>
           <span className="flex flex-col items-center gap-0.5">
             <span className="text-[10px] text-muted tracking-wider uppercase">{centerStatus}</span>
-            <span className="text-[8px] text-muted/70 tracking-wider uppercase">STATUS</span>
+            <span className="text-[8px] text-muted/70 tracking-wider uppercase">
+              {isRunning ? 'LEFT' : pausedPct > 0 ? 'DONE' : 'STATUS'}
+            </span>
           </span>
           <span className="flex flex-col items-end gap-0.5">
             <span className="text-sm text-muted">{isFlowMode ? flowTick.time : totalStr}</span>
