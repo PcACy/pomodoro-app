@@ -162,12 +162,6 @@ export interface Messages {
     backup: string
     language: string
     languageHint: string
-    appearance: string
-    layoutHint: string
-    layoutTwoColumns: string
-    layoutTwoColumnsDesc: string
-    layoutOneColumn: string
-    layoutOneColumnDesc: string
   }
   sync: {
     title: string
@@ -369,12 +363,6 @@ const de: Messages = {
     backup: 'Komplett-Backup (.json)',
     language: 'Sprache',
     languageHint: 'Wähle deine bevorzugte Sprache für UI und Benachrichtigungen.',
-    appearance: 'Darstellung & Layout',
-    layoutHint: 'Wähle die Anordnung von Timer, Aufgaben und Statistiken.',
-    layoutTwoColumns: 'Zwei Spalten',
-    layoutTwoColumnsDesc: 'Timer und Aufgaben nebeneinander',
-    layoutOneColumn: 'Eine Spalte',
-    layoutOneColumnDesc: 'Zentrierter Fokus auf den Timer',
   },
   sync: {
     title: 'Cloud-Sync',
@@ -582,12 +570,6 @@ const en: Messages = {
     backup: 'Full backup (.json)',
     language: 'Language',
     languageHint: 'Select your preferred language for the interface and notifications.',
-    appearance: 'Appearance & Layout',
-    layoutHint: 'Choose how timer, tasks and stats are arranged.',
-    layoutTwoColumns: 'Two columns',
-    layoutTwoColumnsDesc: 'Timer & tasks side by side',
-    layoutOneColumn: 'One column',
-    layoutOneColumnDesc: 'Centered focus & large timer',
   },
   sync: {
     title: 'Cloud Sync',

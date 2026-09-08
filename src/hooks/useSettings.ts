@@ -41,7 +41,6 @@ function mergeWithDefaults(stored: Partial<Settings> | undefined): Settings {
     ? s.tags.filter((t): t is string => typeof t === 'string' && t.trim().length > 0).map((t) => t.slice(0, 50))
     : []
   const tags = rawTags.length > 0 ? rawTags : DEFAULT_SETTINGS.tags
-  const layoutMode = s.layoutMode === 'single' || s.layoutMode === 'split' ? s.layoutMode : DEFAULT_SETTINGS.layoutMode
 
   return {
     phases,
@@ -49,7 +48,6 @@ function mergeWithDefaults(stored: Partial<Settings> | undefined): Settings {
     weeklyGoalMinutes,
     accentColor,
     tags,
-    layoutMode,
   }
 }
 
