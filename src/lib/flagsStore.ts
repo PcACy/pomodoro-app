@@ -53,3 +53,4 @@ export function subscribeFlags(callback: (key?: string) => void): () => void {
     window.removeEventListener('storage', handleStorage)
   }
 }
+
