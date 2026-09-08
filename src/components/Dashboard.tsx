@@ -159,7 +159,7 @@ export const Dashboard = memo(function Dashboard({
 }: Props) {
   const { t, lang } = useTranslation()
   const locale = lang === 'de' ? 'de-DE' : 'en-GB'
-  const colors = useThemeColors(themeId, colorMode)
+  const colors = useThemeColors(themeId, colorMode, settings.accentColor)
   const [timeRange, setTimeRange] = useState<TimeRange>('week')
 
   const filteredSessions = useMemo(

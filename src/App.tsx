@@ -57,6 +57,10 @@ export default function App() {
   const mouseTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
+    document.documentElement.dataset.accent = settings.accentColor || 'red'
+  }, [settings.accentColor])
+
+  useEffect(() => {
     if (!isZenMode) {
       setIsMouseActive(true)
       return

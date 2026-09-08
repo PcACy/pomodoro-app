@@ -1,7 +1,8 @@
 export type PhaseId = 'focus' | 'shortBreak' | 'longBreak'
 export type TimerStatus = 'idle' | 'running' | 'paused'
 export type TimerMode = 'pomodoro' | 'flow'
-type LayoutMode = 'split' | 'single'
+export type LayoutMode = 'split' | 'single'
+export type AccentColor = 'red' | 'orange' | 'blue' | 'green' | 'monochrome'
 
 export interface PhaseConfig {
   focus: number
@@ -14,6 +15,7 @@ export interface Settings {
   phases: PhaseConfig
   dailyGoalMinutes: number
   weeklyGoalMinutes: number
+  accentColor: AccentColor
   tags: string[]
   layoutMode: LayoutMode
 }
@@ -50,6 +52,7 @@ export const DEFAULT_SETTINGS: Settings = {
   },
   weeklyGoalMinutes: 5 * 60,
   dailyGoalMinutes: 120,
+  accentColor: 'red',
   tags: ['Uni', 'Projekt', 'Coding'],
   layoutMode: 'split',
 }

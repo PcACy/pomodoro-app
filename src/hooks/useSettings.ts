@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { useLocalState } from './useLocalState'
-import { DEFAULT_SETTINGS, STORAGE_KEYS, type PhaseConfig, type Settings } from '../types'
+import { DEFAULT_SETTINGS, STORAGE_KEYS, type AccentColor, type PhaseConfig, type Settings } from '../types'
 
 /** Coerce unknown values to a finite positive number; fall back otherwise. */
 const positiveNumber = (value: unknown, fallback: number): number =>
@@ -32,6 +32,11 @@ function mergeWithDefaults(stored: Partial<Settings> | undefined): Settings {
       ? s.dailyGoalMinutes
       : DEFAULT_SETTINGS.dailyGoalMinutes,
   )
+  const validAccents: AccentColor[] = ['red', 'orange', 'blue', 'green', 'monochrome']
+  const accentColor =
+    typeof s.accentColor === 'string' && validAccents.includes(s.accentColor as AccentColor)
+      ? (s.accentColor as AccentColor)
+      : DEFAULT_SETTINGS.accentColor
   const rawTags = Array.isArray(s.tags)
     ? s.tags.filter((t): t is string => typeof t === 'string' && t.trim().length > 0).map((t) => t.slice(0, 50))
     : []
@@ -42,6 +47,7 @@ function mergeWithDefaults(stored: Partial<Settings> | undefined): Settings {
     phases,
     dailyGoalMinutes,
     weeklyGoalMinutes,
+    accentColor,
     tags,
     layoutMode,
   }

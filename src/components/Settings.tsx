@@ -15,14 +15,29 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import type { Settings, Session, TodoItem } from '../types'
+import type { AccentColor, Settings, Session, TodoItem } from '../types'
 import type { ColorMode, ThemeId } from '../themes'
 import { useThemeColors } from '../hooks/useTheme'
 import { clearSessions, exportAll } from '../lib/db'
 import { downloadText, sessionsToCsv, sessionsToJson, todosToCsv, todosToJson } from '../lib/dataExport'
 import { useTranslation } from '../hooks/useTranslation'
+import { playMicroClick } from '../lib/sound'
 import type { SyncStatus } from '../hooks/useSync'
 import type { GitHubProfile } from '../hooks/useAuth'
+
+interface AccentOption {
+  id: AccentColor
+  labelKey: 'accentRed' | 'accentOrange' | 'accentBlue' | 'accentGreen' | 'accentMonochrome'
+  colorHex: string
+}
+
+const ACCENT_OPTIONS: AccentOption[] = [
+  { id: 'red', labelKey: 'accentRed', colorHex: '#D71921' },
+  { id: 'orange', labelKey: 'accentOrange', colorHex: '#FA5D29' },
+  { id: 'blue', labelKey: 'accentBlue', colorHex: '#38BDF8' },
+  { id: 'green', labelKey: 'accentGreen', colorHex: '#22C55E' },
+  { id: 'monochrome', labelKey: 'accentMonochrome', colorHex: '#FFFFFF' },
+]
 
 interface NumberStepperProps {
   value: number
@@ -265,7 +280,7 @@ export const SettingsPanel = memo(function SettingsPanel({
   onSyncNow,
 }: Props) {
   const { t, lang, setLang } = useTranslation()
-  const colors = useThemeColors(themeId, colorMode)
+  const colors = useThemeColors(themeId, colorMode, settings.accentColor)
   const [newTag, setNewTag] = useState('')
   const [tagError, setTagError] = useState<string | null>(null)
   // Increments on every failed attempt so the error message remounts and its
@@ -503,6 +518,57 @@ export const SettingsPanel = memo(function SettingsPanel({
               <Sun size={13} />
               <span>{t.settings.light}</span>
             </button>
+          </div>
+        </div>
+
+        {/* Subtle Divider */}
+        <div className="my-6 border-t border-line/50" />
+
+        {/* Accent Color Switcher */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between font-mono">
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-muted">{t.settings.accentColor}</h3>
+            <p className="text-[11px] text-muted">{t.settings.accentColorHint}</p>
+          </div>
+          <div
+            role="radiogroup"
+            aria-label={t.settings.accentColor}
+            className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl sm:rounded-full border border-line bg-canvas font-mono text-xs select-none w-full lg:w-auto"
+          >
+            {ACCENT_OPTIONS.map((opt) => {
+              const active = (settings.accentColor || 'red') === opt.id
+              const swatchColor =
+                opt.id === 'monochrome'
+                  ? colorMode === 'light'
+                    ? '#1e1e1e'
+                    : '#ffffff'
+                  : opt.colorHex
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => {
+                    playMicroClick('toggle')
+                    update((s) => ({ ...s, accentColor: opt.id }))
+                  }}
+                  className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-full flex items-center justify-center gap-2 text-xs transition-all cursor-pointer uppercase ${
+                    active
+                      ? 'bg-fg text-canvas font-bold'
+                      : 'text-muted hover:text-fg'
+                  }`}
+                >
+                  <span
+                    className={`h-2.5 w-2.5 rounded-full shrink-0 ${
+                      opt.id === 'monochrome' ? 'border border-line' : ''
+                    }`}
+                    style={{ backgroundColor: swatchColor }}
+                  />
+                  <span>{t.settings[opt.labelKey]}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>

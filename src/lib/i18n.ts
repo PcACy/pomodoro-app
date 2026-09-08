@@ -121,6 +121,13 @@ export interface Messages {
     colorModeHint: string
     dark: string
     light: string
+    accentColor: string
+    accentColorHint: string
+    accentRed: string
+    accentOrange: string
+    accentBlue: string
+    accentGreen: string
+    accentMonochrome: string
     timerIntervals: string
     timerIntervalsHint: string
     presets: string
@@ -321,6 +328,13 @@ const de: Messages = {
     colorModeHint: 'Wähle zwischen dunklem und hellem Erscheinungsbild.',
     dark: 'Dunkel',
     light: 'Hell',
+    accentColor: 'Akzentfarbe',
+    accentColorHint: 'Farbe für Signale, Timer-Indikatoren und Statusanzeigen.',
+    accentRed: 'Signature Red',
+    accentOrange: 'CMF Orange',
+    accentBlue: 'Electric Blue',
+    accentGreen: 'Matrix Green',
+    accentMonochrome: 'Monochrome',
     timerIntervals: 'Timer & Intervalle',
     timerIntervalsHint: 'Passe Fokus- und Pausendauern, Zykluslänge sowie dein Wochenziel an.',
     presets: 'Fokus-Rhythmen',
@@ -527,6 +541,13 @@ const en: Messages = {
     colorModeHint: 'Choose between dark and light appearance.',
     dark: 'Dark',
     light: 'Light',
+    accentColor: 'Accent Color',
+    accentColorHint: 'Color for signals, timer indicators and status dots.',
+    accentRed: 'Signature Red',
+    accentOrange: 'CMF Orange',
+    accentBlue: 'Electric Blue',
+    accentGreen: 'Matrix Green',
+    accentMonochrome: 'Monochrome',
     timerIntervals: 'Timer & Intervals',
     timerIntervalsHint: 'Customize focus and break durations, cycle length, and weekly goal.',
     presets: 'Focus Rhythms',

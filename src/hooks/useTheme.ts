@@ -125,7 +125,7 @@ export interface ThemeColors {
 }
 
 /** Resolves the theme CSS variables to concrete `rgb(...)` strings (for Recharts, inline styles). */
-export function useThemeColors(themeId: ThemeId, colorMode: ColorMode): ThemeColors {
+export function useThemeColors(themeId: ThemeId, colorMode: ColorMode, accentColor?: string): ThemeColors {
   return useMemo(() => {
     const rgb = (name: string) => `rgb(${readVar(name)})`
     return {
@@ -141,5 +141,5 @@ export function useThemeColors(themeId: ThemeId, colorMode: ColorMode): ThemeCol
       long: rgb('--c-long'),
       chart: Array.from({ length: 8 }, (_, i) => rgb(`--c-chart-${i + 1}`)),
     }
-  }, [themeId, colorMode])
+  }, [themeId, colorMode, accentColor])
 }
