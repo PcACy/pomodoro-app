@@ -80,7 +80,7 @@ export function ReflectionModal({ onSave, onSkip }: Props) {
     >
       <div
         ref={modalRef}
-        className={`card modal-panel w-full max-w-sm border-line-strong bg-surface p-5 ${closing ? 'modal-panel--closing' : ''}`}
+        className={`card modal-panel w-full max-w-sm border border-line bg-surface p-5 ${closing ? 'modal-panel--closing' : ''}`}
       >
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">

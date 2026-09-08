@@ -23,8 +23,7 @@ import { STORAGE_KEYS, type Session, type Settings, type TimerMode } from './typ
 import { Timer } from './components/Timer'
 import { PipTimer, PipCanvas } from './components/PipTimer'
 import { CatLogo } from './components/CatLogo'
-import { ThemeStatusBar } from './components/ThemeStatusBar'
-import { ThemeBackground } from './components/ThemeBackground'
+import { StatusBar } from './components/StatusBar'
 import { BentoCockpit } from './components/cockpit/BentoCockpit'
 import { TodoManagerModal } from './components/cockpit/TodoManagerModal'
 import { AnalyticsModal } from './components/cockpit/AnalyticsModal'
@@ -34,7 +33,7 @@ const ReflectionModal = lazy(() => import('./components/ReflectionModal').then((
 
 export default function App() {
   const { t } = useTranslation()
-  const [themeId, colorMode, setColorMode] = useTheme()
+  const [colorMode, setColorMode] = useTheme()
   const [settings, updateSettings] = useSettings()
   const [isTodoModalOpen, setIsTodoModalOpen] = useState(false)
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false)
@@ -277,9 +276,6 @@ export default function App() {
         {liveAnnouncement}
       </div>
 
-      {/* Theme-Specific High-End Atmosphere Background */}
-      <ThemeBackground colorMode={colorMode} />
-
       <header className="flex w-full h-14 shrink-0 items-center justify-between gap-4 px-1">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors">
@@ -399,9 +395,6 @@ export default function App() {
       {/* Immersive Borderless Zen Mode Overlay */}
       {isZenMode && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-canvas select-none overflow-hidden animate-fade-in">
-          {/* Theme-Specific Atmosphere Background */}
-          <ThemeBackground colorMode={colorMode} />
-
           {/* Floating Minimalist Top Exit Badge (auto-fades on idle during focus) */}
           <div
             className={`fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-all duration-200 ${
@@ -522,7 +515,6 @@ export default function App() {
         onClose={() => setIsAnalyticsModalOpen(false)}
         sessions={sessions}
         settings={settings}
-        themeId={themeId}
         colorMode={colorMode}
         todos={todosApi.todos}
         onImportSettings={handleImportSettings}
@@ -548,8 +540,8 @@ export default function App() {
         onSyncNow={handleSyncNow}
       />
 
-      {/* Theme-specific Dynamic Status Bar */}
-      <ThemeStatusBar
+      {/* Dynamic Status Bar */}
+      <StatusBar
         colorMode={colorMode}
         mode={mode}
         phase={chromePhase}

@@ -2,6 +2,7 @@ import { memo, useCallback, useEffect, useState } from 'react'
 import { BentoCard } from './BentoCard'
 import { playMicroClick } from '../../lib/sound'
 import { isNotifyEffective, writeNotifyFlag } from '../../lib/notify'
+import { MechanicalSwitch } from '../MechanicalSwitch'
 
 const SOUND_KEY = 'pomodoro.sound'
 const AUTO_BREAKS_KEY = 'pomodoro.auto_breaks'
@@ -24,7 +25,6 @@ function writeFlag(key: string, value: boolean): void {
     /* storage unavailable */
   }
 }
-import { MechanicalSwitch } from '../MechanicalSwitch'
 
 interface QuickSettingsCardProps {
   isZenMode?: boolean

@@ -190,7 +190,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                     !selectedTag ? 'text-fg font-medium bg-canvas/60' : 'text-muted'
                   }`}
                 >
-                  <span>OHNE TAG</span>
+                  <span>{tr.todo.noTag.toUpperCase()}</span>
                   {!selectedTag && <span className="text-[9px]">✓</span>}
                 </button>
                 {tags.map((tag) => (

@@ -96,13 +96,6 @@ export interface Messages {
     colorModeHint: string
     dark: string
     light: string
-    accentColor: string
-    accentColorHint: string
-    accentRed: string
-    accentOrange: string
-    accentBlue: string
-    accentGreen: string
-    accentMonochrome: string
     presets: string
     presetClassic: string
     presetDeepWork: string
@@ -264,13 +257,6 @@ const de: Messages = {
     colorModeHint: 'Wähle zwischen dunklem und hellem Erscheinungsbild.',
     dark: 'Dunkel',
     light: 'Hell',
-    accentColor: 'Akzentfarbe',
-    accentColorHint: 'Farbe für Signale, Timer-Indikatoren und Statusanzeigen.',
-    accentRed: 'Signature Red',
-    accentOrange: 'CMF Orange',
-    accentBlue: 'Electric Blue',
-    accentGreen: 'Matrix Green',
-    accentMonochrome: 'Monochrome',
     presets: 'Fokus-Rhythmen',
     presetClassic: 'Klassisch (25 / 5 min)',
     presetDeepWork: 'Deep Work (50 / 10 min)',
@@ -438,13 +424,6 @@ const en: Messages = {
     colorModeHint: 'Choose between dark and light appearance.',
     dark: 'Dark',
     light: 'Light',
-    accentColor: 'Accent Color',
-    accentColorHint: 'Color for signals, timer indicators and status dots.',
-    accentRed: 'Signature Red',
-    accentOrange: 'CMF Orange',
-    accentBlue: 'Electric Blue',
-    accentGreen: 'Matrix Green',
-    accentMonochrome: 'Monochrome',
     presets: 'Focus Rhythms',
     presetClassic: 'Classic (25 / 5 min)',
     presetDeepWork: 'Deep Work (50 / 10 min)',

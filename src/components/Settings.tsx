@@ -16,7 +16,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import type { AccentColor, Settings, Session, TodoItem } from '../types'
+import type { Settings, Session, TodoItem } from '../types'
 import type { ColorMode } from '../themes'
 import { clearSessions, exportAll } from '../lib/db'
 import { dayKey } from '../lib/time'
@@ -50,14 +50,6 @@ function writeFlag(key: string, value: boolean): void {
     /* storage unavailable */
   }
 }
-
-interface AccentOption {
-  id: AccentColor
-  labelKey: 'accentRed' | 'accentOrange' | 'accentBlue' | 'accentGreen' | 'accentMonochrome'
-  colorHex: string
-}
-
-const ACCENT_OPTIONS: AccentOption[] = [{ id: 'red', labelKey: 'accentRed', colorHex: '#D71921' }]
 
 interface NumberStepperProps {
   value: number
@@ -717,73 +709,6 @@ export const SettingsPanel = memo(function SettingsPanel({
           />
         </div>
 
-        {/* Accent Color Selection */}
-        {(() => {
-          const currentAccentOption =
-            ACCENT_OPTIONS.find((o) => o.id === (settings.accentColor || 'red')) || ACCENT_OPTIONS[0]
-          return (
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-muted">{t.settings.accentColor}</h3>
-                  <span className="text-[10px] text-accent tracking-wider uppercase">
-                    // {t.settings[currentAccentOption.labelKey]}
-                  </span>
-                </div>
-                <p className="text-[11px] text-muted">{t.settings.accentColorHint}</p>
-              </div>
-
-              <div
-                role="radiogroup"
-                aria-label={t.settings.accentColor}
-                className="inline-flex items-center gap-2 p-1.5 rounded-full border border-line bg-canvas select-none shrink-0 self-start sm:self-auto"
-              >
-                {ACCENT_OPTIONS.map((opt) => {
-                  const active = (settings.accentColor || 'red') === opt.id
-                  const swatchColor =
-                    opt.id === 'monochrome'
-                      ? colorMode === 'light'
-                        ? '#1E1E1E'
-                        : '#FFFFFF'
-                      : opt.colorHex
-
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      role="radio"
-                      aria-checked={active}
-                      title={t.settings[opt.labelKey]}
-                      onClick={() => {
-                        playMicroClick('toggle')
-                        document.documentElement.dataset.accent = opt.id
-                        update((s) => ({ ...s, accentColor: opt.id }))
-                      }}
-                      className={`group relative h-7 w-7 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                        active
-                          ? 'ring-2 ring-fg ring-offset-2 ring-offset-canvas scale-110'
-                          : 'opacity-65 hover:opacity-100 hover:scale-105'
-                      }`}
-                      style={{ backgroundColor: swatchColor }}
-                    >
-                      {active && (
-                        <Check
-                          size={13}
-                          strokeWidth={3}
-                          className={
-                            opt.id === 'monochrome' && colorMode !== 'light'
-                              ? 'text-black'
-                              : 'text-white'
-                          }
-                        />
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })()}
 
         {/* Subtle Divider */}
         <div className="my-1 border-t border-line/40" />

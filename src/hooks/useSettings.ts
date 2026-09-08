@@ -32,7 +32,7 @@ function mergeWithDefaults(stored: Partial<Settings> | undefined): Settings {
       ? s.dailyGoalMinutes
       : DEFAULT_SETTINGS.dailyGoalMinutes,
   )
-  const validAccents: AccentColor[] = ['red', 'orange', 'blue', 'green', 'monochrome']
+  const validAccents: AccentColor[] = ['red']
   const accentColor =
     typeof s.accentColor === 'string' && validAccents.includes(s.accentColor as AccentColor)
       ? (s.accentColor as AccentColor)

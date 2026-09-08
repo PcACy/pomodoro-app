@@ -303,10 +303,9 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     })
   }, [])
 
-  /** Extend the current phase (running or paused) by `ms`. */
+  /** Extend the current phase (running, paused, or idle) by `ms`. */
   const addTime = useCallback((ms: number) => {
     const m = machineRef.current
-    if (m.status === 'idle') return
     const safeMs = Math.max(0, ms)
     if (endRef.current != null) endRef.current += safeMs
     totalMsRef.current += safeMs

@@ -1,5 +1,4 @@
 import { memo } from 'react'
-import { playMicroClick } from '../lib/sound'
 
 export interface MechanicalSwitchProps {
   checked: boolean
@@ -20,7 +19,6 @@ export const MechanicalSwitch = memo(function MechanicalSwitch({
       aria-label={label}
       onClick={(e) => {
         e.stopPropagation()
-        playMicroClick('toggle')
         onChange()
       }}
       className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border transition-colors duration-150 p-0.5 ${

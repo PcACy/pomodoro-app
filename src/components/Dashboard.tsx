@@ -14,7 +14,7 @@ import {
 import { Calendar, Clock, Flame, Layers } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../types'
 import { DEFAULT_SETTINGS } from '../types'
-import type { ColorMode, ThemeId } from '../themes'
+import type { ColorMode } from '../themes'
 import { useThemeColors } from '../hooks/useTheme'
 import { getTagColor } from './TodoList'
 import {
@@ -46,7 +46,6 @@ const TIME_RANGES: TimeRange[] = ['week', 'month', 'all']
 interface Props {
   sessions: Session[]
   settings: Settings
-  themeId: ThemeId
   colorMode?: ColorMode
   todos: TodoItem[]
   onImportSettings: (s: unknown) => void
@@ -187,14 +186,13 @@ function HourEmptySkeleton({ message }: { message: string }) {
 export const Dashboard = memo(function Dashboard({
   sessions,
   settings,
-  themeId,
   colorMode = 'dark',
   todos,
   onImportSettings,
 }: Props) {
   const { t, lang } = useTranslation()
   const locale = lang === 'de' ? 'de-DE' : 'en-GB'
-  const colors = useThemeColors(themeId, colorMode)
+  const colors = useThemeColors(colorMode)
   const [timeRange, setTimeRange] = useState<TimeRange>('week')
 
   const filteredSessions = useMemo(

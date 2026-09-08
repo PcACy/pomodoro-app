@@ -1,22 +1,20 @@
 import { useCallback, useLayoutEffect, useMemo, useState } from 'react'
-import { DEFAULT_MODE, DEFAULT_THEME, MODE_KEY, THEME_KEY } from '../themes'
-import type { ColorMode, ThemeId } from '../themes'
+import { DEFAULT_MODE, MODE_KEY } from '../themes'
+import type { ColorMode } from '../themes'
 
-const THEME_BG_HEX: Record<ThemeId, Record<ColorMode, string>> = {
-  nothing: {
-    dark: '#000000',
-    light: '#f5f5f5',
-  },
+const THEME_BG_HEX: Record<ColorMode, string> = {
+  dark: '#000000',
+  light: '#f5f5f5',
 }
 
-const applyTheme = (id: ThemeId, mode: ColorMode): void => {
+const applyTheme = (mode: ColorMode): void => {
   if (typeof document === 'undefined') return
-  document.documentElement.dataset.theme = id
+  document.documentElement.dataset.theme = 'nothing'
   document.documentElement.dataset.mode = mode
   document.documentElement.classList.toggle('dark', mode === 'dark')
 
   // Dynamically synchronize OS status bar & browser chrome theme-color
-  const hex = THEME_BG_HEX[id]?.[mode] ?? (mode === 'dark' ? '#000000' : '#f5f5f5')
+  const hex = THEME_BG_HEX[mode] ?? (mode === 'dark' ? '#000000' : '#f5f5f5')
   let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
   if (!meta) {
     meta = document.createElement('meta')
@@ -26,44 +24,18 @@ const applyTheme = (id: ThemeId, mode: ColorMode): void => {
   meta.setAttribute('content', hex)
 }
 
-const VALID_THEMES: Record<string, ThemeId> = {
-  nothing: 'nothing',
-  'nothing-dark': 'nothing',
-  'nothing-light': 'nothing',
-  gruvbox: 'nothing',
-  'gruvbox-dark': 'nothing',
-  'gruvbox-light': 'nothing',
-}
-
 const VALID_MODES: Record<string, ColorMode> = {
   dark: 'dark',
   light: 'light',
 }
 
-export function useTheme(): [ThemeId, ColorMode, (mode: ColorMode) => void] {
-  // Single-theme build: the id never changes at runtime (no setter needed).
-  const [themeId] = useState<ThemeId>(() => {
-    let id = DEFAULT_THEME
-    try {
-      const saved = localStorage.getItem(THEME_KEY)
-      if (saved && saved in VALID_THEMES) {
-        id = VALID_THEMES[saved]
-      }
-    } catch {
-      /* ignore */
-    }
-    return id
-  })
-
+export function useTheme(): [ColorMode, (mode: ColorMode) => void] {
   const [colorMode, setColorModeState] = useState<ColorMode>(() => {
     let mode = DEFAULT_MODE
     try {
       const savedMode = localStorage.getItem(MODE_KEY)
       if (savedMode && savedMode in VALID_MODES) {
         mode = savedMode as ColorMode
-      } else {
-        const savedTheme = localStorage.getItem(THEME_KEY)
-        if (savedTheme === 'gruvbox-light') mode = 'light'
       }
     } catch {
       /* ignore */
@@ -71,17 +43,13 @@ export function useTheme(): [ThemeId, ColorMode, (mode: ColorMode) => void] {
     return mode
   })
 
-  // Apply outside render: render-phase DOM writes break under StrictMode /
-  // concurrent rendering (double-invoke, tearing). useLayoutEffect still runs
-  // before paint, so there is no flash. Event-handler setters below update
-  // the DOM synchronously for instant feedback.
   useLayoutEffect(() => {
-    applyTheme(themeId, colorMode)
-  }, [themeId, colorMode])
+    applyTheme(colorMode)
+  }, [colorMode])
 
   const setColorMode = useCallback(
     (mode: ColorMode) => {
-      applyTheme(themeId, mode)
+      applyTheme(mode)
       setColorModeState(mode)
       try {
         localStorage.setItem(MODE_KEY, mode)
@@ -89,10 +57,10 @@ export function useTheme(): [ThemeId, ColorMode, (mode: ColorMode) => void] {
         /* ignore */
       }
     },
-    [themeId],
+    [],
   )
 
-  return [themeId, colorMode, setColorMode]
+  return [colorMode, setColorMode]
 }
 
 const readVar = (name: string): string =>
@@ -113,7 +81,7 @@ export interface ThemeColors {
 }
 
 /** Resolves the theme CSS variables to concrete `rgb(...)` strings (for Recharts, inline styles). */
-export function useThemeColors(themeId: ThemeId, colorMode: ColorMode): ThemeColors {
+export function useThemeColors(colorMode: ColorMode): ThemeColors {
   return useMemo(() => {
     const rgb = (name: string) => `rgb(${readVar(name)})`
     return {
@@ -129,5 +97,5 @@ export function useThemeColors(themeId: ThemeId, colorMode: ColorMode): ThemeCol
       long: rgb('--c-long'),
       chart: Array.from({ length: 8 }, (_, i) => rgb(`--c-chart-${i + 1}`)),
     }
-  }, [themeId, colorMode])
+  }, [colorMode])
 }

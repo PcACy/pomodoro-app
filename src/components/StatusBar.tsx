@@ -2,14 +2,15 @@ import { memo } from 'react'
 import type { PhaseId, TimerStatus } from '../types'
 import type { ColorMode } from '../themes'
 import type { SyncStatus } from '../hooks/useSync'
+import { useFlowTimerTick, useTimerTick } from '../hooks/useTimerTick'
 
-interface VimStatusLineProps {
+export interface StatusBarProps {
   colorMode: ColorMode
   mode: 'pomodoro' | 'flow'
   phase: PhaseId
   status: TimerStatus
-  time: string
-  progress: number
+  time?: string
+  progress?: number
   task: string
   tag: string
   completedRounds: number
@@ -17,9 +18,7 @@ interface VimStatusLineProps {
   syncStatus?: SyncStatus
 }
 
-// Memoized: all props are primitives, so this leaf only re-renders when its
-// own inputs change — not on unrelated App-level updates.
-export const VimStatusLine = memo(function VimStatusLine({
+export const StatusBar = memo(function StatusBar({
   colorMode,
   mode,
   phase,
@@ -31,7 +30,13 @@ export const VimStatusLine = memo(function VimStatusLine({
   completedRounds,
   totalRounds,
   syncStatus,
-}: VimStatusLineProps) {
+}: StatusBarProps) {
+  const timerTick = useTimerTick()
+  const flowTick = useFlowTimerTick()
+
+  const activeTime = time ?? (mode === 'flow' ? flowTick.time : timerTick.time)
+  const activeProgress = progress ?? (mode === 'flow' ? 1 : timerTick.progress)
+
   const isRunning = status === 'running'
   const isBreak = phase === 'shortBreak' || phase === 'longBreak'
 
@@ -49,8 +54,8 @@ export const VimStatusLine = memo(function VimStatusLine({
     statusLabel = 'PAUSED'
   }
 
-  const pct = Number.isFinite(progress)
-    ? Math.round(Math.min(1, Math.max(0, progress)) * 100)
+  const pct = Number.isFinite(activeProgress)
+    ? Math.round(Math.min(1, Math.max(0, activeProgress)) * 100)
     : 0
 
   return (
@@ -83,7 +88,7 @@ export const VimStatusLine = memo(function VimStatusLine({
       </div>
 
       <div className="flex items-center gap-3 shrink-0 font-mono text-xs">
-        <span className="text-fg font-bold tabular-nums">[{time}]</span>
+        <span className="text-fg font-bold tabular-nums">[{activeTime}]</span>
         {mode === 'pomodoro' && (
           <span className="hidden sm:inline text-muted tabular-nums">
             R:{completedRounds}/{totalRounds}

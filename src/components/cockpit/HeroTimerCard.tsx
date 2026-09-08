@@ -201,7 +201,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
                           isCompleted
                             ? 'bg-fg'
                             : isCurrent
-                              ? 'bg-fg'
+                              ? 'bg-accent'
                               : 'border border-line bg-canvas'
                         }`}
                       />

@@ -1,7 +1,7 @@
 import { memo, useEffect } from 'react'
 import { X } from 'lucide-react'
 import type { Session, Settings, TodoItem } from '../../types'
-import type { ColorMode, ThemeId } from '../../themes'
+import type { ColorMode } from '../../themes'
 import { Dashboard } from '../Dashboard'
 import { playMicroClick } from '../../lib/sound'
 
@@ -10,7 +10,6 @@ interface AnalyticsModalProps {
   onClose: () => void
   sessions: Session[]
   settings: Settings
-  themeId: ThemeId
   colorMode: ColorMode
   todos: TodoItem[]
   onImportSettings: (s: unknown) => void
@@ -21,7 +20,6 @@ export const AnalyticsModal = memo(function AnalyticsModal({
   onClose,
   sessions,
   settings,
-  themeId,
   colorMode,
   todos,
   onImportSettings,
@@ -58,7 +56,7 @@ export const AnalyticsModal = memo(function AnalyticsModal({
       }}
     >
       <div
-        className="modal-panel relative w-full max-w-[480px] max-h-[90vh] overflow-y-auto rounded-card bg-surface border border-line p-5 sm:p-7 flex flex-col gap-4 shadow-none"
+        className="modal-panel relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-card bg-surface border border-line p-5 sm:p-7 flex flex-col gap-4 shadow-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -90,7 +88,6 @@ export const AnalyticsModal = memo(function AnalyticsModal({
           <Dashboard
             sessions={sessions}
             settings={settings}
-            themeId={themeId}
             colorMode={colorMode}
             todos={todos}
             onImportSettings={onImportSettings}
