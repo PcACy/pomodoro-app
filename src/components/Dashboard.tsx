@@ -79,7 +79,11 @@ function MetricCard({
             )}
             <p className="text-[10px] uppercase tracking-wider text-muted truncate">{label}</p>
           </div>
-          <p className="font-doto text-2xl sm:text-3xl font-bold tracking-tight text-fg tabular-nums truncate">
+          <p
+            className={`font-doto font-bold tracking-tight text-fg tabular-nums truncate ${
+              value.length > 7 ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl'
+            }`}
+          >
             {value}
           </p>
         </div>
@@ -151,18 +155,32 @@ function BarChartTooltip({
 
 function DonutEmptySkeleton({ message }: { message: string }) {
   return (
-    <div className="relative flex h-[240px] w-full flex-col items-center justify-center font-mono">
-      <div className="border border-dashed border-line rounded-full h-36 w-36 flex items-center justify-center">
-        <p className="max-w-[160px] text-center text-xs uppercase tracking-wider text-muted">{message}</p>
+    <div className="flex flex-col items-center justify-center py-6 font-mono">
+      <div className="relative flex h-28 w-28 items-center justify-center rounded-full border border-dashed border-line/80 bg-canvas/40">
+        <span className="text-muted/60 text-lg font-mono">#</span>
       </div>
+      <p className="mt-3.5 max-w-[210px] text-center text-[11px] uppercase tracking-wider text-muted">
+        {message}
+      </p>
     </div>
   )
 }
 
 function HourEmptySkeleton({ message }: { message: string }) {
   return (
-    <div className="relative flex h-[220px] w-full flex-col items-center justify-center font-mono">
-      <p className="text-xs uppercase tracking-wider text-muted">{message}</p>
+    <div className="flex flex-col items-center justify-center py-6 font-mono">
+      <div className="flex items-end justify-center gap-1.5 h-20 w-full max-w-[260px] px-2 mb-3">
+        {Array.from({ length: 24 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex-1 bg-line/30 rounded-none transition-all"
+            style={{ height: i % 6 === 0 ? '12px' : '4px' }}
+          />
+        ))}
+      </div>
+      <p className="max-w-[210px] text-center text-[11px] uppercase tracking-wider text-muted">
+        {message}
+      </p>
     </div>
   )
 }
@@ -293,14 +311,20 @@ export const Dashboard = memo(function Dashboard({
           sub={t.dashboard.pomodoroRatio(pomFlow.pomodoroPct, pomFlow.flowPct)}
           extra={
             <div className="h-2 w-full overflow-hidden rounded-full bg-canvas border border-line flex gap-0.5 p-0.5">
-              <div
-                className="h-full bg-fg rounded-full transition-all duration-300"
-                style={{ width: `${pomFlow.pomodoroPct}%` }}
-              />
-              <div
-                className="h-full bg-accent rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(215,25,33,0.5)]"
-                style={{ width: `${pomFlow.flowPct}%` }}
-              />
+              {pomFlow.pomodoroPct === 0 && pomFlow.flowPct === 0 ? (
+                <div className="h-full w-full bg-line/20 rounded-full" />
+              ) : (
+                <>
+                  <div
+                    className="h-full bg-fg rounded-full transition-all duration-300"
+                    style={{ width: `${pomFlow.pomodoroPct}%` }}
+                  />
+                  <div
+                    className="h-full bg-accent rounded-full transition-all duration-300"
+                    style={{ width: `${pomFlow.flowPct}%` }}
+                  />
+                </>
+              )}
             </div>
           }
         />
