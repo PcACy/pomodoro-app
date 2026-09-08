@@ -148,7 +148,10 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                   <>
                     <span
                       className="h-1.5 w-1.5 rounded-full shrink-0"
-                      style={{ backgroundColor: getTagColor(selectedTag) }}
+                      style={{
+                        backgroundColor: getTagColor(selectedTag),
+                        boxShadow: `0 0 8px ${getTagColor(selectedTag)}66`,
+                      }}
                     />
                     <span className="max-w-[70px] truncate">{selectedTag}</span>
                   </>
@@ -201,7 +204,10 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                   >
                     <span
                       className="h-1.5 w-1.5 rounded-full"
-                      style={{ backgroundColor: getTagColor(tag) }}
+                      style={{
+                        backgroundColor: getTagColor(tag),
+                        boxShadow: `0 0 8px ${getTagColor(tag)}66`,
+                      }}
                     />
                     <span className="truncate flex-1">{tag}</span>
                     {selectedTag === tag && <span className="text-[9px]">✓</span>}
@@ -261,7 +267,10 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                     <span className="flex items-center gap-1 font-mono text-[9px] text-muted shrink-0">
                       <span
                         className="h-1.5 w-1.5 rounded-full"
-                        style={{ backgroundColor: tagColor }}
+                        style={{
+                          backgroundColor: tagColor,
+                          boxShadow: tagColor ? `0 0 8px ${tagColor}66` : undefined,
+                        }}
                       />
                       <span>{todo.tag}</span>
                     </span>

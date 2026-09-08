@@ -46,49 +46,69 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
   return (
     <BentoCard
       label={`PROJECTS · ${Math.round(totalTodayMinutes)} MINS`}
+      action={
+        <span className="font-mono text-[9px] px-2 py-0.5 rounded-full border border-line bg-canvas text-muted tracking-wider uppercase">
+          {configuredTags.length} {configuredTags.length === 1 ? 'TAG' : 'TAGS'}
+        </span>
+      }
       className={className}
       contentClassName="justify-between"
     >
-      <div className="flex-1 flex flex-col justify-around py-1">
-        {displayRows.map((row) => {
-          const ratio = totalTodayMinutes > 0 ? row.minutes / totalTodayMinutes : 0
-          const filled = totalTodayMinutes > 0 && row.minutes > 0
-            ? Math.min(SEGMENT_COUNT, Math.max(1, Math.round(ratio * SEGMENT_COUNT)))
-            : 0
-          const hours = (row.minutes / 60).toFixed(1)
-          const tagColor = getTagColor(row.tag)
+      <div className="flex-1 flex flex-col justify-between py-1 gap-2">
+        <div className="flex-1 flex flex-col justify-center gap-3">
+          {displayRows.map((row) => {
+            const ratio = totalTodayMinutes > 0 ? row.minutes / totalTodayMinutes : 0
+            const filled = totalTodayMinutes > 0 && row.minutes > 0
+              ? Math.min(SEGMENT_COUNT, Math.max(1, Math.round(ratio * SEGMENT_COUNT)))
+              : 0
+            const hours = (row.minutes / 60).toFixed(1)
+            const tagColor = getTagColor(row.tag)
 
-          return (
-            <div key={row.tag} className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between font-mono text-[10px] tracking-wider uppercase">
-                <span className="flex items-center gap-1.5 text-muted">
-                  <span
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: tagColor }}
-                  />
-                  <span>{row.tag}</span>
-                </span>
-                <span className="text-fg/80 tabular-nums">
-                  {row.minutes > 0 ? `${hours} H` : '0 H'}
-                </span>
-              </div>
+            return (
+              <div key={row.tag} className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between font-mono text-[10px] tracking-wider uppercase">
+                  <span className="flex items-center gap-1.5 text-muted">
+                    <span
+                      className="h-1.5 w-1.5 rounded-full"
+                      style={{
+                        backgroundColor: tagColor,
+                        boxShadow: `0 0 8px ${tagColor}66`,
+                      }}
+                    />
+                    <span className="text-fg/90 font-medium">{row.tag}</span>
+                  </span>
+                  <span className="text-fg/80 tabular-nums">
+                    {row.minutes > 0 ? `${hours} H` : '0 H'}
+                  </span>
+                </div>
 
-              {/* Segmented bar for this category */}
-              <div className="flex h-2 w-full gap-0.5">
-                {Array.from({ length: SEGMENT_COUNT }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={`flex-1 rounded-[0.5px] transition-colors duration-150 ${
-                      i < filled
-                        ? 'bg-fg'
-                        : 'bg-line/40'
-                    }`}
-                  />
-                ))}
+                {/* Segmented bar for this category */}
+                <div className="flex h-2 w-full gap-0.5">
+                  {Array.from({ length: SEGMENT_COUNT }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`flex-1 rounded-[0.5px] transition-colors duration-150 ${
+                        i < filled
+                          ? 'bg-fg'
+                          : 'bg-line/40'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
+
+        {totalTodayMinutes === 0 && (
+          <div className="pt-2 border-t border-line/40 flex items-center justify-between font-mono text-[9px] text-muted tracking-widest uppercase">
+            <span className="flex items-center gap-1.5">
+              <span className="h-1 w-1 rounded-full bg-muted/60" />
+              <span>NO ACTIVITY TODAY</span>
+            </span>
+            <span className="text-fg/60">STANDBY</span>
+          </div>
+        )}
       </div>
     </BentoCard>
   )

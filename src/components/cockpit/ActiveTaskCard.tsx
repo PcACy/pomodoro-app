@@ -87,7 +87,10 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
               <span className="flex items-center gap-1.5">
                 <span
                   className="h-1.5 w-1.5 rounded-full"
-                  style={{ backgroundColor: tagColor }}
+                  style={{
+                    backgroundColor: tagColor,
+                    boxShadow: tagColor ? `0 0 8px ${tagColor}66` : undefined,
+                  }}
                 />
                 <span className="text-fg/80">{activeTodo.tag}</span>
               </span>
@@ -128,9 +131,13 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           </div>
         ) : (
           <div className="shrink-0 flex items-center">
-            <span className="font-mono text-[10px] text-muted tracking-widest uppercase px-2.5 py-1 rounded border border-line/40 bg-canvas/30">
-              READY
-            </span>
+            <button
+              type="button"
+              onClick={onOpenTodoManager}
+              className="font-mono text-[10px] text-muted hover:text-fg tracking-widest uppercase px-2.5 py-1 rounded-full border border-line/50 hover:border-fg/40 bg-canvas/40 transition-colors cursor-pointer"
+            >
+              CHOOSE TASK
+            </button>
           </div>
         )}
       </div>
@@ -147,7 +154,9 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         </div>
         <div className="mt-1.5 flex items-center justify-between font-mono text-[9px] text-muted tracking-wider tabular-nums">
           <span>{elapsedStr}</span>
-          <span className="text-fg/80 font-medium">{liveTime}</span>
+          <span className="text-fg/80 font-medium">
+            {isRunning ? `-${liveTime}` : (progressRatio > 0 ? `${Math.round(progressRatio * 100)}%` : 'STANDBY')}
+          </span>
           <span>{totalStr}</span>
         </div>
       </div>

@@ -22,6 +22,7 @@ export function notify(
   actions: NotificationActionConfig[] = [],
 ): void {
   if (!notificationsSupported() || Notification.permission !== 'granted') return
+  if (typeof localStorage !== 'undefined' && localStorage.getItem('pomodoro.notifications') === 'false') return
   try {
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
       void navigator.serviceWorker.ready

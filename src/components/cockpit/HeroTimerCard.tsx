@@ -181,30 +181,37 @@ export const HeroTimerCard = memo(function HeroTimerCard({
               <span className={`h-1.5 w-1.5 rounded-full ${running ? 'bg-accent animate-pulse' : 'bg-muted'}`} />
               {shownLabel}
             </div>
-            <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted tracking-wider">
-              <span>ROUND {(completedFocusInCycle % safeRounds) + 1} / {safeRounds}</span>
-              <div className="flex items-center gap-1 ml-0.5" title={`Cycle: ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`}>
-                {Array.from({ length: safeRounds }).map((_, rIdx) => {
-                  const currentRoundIdx = completedFocusInCycle % safeRounds
-                  const isCompleted = rIdx < currentRoundIdx
-                  const isCurrent = rIdx === currentRoundIdx
-                  return (
-                    <span
-                      key={rIdx}
-                      className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                        isCompleted
-                          ? 'bg-fg'
-                          : isCurrent
-                          ? running
-                            ? 'bg-accent animate-pulse'
-                            : 'bg-accent/80'
-                          : 'border border-line bg-canvas'
-                      }`}
-                    />
-                  )
-                })}
+            {isFlow ? (
+              <div className="inline-flex items-center gap-1.5 font-mono text-[10px] text-muted tracking-wider uppercase">
+                <span className={`h-1.5 w-1.5 rounded-full ${running ? 'bg-accent animate-pulse' : 'bg-line'}`} />
+                <span>{running ? 'FLOW ACTIVE' : 'FREE FLOW'}</span>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted tracking-wider">
+                <span>ROUND {(completedFocusInCycle % safeRounds) + 1} / {safeRounds}</span>
+                <div className="flex items-center gap-1 ml-0.5" title={`Cycle: ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`}>
+                  {Array.from({ length: safeRounds }).map((_, rIdx) => {
+                    const currentRoundIdx = completedFocusInCycle % safeRounds
+                    const isCompleted = rIdx < currentRoundIdx
+                    const isCurrent = rIdx === currentRoundIdx
+                    return (
+                      <span
+                        key={rIdx}
+                        className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                          isCompleted
+                            ? 'bg-fg'
+                            : isCurrent
+                            ? running
+                              ? 'bg-accent animate-pulse'
+                              : 'bg-accent/80'
+                            : 'border border-line bg-canvas'
+                        }`}
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

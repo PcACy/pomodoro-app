@@ -21,7 +21,10 @@ export const SystemStatusCard = memo(function SystemStatusCard({
   const streak = currentStreakDays(sessions)
   const today = new Date()
   const weekStart = startOfWeek(today)
-  const todaySessions = sessions.filter((s) => sameDay(new Date(s.start), today)).length
+  const activeDaysThisWeek = WEEK_DAYS.reduce((count, _, i) => {
+    const dayDate = addDays(weekStart, i)
+    return count + (sessions.some((s) => sameDay(new Date(s.start), dayDate)) ? 1 : 0)
+  }, 0)
 
   return (
     <BentoCard
@@ -97,11 +100,11 @@ export const SystemStatusCard = memo(function SystemStatusCard({
         })}
       </div>
 
-      {/* Bottom Row: Today's session count */}
+      {/* Bottom Row: Weekly consistency metric */}
       <div className="flex items-center justify-between font-mono text-[10px] text-muted tracking-wider uppercase pt-1 border-t border-line/40">
-        <span>TODAY</span>
+        <span>ACTIVE DAYS</span>
         <span className="text-fg/90 font-medium tabular-nums">
-          {todaySessions} {todaySessions === 1 ? 'SESSION' : 'SESSIONS'}
+          {activeDaysThisWeek} / 7 DAYS
         </span>
       </div>
     </BentoCard>

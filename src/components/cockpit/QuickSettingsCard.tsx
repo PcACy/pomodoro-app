@@ -6,6 +6,7 @@ import { playMicroClick } from '../../lib/sound'
 
 const SOUND_KEY = 'pomodoro.sound'
 const AUTO_BREAKS_KEY = 'pomodoro.auto_breaks'
+const NOTIFY_KEY = 'pomodoro.notifications'
 
 function readFlag(key: string, expectTrue: boolean): boolean {
   try {
@@ -25,6 +26,52 @@ function writeFlag(key: string, value: boolean): void {
   }
 }
 
+interface MechanicalSwitchProps {
+  checked: boolean
+  onChange: () => void
+  label: string
+}
+
+function MechanicalSwitch({ checked, onChange, label }: MechanicalSwitchProps) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      onClick={(e) => {
+        e.stopPropagation()
+        onChange()
+      }}
+      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border transition-colors duration-150 p-0.5 ${
+        checked ? 'border-accent bg-canvas' : 'border-line bg-canvas'
+      }`}
+    >
+      <span
+        className={`pointer-events-none absolute left-1.5 font-mono text-[8px] font-bold transition-opacity ${
+          checked ? 'text-accent opacity-90' : 'opacity-0'
+        }`}
+      >
+        I
+      </span>
+      <span
+        className={`pointer-events-none absolute right-1.5 font-mono text-[8px] transition-opacity ${
+          !checked ? 'text-muted/60 opacity-80' : 'opacity-0'
+        }`}
+      >
+        O
+      </span>
+      <span
+        className={`pointer-events-none inline-block h-3.5 w-3.5 rounded-full transition-transform duration-150 ease-out ${
+          checked
+            ? 'translate-x-4 bg-accent shadow-[0_0_8px_rgba(215,25,33,0.6)]'
+            : 'translate-x-0 bg-muted/60'
+        }`}
+      />
+    </button>
+  )
+}
+
 interface QuickSettingsCardProps {
   settings?: Settings
   colorMode: ColorMode
@@ -38,10 +85,10 @@ interface QuickSettingsCardProps {
 
 export const QuickSettingsCard = memo(function QuickSettingsCard({
   settings: _settings,
-  colorMode,
+  colorMode: _colorMode,
   isZenMode = false,
   onUpdateSettings: _onUpdateSettings,
-  onToggleColorMode,
+  onToggleColorMode: _onToggleColorMode,
   onToggleZen,
   onOpenSettingsModal,
   className = '',
@@ -49,19 +96,28 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
   // Local quick toggle preferences synced to localStorage
   const [soundEnabled, setSoundEnabled] = useState(() => readFlag(SOUND_KEY, false))
   const [autoBreaks, setAutoBreaks] = useState(() => readFlag(AUTO_BREAKS_KEY, true))
+  const [notifyEnabled, setNotifyEnabled] = useState(() => {
+    if (typeof window === 'undefined' || !('Notification' in window)) return false
+    return Notification.permission === 'granted' && readFlag(NOTIFY_KEY, true)
+  })
 
   // Stay in sync when another tab (or the Settings panel) flips these flags.
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === SOUND_KEY) setSoundEnabled(readFlag(SOUND_KEY, false))
       else if (e.key === AUTO_BREAKS_KEY) setAutoBreaks(readFlag(AUTO_BREAKS_KEY, true))
+      else if (e.key === NOTIFY_KEY) setNotifyEnabled(readFlag(NOTIFY_KEY, true))
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  const toggleSound = useCallback((e?: React.MouseEvent) => {
-    e?.stopPropagation()
+  const handleToggleZen = useCallback(() => {
+    playMicroClick('toggle')
+    onToggleZen?.()
+  }, [onToggleZen])
+
+  const toggleSound = useCallback(() => {
     playMicroClick('toggle')
     setSoundEnabled((prev) => {
       const next = !prev
@@ -70,12 +126,30 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
     })
   }, [])
 
-  const toggleAutoBreaks = useCallback((e?: React.MouseEvent) => {
-    e?.stopPropagation()
+  const toggleAutoBreaks = useCallback(() => {
     playMicroClick('toggle')
     setAutoBreaks((prev) => {
       const next = !prev
       writeFlag(AUTO_BREAKS_KEY, next)
+      return next
+    })
+  }, [])
+
+  const toggleNotify = useCallback(() => {
+    playMicroClick('toggle')
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        void Notification.requestPermission().then((perm) => {
+          const granted = perm === 'granted'
+          setNotifyEnabled(granted)
+          writeFlag(NOTIFY_KEY, granted)
+        })
+        return
+      }
+    }
+    setNotifyEnabled((prev) => {
+      const next = !prev
+      writeFlag(NOTIFY_KEY, next)
       return next
     })
   }, [])
@@ -104,47 +178,35 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
       contentClassName="justify-between"
     >
       <div className="flex flex-col gap-1.5 sm:gap-2 my-auto">
-        {/* Toggle 1: Dark Mode */}
+        {/* Toggle 1: Zen Mode (Direct Fullscreen Focus) */}
         <div
           onClick={(e) => {
             e.stopPropagation()
-            playMicroClick('toggle')
-            onToggleColorMode()
+            handleToggleZen()
           }}
           className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
         >
           <div className="flex flex-col min-w-0">
             <span className="font-sans text-[11px] text-fg font-medium truncate group-hover:text-fg transition-colors">
-              Dark Mode
+              Zen Mode
             </span>
             <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
-              {colorMode === 'dark' ? 'OLED' : 'LIGHT'}
+              {isZenMode ? 'IMMERSIVE' : 'STANDBY'}
             </span>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={colorMode === 'dark'}
-            onClick={(e) => {
-              e.stopPropagation()
-              playMicroClick('toggle')
-              onToggleColorMode()
-            }}
-            className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
-              colorMode === 'dark' ? 'bg-accent border-accent' : 'bg-canvas border-line'
-            }`}
-          >
-            <span
-              className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                colorMode === 'dark' ? 'translate-x-3.5' : 'translate-x-0 bg-muted'
-              }`}
-            />
-          </button>
+          <MechanicalSwitch
+            checked={Boolean(isZenMode)}
+            onChange={handleToggleZen}
+            label="Zen Mode"
+          />
         </div>
 
         {/* Toggle 2: Sound FX */}
         <div
-          onClick={toggleSound}
+          onClick={(e) => {
+            e.stopPropagation()
+            toggleSound()
+          }}
           className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
         >
           <div className="flex flex-col min-w-0">
@@ -155,26 +217,19 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
               {soundEnabled ? 'ACTIVE' : 'MUTED'}
             </span>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={soundEnabled}
-            onClick={toggleSound}
-            className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
-              soundEnabled ? 'bg-accent border-accent' : 'bg-canvas border-line'
-            }`}
-          >
-            <span
-              className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                soundEnabled ? 'translate-x-3.5' : 'translate-x-0 bg-muted'
-              }`}
-            />
-          </button>
+          <MechanicalSwitch
+            checked={soundEnabled}
+            onChange={toggleSound}
+            label="Sound FX"
+          />
         </div>
 
         {/* Toggle 3: Auto-Start Breaks */}
         <div
-          onClick={toggleAutoBreaks}
+          onClick={(e) => {
+            e.stopPropagation()
+            toggleAutoBreaks()
+          }}
           className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
         >
           <div className="flex flex-col min-w-0">
@@ -185,59 +240,34 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
               {autoBreaks ? 'AUTO' : 'MANUAL'}
             </span>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={autoBreaks}
-            onClick={toggleAutoBreaks}
-            className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
-              autoBreaks ? 'bg-accent border-accent' : 'bg-canvas border-line'
-            }`}
-          >
-            <span
-              className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                autoBreaks ? 'translate-x-3.5' : 'translate-x-0 bg-muted'
-              }`}
-            />
-          </button>
+          <MechanicalSwitch
+            checked={autoBreaks}
+            onChange={toggleAutoBreaks}
+            label="Auto Breaks"
+          />
         </div>
 
-        {/* Toggle 4: Distraction Free (Immersive Zen Mode) */}
+        {/* Toggle 4: Desktop Notifications */}
         <div
           onClick={(e) => {
             e.stopPropagation()
-            playMicroClick('toggle')
-            onToggleZen?.()
+            toggleNotify()
           }}
           className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
         >
           <div className="flex flex-col min-w-0">
             <span className="font-sans text-[11px] text-fg font-medium truncate group-hover:text-fg transition-colors">
-              Distraction Free
+              Desktop Alerts
             </span>
             <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
-              {isZenMode ? 'IMMERSIVE' : 'STANDBY'}
+              {notifyEnabled ? 'ACTIVE' : 'MUTED'}
             </span>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={Boolean(isZenMode)}
-            onClick={(e) => {
-              e.stopPropagation()
-              playMicroClick('toggle')
-              onToggleZen?.()
-            }}
-            className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out p-0.5 ${
-              isZenMode ? 'bg-accent border-accent' : 'bg-canvas border-line'
-            }`}
-          >
-            <span
-              className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                isZenMode ? 'translate-x-3.5' : 'translate-x-0 bg-muted'
-              }`}
-            />
-          </button>
+          <MechanicalSwitch
+            checked={notifyEnabled}
+            onChange={toggleNotify}
+            label="Desktop Alerts"
+          />
         </div>
       </div>
     </BentoCard>
