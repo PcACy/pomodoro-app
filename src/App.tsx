@@ -412,6 +412,7 @@ export default function App() {
             colorMode={colorMode}
             onToggleColorMode={() => setColorMode(colorMode === 'dark' ? 'light' : 'dark')}
             onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+            onOpenAnalyticsModal={() => setIsAnalyticsModalOpen(true)}
             isZenMode={isZenMode}
             onToggleZen={handleToggleZen}
           />

@@ -7,6 +7,7 @@ interface BentoCardProps {
   children: ReactNode
   className?: string
   contentClassName?: string
+  onClick?: () => void
 }
 
 export const BentoCard = memo(function BentoCard({
@@ -16,9 +17,11 @@ export const BentoCard = memo(function BentoCard({
   children,
   className = '',
   contentClassName = '',
+  onClick,
 }: BentoCardProps) {
   return (
     <div
+      onClick={onClick}
       className={`relative overflow-hidden rounded-card bg-surface border border-line p-4 sm:p-5 flex flex-col justify-between select-none transition-colors duration-150 ${className}`}
     >
       {/* Header with technical mono ALL-CAPS label and optional actions */}

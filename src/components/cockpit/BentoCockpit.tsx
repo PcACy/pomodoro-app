@@ -48,6 +48,7 @@ interface BentoCockpitProps {
   colorMode: ColorMode
   onToggleColorMode: () => void
   onOpenSettingsModal: () => void
+  onOpenAnalyticsModal?: () => void
   isZenMode?: boolean
   onToggleZen?: () => void
 }
@@ -82,6 +83,7 @@ export const BentoCockpit = memo(function BentoCockpit({
   colorMode,
   onToggleColorMode,
   onOpenSettingsModal,
+  onOpenAnalyticsModal,
   isZenMode,
   onToggleZen,
 }: BentoCockpitProps) {
@@ -167,8 +169,10 @@ export const BentoCockpit = memo(function BentoCockpit({
           className="md:col-span-2 lg:col-span-2 min-h-[170px]"
         />
 
-        {/* 9. STATUS PILLS */}
+        {/* 9. DAILY STREAK & PERFORMANCE */}
         <SystemStatusCard
+          sessions={sessions}
+          onOpenAnalyticsModal={onOpenAnalyticsModal}
           className="md:col-span-1 lg:col-span-1 min-h-[170px]"
         />
 
