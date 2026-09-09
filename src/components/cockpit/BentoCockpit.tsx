@@ -89,7 +89,7 @@ export const BentoCockpit = memo(function BentoCockpit({
   return (
     <div className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-0">
       {/* 1. Cockpit Bento Grid (Cards 1-7): Heroic instrument panel fitting the initial viewport */}
-      <section className="w-full flex flex-col justify-start mb-16">
+      <section className="w-full min-h-[calc(100vh-4.5rem)] min-h-[calc(100dvh-4.5rem)] flex flex-col justify-center mb-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5 auto-rows-auto">
           {/* 1. HERO TIMER: Large 2x2 card (Top-Left, Cols 1-2, Rows 1-2) */}
           <HeroTimerCard
