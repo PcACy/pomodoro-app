@@ -24,10 +24,10 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
   const { t } = useTranslation()
   const untaggedLabel = t.todo.noTag
 
-  // Collect only real user tags from settings and logged sessions
-  const availableTags = useMemo(() => {
-    const list: string[] = []
-    const seen = new Set<string>()
+  // Track list: 'ALL' option first for total week activity, followed by individual user tags
+  const tracks = useMemo(() => {
+    const list: string[] = ['ALL']
+    const seen = new Set<string>(['all'])
 
     const addTag = (tName: string) => {
       const clean = tName.trim()
@@ -48,35 +48,31 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
     return list
   }, [tags, sessions])
 
-  // Automatically select the project with the most focus time this week, or the first configured tag
-  const defaultTagIndex = useMemo(() => {
-    if (availableTags.length === 0) return 0
-    const weekStart = startOfWeek(new Date())
-    const stats = minutesByTag(sessions, weekStart, untaggedLabel)
-    let bestTag = ''
-    let maxMins = 0
-    for (const item of stats) {
-      if (item.minutes > maxMins && availableTags.some((t) => t.toLowerCase() === item.tag.toLowerCase())) {
-        maxMins = item.minutes
-        bestTag = item.tag
-      }
-    }
-    if (bestTag) {
-      const idx = availableTags.findIndex((t) => t.toLowerCase() === bestTag.toLowerCase())
-      if (idx !== -1) return idx
-    }
-    return 0
-  }, [availableTags, sessions, untaggedLabel])
+  const [selectedTrackIndex, setSelectedTrackIndex] = useState(0)
+  const currentTrackIndex = ((selectedTrackIndex % tracks.length) + tracks.length) % tracks.length
+  const activeTrack = tracks[currentTrackIndex] || 'ALL'
+  const isAllTrack = activeTrack === 'ALL'
+  const channelNumber = String(currentTrackIndex + 1).padStart(2, '0')
 
-  const [selectedTagIndex, setSelectedTagIndex] = useState<number | null>(null)
-  const currentIndex = selectedTagIndex ?? defaultTagIndex
-  const activeTag = availableTags.length > 0 ? availableTags[currentIndex % availableTags.length] : 'GENERAL'
+  const handlePrevTrack = useCallback(
+    (e?: React.MouseEvent) => {
+      e?.stopPropagation()
+      if (tracks.length <= 1) return
+      playMicroClick('tap')
+      setSelectedTrackIndex((prev) => (prev - 1 + tracks.length) % tracks.length)
+    },
+    [tracks.length]
+  )
 
-  const handleCycleTrack = useCallback(() => {
-    if (availableTags.length <= 1) return
-    playMicroClick('tap')
-    setSelectedTagIndex((prev) => ((prev ?? defaultTagIndex) + 1) % availableTags.length)
-  }, [availableTags.length, defaultTagIndex])
+  const handleNextTrack = useCallback(
+    (e?: React.MouseEvent) => {
+      e?.stopPropagation()
+      if (tracks.length <= 1) return
+      playMicroClick('tap')
+      setSelectedTrackIndex((prev) => (prev + 1) % tracks.length)
+    },
+    [tracks.length]
+  )
 
   const { totalWeekMinutes, activeTrackWeekMinutes, dayMinutes, todayIdx } = useMemo(() => {
     const weekStart = startOfWeek(new Date())
@@ -103,8 +99,9 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
       const minsForDay = sessions
         .filter((s) => sameDay(new Date(s.start), dayDate))
         .filter((s) => {
+          if (isAllTrack) return true
           const sessionTag = (s.tag?.trim() || untaggedLabel).toLowerCase()
-          return sessionTag === activeTag.toLowerCase()
+          return sessionTag === activeTrack.toLowerCase()
         })
         .reduce((sum, s) => {
           const d = s.durationMs
@@ -121,7 +118,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
       dayMinutes: dailyMins,
       todayIdx: tIdx,
     }
-  }, [sessions, untaggedLabel, activeTag])
+  }, [sessions, untaggedLabel, activeTrack, isAllTrack])
 
   const totalWeekHours = (totalWeekMinutes / 60).toFixed(1)
   const activeTrackHours = (activeTrackWeekMinutes / 60).toFixed(1)
@@ -131,43 +128,83 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
     <BentoCard
       label={`PROJECTS · ${totalWeekHours} H WEEK`}
       action={
-        <span className="font-mono text-[9px] px-2 py-0.5 rounded-full border border-line bg-canvas text-muted tracking-wider uppercase">
-          {availableTags.length} {availableTags.length === 1 ? 'TAG' : 'TAGS'}
-        </span>
+        <button
+          type="button"
+          onClick={handleNextTrack}
+          disabled={tracks.length <= 1}
+          className={`font-mono text-[9px] px-2 py-0.5 rounded-full border border-line bg-canvas text-muted tracking-wider uppercase transition-colors select-none ${
+            tracks.length > 1
+              ? 'hover:text-fg hover:border-fg/40 cursor-pointer active:scale-95'
+              : 'cursor-default'
+          }`}
+          title={tracks.length > 1 ? 'Click to switch track' : undefined}
+        >
+          TRK {currentTrackIndex + 1}/{tracks.length}
+        </button>
       }
       className={className}
       contentClassName="justify-between"
     >
       <div className="flex-1 flex flex-col justify-between py-0.5 gap-2.5">
-        {/* Project Selection / Active Track Row */}
-        <button
-          type="button"
-          onClick={handleCycleTrack}
-          disabled={availableTags.length <= 1}
-          className={`flex items-center justify-between font-mono text-[10px] tracking-wider uppercase text-left group select-none transition-opacity ${
-            availableTags.length > 1 ? 'cursor-pointer hover:opacity-85' : 'cursor-default'
-          }`}
-          title={availableTags.length > 1 ? 'Click to cycle track' : undefined}
-        >
+        {/* Project Selection / Active Track Row with Stepper Controls */}
+        <div className="flex items-center justify-between font-mono text-[10px] tracking-wider uppercase select-none">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span
-              className={`text-fg font-medium truncate ${
-                availableTags.length > 1 ? 'group-hover:underline underline-offset-2 decoration-line' : ''
-              }`}
-            >
-              {activeTag}
-            </span>
+            {/* Stepper controls */}
+            <div className="flex items-center gap-0.5">
+              <button
+                type="button"
+                onClick={handlePrevTrack}
+                disabled={tracks.length <= 1}
+                className={`h-5 w-4 flex items-center justify-center rounded-[2px] transition-colors ${
+                  tracks.length > 1
+                    ? 'text-muted hover:text-fg hover:bg-fg/10 active:scale-95 cursor-pointer'
+                    : 'text-muted/30 cursor-default'
+                }`}
+                title="Previous track (‹)"
+                aria-label="Previous track"
+              >
+                ‹
+              </button>
+
+              <button
+                type="button"
+                onClick={handleNextTrack}
+                disabled={tracks.length <= 1}
+                className={`flex items-center gap-1 px-1 py-0.5 rounded-[2px] transition-colors ${
+                  tracks.length > 1
+                    ? 'hover:bg-fg/10 active:scale-98 cursor-pointer'
+                    : 'cursor-default'
+                }`}
+                title="Click to switch track"
+              >
+                <span className="text-fg font-medium truncate">
+                  {activeTrack}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleNextTrack}
+                disabled={tracks.length <= 1}
+                className={`h-5 w-4 flex items-center justify-center rounded-[2px] transition-colors ${
+                  tracks.length > 1
+                    ? 'text-muted hover:text-fg hover:bg-fg/10 active:scale-95 cursor-pointer'
+                    : 'text-muted/30 cursor-default'
+                }`}
+                title="Next track (›)"
+                aria-label="Next track"
+              >
+                ›
+              </button>
+            </div>
+
             <span className="text-muted/60 shrink-0">// ACTIVE TRACK</span>
-            {availableTags.length > 1 && (
-              <span className="text-muted/40 group-hover:text-muted/80 text-[8px] transition-colors ml-0.5 select-none shrink-0">
-                ⇄
-              </span>
-            )}
           </div>
+
           <span className="text-fg/80 tabular-nums font-mono text-[10px] shrink-0 ml-2">
             {activeTrackHours} H
           </span>
-        </button>
+        </div>
 
         {/* 7-Column Full-Width VU-Meter LED Equalizer Grid */}
         <div className="w-full grid grid-cols-7 gap-2.5 sm:gap-3 px-1 my-3">
@@ -237,10 +274,16 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
                 hasActivity ? 'bg-[#EB1E23] animate-pulse' : 'bg-muted/40'
               }`}
             />
-            <span>{hasActivity ? `${activeTrackHours} H LOGGED THIS WEEK` : 'NO ACTIVITY THIS WEEK'}</span>
+            <span>
+              {hasActivity
+                ? `${activeTrackHours} H LOGGED THIS WEEK`
+                : isAllTrack
+                  ? 'NO ACTIVITY THIS WEEK'
+                  : `NO ACTIVITY ON ${activeTrack}`}
+            </span>
           </span>
           <span className="text-muted/70 tracking-wider">
-            {hasActivity ? 'ACTIVE // CH-01' : 'STANDBY // CH-01'}
+            {hasActivity ? `ACTIVE // CH-${channelNumber}` : `STANDBY // CH-${channelNumber}`}
           </span>
         </div>
       </div>
