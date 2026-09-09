@@ -4,7 +4,6 @@ import {
   Check,
   Download,
   FileDown,
-  FileJson,
   Github,
   Loader2,
   LogOut,
@@ -96,11 +95,13 @@ function StepperButton({
   onClick,
   disabled,
   ariaLabel,
+  side,
 }: {
   icon: typeof Minus
   onClick: () => void
   disabled: boolean
   ariaLabel: string
+  side: 'left' | 'right'
 }) {
   const holdHandlers = useHoldToRepeat(() => {
     playMicroClick('tap')
@@ -124,9 +125,11 @@ function StepperButton({
         }
       }}
       {...holdHandlers}
-      className="tap-spring flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted hover:bg-surface-raised hover:text-fg disabled:pointer-events-none disabled:opacity-20 cursor-pointer transition-colors"
+      className={`w-9 h-full flex items-center justify-center text-muted hover:text-fg hover:bg-black/5 dark:hover:bg-white/10 disabled:pointer-events-none disabled:opacity-20 cursor-pointer transition-colors select-none ${
+        side === 'left' ? 'border-r border-line dark:border-white/10' : 'border-l border-line dark:border-white/10'
+      }`}
     >
-      <Icon size={13} />
+      <Icon size={12} />
     </button>
   )
 }
@@ -183,16 +186,17 @@ function NumberStepper({
 
   return (
     <div
-      className={`flex items-center justify-between rounded-full border border-line bg-canvas px-1 py-0.5 transition-colors focus-within:border-fg ${className}`}
+      className={`h-10 flex items-center justify-between rounded-lg border border-line dark:border-white/10 bg-canvas/30 dark:bg-white/[0.02] overflow-hidden transition-colors focus-within:border-fg ${className}`}
     >
       <StepperButton
         icon={Minus}
         onClick={handleDecrement}
         disabled={value <= min}
         ariaLabel={`${ariaLabel ?? 'Wert'} verringern`}
+        side="left"
       />
 
-      <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 px-1">
+      <div className="flex min-w-0 flex-1 items-center justify-center gap-1 px-1">
         <input
           type="number"
           min={min}
@@ -204,7 +208,7 @@ function NumberStepper({
           className="w-12 bg-transparent text-center font-mono text-sm font-medium tabular-nums text-fg focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />
         {suffix && (
-          <span className="select-none font-mono text-[10px] uppercase text-muted tracking-wider">
+          <span className="select-none font-mono text-[10px] uppercase text-muted tracking-wider shrink-0">
             {suffix}
           </span>
         )}
@@ -215,6 +219,7 @@ function NumberStepper({
         onClick={handleIncrement}
         disabled={value >= max}
         ariaLabel={`${ariaLabel ?? 'Wert'} erhöhen`}
+        side="right"
       />
     </div>
   )
@@ -534,11 +539,8 @@ export const SettingsPanel = memo(function SettingsPanel({
 
         {/* Cycle, Daily Goal & Weekly Goal in 3 Columns */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="flex flex-col justify-between gap-1.5">
-            <div className="flex flex-col">
-              <span className="text-xs font-bold uppercase tracking-wider text-fg">{t.settings.cycle}</span>
-              <p className="text-[10px] text-muted line-clamp-1">{t.settings.cycleHint}</p>
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-fg">{t.settings.cycle}</span>
             <NumberStepper
               value={settings.phases.roundsBeforeLongBreak}
               min={1}
@@ -553,14 +555,12 @@ export const SettingsPanel = memo(function SettingsPanel({
                 }))
               }
             />
-            <div className="h-3" />
           </div>
 
-          <div className="flex flex-col justify-between gap-1.5">
-            <div className="flex flex-col">
-              <span className="text-xs font-bold uppercase tracking-wider text-fg">{t.settings.dailyGoal}</span>
-              <p className="text-[10px] text-muted line-clamp-1">{t.settings.dailyGoalHint}</p>
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-fg">
+              {t.settings.dailyGoal} ({(settings.dailyGoalMinutes / 60).toFixed(1)} H)
+            </span>
             <NumberStepper
               value={settings.dailyGoalMinutes}
               min={15}
@@ -575,18 +575,12 @@ export const SettingsPanel = memo(function SettingsPanel({
                 }))
               }
             />
-            <div className="flex items-center justify-center">
-              <span className="text-[10px] text-muted">
-                {t.settings.dailyGoalHours(settings.dailyGoalMinutes / 60)}
-              </span>
-            </div>
           </div>
 
-          <div className="flex flex-col justify-between gap-1.5">
-            <div className="flex flex-col">
-              <span className="text-xs font-bold uppercase tracking-wider text-fg">{t.settings.weeklyGoal}</span>
-              <p className="text-[10px] text-muted line-clamp-1">{t.settings.weeklyGoalHint}</p>
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-fg">
+              {t.settings.weeklyGoal} ({(settings.weeklyGoalMinutes / 60).toFixed(1)} H)
+            </span>
             <NumberStepper
               value={settings.weeklyGoalMinutes}
               min={15}
@@ -601,11 +595,6 @@ export const SettingsPanel = memo(function SettingsPanel({
                 }))
               }
             />
-            <div className="flex items-center justify-center">
-              <span className="text-[10px] text-muted">
-                {t.settings.weeklyGoalHours(settings.weeklyGoalMinutes / 60)}
-              </span>
-            </div>
           </div>
         </div>
       </section>
@@ -957,54 +946,74 @@ export const SettingsPanel = memo(function SettingsPanel({
 
         <p className="text-[11px] text-muted -mt-1">{t.settings.dataHint}</p>
 
-        {/* Primary Backup Action (Full Width Hardware Pill) */}
-        <button
-          type="button"
-          onClick={handleBackup}
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-line bg-canvas px-4 py-2.5 text-xs uppercase tracking-wider text-fg transition-colors hover:border-fg/50 hover:bg-surface cursor-pointer active:scale-[0.99]"
-        >
-          <Download size={14} className="text-accent" />
-          <span>{t.settings.backup}</span>
-        </button>
+        {/* Export Matrix */}
+        <div className="flex flex-col divide-y divide-line border border-line rounded-lg bg-canvas/30 dark:bg-white/[0.02] overflow-hidden text-xs">
+          {/* Row 1: Full Backup */}
+          <div className="flex items-center justify-between px-3.5 py-2.5">
+            <div className="flex items-center gap-2">
+              <Download size={13} className="text-accent shrink-0" />
+              <span className="font-mono font-medium tracking-wider text-fg uppercase">FULL BACKUP</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleBackup}
+              className="font-mono text-[11px] font-bold tracking-wider px-3 py-1 rounded-[2px] bg-fg text-canvas hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-none"
+            >
+              .JSON
+            </button>
+          </div>
 
-        {/* Granular Exports (Symmetrical 2x2 Hardware Pills Grid) */}
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={handleSessionsCsv}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-line bg-canvas px-3 py-2 text-xs uppercase tracking-wider text-muted hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
-            title={t.dashboard.sessionsCsvTitle}
-          >
-            <FileDown size={13} className="text-muted" />
-            <span>{t.dashboard.sessionsCsv}</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleSessionsJson}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-line bg-canvas px-3 py-2 text-xs uppercase tracking-wider text-muted hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
-            title={t.dashboard.sessionsJsonTitle}
-          >
-            <FileJson size={13} className="text-muted" />
-            <span>{t.dashboard.sessionsJson}</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleTodosCsv}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-line bg-canvas px-3 py-2 text-xs uppercase tracking-wider text-muted hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
-            title={t.dashboard.todosCsvTitle}
-          >
-            <FileDown size={13} className="text-muted" />
-            <span>{t.dashboard.todosCsv}</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleTodosJson}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-line bg-canvas px-3 py-2 text-xs uppercase tracking-wider text-muted hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
-            title={t.dashboard.todosJsonTitle}
-          >
-            <FileJson size={13} className="text-muted" />
-            <span>{t.dashboard.todosJson}</span>
-          </button>
+          {/* Row 2: Sessions */}
+          <div className="flex items-center justify-between px-3.5 py-2.5">
+            <div className="flex items-center gap-2">
+              <FileDown size={13} className="text-muted shrink-0" />
+              <span className="font-mono tracking-wider text-muted uppercase">SESSIONS</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={handleSessionsCsv}
+                title={t.dashboard.sessionsCsvTitle}
+                className="font-mono text-[11px] tracking-wider px-2.5 py-1 rounded-[2px] border border-line bg-canvas hover:border-fg/40 hover:text-fg text-muted transition-colors cursor-pointer active:scale-95"
+              >
+                .CSV
+              </button>
+              <button
+                type="button"
+                onClick={handleSessionsJson}
+                title={t.dashboard.sessionsJsonTitle}
+                className="font-mono text-[11px] tracking-wider px-2.5 py-1 rounded-[2px] border border-line bg-canvas hover:border-fg/40 hover:text-fg text-muted transition-colors cursor-pointer active:scale-95"
+              >
+                .JSON
+              </button>
+            </div>
+          </div>
+
+          {/* Row 3: Todos */}
+          <div className="flex items-center justify-between px-3.5 py-2.5">
+            <div className="flex items-center gap-2">
+              <FileDown size={13} className="text-muted shrink-0" />
+              <span className="font-mono tracking-wider text-muted uppercase">TODOS</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={handleTodosCsv}
+                title={t.dashboard.todosCsvTitle}
+                className="font-mono text-[11px] tracking-wider px-2.5 py-1 rounded-[2px] border border-line bg-canvas hover:border-fg/40 hover:text-fg text-muted transition-colors cursor-pointer active:scale-95"
+              >
+                .CSV
+              </button>
+              <button
+                type="button"
+                onClick={handleTodosJson}
+                title={t.dashboard.todosJsonTitle}
+                className="font-mono text-[11px] tracking-wider px-2.5 py-1 rounded-[2px] border border-line bg-canvas hover:border-fg/40 hover:text-fg text-muted transition-colors cursor-pointer active:scale-95"
+              >
+                .JSON
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Destructive Section (Inline Two-Step Confirmation) */}
