@@ -3,7 +3,7 @@ type ChimeKind = 'focus' | 'break'
 const SAMPLE_RATE = 44_100
 
 let ctx: AudioContext | null = null
-let buffers: Record<ChimeKind, AudioBuffer | null> = { focus: null, break: null }
+const buffers: Record<ChimeKind, AudioBuffer | null> = { focus: null, break: null }
 let initialized = false
 
 function isSoundEnabled(): boolean {

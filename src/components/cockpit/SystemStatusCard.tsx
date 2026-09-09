@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react'
 import type { Session } from '../../types'
 import { BentoCard } from './BentoCard'
 import { currentStreakDays } from '../../lib/stats'
-import { addDays, sameDay, startOfWeek } from '../../lib/time'
+import { addDays, dayKey, sameDay, startOfWeek } from '../../lib/time'
 import { playMicroClick } from '../../lib/sound'
 
 interface SystemStatusCardProps {
@@ -19,10 +19,18 @@ export const SystemStatusCard = memo(function SystemStatusCard({
   className = '',
 }: SystemStatusCardProps) {
   const streak = currentStreakDays(sessions)
-  const today = new Date()
-  const weekStart = startOfWeek(today)
+  // Day-granular cache key: `new Date()` inline would defeat the memo below
+  // (fresh object identity each render) and go stale after midnight; the key
+  // string is stable within a day and changes exactly when it must recompute.
+  const todayKey = dayKey(new Date())
 
-  const { dayLogged, activeDaysThisWeek, hasLoggedToday } = useMemo(() => {
+  const { dayLogged, activeDaysThisWeek, hasLoggedToday, weekStart, today } = useMemo(() => {
+    // Reconstructed from the day key (local midnight): sameDay/startOfWeek
+    // only compare calendar days, so midnight is exactly equivalent — and the
+    // memo now genuinely depends on `todayKey`, recomputing at day rollover.
+    const [y, m, d] = todayKey.split('-').map(Number)
+    const today = new Date(y, (m ?? 1) - 1, d)
+    const weekStart = startOfWeek(today)
     const logged = WEEK_DAYS.map((_, i) => {
       const dayDate = addDays(weekStart, i)
       return sessions.some((s) => sameDay(new Date(s.start), dayDate))
@@ -34,8 +42,10 @@ export const SystemStatusCard = memo(function SystemStatusCard({
       dayLogged: logged,
       activeDaysThisWeek: count,
       hasLoggedToday: todayActive,
+      weekStart,
+      today,
     }
-  }, [sessions, weekStart, today])
+  }, [sessions, todayKey])
 
   return (
     <BentoCard

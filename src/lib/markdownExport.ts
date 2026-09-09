@@ -90,7 +90,7 @@ export function buildDailyMarkdown(exportData: DayExport, todos?: TodoItem[]): s
     .map((s) => {
       const time = fmtClock(new Date(s.start))
       const task = s.task ? sanitizeMarkdownText(s.task) : 'Ohne Aufgabe'
-      const formattedNotes = s.notes!.trim().replace(/(\r\n|\r|\n)+/g, ' · ')
+      const formattedNotes = (s.notes ?? '').trim().replace(/(\r\n|\r|\n)+/g, ' · ')
       const sanitizedNotes = sanitizeMarkdownText(formattedNotes)
       return `- **${time}** (${task}): ${sanitizedNotes}`
     })
@@ -99,7 +99,7 @@ export function buildDailyMarkdown(exportData: DayExport, todos?: TodoItem[]): s
     .filter((t) => t.done && t.completedAt && dayKey(new Date(t.completedAt)) === key)
     .sort((a, b) => (a.completedAt ?? 0) - (b.completedAt ?? 0))
   const todoLines = doneToday.map((t) => {
-    const time = fmtClock(new Date(t.completedAt!))
+    const time = fmtClock(new Date(t.completedAt ?? 0))
     const title = sanitizeMarkdownText(t.title)
     const tag = t.tag ? ` (${sanitizeMarkdownText(t.tag)})` : ''
     return `- [x] ${title}${tag} – erledigt um ${time}`

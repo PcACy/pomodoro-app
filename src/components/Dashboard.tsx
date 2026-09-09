@@ -153,20 +153,20 @@ function BarChartTooltip({
   )
 }
 
-function DonutEmptySkeleton({ message: _ }: { message?: string }) {
+function DonutEmptySkeleton({ message }: { message?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-8 font-mono select-none">
       <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-dashed border-line/60 bg-canvas/30 mb-3">
         <span className="text-muted/60 text-xs font-mono">0.0%</span>
       </div>
       <p className="max-w-[210px] text-center text-[10px] uppercase tracking-widest text-muted">
-        [ NO TELEMETRY DATA ]
+        {message ?? '[ NO TELEMETRY DATA ]'}
       </p>
     </div>
   )
 }
 
-function HourEmptySkeleton({ message: _ }: { message?: string }) {
+function HourEmptySkeleton({ message }: { message?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-8 font-mono select-none">
       <div className="flex items-end justify-center gap-1.5 h-16 w-full max-w-[260px] px-2 mb-3">
@@ -179,7 +179,7 @@ function HourEmptySkeleton({ message: _ }: { message?: string }) {
         ))}
       </div>
       <p className="max-w-[210px] text-center text-[10px] uppercase tracking-widest text-muted">
-        [ NO TELEMETRY DATA ]
+        {message ?? '[ NO TELEMETRY DATA ]'}
       </p>
     </div>
   )

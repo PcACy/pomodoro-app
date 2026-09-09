@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { ArrowUpFromLine, Square } from 'lucide-react'
 import type { Session, TodoItem, TimerMode } from '../../types'
 import { BentoCard } from './BentoCard'
@@ -171,40 +171,43 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   const leftPack = 1.5 + 4.5 * (1 - ratio)
   const rightPack = 1.5 + 4.5 * ratio
 
-  // Preserve pack thickness during mechanical eject pop so winding doesn't jump
-  const lastPacksRef = useRef<{ left: number; right: number }>({ left: leftPack, right: rightPack })
-  if (activeTodo) {
-    lastPacksRef.current = { left: leftPack, right: rightPack }
+  // Cassette insert/eject choreography, kept in a single state object:
+  // `packs` captures the live reel thickness on the transition render, so the
+  // eject pop doesn't jump when the live values disappear with the todo.
+  // The id comparison below is a render-phase adjustment (React-endorsed
+  // "adjust state during render"): no effect, no prev ref, no extra commit.
+  const currTodoId = activeTodo?.id ?? null
+  interface CassetteState {
+    id: string | null
+    anim: 'insert' | 'eject' | ''
+    textKey: string
+    packs: { left: number; right: number }
   }
-
-  const [cassetteAnim, setCassetteAnim] = useState<'insert' | 'eject' | ''>('')
-  const [textAnimKey, setTextAnimKey] = useState<string>('')
-  const prevTodoIdRef = useRef<string | null>(activeTodo?.id ?? null)
-  const isFirstRender = useRef(true)
+  const [cassette, setCassette] = useState<CassetteState>(() => ({
+    id: currTodoId,
+    anim: '',
+    textKey: '',
+    packs: { left: leftPack, right: rightPack },
+  }))
+  if (cassette.id !== currTodoId) {
+    setCassette({
+      id: currTodoId,
+      anim: currTodoId != null ? 'insert' : 'eject',
+      textKey: currTodoId ?? 'empty',
+      packs: { left: leftPack, right: rightPack },
+    })
+  }
+  const cassetteAnim = cassette.anim
+  const textAnimKey = cassette.textKey
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      return
-    }
-    const prevId = prevTodoIdRef.current
-    const currId = activeTodo?.id ?? null
-
-    if (prevId !== currId) {
-      prevTodoIdRef.current = currId
-      if (currId != null) {
-        setCassetteAnim('insert')
-        setTextAnimKey(currId)
-        const t = setTimeout(() => setCassetteAnim(''), 280)
-        return () => clearTimeout(t)
-      } else {
-        setCassetteAnim('eject')
-        setTextAnimKey('empty')
-        const t = setTimeout(() => setCassetteAnim(''), 240)
-        return () => clearTimeout(t)
-      }
-    }
-  }, [activeTodo?.id])
+    if (!cassette.anim) return
+    const t = setTimeout(
+      () => setCassette((c) => ({ ...c, anim: '' })),
+      cassette.anim === 'insert' ? 280 : 240,
+    )
+    return () => clearTimeout(t)
+  }, [cassette])
 
   return (
     <BentoCard
@@ -307,8 +310,8 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
                         : ''
                   }`}
                 >
-                  <Reel packWidth={activeTodo ? leftPack : lastPacksRef.current.left} spinning={spinning} />
-                  <Reel packWidth={activeTodo ? rightPack : lastPacksRef.current.right} spinning={spinning} reverse />
+                  <Reel packWidth={activeTodo ? leftPack : cassette.packs.left} spinning={spinning} />
+                  <Reel packWidth={activeTodo ? rightPack : cassette.packs.right} spinning={spinning} reverse />
                 </div>
               )}
             </div>

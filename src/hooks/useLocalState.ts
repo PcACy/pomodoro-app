@@ -2,7 +2,9 @@ import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 
 
 export function useLocalState<T>(key: string, initial: T): [T, Dispatch<SetStateAction<T>>] {
   const initialRef = useRef(initial)
-  initialRef.current = initial
+  useEffect(() => {
+    initialRef.current = initial
+  })
 
   const [value, setValue] = useState<T>(() => {
     try {

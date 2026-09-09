@@ -13,7 +13,9 @@ interface Handlers {
  */
 export function useNotificationActions({ onStartPhase, onAddTime }: Handlers): void {
   const ref = useRef({ onStartPhase, onAddTime })
-  ref.current = { onStartPhase, onAddTime }
+  useEffect(() => {
+    ref.current = { onStartPhase, onAddTime }
+  })
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return

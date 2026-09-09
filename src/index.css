@@ -9,12 +9,6 @@
   font-display: swap;
 }
 
-.font-glyph {
-  font-family: 'Doto', monospace;
-  font-variation-settings: 'ROND' 0;
-  font-feature-settings: 'dlig' 1;
-}
-
 /* =========================================================================
    1. NOTHING DESIGN SYSTEM TOKENS
    ========================================================================= */
@@ -165,26 +159,17 @@
 
 /* =========================================================================
    ACCENT COLOR TOKENS
+   Nothing spec: static signal red #D71921 (no accent picker).
    ========================================================================= */
-:root,
-:root[data-accent='red'],
-:root:not([data-accent]),
-html[data-accent='red'] {
+:root {
   --accent: 215 25 33 !important;
   --accent-strong: 215 25 33 !important;
   --accent-subtle: rgba(215, 25, 33, 0.15) !important;
 }
 
-/* Nothing spec: only signal red #D71921. No orange/blue/green/monochrome accents. */
-
 /* =========================================================================
    DOT-MATRIX MOTIF & BACKGROUNDS
    ========================================================================= */
-.dot-grid {
-  background-image: radial-gradient(circle, rgb(var(--border-visible)) 1px, transparent 1px);
-  background-size: 16px 16px;
-}
-
 .dot-grid-subtle {
   background-image: radial-gradient(circle, rgb(var(--border-visible)) 0.75px, transparent 0.75px);
   background-size: 14px 14px;
@@ -314,22 +299,6 @@ textarea:focus:not(:focus-visible) {
   @apply bg-transparent;
 }
 
-/* iOS-typical View Transitions */
-@keyframes tab-enter {
-  0% {
-    opacity: 0;
-    transform: scale(0.98) translateY(4px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.animate-tab-enter {
-  animation: tab-enter 250ms cubic-bezier(0.2, 0, 0, 1) forwards;
-}
-
 /* =========================================================================
    MOTION SYSTEM — Snappy mechanical Nothing motion
    Only transform / opacity / filter are ever animated (no layout thrash).
@@ -416,19 +385,6 @@ textarea:focus:not(:focus-visible) {
 }
 .animate-add-pop {
   animation: add-pop 150ms cubic-bezier(0.2, 0, 0, 1);
-}
-
-/* --- Mechanical button feedback ------------------------------------------ */
-.tap-spring {
-  transition:
-    transform 100ms cubic-bezier(0.2, 0, 0, 1),
-    background-color 120ms ease,
-    color 120ms ease,
-    border-color 120ms ease,
-    opacity 120ms ease;
-}
-.tap-spring:active:not(:disabled) {
-  transform: scale(0.96);
 }
 
 /* --- Dialog entrance / exit (Mechanical) --------------------------------- */

@@ -9,12 +9,21 @@ interface TimerBroadcastPayload {
   completedFocusInCycle: number
   phaseStartedAt?: number
   senderId: string
+  seq: number
 }
 
 type BroadcastMessage = { type: 'timer_state'; payload: TimerBroadcastPayload }
 
 const CHANNEL_NAME = 'pomau_sync_channel'
 const TAB_INSTANCE_ID = Math.random().toString(36).slice(2, 9)
+
+// Monotonic per-tab sequence counter: when two tabs drive the timer at once,
+// receivers apply last-writer-wins per sender instead of flapping between
+// interleaved stale and fresh states.
+let broadcastSeq = 0
+// Last applied seq per sender tab; bounded below to avoid unbounded growth
+// from short-lived tabs (e.g. repeatedly opened PiP/refresh cycles).
+const lastSeqBySender = new Map<string, number>()
 
 let channel: BroadcastChannel | null = null
 
@@ -30,12 +39,13 @@ function getChannel(): BroadcastChannel | null {
   return channel
 }
 
-export function broadcastTimerState(state: Omit<TimerBroadcastPayload, 'senderId'>): void {
+export function broadcastTimerState(state: Omit<TimerBroadcastPayload, 'senderId' | 'seq'>): void {
   try {
+    broadcastSeq += 1
     const ch = getChannel()
     ch?.postMessage({
       type: 'timer_state',
-      payload: { ...state, senderId: TAB_INSTANCE_ID },
+      payload: { ...state, senderId: TAB_INSTANCE_ID, seq: broadcastSeq },
     } satisfies BroadcastMessage)
   } catch {
     /* ignore */
@@ -61,7 +71,8 @@ export function subscribeBroadcast(callback: (msg: BroadcastMessage) => void): (
       typeof p.phase === 'string' &&
       typeof p.status === 'string' &&
       typeof p.completedFocusInCycle === 'number' &&
-      (p.targetEnd === null || typeof p.targetEnd === 'number')
+      (p.targetEnd === null || typeof p.targetEnd === 'number') &&
+      (p.seq === undefined || typeof p.seq === 'number')
     )
   }
 
@@ -77,6 +88,16 @@ export function subscribeBroadcast(callback: (msg: BroadcastMessage) => void): (
 
     if (sender === TAB_INSTANCE_ID) {
       return // Ignore own messages
+    }
+    // Drop stale/out-of-order states per sender: without this, two tabs
+    // driving the timer at once flap between old and new states.
+    // Messages without a seq (older app versions) are always applied.
+    const seq = (data.payload as { seq?: unknown }).seq
+    if (typeof sender === 'string' && typeof seq === 'number') {
+      const last = lastSeqBySender.get(sender)
+      if (last !== undefined && seq <= last) return
+      lastSeqBySender.set(sender, seq)
+      if (lastSeqBySender.size > 100) lastSeqBySender.clear()
     }
     callback(data)
   }

@@ -1,7 +1,7 @@
 import type { Session, TodoItem } from '../types'
 import { dayKey } from './time'
 
-const FORMULA_PREFIX = /^[\=\+\-\@\t\r\|\%]/
+const FORMULA_PREFIX = /^[=+\-@\t\r|%]/
 
 function sanitizeCell(value: unknown): string {
   let s = String(value ?? '')

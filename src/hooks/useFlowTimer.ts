@@ -35,10 +35,15 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
   const taskRef = useRef(task)
   const tagRef = useRef(tag)
   const onFinishRef = useRef(onFinish)
+  // Intentional synchronous latest-ref sync (not an effect): toggle() must
+  // observe the current status even when invoked twice within the same tick —
+  // an effect would leave a stale window and turn toggle+toggle into start+start.
+  /* eslint-disable react-hooks/refs */
   statusRef.current = status
   taskRef.current = task
   tagRef.current = tag
   onFinishRef.current = onFinish
+  /* eslint-enable react-hooks/refs */
 
   // Initialize flow tick snapshot
   useEffect(() => {

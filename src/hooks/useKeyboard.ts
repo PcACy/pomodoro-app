@@ -35,8 +35,10 @@ const isActivatableTarget = (el: EventTarget | null): boolean => {
 export function useKeyboard(handlers: ShortcutHandlers, enabled = true): void {
   const handlersRef = useRef(handlers)
   const enabledRef = useRef(enabled)
-  handlersRef.current = handlers
-  enabledRef.current = enabled
+  useEffect(() => {
+    handlersRef.current = handlers
+    enabledRef.current = enabled
+  })
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

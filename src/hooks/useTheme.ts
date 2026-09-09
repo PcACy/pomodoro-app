@@ -97,5 +97,9 @@ export function useThemeColors(colorMode: ColorMode): ThemeColors {
       long: rgb('--c-long'),
       chart: Array.from({ length: 8 }, (_, i) => rgb(`--c-chart-${i + 1}`)),
     }
+    // `colorMode` is intentionally a dependency even though the memo body
+    // never names it: `readVar` reads live DOM values that `applyTheme`
+    // rewrites on every mode change, so the cache must invalidate exactly then.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [colorMode])
 }

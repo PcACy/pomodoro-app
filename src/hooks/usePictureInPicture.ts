@@ -88,9 +88,10 @@ export function usePictureInPicture(): PictureInPictureState {
     openingRef.current = true
     try {
       // 1. Modern Document Picture-in-Picture API (Chrome/Edge >= 116)
-    if (supportsDocumentPip()) {
+    const docPip = window.documentPictureInPicture
+    if (supportsDocumentPip() && docPip) {
       try {
-        const win = await window.documentPictureInPicture!.requestWindow({
+        const win = await docPip.requestWindow({
           width: PIP_WIDTH,
           height: PIP_HEIGHT,
         })
@@ -145,7 +146,9 @@ export function usePictureInPicture(): PictureInPictureState {
   }, [isSupported, mode, cleanupVideo])
 
   const pipWindowRef = useRef<Window | null>(null)
-  pipWindowRef.current = pipWindow
+  useEffect(() => {
+    pipWindowRef.current = pipWindow
+  })
 
   // Sync theme changes to active document PiP window
   useEffect(() => {

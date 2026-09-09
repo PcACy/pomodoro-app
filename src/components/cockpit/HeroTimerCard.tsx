@@ -92,6 +92,9 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   } else if (flowParts.length === 2) {
     flowSeconds = (flowParts[0] || 0) * 60 + (flowParts[1] || 0)
   }
+  // Defensive: a malformed time string must not poison the progress bar
+  // (NaN would render aria-valuenow={NaN} and an empty bar).
+  if (!Number.isFinite(flowSeconds) || flowSeconds < 0) flowSeconds = 0
   // Benchmark 25 mins (= 1500 sec) for full 20-block flow bar (1 block every 75 sec)
   const flowRatio = Math.min(1, flowSeconds / 1500)
   const flowFilledSegments = Math.min(

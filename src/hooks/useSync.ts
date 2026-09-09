@@ -114,9 +114,11 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
   const busyRef = useRef(false)
   const syncAgainRef = useRef(false)
   const userRef = useRef(user)
-  userRef.current = user
   const mergeRef = useRef(mergeRemoteTodos)
-  mergeRef.current = mergeRemoteTodos
+  useEffect(() => {
+    userRef.current = user
+    mergeRef.current = mergeRemoteTodos
+  })
 
   const pushQueue = useCallback(async (supabase: SupabaseClient): Promise<boolean> => {
     if (!userRef.current) return true

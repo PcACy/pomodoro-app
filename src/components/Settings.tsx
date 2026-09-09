@@ -50,7 +50,9 @@ interface NumberStepperProps {
 
 function useHoldToRepeat(callback: () => void, disabled: boolean) {
   const callbackRef = useRef(callback)
-  callbackRef.current = callback
+  useEffect(() => {
+    callbackRef.current = callback
+  })
 
   const timerRef = useRef<number | null>(null)
   const intervalRef = useRef<number | null>(null)

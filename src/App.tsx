@@ -56,14 +56,7 @@ export default function App() {
   const mouseTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
-    document.documentElement.dataset.accent = settings.accentColor || 'red'
-  }, [settings.accentColor])
-
-  useEffect(() => {
-    if (!isZenMode) {
-      setIsMouseActive(true)
-      return
-    }
+    if (!isZenMode) return
     const onActivity = () => {
       setIsMouseActive(true)
       if (mouseTimerRef.current != null) window.clearTimeout(mouseTimerRef.current)
@@ -209,6 +202,9 @@ export default function App() {
   )
 
   const handleToggleZen = useCallback(() => {
+    // Reset the idle badge on every (re-)entry; outside zen mode the flag is
+    // irrelevant because the badge is only rendered in the zen overlay.
+    setIsMouseActive(true)
     setIsZenMode((prev) => !prev)
   }, [])
 
@@ -269,22 +265,26 @@ export default function App() {
   const syncNow = sync.sync
   const handleSyncNow = useCallback(() => void syncNow(true), [syncNow])
 
-  const [liveAnnouncement, setLiveAnnouncement] = useState('')
-  const prevPhaseRef = useRef(timer.phase)
-  const prevStatusRef = useRef(timer.status)
-
-  useEffect(() => {
-    if (prevPhaseRef.current !== timer.phase) {
-      prevPhaseRef.current = timer.phase
+  const [liveAnnouncement, setLiveAnnouncement] = useState({
+    phase: timer.phase,
+    status: timer.status,
+    message: '',
+  })
+  // Render-phase adjustment (React-endorsed "adjust state during render"):
+  // derives the screen-reader announcement from phase/status transitions
+  // without an effect + prev refs and without a cascading re-render.
+  if (liveAnnouncement.phase !== timer.phase || liveAnnouncement.status !== timer.status) {
+    let message = liveAnnouncement.message
+    if (liveAnnouncement.phase !== timer.phase) {
       const phaseName = t.phases[timer.phase]
       const durationMins = Math.round(timer.totalMs / 60_000)
-      setLiveAnnouncement(`${phaseName} gestartet (${durationMins} Minuten).`)
-    } else if (prevStatusRef.current !== timer.status) {
-      prevStatusRef.current = timer.status
-      if (timer.status === 'paused') setLiveAnnouncement(`${t.phases[timer.phase]} pausiert.`)
-      else if (timer.status === 'running') setLiveAnnouncement(`${t.phases[timer.phase]} fortgesetzt.`)
+      message = `${phaseName} gestartet (${durationMins} Minuten).`
+    } else if (liveAnnouncement.status !== timer.status) {
+      if (timer.status === 'paused') message = `${t.phases[timer.phase]} pausiert.`
+      else if (timer.status === 'running') message = `${t.phases[timer.phase]} fortgesetzt.`
     }
-  }, [timer.phase, timer.status, timer.totalMs, t.phases])
+    setLiveAnnouncement({ phase: timer.phase, status: timer.status, message })
+  }
 
   return (
     <div className="min-h-screen min-h-[100dvh] flex flex-col justify-start px-4 sm:px-6 pt-3 pb-4 max-w-7xl 2xl:max-w-[1440px] mx-auto relative w-full">
@@ -293,7 +293,7 @@ export default function App() {
 
       {/* Screen Reader Live Region for WCAG 2.1 AA Announcements */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
-        {liveAnnouncement}
+        {liveAnnouncement.message}
       </div>
 
       <header className="flex w-full h-11 shrink-0 items-center justify-between gap-4 px-1 mb-2 sm:mb-3">

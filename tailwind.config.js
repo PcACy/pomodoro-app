@@ -79,7 +79,6 @@ export default {
       animation: {
         'fade-in': 'fade-in 0.25s ease-out',
         shake: 'shake 0.35s ease-in-out',
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
     },
   },

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { STORAGE_KEYS, type TodoItem } from '../types'
 import { uid } from '../lib/uid'
 import { enqueue } from '../lib/syncQueue'
@@ -20,19 +20,24 @@ const preferNewer = (a: TodoItem, b: TodoItem): TodoItem => {
 
 export function useTodos() {
   const [todos, setTodos] = useState<TodoItem[]>(readTodosLocal)
+  // Mirror of state for updater-free writes: side effects (localStorage,
+  // sync queue) must not run inside a setState updater, which StrictMode
+  // may invoke twice. Storage events keep the ref in sync cross-tab; JS
+  // run-to-completion makes the synchronous read-compute-write below atomic.
+  const todosRef = useRef(todos)
 
   const updateTodos = useCallback((updater: (prev: TodoItem[]) => TodoItem[]) => {
-    setTodos((prev) => {
-      const next = updater(prev)
-      writeTodosLocal(next)
-      return next
-    })
+    const next = updater(todosRef.current)
+    todosRef.current = next
+    writeTodosLocal(next)
+    setTodos(next)
   }, [])
 
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEYS.todos) {
         if (!e.newValue) {
+          todosRef.current = []
           setTodos([])
           return
         }
@@ -46,6 +51,7 @@ export function useTodos() {
               const sanitized = sanitizeTodoItem(item)
               if (sanitized) valid.push(sanitized)
             }
+            todosRef.current = valid
             setTodos(valid)
           }
         } catch {
@@ -109,12 +115,10 @@ export function useTodos() {
   const incrementPomodoros = useCallback(
     (id: string | null) => {
       if (!id) return
-      updateTodos((prev) => {
-        const target = prev.find((t) => t.id === id)
-        if (!target) return prev
-        enqueue({ kind: 'upsert', table: 'todos', id })
-        return prev.map((t) => (t.id === id ? withUpdatedAt({ ...t, pomodoros: t.pomodoros + 1 }) : t))
-      })
+      const target = todosRef.current.find((t) => t.id === id)
+      if (!target) return
+      updateTodos((prev) => prev.map((t) => (t.id === id ? withUpdatedAt({ ...t, pomodoros: t.pomodoros + 1 }) : t)))
+      enqueue({ kind: 'upsert', table: 'todos', id })
     },
     [updateTodos],
   )

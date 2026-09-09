@@ -8,6 +8,7 @@ import { fmtTime } from '../lib/time'
 import { getLang, translations } from '../lib/i18n'
 import { useTranslation } from './useTranslation'
 import { broadcastTimerState, subscribeBroadcast } from '../lib/broadcast'
+import { AUTO_BREAKS_KEY, readFlag } from '../lib/flagsStore'
 import { getTimerTickSnapshot, setTimerTickSnapshot, subscribeTimerTick } from '../lib/timerStore'
 
 interface Options {
@@ -40,6 +41,11 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
 
   const machineRef = useRef(machine)
   const settingsRef = useRef(settings)
+  // Intentional synchronous latest-ref sync (not an effect): callbacks such
+  // as start()/pause() rely on seeing the current render's values even when
+  // invoked twice within the same tick — an effect would leave a stale
+  // window. See the guards documented in finishCurrentPhase/start/pause.
+  /* eslint-disable react-hooks/refs */
   machineRef.current = machine
   settingsRef.current = settings
 
@@ -56,6 +62,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
   taskRef.current = task
   tagRef.current = tag
   onFocusCompleteRef.current = onFocusComplete
+  /* eslint-enable react-hooks/refs */
 
   // Initialize initial tick snapshot
   useEffect(() => {
@@ -137,10 +144,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     const d = phaseDuration(settingsRef.current, nextPhase)
     cycleRef.current = nextCycle
 
-    const autoBreaks =
-      typeof localStorage !== 'undefined'
-        ? localStorage.getItem('pomodoro.auto_breaks') === 'true'
-        : false
+    const autoBreaks = readFlag(AUTO_BREAKS_KEY, true)
     const shouldRun = skipped || (m.phase === 'focus' ? autoBreaks : false)
     const nextStatus: TimerStatus = shouldRun ? 'running' : 'idle'
     const targetEnd = shouldRun ? now + d : null

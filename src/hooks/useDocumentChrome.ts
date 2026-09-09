@@ -89,8 +89,12 @@ function useDocumentChrome(
   const progressRef = useRef(progress)
   const remainingMsRef = useRef(remainingMs)
   const lastFaviconRef = useRef<{ key: string; uri: string }>({ key: '', uri: DEFAULT_FAVICON })
-  progressRef.current = progress
-  remainingMsRef.current = remainingMs
+  // Sync latest values for the title/favicon effect below. Declared first so
+  // it always runs before the consumer on every commit (effects run in order).
+  useEffect(() => {
+    progressRef.current = progress
+    remainingMsRef.current = remainingMs
+  })
 
   useEffect(() => {
     const paused = status === 'paused'

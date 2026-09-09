@@ -13,7 +13,9 @@ function wakeLockSupported(): boolean {
 export function useWakeLock(active: boolean): void {
   const sentinelRef = useRef<WakeLockSentinel | null>(null)
   const activeRef = useRef(active)
-  activeRef.current = active
+  useEffect(() => {
+    activeRef.current = active
+  })
 
   useEffect(() => {
     if (!wakeLockSupported()) return

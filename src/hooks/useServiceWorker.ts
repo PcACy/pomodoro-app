@@ -12,6 +12,7 @@ export function useServiceWorker(): ServiceWorkerState {
   const waitingWorkerRef = useRef<ServiceWorker | null>(null)
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null)
   const reloadingRef = useRef(false)
+  const reloadTimeoutRef = useRef<number | null>(null)
   const initialVersionRef = useRef<string | null>(
     typeof __APP_BUILD_VERSION__ !== 'undefined' ? __APP_BUILD_VERSION__ : null,
   )
@@ -25,8 +26,11 @@ export function useServiceWorker(): ServiceWorkerState {
       waiting.postMessage({ type: 'SKIP_WAITING' })
       // Give the new worker a moment to activate (controllerchange reloads).
       // Fallback: navigation is network-first, so even a plain reload loads
-      // the fresh index.html + hashed assets.
-      setTimeout(() => {
+      // the fresh index.html + hashed assets. The timeout is tracked so an
+      // unmount in between cannot fire a stale reload.
+      if (reloadTimeoutRef.current != null) window.clearTimeout(reloadTimeoutRef.current)
+      reloadTimeoutRef.current = window.setTimeout(() => {
+        reloadTimeoutRef.current = null
         if (reloadingRef.current) {
           reloadingRef.current = false
           window.location.reload()
@@ -109,6 +113,10 @@ export function useServiceWorker(): ServiceWorkerState {
         // Consume the flag: without this, reload() and this handler would
         // each trigger a full page reload.
         reloadingRef.current = false
+        if (reloadTimeoutRef.current != null) {
+          window.clearTimeout(reloadTimeoutRef.current)
+          reloadTimeoutRef.current = null
+        }
         window.location.reload()
       }
     }
@@ -153,6 +161,10 @@ export function useServiceWorker(): ServiceWorkerState {
     return () => {
       disposed = true
       clearInterval(intervalId)
+      if (reloadTimeoutRef.current != null) {
+        window.clearTimeout(reloadTimeoutRef.current)
+        reloadTimeoutRef.current = null
+      }
       trackedCleanups.forEach((fn) => fn())
       trackedCleanups.clear()
       registrationRef.current?.removeEventListener('updatefound', onUpdateFound)
