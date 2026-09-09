@@ -287,7 +287,7 @@ export default function App() {
   }, [timer.phase, timer.status, timer.totalMs, t.phases])
 
   return (
-    <div className="min-h-screen min-h-[100dvh] flex flex-col justify-start px-3 sm:px-6 lg:px-8 pt-4 pb-12 max-w-7xl 2xl:max-w-[1440px] mx-auto relative w-full">
+    <div className="min-h-screen min-h-[100dvh] flex flex-col justify-start px-4 sm:px-6 pt-3 pb-4 max-w-7xl 2xl:max-w-[1440px] mx-auto relative w-full">
       {/* Dynamic Document Title & Favicon Manager (Isolated from App re-renders) */}
       <DocumentChrome phase={chromePhase} status={chromeStatus} mode={mode} />
 
@@ -296,12 +296,12 @@ export default function App() {
         {liveAnnouncement}
       </div>
 
-      <header className="flex w-full h-14 shrink-0 items-center justify-between gap-4 px-1">
+      <header className="flex w-full h-11 shrink-0 items-center justify-between gap-4 px-1 mb-2 sm:mb-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors">
             <CatLogo
               className="text-fg"
-              size={20}
+              size={18}
               state={isRunning ? chromePhase : 'idle'}
             />
           </div>
@@ -352,7 +352,7 @@ export default function App() {
             }}
             title={t.nav.statistics}
             aria-label={t.nav.statistics}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line bg-surface hover:border-fg/40 text-muted hover:text-fg uppercase tracking-wider transition-colors cursor-pointer text-[11px]"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-line bg-surface hover:border-fg/40 text-muted hover:text-fg uppercase tracking-wider transition-colors cursor-pointer text-[11px]"
           >
             <BarChart3 size={13} />
             <span className="hidden md:inline">{t.nav.statistics}</span>
@@ -367,7 +367,7 @@ export default function App() {
             }}
             title={t.nav.settings}
             aria-label={t.nav.settings}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line bg-surface hover:border-fg/40 text-muted hover:text-fg uppercase tracking-wider transition-colors cursor-pointer text-[11px]"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-line bg-surface hover:border-fg/40 text-muted hover:text-fg uppercase tracking-wider transition-colors cursor-pointer text-[11px]"
           >
             <SettingsIcon size={13} />
             <span className="hidden md:inline">{t.nav.settings}</span>
@@ -375,7 +375,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex w-full flex-1 flex-col items-center justify-start pt-2 sm:pt-3">
+      <main className="flex w-full flex-1 flex-col items-center justify-start">
         {!isZenMode && (
           <BentoCockpit
             phaseLabel={timer.phaseLabel}

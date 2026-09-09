@@ -204,7 +204,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
         </div>
 
         {/* 7-Column Full-Width VU-Meter LED Equalizer Grid */}
-        <div className="w-full grid grid-cols-7 gap-2.5 sm:gap-3 px-1 my-3">
+        <div className="w-full grid grid-cols-7 gap-2 sm:gap-2.5 px-1 my-2">
           {DAY_LABELS.map((label, dayIdx) => {
             const dayMins = dayMinutes[dayIdx] ?? 0
             const isToday = dayIdx === todayIdx
@@ -228,7 +228,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
 
                 {/* Vertical LED Column (6 flat slabs stacked top to bottom) */}
                 <div
-                  className="w-full flex flex-col gap-1.5"
+                  className="w-full flex flex-col gap-1"
                   role="img"
                   aria-label={`${label}: ${dayMins} minutes (${activeCount}/6 segments)`}
                 >
@@ -251,7 +251,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
                     return (
                       <div
                         key={level}
-                        className={`w-full h-2 sm:h-2.5 rounded-[2px] transition-colors duration-150 ${segmentStyle}`}
+                        className={`w-full h-1.5 rounded-[1px] transition-colors duration-150 ${segmentStyle}`}
                       />
                     )
                   })}
@@ -262,7 +262,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
         </div>
 
         {/* Fixed Footer Status Line */}
-        <div className="pt-2 border-t border-line/40 flex h-7 items-center justify-between font-mono text-[9px] text-muted tracking-widest uppercase select-none">
+        <div className="pt-1.5 border-t border-line/40 flex h-6 items-center justify-between font-mono text-[9px] text-muted tracking-widest uppercase select-none">
           <span className="flex items-center gap-1.5">
             <span
               className={`h-1.5 w-1.5 rounded-full ${

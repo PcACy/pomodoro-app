@@ -125,13 +125,13 @@ export const HeroTimerCard = memo(function HeroTimerCard({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-card bg-surface border border-line p-5 sm:p-6 lg:p-7 flex flex-col justify-between select-none ${className}`}
+      className={`relative overflow-hidden rounded-card bg-surface border border-line p-4 sm:p-5 flex flex-col justify-between select-none ${className}`}
     >
       {/* Interactive Dot-Matrix background (proximity ripple, hero only) */}
       <HeroDotGridCanvas />
 
       {/* Header Bar */}
-      <div className="relative z-10 flex h-7 items-center justify-between gap-2 mb-4 shrink-0">
+      <div className="relative z-10 flex h-7 items-center justify-between gap-2 mb-2 shrink-0">
         <div className="flex items-center gap-2">
           <span
             className={`h-2 w-2 rounded-full shrink-0 transition-colors ${
@@ -157,19 +157,19 @@ export const HeroTimerCard = memo(function HeroTimerCard({
       </div>
 
       {/* Hero Glyph Display */}
-      <div className="relative z-10 flex-1 flex flex-col justify-center py-2 sm:py-3">
+      <div className="relative z-10 flex-1 flex flex-col justify-center py-1 sm:py-1.5">
         {/* Glyph Dot-Matrix Clock */}
-        <div className="my-1 flex justify-center">
+        <div className="my-0.5 flex justify-center">
           <GlyphTimeDisplay time={shownTime} />
         </div>
 
         {/* Date & Phase Info */}
-        <div className="mt-4 flex min-h-[44px] items-center justify-between gap-4 flex-wrap shrink-0">
+        <div className="mt-2 flex min-h-[36px] items-center justify-between gap-4 flex-wrap shrink-0">
           <div className="flex flex-col">
-            <span className="font-sans font-medium text-base text-fg">
+            <span className="font-sans font-medium text-sm sm:text-base text-fg leading-snug">
               {dayName}
             </span>
-            <span className="font-mono text-xs text-muted tracking-wider uppercase">
+            <span className="font-mono text-[11px] text-muted tracking-wider uppercase">
               {dateFormatted}
             </span>
           </div>
@@ -215,7 +215,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
 
         {/* 20-Segment Mechanical Progress Bar */}
         <div
-          className="mt-6 flex h-3 w-full items-center gap-0.5 shrink-0"
+          className="mt-3 flex h-2.5 w-full items-center gap-0.5 shrink-0"
           role="progressbar"
           aria-valuenow={Math.round((isFlow ? flowRatio : elapsedRatio) * 100)}
           aria-valuemin={0}
@@ -236,13 +236,13 @@ export const HeroTimerCard = memo(function HeroTimerCard({
       </div>
 
       {/* Action Controls Bar */}
-      <div className="relative z-10 mt-6 flex items-center justify-between gap-3 pt-4 border-t border-line/60 shrink-0">
+      <div className="relative z-10 mt-3 flex items-center justify-between gap-3 pt-3 border-t border-line/60 shrink-0">
         <div className="flex items-center gap-2">
           {/* Main Start / Pause Trigger */}
           <button
             type="button"
             onClick={handleToggleClick}
-            className="h-11 w-[190px] sm:w-[210px] inline-flex items-center justify-center rounded-full border border-fg px-4 sm:px-6 font-mono text-xs leading-none tracking-widest uppercase font-semibold transition-colors cursor-pointer bg-fg text-canvas hover:opacity-90 active:opacity-80 shrink-0"
+            className="h-10 w-[180px] sm:w-[200px] inline-flex items-center justify-center rounded-full border border-fg px-4 sm:px-6 font-mono text-xs leading-none tracking-widest uppercase font-semibold transition-colors cursor-pointer bg-fg text-canvas hover:opacity-90 active:opacity-80 shrink-0"
           >
             {running ? t.timer.pause : t.timer.start}
           </button>
@@ -253,7 +253,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
               type="button"
               onClick={handleAddFive}
               title="+5 minutes"
-              className="h-11 rounded-full px-3 border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg font-mono text-[10px] tracking-wider uppercase transition-colors inline-flex items-center gap-1 cursor-pointer shrink-0"
+              className="h-10 rounded-full px-3 border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg font-mono text-[10px] tracking-wider uppercase transition-colors inline-flex items-center gap-1 cursor-pointer shrink-0"
             >
               <Plus size={11} />
               5M
@@ -268,18 +268,18 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             onClick={handleResetClick}
             title={t.shortcuts.reset}
             aria-label={t.shortcuts.reset}
-            className="h-11 w-11 flex items-center justify-center shrink-0 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer"
+            className="h-10 w-10 flex items-center justify-center shrink-0 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer"
           >
-            <RotateCcw size={14} />
+            <RotateCcw size={13} />
           </button>
           <button
             type="button"
             onClick={handleSkipClick}
             title={t.shortcuts.skip}
             aria-label={t.shortcuts.skip}
-            className="h-11 w-11 flex items-center justify-center shrink-0 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer"
+            className="h-10 w-10 flex items-center justify-center shrink-0 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer"
           >
-            <SkipForward size={14} />
+            <SkipForward size={13} />
           </button>
         </div>
       </div>

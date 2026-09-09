@@ -24,7 +24,7 @@ interface ActiveTaskCardProps {
 // One pick row: fixed height so every slot state stays pixel-identical.
 function PickRow({ todo, onFocus }: { todo: TodoItem; onFocus?: (id: string) => void }) {
   return (
-    <li className="flex h-[40px] items-center justify-between gap-3">
+    <li className="flex h-[36px] items-center justify-between gap-3">
       <button
         type="button"
         onClick={() => {
@@ -47,7 +47,7 @@ function PickRow({ todo, onFocus }: { todo: TodoItem; onFocus?: (id: string) => 
           playMicroClick('tick')
           onFocus?.(todo.id)
         }}
-        className="shrink-0 font-mono text-[10px] tracking-widest uppercase text-muted hover:text-fg transition-colors cursor-pointer px-2 min-h-[40px]"
+        className="shrink-0 font-mono text-[10px] tracking-widest uppercase text-muted hover:text-fg transition-colors cursor-pointer px-2 min-h-[36px]"
       >
         FOCUS
       </button>
@@ -356,7 +356,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
             }
           }}
           title={activeTodo ? 'Eject tape (standby)' : 'Insert tape'}
-          className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-md border border-line bg-canvas font-mono text-[11px] tracking-widest uppercase text-muted transition-colors hover:border-fg/40 hover:text-fg active:translate-y-px cursor-pointer"
+          className="flex h-9 min-h-[36px] flex-1 items-center justify-center gap-1.5 rounded-md border border-line bg-canvas font-mono text-[11px] tracking-widest uppercase text-muted transition-colors hover:border-fg/40 hover:text-fg active:translate-y-px cursor-pointer"
         >
           <ArrowUpFromLine size={13} />
           <span>{activeTodo ? 'EJECT' : 'INSERT'}</span>
@@ -371,7 +371,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
             }
           }}
           title={activeTodo ? 'Stop and complete track' : 'No track loaded'}
-          className={`flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-md border font-mono text-[11px] tracking-widest uppercase transition-colors ${
+          className={`flex h-9 min-h-[36px] flex-1 items-center justify-center gap-1.5 rounded-md border font-mono text-[11px] tracking-widest uppercase transition-colors ${
             activeTodo
               ? 'border-line bg-canvas text-fg hover:bg-fg hover:text-canvas hover:border-fg active:translate-y-px cursor-pointer'
               : 'border-line/40 bg-canvas/40 text-muted/30 cursor-not-allowed pointer-events-none'
@@ -383,7 +383,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
       </div>
 
       {/* Pick slot: fixed label + exactly 3 rows + footer — height never moves */}
-      <div className="mt-3 border-t border-line/60 pt-1">
+      <div className="mt-2.5 border-t border-line/60 pt-1">
         <div className="flex h-5 items-center justify-between font-mono text-[9px] tracking-widest uppercase">
           <span className="text-muted">
             {activeTodo ? 'UP NEXT' : 'QUICK PICK'}
@@ -403,7 +403,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           )}
         </div>
         {pickPool.length === 0 ? (
-          <p className="flex h-[40px] items-center font-mono text-[10px] tracking-wider uppercase text-muted">
+          <p className="flex h-[36px] items-center font-mono text-[10px] tracking-wider uppercase text-muted">
             {activeTodo ? 'NO OTHER TAPES QUEUED' : 'NO OPEN TASKS — ADD ONE IN [TASK INBOX]'}
           </p>
         ) : (
@@ -412,7 +412,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
               <PickRow key={todo.id} todo={todo} onFocus={onFocus} />
             ))}
             {Array.from({ length: fillerCount }).map((_, i) => (
-              <li key={`filler-${i}`} aria-hidden="true" className="h-[40px]" />
+              <li key={`filler-${i}`} aria-hidden="true" className="h-[36px]" />
             ))}
           </ul>
         )}
