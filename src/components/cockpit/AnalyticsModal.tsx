@@ -61,12 +61,9 @@ export const AnalyticsModal = memo(function AnalyticsModal({
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-line">
           <div className="flex flex-col gap-0.5 font-mono">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#EB1E23] animate-pulse shrink-0" />
-              <span className="text-[11px] sm:text-xs font-bold tracking-widest text-fg uppercase">
-                PERFORMANCE // METRICS
-              </span>
-            </div>
+            <span className="text-[11px] sm:text-xs font-bold tracking-widest text-fg uppercase">
+              PERFORMANCE
+            </span>
             <span className="text-[9px] sm:text-[10px] tracking-wider text-muted uppercase">
               SYSTEM TELEMETRY & LOGGED SESSIONS
             </span>

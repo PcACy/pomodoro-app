@@ -51,29 +51,20 @@ function MetricCard({
   value,
   sub,
   extra,
-  accentDot = false,
 }: {
   channel: string
   label?: string
   value: string
   sub?: string
   extra?: React.ReactNode
-  accentDot?: boolean
 }) {
   return (
     <div className="card flex flex-col justify-between p-4 sm:p-5 transition-colors select-none font-mono">
       <div>
         <div className="flex items-center justify-between gap-2 mb-2.5">
-          <div className="flex items-center gap-1.5 min-w-0">
-            {accentDot ? (
-              <span className="h-1.5 w-1.5 rounded-full bg-[#EB1E23] animate-pulse shrink-0" />
-            ) : (
-              <span className="h-1.5 w-1.5 rounded-full bg-line shrink-0" />
-            )}
-            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted truncate">
-              {channel}
-            </p>
-          </div>
+          <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted truncate">
+            {channel}
+          </p>
           {label && (
             <span className="text-[9px] uppercase tracking-wider text-muted/60 shrink-0">
               {label}
@@ -169,7 +160,7 @@ function DonutEmptySkeleton({ message: _ }: { message?: string }) {
         <span className="text-muted/60 text-xs font-mono">0.0%</span>
       </div>
       <p className="max-w-[210px] text-center text-[10px] uppercase tracking-widest text-muted">
-        [ NO TELEMETRY DATA ] // STANDBY
+        [ NO TELEMETRY DATA ]
       </p>
     </div>
   )
@@ -188,7 +179,7 @@ function HourEmptySkeleton({ message: _ }: { message?: string }) {
         ))}
       </div>
       <p className="max-w-[210px] text-center text-[10px] uppercase tracking-widest text-muted">
-        [ NO TELEMETRY DATA ] // STANDBY
+        [ NO TELEMETRY DATA ]
       </p>
     </div>
   )
@@ -262,12 +253,9 @@ export const Dashboard = memo(function Dashboard({
     <div className="flex w-full max-w-5xl flex-col gap-5 select-none">
       {/* Dashboard Top Header with Segmented Range Filter */}
       <div className="flex flex-wrap items-center justify-between gap-3 font-mono">
-        <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-          <h2 className="text-xs font-bold uppercase tracking-widest text-fg">
-            TIMEFRAME // 01
-          </h2>
-        </div>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-fg">
+          TIMEFRAME
+        </h2>
         <SlidingSegmentedControl<TimeRange>
           options={[
             { value: 'week', label: 'WEEK' },
@@ -285,7 +273,7 @@ export const Dashboard = memo(function Dashboard({
       <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Total Focus in Range */}
         <MetricCard
-          channel="CH 01 // TOTAL TIME"
+          channel="TOTAL TIME"
           label={timeRange.toUpperCase()}
           value={fmtDuration(totalFocus.totalMinutes * 60_000, lang)}
           sub={
@@ -297,7 +285,7 @@ export const Dashboard = memo(function Dashboard({
 
         {/* Card 2: Ø Daily Focus per Active Day */}
         <MetricCard
-          channel="CH 02 // DAILY AVERAGE"
+          channel="DAILY AVG"
           label="24H RATE"
           value={avgDaily.avgMinutes > 0 ? fmtDuration(avgDaily.avgMinutes * 60_000, lang) : '0 min'}
           sub={t.dashboard.avgDailyFocusSub(
@@ -308,16 +296,15 @@ export const Dashboard = memo(function Dashboard({
 
         {/* Card 3: Daily Streak */}
         <MetricCard
-          channel="CH 03 // ACTIVE STREAK"
+          channel="STREAK"
           label="SEQUENCE"
           value={`${streak} ${streak === 1 ? 'DAY' : 'DAYS'}`}
           sub={streak > 0 ? t.dashboard.streakActive : t.dashboard.streakReset}
-          accentDot={streak > 0}
         />
 
         {/* Card 4: Pomodoro vs Flow Breakdown */}
         <MetricCard
-          channel="CH 04 // POMO vs FLOW"
+          channel="POMO / FLOW"
           label="RATIO"
           value={`${pomFlow.pomodoroPct}% / ${pomFlow.flowPct}%`}
           sub={t.dashboard.pomodoroRatio(pomFlow.pomodoroPct, pomFlow.flowPct)}
@@ -366,11 +353,8 @@ export const Dashboard = memo(function Dashboard({
       {/* Main Focus Over Time Bar Chart (Nothing Monochrome with Square Bars) */}
       <div className="card p-5">
         <div className="mb-4 flex items-center justify-between font-mono">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
-            <h3 className="text-xs font-bold text-fg uppercase tracking-widest">{chartTitle}</h3>
-          </div>
-          <span className="text-[9px] uppercase text-muted tracking-wider font-mono">TELEMETRY // CH-LOG</span>
+          <h3 className="text-xs font-bold text-fg uppercase tracking-widest">{chartTitle}</h3>
+          <span className="text-[9px] uppercase text-muted tracking-wider font-mono">TELEMETRY</span>
         </div>
         <ResponsiveContainer width="100%" height={230}>
           <BarChart data={barData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>

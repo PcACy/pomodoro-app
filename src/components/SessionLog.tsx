@@ -323,7 +323,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
             <History size={16} />
           </div>
           <p className="text-xs font-bold uppercase tracking-wider text-fg">
-            [ NO TELEMETRY DATA ] // STANDBY
+            [ NO TELEMETRY DATA ]
           </p>
           <p className="mt-1 max-w-sm text-[11px] text-muted">
             {sessions.length === 0 ? t.sessionLog.emptySub : t.sessionLog.searchPlaceholder}
@@ -337,7 +337,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
             <span className="w-14 shrink-0">DURATION</span>
             <span className="w-12 sm:w-14 shrink-0">MODE</span>
             <span className="w-16 sm:w-20 shrink-0">TAG</span>
-            <span className="flex-1 min-w-0">TELEMETRY // TASK</span>
+            <span className="flex-1 min-w-0">TASK</span>
             <span className="w-16 shrink-0 text-right">STATUS</span>
           </div>
 
