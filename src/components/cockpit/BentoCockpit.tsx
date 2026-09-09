@@ -87,9 +87,9 @@ export const BentoCockpit = memo(function BentoCockpit({
   const isRunning = mode === 'flow' ? flowStatus === 'running' : status === 'running'
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-0">
+    <div className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-0">
       {/* 1. Cockpit Bento Grid (Cards 1-7): Heroic instrument panel fitting the initial viewport */}
-      <section className="w-full flex flex-col justify-start py-0">
+      <section className="w-full flex flex-col justify-start mb-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5 auto-rows-auto">
           {/* 1. HERO TIMER: Large 2x2 card (Top-Left, Cols 1-2, Rows 1-2) */}
           <HeroTimerCard
@@ -171,7 +171,7 @@ export const BentoCockpit = memo(function BentoCockpit({
         {/* Technical Section Divider */}
         <div className="flex items-center gap-3 mb-4">
           <span className="font-mono text-[10px] sm:text-xs text-muted/60 tracking-widest uppercase">
-            02 // TASKS & LOG
+            02  TASKS & LOG
           </span>
           <div className="flex-1 h-[1px] bg-line/60" />
         </div>
