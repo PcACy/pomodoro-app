@@ -23,13 +23,34 @@ const SessionRow = memo(function SessionRow({ s, locale }: { s: Session; locale:
   const hasNote = Boolean(s.notes?.trim())
 
   return (
-    <li className="py-2.5">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 flex-col">
-          <span className="truncate text-sm text-fg">{s.task || t.sessionLog.noTask}</span>
-          <span className="font-mono text-[11px] text-muted">{fmtDateTime(new Date(s.start), locale)}</span>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
+    <li className="py-2 px-2 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors border-b border-line/30 font-mono">
+      <div className="flex items-center gap-2.5 text-xs min-w-0">
+        <span className="w-24 sm:w-28 shrink-0 text-[10px] text-muted tabular-nums truncate">
+          {fmtDateTime(new Date(s.start), locale)}
+        </span>
+        <span className="w-14 shrink-0 text-[11px] font-medium text-fg tabular-nums">
+          {fmtDuration(s.durationMs, locale === 'de-DE' ? 'de' : 'en')}
+        </span>
+        <span className="w-12 sm:w-14 shrink-0 text-[10px] text-muted/80 uppercase">
+          {s.mode === 'flow' ? 'FLOW' : 'POMO'}
+        </span>
+        <span className="w-16 sm:w-20 shrink-0 text-[10px] text-fg/80 truncate" title={s.tag || undefined}>
+          {s.tag ? (
+            <span className="flex items-center gap-1 truncate">
+              <span
+                className="h-1.5 w-1.5 rounded-full shrink-0"
+                style={{ backgroundColor: getTagColor(s.tag) }}
+              />
+              <span className="truncate">{s.tag}</span>
+            </span>
+          ) : (
+            <span className="text-muted/40">—</span>
+          )}
+        </span>
+        <span className="flex-1 min-w-0 text-fg text-xs truncate" title={s.task || t.sessionLog.noTask}>
+          {s.task || <span className="text-muted/50 italic">{t.sessionLog.noTask}</span>}
+        </span>
+        <div className="w-16 shrink-0 flex items-center justify-end gap-1.5">
           {hasNote && (
             <button
               type="button"
@@ -38,37 +59,20 @@ const SessionRow = memo(function SessionRow({ s, locale }: { s: Session; locale:
                 setOpen((o) => !o)
               }}
               title={open ? 'Notiz ausblenden' : 'Notiz anzeigen'}
-              className={`rounded-full border p-1.5 transition-colors cursor-pointer ${
+              className={`h-5 w-5 flex items-center justify-center rounded-[2px] border transition-colors cursor-pointer ${
                 open
                   ? 'border-accent bg-accent/15 text-accent'
                   : 'border-line bg-canvas text-muted hover:border-fg/40 hover:text-fg'
               }`}
             >
-              <StickyNote size={12} />
+              <StickyNote size={11} />
             </button>
           )}
-          {s.tag ? (
-            <span className="flex items-center gap-1.5 rounded-full border border-line bg-canvas px-2.5 py-0.5 font-mono text-[10px] text-fg/90">
-              <span
-                className="h-1.5 w-1.5 rounded-full shrink-0"
-                style={{
-                  backgroundColor: getTagColor(s.tag),
-                }}
-              />
-              <span>{s.tag}</span>
-            </span>
-          ) : (
-            <span className="rounded-full border border-line bg-surface px-2.5 py-0.5 font-mono text-[10px] text-muted">
-              —
-            </span>
-          )}
-          <span className="w-16 text-right font-mono text-xs tabular-nums text-fg">
-            {fmtDuration(s.durationMs, locale === 'de-DE' ? 'de' : 'en')}
-          </span>
+          <span className="text-[9px] font-mono text-muted/60 tracking-wider">LOGGED</span>
         </div>
       </div>
       {open && s.notes && (
-        <p className="mt-2 whitespace-pre-wrap rounded-card border border-line bg-surface px-3 py-2 font-mono text-xs leading-relaxed text-fg">
+        <p className="mt-2 whitespace-pre-wrap rounded-[2px] border border-line bg-canvas p-2.5 font-mono text-xs leading-relaxed text-fg">
           {s.notes}
         </p>
       )}
@@ -176,11 +180,15 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-muted">{title}</h3>
+    <div className="flex flex-col gap-3 font-mono select-none">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 pb-1 border-b border-line/60">
+        <div className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
+          <h3 className="text-xs font-bold uppercase tracking-widest text-fg">{title}</h3>
+          <span className="text-[10px] text-muted tracking-wider">[{filtered.length} ENTRIES]</span>
+        </div>
 
-        <div className="ml-auto flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <input
             ref={importRef}
             type="file"
@@ -198,9 +206,9 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
               playMicroClick('tap')
               importRef.current?.click()
             }}
-            className="flex h-8 items-center gap-1.5 rounded-full border border-line bg-canvas px-3 font-mono text-xs text-muted hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
+            className="flex h-8 items-center gap-1.5 rounded-[2px] border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] px-2.5 font-mono text-xs text-muted hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
           >
-            <Upload size={13} /> {t.sessionLog.import}
+            <Upload size={12} /> {t.sessionLog.import}
           </button>
 
           <div className="relative" ref={exportRef}>
@@ -210,16 +218,16 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
                 playMicroClick('tap')
                 setOpen((o) => !o)
               }}
-              className="flex h-8 items-center gap-1.5 rounded-full border border-line bg-canvas px-3 font-mono text-xs text-muted hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
+              className="flex h-8 items-center gap-1.5 rounded-[2px] border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] px-2.5 font-mono text-xs text-muted hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
               aria-haspopup="menu"
               aria-expanded={open}
             >
-              <Download size={13} /> {t.sessionLog.export} <ChevronDown size={12} />
+              <Download size={12} /> {t.sessionLog.export} <ChevronDown size={11} />
             </button>
             {open && (
               <div
                 role="menu"
-                className="absolute right-0 top-full z-20 mt-2 w-64 rounded-sm border border-line bg-surface p-1.5 shadow-none"
+                className="absolute right-0 top-full z-20 mt-1 w-60 rounded-[2px] border border-line bg-surface p-1 shadow-none"
               >
                 <button
                   type="button"
@@ -229,9 +237,9 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
                     handleMdDownload()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised cursor-pointer"
+                  className="flex w-full items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-left font-mono text-xs text-fg transition-colors hover:bg-fg/10 cursor-pointer"
                 >
-                  <FileText size={14} className="text-muted" /> {t.sessionLog.mdDownload}
+                  <FileText size={13} className="text-muted" /> {t.sessionLog.mdDownload}
                 </button>
                 <button
                   type="button"
@@ -240,12 +248,12 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
                     playMicroClick('tap')
                     handleMdCopy()
                   }}
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised cursor-pointer"
+                  className="flex w-full items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-left font-mono text-xs text-fg transition-colors hover:bg-fg/10 cursor-pointer"
                 >
                   {copied ? (
-                    <Check size={14} className="text-accent" />
+                    <Check size={13} className="text-accent" />
                   ) : (
-                    <Copy size={14} className="text-muted" />
+                    <Copy size={13} className="text-muted" />
                   )}
                   <span>{copied ? t.sessionLog.copied : t.sessionLog.copy}</span>
                 </button>
@@ -257,9 +265,9 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
                     handleSessionsCsv()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised cursor-pointer"
+                  className="flex w-full items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-left font-mono text-xs text-fg transition-colors hover:bg-fg/10 cursor-pointer"
                 >
-                  <FileDown size={14} className="text-muted" /> {t.sessionLog.csv}
+                  <FileDown size={13} className="text-muted" /> {t.sessionLog.csv}
                 </button>
                 <button
                   type="button"
@@ -269,22 +277,22 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
                     handleSessionsJson()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-surface-raised cursor-pointer"
+                  className="flex w-full items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-left font-mono text-xs text-fg transition-colors hover:bg-fg/10 cursor-pointer"
                 >
-                  <FileJson size={14} className="text-muted" /> {t.sessionLog.json}
+                  <FileJson size={13} className="text-muted" /> {t.sessionLog.json}
                 </button>
               </div>
             )}
           </div>
 
           <div className="relative">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted/60" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.sessionLog.searchPlaceholder}
-              className="h-11 w-40 rounded-[8px] border border-line bg-canvas pl-8 pr-3.5 font-mono text-xs text-fg placeholder:text-muted/60 focus:border-fg focus:outline-none sm:w-56 transition-colors"
+              className="h-8 w-36 sm:w-48 rounded-[2px] border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] pl-7 pr-2.5 font-mono text-xs text-fg placeholder:text-muted/50 focus:border-fg focus:outline-none transition-colors"
             />
           </div>
 
@@ -295,10 +303,10 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
               onClear()
             }}
             disabled={sessions.length === 0}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-canvas text-muted hover:border-accent hover:text-accent disabled:pointer-events-none disabled:opacity-30 transition-colors cursor-pointer"
+            className="flex h-8 w-8 items-center justify-center rounded-[2px] border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] text-muted hover:border-accent hover:text-accent disabled:pointer-events-none disabled:opacity-30 transition-colors cursor-pointer"
             title={t.sessionLog.clearAll}
           >
-            <Trash2 size={13} />
+            <Trash2 size={12} />
           </button>
         </div>
       </div>
@@ -310,23 +318,35 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
       )}
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-10 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-card border border-line bg-surface text-muted">
-            <History size={20} />
+        <div className="flex flex-col items-center justify-center py-10 text-center font-mono">
+          <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-[2px] border border-line bg-canvas text-muted">
+            <History size={16} />
           </div>
-          <p className="font-mono text-xs font-bold uppercase tracking-wider text-fg">
-            {sessions.length === 0 ? t.sessionLog.empty : t.sessionLog.noResults}
+          <p className="text-xs font-bold uppercase tracking-wider text-fg">
+            [ NO TELEMETRY DATA ] // STANDBY
           </p>
-          <p className="mt-1 max-w-sm font-mono text-[11px] text-muted">
+          <p className="mt-1 max-w-sm text-[11px] text-muted">
             {sessions.length === 0 ? t.sessionLog.emptySub : t.sessionLog.searchPlaceholder}
           </p>
         </div>
       ) : (
-        <ul className="max-h-80 divide-y divide-line overflow-y-auto">
-          {filtered.map((s) => (
-            <SessionRow key={s.id} s={s} locale={locale} />
-          ))}
-        </ul>
+        <div className="flex flex-col w-full overflow-x-auto [scrollbar-width:thin]">
+          {/* Telemetry Column Headers */}
+          <div className="flex items-center gap-2.5 px-2 py-1.5 border-b border-line/50 text-[9px] uppercase tracking-wider text-muted font-bold min-w-[540px]">
+            <span className="w-24 sm:w-28 shrink-0">TIMESTAMP</span>
+            <span className="w-14 shrink-0">DURATION</span>
+            <span className="w-12 sm:w-14 shrink-0">MODE</span>
+            <span className="w-16 sm:w-20 shrink-0">TAG</span>
+            <span className="flex-1 min-w-0">TELEMETRY // TASK</span>
+            <span className="w-16 shrink-0 text-right">STATUS</span>
+          </div>
+
+          <ul className="max-h-80 divide-y divide-line/30 overflow-y-auto min-w-[540px]">
+            {filtered.map((s) => (
+              <SessionRow key={s.id} s={s} locale={locale} />
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   )

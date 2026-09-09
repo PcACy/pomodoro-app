@@ -14,10 +14,10 @@ const WEEKDAY_ROWS = [0, 1, 2, 3, 4, 5, 6]
 const DAY_LABELS = [0, 2, 4]
 
 function cellClass(minutes: number): string {
-  if (minutes <= 0) return 'bg-heatmap-l0 border border-heatmap-l0-border hover:border-fg/60'
-  if (minutes < 30) return 'bg-line/60 border border-line hover:border-fg/60'
-  if (minutes < 60) return 'bg-muted/60 border border-muted hover:border-fg/60'
-  if (minutes < 120) return 'bg-fg/60 border border-fg/60 hover:border-fg'
+  if (minutes <= 0) return 'bg-black/[0.04] border border-black/5 dark:bg-white/[0.04] dark:border-white/5 hover:border-fg/40'
+  if (minutes < 30) return 'bg-fg/20 border border-fg/30 hover:border-fg/60'
+  if (minutes < 60) return 'bg-fg/50 border border-fg/60 hover:border-fg/80'
+  if (minutes < 120) return 'bg-fg/80 border border-fg/90 hover:border-fg'
   return 'bg-fg border border-fg hover:border-fg'
 }
 
@@ -115,7 +115,7 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
                     key={cell.key}
                     role="img"
                     aria-label={t.heatmap.tooltip(cell.minutes, cell.count, getFormattedDate(cell))}
-                    className={`h-3 w-3 cursor-pointer rounded-none transition-colors duration-100 hover:border hover:border-fg hover:z-20 ${cellClass(
+                    className={`h-3 w-3 cursor-pointer rounded-[1px] transition-colors duration-100 hover:border hover:border-fg hover:z-20 ${cellClass(
                       cell.minutes,
                     )}`}
                     onMouseMove={(e) => handleMove(e, cell)}
@@ -131,7 +131,7 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
       <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-muted select-none">
         <span>{t.heatmap.less}</span>
         {LEVELS.map((m) => (
-          <span key={m} className={`h-3 w-3 rounded-none ${cellClass(m)}`} />
+          <span key={m} className={`h-3 w-3 rounded-[1px] ${cellClass(m)}`} />
         ))}
         <span>{t.heatmap.more}</span>
       </div>

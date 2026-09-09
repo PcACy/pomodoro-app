@@ -11,7 +11,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { Calendar, Clock, Flame, Layers } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../types'
 import { DEFAULT_SETTINGS } from '../types'
 import type { ColorMode } from '../themes'
@@ -21,7 +20,6 @@ import {
   averageDailyFocusMinutes,
   currentStreakDays,
   filterSessionsByRange,
-  formatYAxisTick,
   getYAxisConfig,
   heatmapData,
   minutesByTag,
@@ -39,10 +37,6 @@ import { clearSessions } from '../lib/db'
 import { useTranslation } from '../hooks/useTranslation'
 import type { Messages } from '../lib/i18n'
 import { SlidingSegmentedControl } from './SlidingSegmentedControl'
-
-
-const TIME_RANGES: TimeRange[] = ['week', 'month', 'all']
-
 interface Props {
   sessions: Session[]
   settings: Settings
@@ -52,48 +46,65 @@ interface Props {
 }
 
 function MetricCard({
-  icon,
+  channel,
   label,
   value,
   sub,
   extra,
   accentDot = false,
 }: {
-  icon: React.ReactNode
-  label: string
+  channel: string
+  label?: string
   value: string
   sub?: string
   extra?: React.ReactNode
   accentDot?: boolean
 }) {
   return (
-    <div className="card flex flex-col justify-between p-4 sm:p-5 transition-colors">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1 font-mono">
-          <div className="flex items-center gap-1.5 mb-1.5">
+    <div className="card flex flex-col justify-between p-4 sm:p-5 transition-colors select-none font-mono">
+      <div>
+        <div className="flex items-center justify-between gap-2 mb-2.5">
+          <div className="flex items-center gap-1.5 min-w-0">
             {accentDot ? (
-              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse shrink-0" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#EB1E23] animate-pulse shrink-0" />
             ) : (
               <span className="h-1.5 w-1.5 rounded-full bg-line shrink-0" />
             )}
-            <p className="text-[10px] uppercase tracking-wider text-muted truncate">{label}</p>
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted truncate">
+              {channel}
+            </p>
           </div>
-          <p
-            className={`font-sans font-medium tracking-tight text-fg tabular-nums truncate ${
-              value.length > 7 ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl'
-            }`}
-          >
-            {value}
-          </p>
+          {label && (
+            <span className="text-[9px] uppercase tracking-wider text-muted/60 shrink-0">
+              {label}
+            </span>
+          )}
         </div>
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-canvas text-muted">
-          {icon}
-        </div>
+        <p
+          className={`font-mono font-medium tracking-tight text-fg tabular-nums truncate ${
+            value.length > 8 ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl'
+          }`}
+        >
+          {value}
+        </p>
       </div>
-      {sub && <p className="mt-2.5 truncate font-mono text-[11px] tabular-nums text-muted">{sub}</p>}
+      {sub && <p className="mt-2.5 truncate font-mono text-[10px] sm:text-[11px] tabular-nums text-muted">{sub}</p>}
       {extra && <div className="mt-2.5">{extra}</div>}
     </div>
   )
+}
+
+function formatHardwareYAxisTick(minutes: number): string {
+  if (minutes === 0) return '00M'
+  if (minutes < 60) return `${String(minutes).padStart(2, '0')}M`
+  const h = Math.floor(minutes / 60)
+  const rem = minutes % 60
+  if (rem === 0) return `${String(h).padStart(2, '0')}H`
+  return `${String(h).padStart(2, '0')}H${String(rem).padStart(2, '0')}`
+}
+
+function formatHardwareXAxisTick(label: string): string {
+  return label.slice(0, 3).toUpperCase()
 }
 
 interface CustomBarTooltipProps {
@@ -115,7 +126,7 @@ function BarChartTooltip({
   const hasTags = data.tags && data.tags.length > 0
 
   return (
-    <div className="flex min-w-[170px] flex-col gap-1.5 rounded-sm border border-line bg-surface p-3 font-mono text-xs text-fg shadow-none">
+    <div className="flex min-w-[170px] flex-col gap-1.5 rounded-[2px] border border-line bg-surface p-2.5 font-mono text-xs text-fg shadow-none">
       <div className="border-b border-line pb-1.5">
         <p className="font-bold uppercase text-fg">{data.fullLabel}</p>
         <div className="mt-0.5 flex items-baseline justify-between gap-3 text-[11px]">
@@ -151,33 +162,33 @@ function BarChartTooltip({
   )
 }
 
-function DonutEmptySkeleton({ message }: { message: string }) {
+function DonutEmptySkeleton({ message: _ }: { message?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-6 font-mono">
-      <div className="relative flex h-28 w-28 items-center justify-center rounded-full border border-dashed border-line/80 bg-canvas/40">
-        <span className="text-muted/60 text-lg font-mono">#</span>
+    <div className="flex flex-col items-center justify-center py-8 font-mono select-none">
+      <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-dashed border-line/60 bg-canvas/30 mb-3">
+        <span className="text-muted/60 text-xs font-mono">0.0%</span>
       </div>
-      <p className="mt-3.5 max-w-[210px] text-center text-[11px] uppercase tracking-wider text-muted">
-        {message}
+      <p className="max-w-[210px] text-center text-[10px] uppercase tracking-widest text-muted">
+        [ NO TELEMETRY DATA ] // STANDBY
       </p>
     </div>
   )
 }
 
-function HourEmptySkeleton({ message }: { message: string }) {
+function HourEmptySkeleton({ message: _ }: { message?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-6 font-mono">
-      <div className="flex items-end justify-center gap-1.5 h-20 w-full max-w-[260px] px-2 mb-3">
+    <div className="flex flex-col items-center justify-center py-8 font-mono select-none">
+      <div className="flex items-end justify-center gap-1.5 h-16 w-full max-w-[260px] px-2 mb-3">
         {Array.from({ length: 24 }).map((_, i) => (
           <div
             key={i}
-            className="flex-1 bg-line/30 rounded-none transition-all"
-            style={{ height: i % 6 === 0 ? '12px' : '4px' }}
+            className="flex-1 bg-line/30 rounded-[1px] transition-all"
+            style={{ height: i % 6 === 0 ? '16px' : '6px' }}
           />
         ))}
       </div>
-      <p className="max-w-[210px] text-center text-[11px] uppercase tracking-wider text-muted">
-        {message}
+      <p className="max-w-[210px] text-center text-[10px] uppercase tracking-widest text-muted">
+        [ NO TELEMETRY DATA ] // STANDBY
       </p>
     </div>
   )
@@ -250,22 +261,23 @@ export const Dashboard = memo(function Dashboard({
   return (
     <div className="flex w-full max-w-5xl flex-col gap-5 select-none">
       {/* Dashboard Top Header with Segmented Range Filter */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-mono text-sm font-bold uppercase tracking-widest text-fg">{t.dashboard.periodOverview}</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3 font-mono">
+        <div className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+          <h2 className="text-xs font-bold uppercase tracking-widest text-fg">
+            TIMEFRAME // 01
+          </h2>
+        </div>
         <SlidingSegmentedControl<TimeRange>
-          options={TIME_RANGES.map((r) => ({
-            value: r,
-            label:
-              r === 'week'
-                ? t.dashboard.rangeWeek
-                : r === 'month'
-                ? t.dashboard.rangeMonth
-                : t.dashboard.rangeAllTime,
-          }))}
+          options={[
+            { value: 'week', label: 'WEEK' },
+            { value: 'month', label: 'MONTH' },
+            { value: 'all', label: 'ALL TIME' },
+          ]}
           value={timeRange}
           onChange={setTimeRange}
           size="sm"
-          ariaLabel={t.dashboard.periodOverview}
+          ariaLabel="Timeframe Filter"
         />
       </div>
 
@@ -273,8 +285,8 @@ export const Dashboard = memo(function Dashboard({
       <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Total Focus in Range */}
         <MetricCard
-          icon={<Clock size={15} />}
-          label={timeRange === 'week' ? t.dashboard.weeklyGoal : t.dashboard.totalFocusTime}
+          channel="CH 01 // TOTAL TIME"
+          label={timeRange.toUpperCase()}
           value={fmtDuration(totalFocus.totalMinutes * 60_000, lang)}
           sub={
             timeRange === 'week'
@@ -285,8 +297,8 @@ export const Dashboard = memo(function Dashboard({
 
         {/* Card 2: Ø Daily Focus per Active Day */}
         <MetricCard
-          icon={<Calendar size={15} />}
-          label={t.dashboard.avgDailyFocus}
+          channel="CH 02 // DAILY AVERAGE"
+          label="24H RATE"
           value={avgDaily.avgMinutes > 0 ? fmtDuration(avgDaily.avgMinutes * 60_000, lang) : '0 min'}
           sub={t.dashboard.avgDailyFocusSub(
             fmtDuration(avgDaily.avgMinutes * 60_000, lang),
@@ -296,35 +308,56 @@ export const Dashboard = memo(function Dashboard({
 
         {/* Card 3: Daily Streak */}
         <MetricCard
-          icon={<Flame size={15} className="text-fg" />}
-          label={t.dashboard.streak}
-          value={`${streak} ${streak === 1 ? t.dashboard.day : t.dashboard.days}`}
+          channel="CH 03 // ACTIVE STREAK"
+          label="SEQUENCE"
+          value={`${streak} ${streak === 1 ? 'DAY' : 'DAYS'}`}
           sub={streak > 0 ? t.dashboard.streakActive : t.dashboard.streakReset}
           accentDot={streak > 0}
         />
 
         {/* Card 4: Pomodoro vs Flow Breakdown */}
         <MetricCard
-          icon={<Layers size={15} />}
-          label={t.dashboard.pomodoroVsFlow}
+          channel="CH 04 // POMO vs FLOW"
+          label="RATIO"
           value={`${pomFlow.pomodoroPct}% / ${pomFlow.flowPct}%`}
           sub={t.dashboard.pomodoroRatio(pomFlow.pomodoroPct, pomFlow.flowPct)}
           extra={
-            <div className="h-2 w-full bg-canvas border border-line flex gap-[2px]">
-              {pomFlow.pomodoroPct === 0 && pomFlow.flowPct === 0 ? (
-                <div className="h-full w-full bg-line/20 rounded-none" />
-              ) : (
-                <>
-                  <div
-                    className="h-full bg-fg rounded-none transition-colors duration-150"
-                    style={{ width: `${pomFlow.pomodoroPct}%` }}
-                  />
-                  <div
-                    className="h-full bg-muted rounded-none transition-colors duration-150"
-                    style={{ width: `${pomFlow.flowPct}%` }}
-                  />
-                </>
-              )}
+            <div className="flex flex-col gap-1.5">
+              <div
+                className="h-2.5 w-full flex gap-1"
+                role="img"
+                aria-label={`Pomodoro ${pomFlow.pomodoroPct}%, Flow ${pomFlow.flowPct}%`}
+              >
+                {Array.from({ length: 12 }).map((_, i) => {
+                  const totalSessions = filteredSessions.length
+                  if (totalSessions === 0) {
+                    return (
+                      <div
+                        key={i}
+                        className="flex-1 h-full rounded-[1px] bg-black/[0.04] border border-black/5 dark:bg-white/[0.04] dark:border-white/5"
+                      />
+                    )
+                  }
+                  const pomoThreshold = Math.round((pomFlow.pomodoroPct / 100) * 12)
+                  const isPomo = i < pomoThreshold
+                  return (
+                    <div
+                      key={i}
+                      className={`flex-1 h-full rounded-[1px] transition-colors duration-150 ${
+                        isPomo ? 'bg-fg' : 'bg-muted/50 dark:bg-white/30'
+                      }`}
+                    />
+                  )
+                })}
+              </div>
+              <div className="flex justify-between font-mono text-[8px] text-muted tracking-widest uppercase">
+                <span className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-[1px] bg-fg shrink-0" /> POMO
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-[1px] bg-muted/50 dark:bg-white/30 shrink-0" /> FLOW
+                </span>
+              </div>
             </div>
           }
         />
@@ -333,14 +366,18 @@ export const Dashboard = memo(function Dashboard({
       {/* Main Focus Over Time Bar Chart (Nothing Monochrome with Square Bars) */}
       <div className="card p-5">
         <div className="mb-4 flex items-center justify-between font-mono">
-          <h3 className="text-xs font-bold text-muted uppercase tracking-widest">{chartTitle}</h3>
-          <span className="text-[10px] uppercase text-muted tracking-wider">{t.dashboard.focusMinutes}</span>
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
+            <h3 className="text-xs font-bold text-fg uppercase tracking-widest">{chartTitle}</h3>
+          </div>
+          <span className="text-[9px] uppercase text-muted tracking-wider font-mono">TELEMETRY // CH-LOG</span>
         </div>
         <ResponsiveContainer width="100%" height={230}>
           <BarChart data={barData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="2 2" stroke={colors.line} vertical={false} />
+            <CartesianGrid strokeDasharray="1 3" stroke={colors.line} vertical={false} />
             <XAxis
               dataKey="label"
+              tickFormatter={formatHardwareXAxisTick}
               tick={{ fill: colors.muted, fontSize: 10, fontFamily: 'Space Mono, monospace' }}
               axisLine={{ stroke: colors.line }}
               tickLine={false}
@@ -349,7 +386,7 @@ export const Dashboard = memo(function Dashboard({
             <YAxis
               domain={yAxisConfig.domain}
               ticks={yAxisConfig.ticks}
-              tickFormatter={formatYAxisTick}
+              tickFormatter={formatHardwareYAxisTick}
               tick={{ fill: colors.muted, fontSize: 10, fontFamily: 'Space Mono, monospace' }}
               axisLine={{ stroke: colors.line }}
               tickLine={false}
@@ -392,7 +429,7 @@ export const Dashboard = memo(function Dashboard({
                     contentStyle={{
                       backgroundColor: colors.surface,
                       border: `1px solid ${colors.line}`,
-                      borderRadius: '8px',
+                      borderRadius: '2px',
                       color: colors.fg,
                       fontSize: '11px',
                       fontFamily: 'Space Mono, monospace',
@@ -431,14 +468,14 @@ export const Dashboard = memo(function Dashboard({
           ) : (
             <ResponsiveContainer width="100%" height={230}>
               <BarChart data={hourData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 2" stroke={colors.line} vertical={false} />
+                <CartesianGrid strokeDasharray="1 3" stroke={colors.line} vertical={false} />
                 <XAxis
                   dataKey="hour"
                   tick={{ fill: colors.muted, fontSize: 10, fontFamily: 'Space Mono, monospace' }}
                   axisLine={{ stroke: colors.line }}
                   tickLine={false}
                   ticks={[0, 3, 6, 9, 12, 15, 18, 21]}
-                  tickFormatter={(h) => `${h}:00`}
+                  tickFormatter={(h) => `${String(h).padStart(2, '0')}H`}
                 />
                 <YAxis
                   allowDecimals={false}
@@ -450,7 +487,7 @@ export const Dashboard = memo(function Dashboard({
                   contentStyle={{
                     backgroundColor: colors.surface,
                     border: `1px solid ${colors.line}`,
-                    borderRadius: '8px',
+                    borderRadius: '2px',
                     color: colors.fg,
                     fontSize: '11px',
                     fontFamily: 'Space Mono, monospace',
