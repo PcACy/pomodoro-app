@@ -52,7 +52,6 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
   const currentTrackIndex = ((selectedTrackIndex % tracks.length) + tracks.length) % tracks.length
   const activeTrack = tracks[currentTrackIndex] || 'ALL'
   const isAllTrack = activeTrack === 'ALL'
-  const channelNumber = String(currentTrackIndex + 1).padStart(2, '0')
 
   const handlePrevTrack = useCallback(
     (e?: React.MouseEvent) => {
@@ -147,7 +146,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
     >
       <div className="flex-1 flex flex-col justify-between py-0.5 gap-2.5">
         {/* Project Selection / Active Track Row with Stepper Controls */}
-        <div className="flex items-center justify-between font-mono text-[10px] tracking-wider uppercase select-none">
+        <div className="flex h-6 items-center justify-between font-mono text-[10px] tracking-wider uppercase select-none">
           <div className="flex items-center gap-1.5 min-w-0">
             {/* Stepper controls */}
             <div className="flex items-center gap-0.5">
@@ -197,8 +196,6 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
                 ›
               </button>
             </div>
-
-            <span className="text-muted/60 shrink-0">// ACTIVE TRACK</span>
           </div>
 
           <span className="text-fg/80 tabular-nums font-mono text-[10px] shrink-0 ml-2">
@@ -211,8 +208,6 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
           {DAY_LABELS.map((label, dayIdx) => {
             const dayMins = dayMinutes[dayIdx] ?? 0
             const isToday = dayIdx === todayIdx
-
-            // 1 block = 30 min, up to 6 blocks (180 min)
             const activeCount =
               dayMins > 0 ? Math.min(6, Math.max(1, Math.ceil(dayMins / MINUTES_PER_BLOCK))) : 0
 
@@ -267,7 +262,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
         </div>
 
         {/* Fixed Footer Status Line */}
-        <div className="pt-2 border-t border-line/40 flex items-center justify-between font-mono text-[9px] text-muted tracking-widest uppercase select-none">
+        <div className="pt-2 border-t border-line/40 flex h-7 items-center justify-between font-mono text-[9px] text-muted tracking-widest uppercase select-none">
           <span className="flex items-center gap-1.5">
             <span
               className={`h-1.5 w-1.5 rounded-full ${
@@ -283,7 +278,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
             </span>
           </span>
           <span className="text-muted/70 tracking-wider">
-            {hasActivity ? `ACTIVE // CH-${channelNumber}` : `STANDBY // CH-${channelNumber}`}
+            {hasActivity ? 'ACTIVE' : 'STANDBY'}
           </span>
         </div>
       </div>

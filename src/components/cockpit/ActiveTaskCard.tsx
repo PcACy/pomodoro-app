@@ -208,7 +208,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
 
   return (
     <BentoCard
-      label="TRACK 01 // TAPE DECK"
+      label="ACTIVE TASK"
       action={
         <span
           className={`h-5 w-[76px] inline-flex items-center justify-center gap-1.5 px-2 font-mono text-[9px] leading-none tracking-widest uppercase rounded-full border transition-colors ${
@@ -234,7 +234,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         {/* Track info with smooth stationary cross-fade (no hopping) */}
         <div key={textAnimKey} className="min-w-0 flex-1 animate-track-fade">
           <h3 className={`font-sans font-medium text-lg sm:text-xl truncate ${activeTodo ? 'text-fg' : 'text-muted'}`}>
-            {activeTodo?.title || '[ NO TAPE INSERTED // SELECT TASK ]'}
+            {activeTodo?.title || '[ NO TAPE INSERTED ]'}
           </h3>
           <div className="mt-1 h-5 flex items-center gap-2 font-mono text-[10px] text-muted tracking-wider uppercase leading-none">
             {activeTodo?.tag ? (
@@ -386,7 +386,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
       <div className="mt-3 border-t border-line/60 pt-1">
         <div className="flex h-5 items-center justify-between font-mono text-[9px] tracking-widest uppercase">
           <span className="text-muted">
-            {activeTodo ? 'UP NEXT // SWITCH TAPE' : 'LOAD TAPE // QUICK PICK'}
+            {activeTodo ? 'UP NEXT' : 'QUICK PICK'}
           </span>
           {remainingPickCount > 0 ? (
             <button

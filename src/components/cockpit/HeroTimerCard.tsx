@@ -139,7 +139,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             }`}
           />
           <span className="font-mono text-[10px] sm:text-xs tracking-widest text-muted uppercase">
-            {isFlow ? 'FLOW' : 'POMODORO'} // INSTRUMENT
+            {isFlow ? 'FLOW' : 'POMODORO'}
           </span>
         </div>
 
@@ -182,7 +182,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             ) : (
               <div className="inline-flex items-center gap-2 font-mono text-xs tracking-wider uppercase">
                 <span className="text-fg font-medium">{shownLabel}</span>
-                <span className="text-line">//</span>
+                <span className="text-muted/40">·</span>
                 <span className="text-muted text-[10px] sm:text-xs">
                   ROUND {(completedFocusInCycle % safeRounds) + 1} / {safeRounds}
                 </span>
