@@ -82,19 +82,14 @@ export const SettingsModal = memo(function SettingsModal({
       >
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-line">
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
-              <span className="font-mono text-[10px] sm:text-xs tracking-widest text-muted uppercase">
-                SETTINGS // SYSTEM CONFIG
-              </span>
-              <span className="rounded-full border border-line bg-canvas px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted">
-                V1.0
-              </span>
-            </div>
-            <h2 className="font-mono text-base font-bold uppercase tracking-tight text-fg">
-              Device Configuration
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
+            <h2 className="font-mono text-xs sm:text-sm font-bold tracking-widest text-fg uppercase">
+              SETTINGS
             </h2>
+            <span className="rounded-full border border-line bg-canvas px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted">
+              V1.0
+            </span>
           </div>
 
           <button

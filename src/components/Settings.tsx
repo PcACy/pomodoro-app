@@ -426,18 +426,11 @@ export const SettingsPanel = memo(function SettingsPanel({
 
   return (
     <div className="flex w-full flex-col gap-7 font-mono">
-      {/* ────────────────────────────────────────────────────────────────
-          [ 01 // TIMER ENGINE ]
-         ──────────────────────────────────────────────────────────────── */}
+      {/* 01 TIMER ENGINE */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-line pb-2">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
-              [ 01 // TIMER ENGINE ]
-            </span>
-          </div>
-          <span className="font-mono text-[10px] text-muted uppercase tracking-wider">
-            INTERVALS & GOALS
+          <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
+            01 &nbsp;TIMER ENGINE
           </span>
         </div>
 
@@ -617,18 +610,11 @@ export const SettingsPanel = memo(function SettingsPanel({
         </div>
       </section>
 
-      {/* ────────────────────────────────────────────────────────────────
-          [ 02 // SYSTEM & AUDIO ]
-         ──────────────────────────────────────────────────────────────── */}
+      {/* 02 SYSTEM & AUDIO */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-line pb-2">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
-              [ 02 // SYSTEM & AUDIO ]
-            </span>
-          </div>
-          <span className="font-mono text-[10px] text-muted uppercase tracking-wider">
-            DISPLAY · THEME · HARDWARE
+          <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
+            02 &nbsp;SYSTEM & AUDIO
           </span>
         </div>
 
@@ -762,16 +748,12 @@ export const SettingsPanel = memo(function SettingsPanel({
         </div>
       </section>
 
-      {/* ────────────────────────────────────────────────────────────────
-          [ 03 // PROJECT TAGS ]
-         ──────────────────────────────────────────────────────────────── */}
+      {/* 03 PROJECT TAGS */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-line pb-2">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
-              [ 03 // PROJECT TAGS ]
-            </span>
-          </div>
+          <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
+            03 &nbsp;PROJECT TAGS
+          </span>
           <span className="rounded-full border border-line bg-canvas px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-muted">
             {settings.tags.length} {settings.tags.length === 1 ? 'TAG' : 'TAGS'}
           </span>
@@ -871,18 +853,11 @@ export const SettingsPanel = memo(function SettingsPanel({
         )}
       </section>
 
-      {/* ────────────────────────────────────────────────────────────────
-          [ 04 // CLOUD SYNC ]
-         ──────────────────────────────────────────────────────────────── */}
+      {/* 04 CLOUD SYNC */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-line pb-2">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
-              [ 04 // CLOUD SYNC ]
-            </span>
-          </div>
-          <span className="font-mono text-[10px] text-muted uppercase tracking-wider">
-            GITHUB GIST BACKEND
+          <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
+            04 &nbsp;CLOUD SYNC
           </span>
         </div>
 
@@ -972,18 +947,11 @@ export const SettingsPanel = memo(function SettingsPanel({
         )}
       </section>
 
-      {/* ────────────────────────────────────────────────────────────────
-          [ 05 // DATA & MEMORY ]
-         ──────────────────────────────────────────────────────────────── */}
+      {/* 05 DATA & MEMORY */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-line pb-2">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
-              [ 05 // DATA & MEMORY ]
-            </span>
-          </div>
-          <span className="font-mono text-[10px] text-muted uppercase tracking-wider">
-            BACKUP · EXPORTS · STORAGE
+          <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
+            05 &nbsp;DATA & MEMORY
           </span>
         </div>
 
