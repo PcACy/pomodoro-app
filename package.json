@@ -12,6 +12,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@capacitor/core": "^8.5.1",
+    "@capawesome-team/capacitor-android-foreground-service": "^8.1.0",
     "@supabase/supabase-js": "^2.112.3",
     "dexie": "^4.0.8",
     "dexie-react-hooks": "^1.1.7",
@@ -21,6 +23,8 @@
     "recharts": "^2.13.3"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/cli": "^8.5.1",
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.2.0",
     "@types/react": "^18.3.12",

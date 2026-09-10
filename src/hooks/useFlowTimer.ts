@@ -3,6 +3,7 @@ import type { Session, TimerStatus } from '../types'
 import { getTickerWorker } from '../lib/tickerWorker'
 import { fmtFlowTime } from '../lib/time'
 import { getFlowTickSnapshot, setFlowTickSnapshot, subscribeFlowTick } from '../lib/timerStore'
+import { updateForegroundTimer, stopForegroundTimer } from '../lib/foregroundTimer'
 
 const MIN_FLOW_SESSION_MS = 60_000
 
@@ -58,10 +59,12 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
     baseRef.current = elapsedRef.current
     segStartRef.current = Date.now()
     pausedAtRef.current = null
+    const timeStr = fmtFlowTime(elapsedRef.current)
     setFlowTickSnapshot({
       elapsedMs: elapsedRef.current,
-      time: fmtFlowTime(elapsedRef.current),
+      time: timeStr,
     })
+    void updateForegroundTimer('Flow', timeStr)
     // Sync the ref immediately: setStatus re-renders async, so a second
     // toggle in the same tick would otherwise read the stale status.
     statusRef.current = 'running'
@@ -81,6 +84,7 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
       elapsedMs: total,
       time: fmtFlowTime(total),
     })
+    void stopForegroundTimer()
     statusRef.current = 'paused'
     setStatus('paused')
   }, [])
@@ -104,6 +108,7 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
       elapsedMs: 0,
       time: '00:00',
     })
+    void stopForegroundTimer()
     statusRef.current = 'idle'
     setStatus('idle')
     if (total < MIN_FLOW_SESSION_MS) return
@@ -127,6 +132,7 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
       elapsedMs: 0,
       time: '00:00',
     })
+    void stopForegroundTimer()
     statusRef.current = 'idle'
     setStatus('idle')
   }, [])
@@ -161,6 +167,13 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
     }
   }, [])
 
+  // Clean up foreground service on unmount
+  useEffect(() => {
+    return () => {
+      void stopForegroundTimer()
+    }
+  }, [])
+
   // Count up on every tick while running.
   useEffect(() => {
     const w = getTickerWorker()
@@ -171,10 +184,12 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
           const delta = Math.max(0, now - segStartRef.current)
           const total = baseRef.current + delta
           elapsedRef.current = total
+          const timeStr = fmtFlowTime(total)
           setFlowTickSnapshot({
             elapsedMs: total,
-            time: fmtFlowTime(total),
+            time: timeStr,
           })
+          void updateForegroundTimer('Flow', timeStr)
         }
       }
     }

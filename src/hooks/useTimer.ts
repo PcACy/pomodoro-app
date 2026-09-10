@@ -10,6 +10,7 @@ import { useTranslation } from './useTranslation'
 import { broadcastTimerState, subscribeBroadcast } from '../lib/broadcast'
 import { AUTO_BREAKS_KEY, readFlag } from '../lib/flagsStore'
 import { getTimerTickSnapshot, setTimerTickSnapshot, subscribeTimerTick } from '../lib/timerStore'
+import { updateForegroundTimer, stopForegroundTimer } from '../lib/foregroundTimer'
 
 interface Options {
   settings: Settings
@@ -182,6 +183,14 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       completedFocusInCycle: nextCycle,
       phaseStartedAt: phaseStartedAtRef.current,
     })
+
+    if (shouldRun) {
+      const lang = getLang()
+      const title = translations[lang].phases[nextPhase]
+      void updateForegroundTimer(title, fmtTime(d))
+    } else {
+      void stopForegroundTimer()
+    }
   }, [])
 
   const handleTick = useCallback(
@@ -194,11 +203,15 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       } else {
         remainingMsRef.current = remaining
         const total = totalMsRef.current
+        const timeStr = fmtTime(remaining)
         setTimerTickSnapshot({
           remainingMs: remaining,
-          time: fmtTime(remaining),
+          time: timeStr,
           progress: total > 0 ? remaining / total : 0,
         })
+        const lang = getLang()
+        const title = translations[lang].phases[machineRef.current.phase]
+        void updateForegroundTimer(title, timeStr)
       }
     },
     [finishCurrentPhase],
@@ -214,11 +227,16 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     endRef.current = targetEnd
 
     const total = totalMsRef.current
+    const timeStr = fmtTime(remainingMsRef.current)
     setTimerTickSnapshot({
       remainingMs: remainingMsRef.current,
-      time: fmtTime(remainingMsRef.current),
+      time: timeStr,
       progress: total > 0 ? remainingMsRef.current / total : 0,
     })
+
+    const lang = getLang()
+    const title = translations[lang].phases[m.phase]
+    void updateForegroundTimer(title, timeStr)
 
     // Sync the ref immediately (see finishCurrentPhase): a second call in the
     // same tick must see 'running', otherwise e.g. a fast double-toggle would
@@ -250,6 +268,8 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       time: fmtTime(remaining),
       progress: total > 0 ? remaining / total : 0,
     })
+
+    void stopForegroundTimer()
 
     // Sync the ref immediately (see start()).
     const nextMachine = { ...m, status: 'paused' as TimerStatus }
@@ -292,6 +312,8 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       progress: 1,
     })
 
+    void stopForegroundTimer()
+
     // Sync the ref immediately (see start()).
     const nextMachine = { ...m, status: 'idle' as TimerStatus, totalMs: total }
     machineRef.current = nextMachine
@@ -317,12 +339,19 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
 
     const total = totalMsRef.current
     const rem = remainingMsRef.current
+    const timeStr = fmtTime(rem)
 
     setTimerTickSnapshot({
       remainingMs: rem,
-      time: fmtTime(rem),
+      time: timeStr,
       progress: total > 0 ? rem / total : 0,
     })
+
+    if (m.status === 'running') {
+      const lang = getLang()
+      const title = translations[lang].phases[m.phase]
+      void updateForegroundTimer(title, timeStr)
+    }
 
     // Sync the ref immediately (see start()).
     const nextMachine = { ...m, totalMs: total }
@@ -340,6 +369,13 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     })
   }, [])
 
+  // Clean up foreground service on unmount
+  useEffect(() => {
+    return () => {
+      void stopForegroundTimer()
+    }
+  }, [])
+
   // Listen for multi-tab BroadcastChannel sync updates
   useEffect(() => {
     return subscribeBroadcast((msg) => {
@@ -355,6 +391,14 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
           time: fmtTime(p.remainingMs),
           progress: p.totalMs > 0 ? p.remainingMs / p.totalMs : 0,
         })
+
+        if (p.status === 'running') {
+          const lang = getLang()
+          const title = translations[lang].phases[p.phase]
+          void updateForegroundTimer(title, fmtTime(p.remainingMs))
+        } else {
+          void stopForegroundTimer()
+        }
 
         if (p.phaseStartedAt != null) {
           phaseStartedAtRef.current = p.phaseStartedAt
