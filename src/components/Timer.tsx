@@ -32,7 +32,10 @@ interface Props {
   tag?: string
 }
 
-const MODES: TimerMode[] = ['pomodoro', 'flow']
+const MODES: { value: TimerMode; label: string }[] = [
+  { value: 'pomodoro', label: 'POMO' },
+  { value: 'flow', label: 'FLOW' },
+]
 const TOTAL_SEGMENTS = 20
 
 export const Timer = memo(function Timer({
@@ -73,23 +76,36 @@ export const Timer = memo(function Timer({
     ? timerTick.time
     : time || '25:00'
 
-  const currentProgress = progress ?? 0
-  const filledSegments = Math.round(currentProgress * TOTAL_SEGMENTS)
+  const currentProgress = isFlow ? 0 : (timerTick.progress ?? progress ?? 1)
+  // Mechanical Segmented Progress (20 discrete blocks, 2px gap)
+  // Fills additively from left to right (0% -> 100%)
+  const elapsedRatio = 1 - Math.min(1, Math.max(0, currentProgress))
+  const filledSegments = Math.min(
+    TOTAL_SEGMENTS,
+    Math.max(0, Math.round(elapsedRatio * TOTAL_SEGMENTS)),
+  )
 
-  const flowSeconds = Math.floor(flowTick.elapsedMs / 1000)
+  const flowParts = (shownTime || '00:00').split(':').map(Number)
+  let flowSeconds = 0
+  if (flowParts.length === 3) {
+    flowSeconds = (flowParts[0] || 0) * 3600 + (flowParts[1] || 0) * 60 + (flowParts[2] || 0)
+  } else if (flowParts.length === 2) {
+    flowSeconds = (flowParts[0] || 0) * 60 + (flowParts[1] || 0)
+  }
+  if (!Number.isFinite(flowSeconds) || flowSeconds < 0) flowSeconds = 0
+  const flowRatio = Math.min(1, flowSeconds / 1500)
+  const flowFilledSegments = Math.min(
+    TOTAL_SEGMENTS,
+    Math.max(0, Math.round(flowRatio * TOTAL_SEGMENTS)),
+  )
   const flowMinutes = Math.floor(flowSeconds / 60)
-  const flowActiveIndex = (flowSeconds % TOTAL_SEGMENTS)
 
-  const safeRounds = Math.max(1, roundsBeforeLongBreak || 4)
+  const safeRounds = Number.isFinite(roundsBeforeLongBreak) && roundsBeforeLongBreak > 0
+    ? Math.floor(roundsBeforeLongBreak)
+    : 1
   const currentRoundIndex = completedFocusInCycle % safeRounds
 
-  const shownLabel = isFlow
-    ? running
-      ? 'FLOW'
-      : flowStatus === 'paused'
-      ? 'PAUSED'
-      : 'STANDBY'
-    : phaseLabel
+  const shownLabel = isFlow ? t.timer.flow : phaseLabel
 
   const handleToggleClick = useCallback(() => {
     playMicroClick(running ? 'tick' : 'pop')
@@ -131,10 +147,7 @@ export const Timer = memo(function Timer({
 
       {/* Nothing Segmented Control: Timer Mode */}
       <SlidingSegmentedControl<TimerMode>
-        options={MODES.map((m) => ({
-          value: m,
-          label: m,
-        }))}
+        options={MODES}
         value={mode}
         onChange={onModeChange}
         size="md"
@@ -146,15 +159,11 @@ export const Timer = memo(function Timer({
         {/* Top Phase Header with Status Dot */}
         <div className="flex items-center gap-2 font-mono text-xs sm:text-sm uppercase tracking-widest text-muted">
           <span
-            className={`h-2 w-2 rounded-full ${
-              running ? 'bg-accent animate-pulse' : 'bg-muted/40'
+            className={`h-2 w-2 rounded-full shrink-0 transition-colors ${
+              running ? 'bg-accent animate-pulse' : 'bg-line'
             }`}
           />
-          <span>
-            {isFlow
-              ? `FLOW // ${running ? 'ACTIVE' : flowStatus === 'paused' ? 'PAUSED' : 'READY'}`
-              : `POMODORO // ${shownLabel}`}
-          </span>
+          <span>{isFlow ? 'FLOW' : 'POMODORO'}</span>
         </div>
 
         {/* Hero Time in Nothing Dot-Matrix Glyph SVG */}
@@ -185,12 +194,10 @@ export const Timer = memo(function Timer({
             </div>
           ) : (
             <div className="flex items-center gap-2.5">
-              <span>
-                ROUND {String(currentRoundIndex + 1).padStart(2, '0')} / {String(safeRounds).padStart(2, '0')}
-              </span>
+              <span>{shownLabel}</span>
               <span className="text-muted/40">·</span>
-              <span className="text-fg font-bold tabular-nums">
-                {Math.round(currentProgress * 100)}%
+              <span>
+                ROUND {currentRoundIndex + 1} / {safeRounds}
               </span>
               {/* 4 Tactile Cycle LEDs */}
               <div className="flex items-center gap-1.5 ml-1" title={`Cycle: ${currentRoundIndex + 1} of ${safeRounds}`}>
@@ -220,34 +227,20 @@ export const Timer = memo(function Timer({
         {/* Mechanical Segmented Progress Bar (Discrete Rectangular Blocks) */}
         <div
           role="progressbar"
-          aria-valuenow={Math.round(currentProgress * 100)}
+          aria-valuenow={Math.round((isFlow ? flowRatio : elapsedRatio) * 100)}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label={shownLabel}
           className="flex items-center w-full h-3 gap-[2px] px-1 py-0.5 rounded-sm bg-canvas border border-line/60"
         >
           {Array.from({ length: TOTAL_SEGMENTS }).map((_, idx) => {
-            let isFilled = false
-            let isHighlight = false
-
-            if (isFlow) {
-              if (running) {
-                isFilled = idx <= flowActiveIndex
-                isHighlight = idx === flowActiveIndex
-              } else if (flowStatus === 'paused') {
-                isFilled = idx % 2 === 0
-              }
-            } else {
-              isFilled = idx < filledSegments
-            }
+            const isFilled = isFlow ? idx < flowFilledSegments : idx < filledSegments
 
             return (
               <div
                 key={idx}
                 className={`flex-1 h-full rounded-none transition-colors duration-150 ${
-                  isHighlight
-                    ? 'bg-accent animate-pulse'
-                    : isFilled
+                  isFilled
                     ? running
                       ? 'bg-accent'
                       : 'bg-fg'
