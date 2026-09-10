@@ -34,6 +34,14 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
         <service
+            android:name=".TimerForegroundService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Pomodoro countdown timer" />
+        </service>
+        <service
             android:name="io.capawesome.capacitorjs.plugins.foregroundservice.AndroidForegroundService"
             android:foregroundServiceType="specialUse"
             android:exported="false">

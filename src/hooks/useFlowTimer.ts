@@ -3,7 +3,7 @@ import type { Session, TimerStatus } from '../types'
 import { getTickerWorker } from '../lib/tickerWorker'
 import { fmtFlowTime } from '../lib/time'
 import { getFlowTickSnapshot, setFlowTickSnapshot, subscribeFlowTick } from '../lib/timerStore'
-import { updateForegroundTimer, stopForegroundTimer } from '../lib/foregroundTimer'
+import { startForegroundTimer, stopForegroundTimer } from '../lib/foregroundTimer'
 
 const MIN_FLOW_SESSION_MS = 60_000
 
@@ -64,7 +64,12 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
       elapsedMs: elapsedRef.current,
       time: timeStr,
     })
-    void updateForegroundTimer('Flow', timeStr)
+    void startForegroundTimer({
+      title: 'Flow',
+      content: taskRef.current || undefined,
+      targetTime: Date.now() - elapsedRef.current,
+      isCountDown: false,
+    })
     // Sync the ref immediately: setStatus re-renders async, so a second
     // toggle in the same tick would otherwise read the stale status.
     statusRef.current = 'running'
@@ -189,7 +194,6 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
             elapsedMs: total,
             time: timeStr,
           })
-          void updateForegroundTimer('Flow', timeStr)
         }
       }
     }

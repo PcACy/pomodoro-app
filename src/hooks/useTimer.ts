@@ -10,7 +10,7 @@ import { useTranslation } from './useTranslation'
 import { broadcastTimerState, subscribeBroadcast } from '../lib/broadcast'
 import { AUTO_BREAKS_KEY, readFlag } from '../lib/flagsStore'
 import { getTimerTickSnapshot, setTimerTickSnapshot, subscribeTimerTick } from '../lib/timerStore'
-import { updateForegroundTimer, stopForegroundTimer } from '../lib/foregroundTimer'
+import { startForegroundTimer, stopForegroundTimer } from '../lib/foregroundTimer'
 
 interface Options {
   settings: Settings
@@ -184,10 +184,16 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       phaseStartedAt: phaseStartedAtRef.current,
     })
 
-    if (shouldRun) {
+    if (shouldRun && targetEnd != null) {
       const lang = getLang()
       const title = translations[lang].phases[nextPhase]
-      void updateForegroundTimer(title, fmtTime(d))
+      const content = taskRef.current || undefined
+      void startForegroundTimer({
+        title,
+        content,
+        targetTime: targetEnd,
+        isCountDown: true,
+      })
     } else {
       void stopForegroundTimer()
     }
@@ -209,9 +215,6 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
           time: timeStr,
           progress: total > 0 ? remaining / total : 0,
         })
-        const lang = getLang()
-        const title = translations[lang].phases[machineRef.current.phase]
-        void updateForegroundTimer(title, timeStr)
       }
     },
     [finishCurrentPhase],
@@ -236,7 +239,13 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
 
     const lang = getLang()
     const title = translations[lang].phases[m.phase]
-    void updateForegroundTimer(title, timeStr)
+    const content = taskRef.current || undefined
+    void startForegroundTimer({
+      title,
+      content,
+      targetTime: targetEnd,
+      isCountDown: true,
+    })
 
     // Sync the ref immediately (see finishCurrentPhase): a second call in the
     // same tick must see 'running', otherwise e.g. a fast double-toggle would
@@ -347,10 +356,16 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       progress: total > 0 ? rem / total : 0,
     })
 
-    if (m.status === 'running') {
+    if (m.status === 'running' && endRef.current != null) {
       const lang = getLang()
       const title = translations[lang].phases[m.phase]
-      void updateForegroundTimer(title, timeStr)
+      const content = taskRef.current || undefined
+      void startForegroundTimer({
+        title,
+        content,
+        targetTime: endRef.current,
+        isCountDown: true,
+      })
     }
 
     // Sync the ref immediately (see start()).
@@ -392,10 +407,16 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
           progress: p.totalMs > 0 ? p.remainingMs / p.totalMs : 0,
         })
 
-        if (p.status === 'running') {
+        if (p.status === 'running' && p.targetEnd != null) {
           const lang = getLang()
           const title = translations[lang].phases[p.phase]
-          void updateForegroundTimer(title, fmtTime(p.remainingMs))
+          const content = taskRef.current || undefined
+          void startForegroundTimer({
+            title,
+            content,
+            targetTime: p.targetEnd,
+            isCountDown: true,
+          })
         } else {
           void stopForegroundTimer()
         }
