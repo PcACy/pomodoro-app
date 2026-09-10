@@ -33,11 +33,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build web application
-        run: npm run build
-
-      - name: Sync Capacitor Android
-        run: npx cap sync android
+      - name: Build Web App & Sync Capacitor
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          npm run build
+          npx cap sync android
 
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
