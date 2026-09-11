@@ -117,65 +117,79 @@ export const SystemStatusCard = memo(function SystemStatusCard({
         </div>
       </div>
 
-      {/* Middle: PCB Trace / Connected Circuit with 44px Tap Hitboxes */}
-      <div className="w-full flex flex-col gap-1 my-1.5 select-none">
-        {/* Horizontal PCB Trace with 7 Pads & Labels */}
-        <div className="relative w-full flex items-center justify-between px-1">
-          {/* Inactive Base Trace Line */}
-          <div className="absolute left-[18px] right-[18px] top-[26px] h-[1.5px] bg-black/10 dark:bg-white/10 z-0" />
+      {/* Middle: PCB Trace / Connected Circuit */}
+      <div className="w-full flex flex-col justify-center my-auto py-2 select-none">
+        <div className="relative w-full">
+          {/* Inactive Base Trace Line (starts at pad 0 center, ends at pad 6 center) */}
+          <div
+            className="absolute h-[1.5px] bg-black/10 dark:bg-white/10 z-0 pointer-events-none"
+            style={{
+              left: `${(0.5 / 7) * 100}%`,
+              width: `${(6 / 7) * 100}%`,
+              top: '12px',
+              transform: 'translateY(-50%)',
+            }}
+          />
 
           {/* Active Connected Circuit Segments */}
-          <div className="absolute left-[18px] right-[18px] top-[26px] h-[1.5px] z-[1] pointer-events-none">
+          <div className="absolute inset-0 z-[1] pointer-events-none">
             {Array.from({ length: 6 }).map((_, i) => {
               const isConnected = dayLogged[i] && dayLogged[i + 1]
               if (!isConnected) return null
               return (
                 <div
                   key={i}
-                  className="absolute top-0 h-full bg-[#EB1E23] transition-colors duration-200"
+                  className="absolute h-[1.5px] bg-[#EB1E23] transition-colors duration-200"
                   style={{
-                    left: `${(i / 6) * 100}%`,
-                    width: `${(1 / 6) * 100}%`,
+                    left: `${((i + 0.5) / 7) * 100}%`,
+                    width: `${(1 / 7) * 100}%`,
+                    top: '12px',
+                    transform: 'translateY(-50%)',
                   }}
                 />
               )
             })}
           </div>
 
-          {/* 7 Touch-Friendly Day Columns (min-h-[44px]) */}
-          {WEEK_DAYS.map((dayName, i) => {
-            const isCurrentDay = sameDay(addDays(weekStart, i), today)
-            const hasLogged = dayLogged[i]
+          {/* 7 Columns: Pads and Labels */}
+          <div className="relative z-10 grid grid-cols-7 w-full">
+            {WEEK_DAYS.map((dayName, i) => {
+              const isCurrentDay = sameDay(addDays(weekStart, i), today)
+              const hasLogged = dayLogged[i]
 
-            return (
-              <div
-                key={i}
-                title={`${dayName}: ${hasLogged ? 'Logged' : 'No sessions'}`}
-                className="relative z-10 flex flex-col items-center justify-center min-h-[44px] min-w-[32px] sm:min-w-[36px] py-1 rounded-lg transition-colors hover:bg-white/[0.04]"
-              >
-                {/* Pad */}
+              return (
                 <div
-                  className={`h-3 w-3 rounded-full transition-all duration-150 mb-1.5 ${
-                    hasLogged
-                      ? 'bg-[#EB1E23] border border-[#EB1E23]'
-                      : 'bg-surface dark:bg-[#0c0c0c] border border-black/20 dark:border-white/20'
-                  } ${
-                    isCurrentDay
-                      ? 'ring-2 ring-fg/40 dark:ring-white/40 ring-offset-2 ring-offset-surface dark:ring-offset-black'
-                      : ''
-                  }`}
-                />
-                {/* Day Label */}
-                <span
-                  className={`font-sans text-[11px] ${
-                    isCurrentDay ? 'text-fg dark:text-white font-semibold' : 'text-neutral-500'
-                  }`}
+                  key={i}
+                  title={`${dayName}: ${hasLogged ? 'Logged' : 'No sessions'}`}
+                  className="flex flex-col items-center justify-start group cursor-default"
                 >
-                  {dayName}
-                </span>
-              </div>
-            )
-          })}
+                  {/* Pad container: fixed height 24px so center is exactly at 12px */}
+                  <div className="h-6 flex items-center justify-center relative">
+                    <div
+                      className={`h-3 w-3 rounded-full transition-all duration-200 ${
+                        hasLogged
+                          ? 'bg-[#EB1E23] border border-[#EB1E23] shadow-sm'
+                          : isCurrentDay
+                          ? 'bg-transparent border-2 border-fg dark:border-white shadow-sm'
+                          : 'bg-surface dark:bg-[#0c0c0c] border border-black/20 dark:border-white/20'
+                      }`}
+                    />
+                  </div>
+
+                  {/* Day Label */}
+                  <span
+                    className={`font-sans text-[11px] mt-1 transition-colors ${
+                      isCurrentDay
+                        ? 'text-fg dark:text-white font-bold'
+                        : 'text-neutral-500'
+                    }`}
+                  >
+                    {dayName}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
 
