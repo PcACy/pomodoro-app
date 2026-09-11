@@ -117,7 +117,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
             onChange={(e) => setQuickTitle(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="+ Add quick task (#tag or select)..."
-            className="w-full rounded-[8px] border border-line bg-canvas pl-3 pr-8 py-1.5 text-xs text-fg placeholder:text-muted/60 font-mono focus:outline-none focus:border-fg/50 transition-colors"
+            className="w-full rounded-[8px] border border-line bg-surface/50 hover:bg-surface focus:bg-surface pl-3 pr-8 py-1.5 text-xs text-fg placeholder:text-muted/60 font-mono focus:outline-none focus:border-fg/50 transition-colors shadow-xs"
           />
           {quickTitle.trim() && (
             <button
@@ -225,8 +225,61 @@ export const TaskInboxCard = memo(function TaskInboxCard({
       {/* Task List */}
       <div className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-y-auto no-scrollbar pr-0.5">
         {pendingTodos.length === 0 ? (
-          <div className="py-4 text-center font-sans text-xs text-muted">
-            No pending tasks
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-center py-6 px-4 my-auto border border-dashed border-line/60 rounded-2xl select-none">
+            {/* Technical Hardware Status */}
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold tracking-widest text-muted uppercase mb-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-muted/40" />
+              <span>// INBOX CLEAR</span>
+            </div>
+
+            <p className="font-sans text-xs text-muted/70 text-center max-w-[240px] mb-4">
+              {tr.todo.empty || 'All tasks completed or none queued'}
+            </p>
+
+            {/* Keyboard Shortcuts Hint Bar */}
+            <div className="flex flex-wrap items-center justify-center gap-2 font-mono text-[10px] text-muted mb-5">
+              <span className="flex items-center gap-1">
+                <kbd className="px-1.5 py-0.5 rounded border border-line bg-surface text-fg font-semibold shadow-xs">↵</kbd>
+                <span>Add Task</span>
+              </span>
+              <span className="text-muted/30">·</span>
+              <span className="flex items-center gap-1">
+                <kbd className="px-1.5 py-0.5 rounded border border-line bg-surface text-fg font-semibold shadow-xs">#</kbd>
+                <span>Tag</span>
+              </span>
+              <span className="text-muted/30">·</span>
+              <span className="flex items-center gap-1">
+                <kbd className="px-1.5 py-0.5 rounded border border-line bg-surface text-fg font-semibold shadow-xs">1</kbd>
+                <span>Focus</span>
+              </span>
+            </div>
+
+            {/* Quick Starter Chips */}
+            <div className="flex flex-col items-center gap-1.5 w-full max-w-[320px]">
+              <span className="font-mono text-[9px] uppercase tracking-wider text-muted/60">
+                Quick Start Templates
+              </span>
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                {[
+                  { title: 'Deep Work Session', tag: 'focus' },
+                  { title: 'Code Review & Audit', tag: 'code' },
+                  { title: 'Admin & Inbox Zero', tag: 'admin' },
+                ].map((preset) => (
+                  <button
+                    key={preset.title}
+                    type="button"
+                    onClick={() => {
+                      playMicroClick('pop')
+                      onAdd(preset.title, preset.tag)
+                    }}
+                    className="font-mono text-[10px] px-2.5 py-1 rounded-full border border-line bg-surface hover:border-fg/40 hover:bg-canvas text-muted hover:text-fg transition-all cursor-pointer active:scale-95"
+                    title={`Create task: "${preset.title}"`}
+                  >
+                    + {preset.title}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           pendingTodos.map((todo) => {

@@ -33,6 +33,7 @@ export interface Messages {
     delete: string
     save: string
     cancel: string
+    empty: string
   }
   reflection: { title: string; prompt: string; placeholder: string; save: string; skip: string }
   dashboard: {
@@ -189,6 +190,7 @@ const de: Messages = {
     delete: 'Löschen',
     save: 'Speichern',
     cancel: 'Abbrechen',
+    empty: 'Alle Aufgaben erledigt oder keine in der Warteschlange',
   },
   reflection: {
     title: 'Micro-Reflection',
@@ -357,6 +359,7 @@ const en: Messages = {
     delete: 'Delete',
     save: 'Save',
     cancel: 'Cancel',
+    empty: 'All tasks completed or none queued',
   },
   reflection: {
     title: 'Micro-Reflection',

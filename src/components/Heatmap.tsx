@@ -82,8 +82,8 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
 
   return (
     <>
-      <div className="overflow-x-auto pb-2 [scrollbar-width:thin]">
-        <div className="relative inline-block min-w-full">
+      <div className="overflow-x-auto pb-1 [scrollbar-width:thin]">
+        <div className="relative w-fit min-w-full min-[900px]:min-w-0 min-[900px]:mx-auto">
           {/* Month Labels Header: accurately aligned above each week column */}
           <div className="relative mb-2 h-4 pointer-events-none">
             {monthLabels.map(({ index, text }) => (
@@ -125,15 +125,16 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
               </div>
             ))}
           </div>
-        </div>
-      </div>
 
-      <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-muted select-none">
-        <span>{t.heatmap.less}</span>
-        {LEVELS.map((m) => (
-          <span key={m} className={`h-3 w-3 rounded-[1px] ${cellClass(m)}`} />
-        ))}
-        <span>{t.heatmap.more}</span>
+          {/* Intensity Legend: flush with the right edge of the 52-week grid */}
+          <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-muted select-none">
+            <span>{t.heatmap.less}</span>
+            {LEVELS.map((m) => (
+              <span key={m} className={`h-3 w-3 rounded-[1px] ${cellClass(m)}`} />
+            ))}
+            <span>{t.heatmap.more}</span>
+          </div>
+        </div>
       </div>
 
       {tip &&

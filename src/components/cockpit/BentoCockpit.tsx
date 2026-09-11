@@ -410,6 +410,9 @@ export const BentoCockpit = memo(
                 onOpenActivityLog={() => {
                   scrollToScreen(2, 'log')
                 }}
+                onJumpToFocus={() => {
+                  scrollToScreen(0)
+                }}
                 className="h-full min-h-0"
               />
             </div>
