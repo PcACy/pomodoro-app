@@ -3,6 +3,7 @@ import { ArrowUpRight, Clock } from 'lucide-react'
 import type { Session } from '../../types'
 import { BentoCard } from './BentoCard'
 import { playMicroClick } from '../../lib/sound'
+import { useTranslation } from '../../hooks/useTranslation'
 
 interface SessionLogCardProps {
   sessions: Session[]
@@ -20,6 +21,7 @@ export const SessionLogCard = memo(function SessionLogCard({
   onOpenActivityLog,
   className = '',
 }: SessionLogCardProps) {
+  const { t } = useTranslation()
   const { todaySessions, totalMinutesToday } = useMemo(() => {
     const todayStr = new Date().toDateString()
     const filtered = sessions.filter((s) => {
@@ -67,10 +69,10 @@ export const SessionLogCard = memo(function SessionLogCard({
             <Clock size={16} className="text-muted/60" />
           </div>
           <span className="font-sans text-xs font-medium text-fg">
-            No sessions recorded today
+            {t.sessionLog.emptyToday}
           </span>
-          <span className="font-sans text-xs text-muted mt-1 max-w-[240px]">
-            Start a focus round above to log activity
+          <span className="font-sans text-xs text-muted mt-1 max-w-[260px]">
+            {t.sessionLog.emptyTodaySub}
           </span>
         </div>
       ) : (

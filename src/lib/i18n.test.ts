@@ -7,6 +7,8 @@ describe('i18n Fallback Proxy and Language Support', () => {
     expect(translations.en.nav.statistics).toBe('Statistics')
     expect(translations.de.phases.focus).toBe('Fokus')
     expect(translations.en.phases.focus).toBe('Focus')
+    expect(translations.de.sessionLog.emptyTodaySub).toContain('Deck 01')
+    expect(translations.en.sessionLog.emptyTodaySub).toContain('Focus Deck')
   })
 
   it('transparently falls back to German for missing keys or undefined properties', () => {

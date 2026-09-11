@@ -333,52 +333,59 @@ export default function App() {
             </div>
           </div>
 
-          {/* 3-Deck Switcher [ 01 FOCUS // 02 TASKS // 03 STATS ] */}
-          <nav aria-label="Deck Switcher" className="flex items-center gap-1 font-mono text-[10px] sm:text-[11px] tracking-wider uppercase">
-            <button
-              type="button"
-              onClick={() => handleSelectDeck(0)}
-              className={`px-2 sm:px-2.5 py-0.5 rounded-full transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
-                activeDeck === 0
-                  ? 'bg-fg text-canvas font-bold shadow-sm'
-                  : 'text-muted hover:text-fg hover:bg-fg/5'
-              }`}
-              aria-pressed={activeDeck === 0}
-              title="Focus Deck (01)"
-            >
-              <span className="text-[9px] opacity-70">01</span>
-              <span className="hidden xs:inline">Focus</span>
-            </button>
-            <span className="text-muted/30 select-none">//</span>
-            <button
-              type="button"
-              onClick={() => handleSelectDeck(1)}
-              className={`px-2 sm:px-2.5 py-0.5 rounded-full transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
-                activeDeck === 1
-                  ? 'bg-fg text-canvas font-bold shadow-sm'
-                  : 'text-muted hover:text-fg hover:bg-fg/5'
-              }`}
-              aria-pressed={activeDeck === 1}
-              title="Tasks Deck (02)"
-            >
-              <span className="text-[9px] opacity-70">02</span>
-              <span className="hidden xs:inline">Tasks</span>
-            </button>
-            <span className="text-muted/30 select-none">//</span>
-            <button
-              type="button"
-              onClick={() => handleSelectDeck(2)}
-              className={`px-2 sm:px-2.5 py-0.5 rounded-full transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
-                activeDeck === 2
-                  ? 'bg-fg text-canvas font-bold shadow-sm'
-                  : 'text-muted hover:text-fg hover:bg-fg/5'
-              }`}
-              aria-pressed={activeDeck === 2}
-              title="Stats Deck (03)"
-            >
-              <span className="text-[9px] opacity-70">03</span>
-              <span className="hidden xs:inline">Stats</span>
-            </button>
+          {/* Morphing Pill 3-Deck Switcher */}
+          <nav
+            aria-label="Deck Switcher"
+            className="flex items-center gap-0.5 sm:gap-1 font-mono select-none shrink-0 min-w-[165px] sm:min-w-[180px]"
+          >
+            {[
+              { id: 0, num: '01', label: 'Focus' },
+              { id: 1, num: '02', label: 'Tasks' },
+              { id: 2, num: '03', label: 'Stats' },
+            ].map((deck, idx) => {
+              const isActive = activeDeck === deck.id
+              return (
+                <div key={deck.id} className="flex items-center">
+                  {idx > 0 && (
+                    <span
+                      className="text-line dark:text-white/20 select-none font-mono text-[10px] mx-0.5"
+                      aria-hidden="true"
+                    >
+                      //
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDeck(deck.id)}
+                    className="relative flex items-center justify-center min-h-[44px] min-w-[36px] sm:min-w-[40px] px-0.5 cursor-pointer outline-none select-none group"
+                    aria-pressed={isActive}
+                    title={`${deck.label} Deck (${deck.num})`}
+                  >
+                    <div
+                      className={`flex items-center rounded-full transition-all duration-300 ease-out font-mono tracking-wider uppercase text-[10px] sm:text-[11px] ${
+                        isActive
+                          ? 'bg-fg text-canvas font-bold px-2.5 sm:px-3 py-1 shadow-sm ring-1 ring-fg/10'
+                          : 'text-muted hover:text-fg hover:bg-fg/5 px-2 py-1'
+                      }`}
+                    >
+                      <span className={`tabular-nums ${isActive ? 'opacity-85' : 'opacity-90'}`}>
+                        {deck.num}
+                      </span>
+                      <span
+                        className={`inline-block overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${
+                          isActive
+                            ? 'max-w-[65px] opacity-100 ml-1.5'
+                            : 'max-w-0 opacity-0 ml-0'
+                        }`}
+                        aria-hidden={!isActive}
+                      >
+                        {deck.label}
+                      </span>
+                    </div>
+                  </button>
+                </div>
+              )
+            })}
           </nav>
         </div>
 

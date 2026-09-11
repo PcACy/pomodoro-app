@@ -80,6 +80,8 @@ export interface Messages {
     clearAll: string
     empty: string
     emptySub: string
+    emptyToday: string
+    emptyTodaySub: string
     noResults: string
     noTask: string
     import: string
@@ -241,6 +243,8 @@ const de: Messages = {
     clearAll: 'Alle löschen',
     empty: 'Noch keine Sessions aufgezeichnet',
     emptySub: 'Schließe deine erste Pomodoro- oder Flow-Session ab, um deine Historie zu sehen.',
+    emptyToday: 'Heute noch keine Sessions erfasst',
+    emptyTodaySub: 'Starte eine Fokus-Runde in Deck 01, um Aktivität zu erfassen',
     noResults: 'Keine Treffer.',
     noTask: 'Ohne Aufgabe',
     import: 'Import',
@@ -408,6 +412,8 @@ const en: Messages = {
     clearAll: 'Delete all',
     empty: 'No sessions recorded yet',
     emptySub: 'Complete your first Pomodoro or Flow session to build your legacy.',
+    emptyToday: 'No sessions recorded today',
+    emptyTodaySub: 'Start a focus round in Focus Deck to log activity',
     noResults: 'No matches.',
     noTask: 'No task',
     import: 'Import',
