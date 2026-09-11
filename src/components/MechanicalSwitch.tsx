@@ -21,7 +21,7 @@ export const MechanicalSwitch = memo(function MechanicalSwitch({
         e.stopPropagation()
         onChange()
       }}
-      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border transition-colors duration-150 p-0.5 ${
+      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border transition-colors duration-150 p-0.5 before:absolute before:-inset-2.5 before:content-[''] ${
         checked ? 'border-accent bg-canvas' : 'border-line bg-canvas'
       }`}
     >

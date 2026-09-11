@@ -21,10 +21,10 @@ interface ActiveTaskCardProps {
   className?: string
 }
 
-// One pick row: fixed height so every slot state stays pixel-identical.
+// One pick row: touch-friendly height (min 44px) so slot state stays accessible and comfortable.
 function PickRow({ todo, onFocus }: { todo: TodoItem; onFocus?: (id: string) => void }) {
   return (
-    <li className="flex h-[36px] items-center justify-between gap-3">
+    <li className="flex min-h-[44px] items-center justify-between gap-3 py-1">
       <button
         type="button"
         onClick={() => {
@@ -37,8 +37,8 @@ function PickRow({ todo, onFocus }: { todo: TodoItem; onFocus?: (id: string) => 
         <span className="block truncate font-sans text-sm text-fg/90 group-hover:text-fg transition-colors">
           {todo.title}
         </span>
-        <span className="block font-mono text-[9px] text-muted tracking-wider uppercase truncate">
-          {todo.tag || 'UNTAGGED'} · {todo.pomodoros} POMOS
+        <span className="block font-sans text-[11px] text-muted truncate">
+          {todo.tag || 'Untagged'} · {todo.pomodoros} {todo.pomodoros === 1 ? 'pomo' : 'pomos'}
         </span>
       </button>
       <button
@@ -47,9 +47,9 @@ function PickRow({ todo, onFocus }: { todo: TodoItem; onFocus?: (id: string) => 
           playMicroClick('tick')
           onFocus?.(todo.id)
         }}
-        className="shrink-0 font-mono text-[10px] tracking-widest uppercase text-muted hover:text-fg transition-colors cursor-pointer px-2 min-h-[36px]"
+        className="shrink-0 font-sans font-medium text-xs text-muted hover:text-fg transition-colors cursor-pointer px-3 min-h-[44px] flex items-center justify-center active:scale-95"
       >
-        FOCUS
+        Focus
       </button>
     </li>
   )
@@ -211,10 +211,10 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
 
   return (
     <BentoCard
-      label="ACTIVE TASK"
+      label="Active Task"
       action={
         <span
-          className={`h-5 w-[76px] inline-flex items-center justify-center gap-1.5 px-2 font-mono text-[9px] leading-none tracking-widest uppercase rounded-full border transition-colors ${
+          className={`h-6 min-w-[76px] inline-flex items-center justify-center gap-1.5 px-2.5 font-sans text-[10px] font-medium leading-none rounded-full border transition-colors ${
             isRunning
               ? 'border-accent/60 text-accent bg-accent/10'
               : 'border-line text-muted bg-canvas'
@@ -225,8 +225,8 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
               isRunning ? 'bg-accent animate-pulse [animation-duration:1s]' : 'bg-muted/40'
             }`}
           />
-          <span className="truncate">
-            {isRunning ? 'REC' : hasProgress ? 'PAUSE' : 'STBY'}
+          <span>
+            {isRunning ? 'Recording' : hasProgress ? 'Paused' : 'Standby'}
           </span>
         </span>
       }
@@ -237,11 +237,11 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         {/* Track info with smooth stationary cross-fade (no hopping) */}
         <div key={textAnimKey} className="min-w-0 flex-1 animate-track-fade">
           <h3 className={`font-sans font-medium text-lg sm:text-xl truncate ${activeTodo ? 'text-fg' : 'text-muted'}`}>
-            {activeTodo?.title || '[ NO TAPE INSERTED ]'}
+            {activeTodo?.title || 'No tape inserted'}
           </h3>
-          <div className="mt-1 h-5 flex items-center gap-2 font-mono text-[10px] text-muted tracking-wider uppercase leading-none">
+          <div className="mt-1 h-5 flex items-center gap-2 font-sans text-xs text-muted leading-none">
             {activeTodo?.tag ? (
-              <span className="flex items-center gap-1.5 rounded-full border border-line bg-canvas px-2 py-px">
+              <span className="flex items-center gap-1.5 rounded-full border border-line bg-canvas px-2 py-0.5">
                 <span
                   className="h-1.5 w-1.5 rounded-full"
                   style={{ backgroundColor: tagColor }}
@@ -249,18 +249,18 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
                 <span className="text-fg/80">{activeTodo.tag}</span>
               </span>
             ) : (
-              <span>UNTAGGED</span>
+              <span>Untagged</span>
             )}
             <span>·</span>
-            <span className="inline-block min-w-[96px]">
-              {activeTodo ? (isRunning ? 'IN PROGRESS' : 'STANDBY') : isRunning ? 'FREE SESSION' : 'STANDBY'}
+            <span className="inline-block">
+              {activeTodo ? (isRunning ? 'In progress' : 'Standby') : isRunning ? 'Free session' : 'Standby'}
             </span>
           </div>
 
           {/* Mechanical tape counter */}
           <div className="mt-3 flex items-center gap-2.5">
             <div
-              className="flex rounded border border-fg/20 bg-black divide-x divide-white/10 overflow-hidden"
+              className="flex rounded-md border border-fg/20 bg-black divide-x divide-white/10 overflow-hidden"
               role="status"
               aria-label={`Tape counter: ${counterDigits.join('')} minutes elapsed`}
             >
@@ -273,8 +273,8 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
                 </span>
               ))}
             </div>
-            <span className="font-mono text-[9px] text-muted tracking-wider uppercase tabular-nums">
-              {activeTodo ? `${displayMinutes} MIN FOCUSED` : 'COUNTER'}
+            <span className="font-sans text-[11px] text-muted tabular-nums">
+              {activeTodo ? `${displayMinutes} min focused` : 'Tape counter'}
             </span>
           </div>
         </div>
@@ -345,8 +345,8 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         </div>
       </div>
 
-      {/* Transport keys - permanently mounted 50/50 rack buttons (no layout shifts) */}
-      <div className="mt-3 flex items-center gap-2">
+      {/* Transport keys - permanently mounted 50/50 rack buttons (no layout shifts, 44px min height) */}
+      <div className="mt-3.5 flex items-center gap-2">
         <button
           type="button"
           onClick={() => {
@@ -359,10 +359,10 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
             }
           }}
           title={activeTodo ? 'Eject tape (standby)' : 'Insert tape'}
-          className="flex h-9 min-h-[36px] flex-1 items-center justify-center gap-1.5 rounded-md border border-line bg-canvas font-mono text-[11px] tracking-widest uppercase text-muted transition-colors hover:border-fg/40 hover:text-fg active:translate-y-px cursor-pointer"
+          className="flex h-11 min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-line bg-canvas font-sans font-medium text-xs text-muted transition-all hover:border-fg/40 hover:text-fg active:scale-[0.98] cursor-pointer"
         >
-          <ArrowUpFromLine size={13} />
-          <span>{activeTodo ? 'EJECT' : 'INSERT'}</span>
+          <ArrowUpFromLine size={14} />
+          <span>{activeTodo ? 'Eject' : 'Insert'}</span>
         </button>
         <button
           type="button"
@@ -374,48 +374,48 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
             }
           }}
           title={activeTodo ? 'Stop and complete track' : 'No track loaded'}
-          className={`flex h-9 min-h-[36px] flex-1 items-center justify-center gap-1.5 rounded-md border font-mono text-[11px] tracking-widest uppercase transition-colors ${
+          className={`flex h-11 min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border font-sans font-medium text-xs transition-all ${
             activeTodo
-              ? 'border-line bg-canvas text-fg hover:bg-fg hover:text-canvas hover:border-fg active:translate-y-px cursor-pointer'
+              ? 'border-line bg-canvas text-fg hover:bg-fg hover:text-canvas hover:border-fg active:scale-[0.98] cursor-pointer'
               : 'border-line/40 bg-canvas/40 text-muted/30 cursor-not-allowed pointer-events-none'
           }`}
         >
-          <Square size={11} />
-          <span>DONE</span>
+          <Square size={12} />
+          <span>Done</span>
         </button>
       </div>
 
-      {/* Pick slot: fixed label + exactly 3 rows + footer — height never moves */}
-      <div className="mt-2.5 border-t border-line/60 pt-1">
-        <div className="flex h-5 items-center justify-between font-mono text-[9px] tracking-widest uppercase">
-          <span className="text-muted">
-            {activeTodo ? 'UP NEXT' : 'QUICK PICK'}
+      {/* Pick slot: fixed label + 44px rows + footer — height never moves */}
+      <div className="mt-3 border-t border-line/60 pt-1.5">
+        <div className="flex h-6 items-center justify-between font-sans text-xs">
+          <span className="text-muted font-medium">
+            {activeTodo ? 'Up next' : 'Quick pick'}
           </span>
           {remainingPickCount > 0 ? (
             <button
               type="button"
               onClick={onOpenTodoManager}
-              className="text-muted hover:text-fg transition-colors cursor-pointer"
+              className="text-muted hover:text-fg transition-colors cursor-pointer text-xs"
             >
-              +{remainingPickCount} MORE
+              +{remainingPickCount} more
             </button>
           ) : (
             <span aria-hidden="true" className="invisible">
-              +0 MORE
+              +0 more
             </span>
           )}
         </div>
         {pickPool.length === 0 ? (
-          <p className="flex h-[36px] items-center font-mono text-[10px] tracking-wider uppercase text-muted">
-            {activeTodo ? 'NO OTHER TAPES QUEUED' : 'NO OPEN TASKS — ADD ONE IN [TASK INBOX]'}
+          <p className="flex h-[44px] items-center font-sans text-xs text-muted">
+            {activeTodo ? 'No other tapes queued' : 'No open tasks — add one in Task Inbox'}
           </p>
         ) : (
-          <ul className="divide-y divide-line">
+          <ul className="divide-y divide-line/60">
             {pickTodos.map((todo) => (
               <PickRow key={todo.id} todo={todo} onFocus={onFocus} />
             ))}
             {Array.from({ length: fillerCount }).map((_, i) => (
-              <li key={`filler-${i}`} aria-hidden="true" className="h-[36px]" />
+              <li key={`filler-${i}`} aria-hidden="true" className="h-[44px]" />
             ))}
           </ul>
         )}

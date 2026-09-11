@@ -85,7 +85,7 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
 
   return (
     <BentoCard
-      label="QUICK SETTINGS"
+      label="Quick Settings"
       action={
         <button
           type="button"
@@ -94,33 +94,33 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
             playMicroClick('tap')
             onOpenSettingsModal()
           }}
-          className="font-mono text-[9px] text-muted hover:text-fg tracking-wider uppercase transition-colors cursor-pointer"
+          className="font-sans text-xs text-muted/90 hover:text-fg font-medium transition-colors cursor-pointer py-1 px-1.5"
         >
-          MORE ↗
+          More ↗
         </button>
       }
       onClick={() => {
         playMicroClick('tap')
         onOpenSettingsModal()
       }}
-      className={`cursor-pointer hover:border-fg/30 transition-colors ${className}`}
+      className={`cursor-pointer hover:border-white/20 transition-all rounded-[28px] ${className}`}
       contentClassName="justify-between"
     >
-      <div className="flex flex-col gap-1.5 sm:gap-2 my-auto">
-        {/* Toggle 1: Zen Mode (Direct Fullscreen Focus) */}
+      <div className="flex flex-col gap-1 sm:gap-1.5 my-auto">
+        {/* Toggle 1: Zen Mode */}
         <div
           onClick={(e) => {
             e.stopPropagation()
             handleToggleZen()
           }}
-          className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
+          className="flex items-center justify-between gap-3 cursor-pointer group py-1 px-1.5 -mx-1.5 rounded-xl hover:bg-white/[0.04] active:bg-white/[0.08] transition-all min-h-[44px]"
         >
           <div className="flex flex-col min-w-0">
-            <span className="font-mono text-[11px] text-fg tracking-wider uppercase truncate group-hover:text-fg transition-colors">
-              ZEN MODE
+            <span className="font-sans text-xs sm:text-[13px] font-medium text-fg truncate">
+              Zen Mode
             </span>
-            <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
-              {isZenMode ? 'IMMERSIVE' : 'STANDBY'}
+            <span className="font-sans text-[11px] text-muted/80">
+              {isZenMode ? 'Immersive focus' : 'Standby'}
             </span>
           </div>
           <MechanicalSwitch
@@ -136,20 +136,20 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
             e.stopPropagation()
             toggleSound()
           }}
-          className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
+          className="flex items-center justify-between gap-3 cursor-pointer group py-1 px-1.5 -mx-1.5 rounded-xl hover:bg-white/[0.04] active:bg-white/[0.08] transition-all min-h-[44px]"
         >
           <div className="flex flex-col min-w-0">
-            <span className="font-mono text-[11px] text-fg tracking-wider uppercase truncate group-hover:text-fg transition-colors">
-              SOUND FX
+            <span className="font-sans text-xs sm:text-[13px] font-medium text-fg truncate">
+              Sound Effects
             </span>
-            <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
-              {soundEnabled ? 'ACTIVE' : 'MUTED'}
+            <span className="font-sans text-[11px] text-muted/80">
+              {soundEnabled ? 'Active' : 'Muted'}
             </span>
           </div>
           <MechanicalSwitch
             checked={soundEnabled}
             onChange={toggleSound}
-            label="Sound FX"
+            label="Sound Effects"
           />
         </div>
 
@@ -159,14 +159,14 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
             e.stopPropagation()
             toggleAutoBreaks()
           }}
-          className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
+          className="flex items-center justify-between gap-3 cursor-pointer group py-1 px-1.5 -mx-1.5 rounded-xl hover:bg-white/[0.04] active:bg-white/[0.08] transition-all min-h-[44px]"
         >
           <div className="flex flex-col min-w-0">
-            <span className="font-mono text-[11px] text-fg tracking-wider uppercase truncate group-hover:text-fg transition-colors">
-              AUTO BREAKS
+            <span className="font-sans text-xs sm:text-[13px] font-medium text-fg truncate">
+              Auto Breaks
             </span>
-            <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
-              {autoBreaks ? 'AUTO' : 'MANUAL'}
+            <span className="font-sans text-[11px] text-muted/80">
+              {autoBreaks ? 'Automatic' : 'Manual'}
             </span>
           </div>
           <MechanicalSwitch
@@ -182,20 +182,20 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
             e.stopPropagation()
             toggleNotify()
           }}
-          className="flex items-center justify-between gap-2 cursor-pointer group py-0.5"
+          className="flex items-center justify-between gap-3 cursor-pointer group py-1 px-1.5 -mx-1.5 rounded-xl hover:bg-white/[0.04] active:bg-white/[0.08] transition-all min-h-[44px]"
         >
           <div className="flex flex-col min-w-0">
-            <span className="font-mono text-[11px] text-fg tracking-wider uppercase truncate group-hover:text-fg transition-colors">
-              DESKTOP ALERTS
+            <span className="font-sans text-xs sm:text-[13px] font-medium text-fg truncate">
+              Notifications
             </span>
-            <span className="font-mono text-[8px] text-muted uppercase tracking-wider">
-              {notifyEnabled ? 'ACTIVE' : 'MUTED'}
+            <span className="font-sans text-[11px] text-muted/80">
+              {notifyEnabled ? 'Active' : 'Muted'}
             </span>
           </div>
           <MechanicalSwitch
             checked={notifyEnabled}
             onChange={toggleNotify}
-            label="Desktop Alerts"
+            label="Notifications"
           />
         </div>
       </div>

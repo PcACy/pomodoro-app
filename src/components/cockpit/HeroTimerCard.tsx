@@ -124,11 +124,11 @@ export const HeroTimerCard = memo(function HeroTimerCard({
 
   const locale = lang === 'de' ? 'de-DE' : 'en-US'
   const dayName = localDate.toLocaleDateString(locale, { weekday: 'long' })
-  const dateFormatted = localDate.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
+  const dateFormatted = localDate.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
 
   return (
     <div
-      className={`relative overflow-hidden rounded-card bg-surface border border-line p-4 sm:p-5 flex flex-col justify-between select-none ${className}`}
+      className={`relative overflow-hidden rounded-[24px] backdrop-blur-md bg-neutral-950/60 dark:bg-neutral-950/60 bg-white/80 border border-white/10 dark:border-white/10 border-black/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_24px_-4px_rgba(0,0,0,0.3)] p-4 sm:p-5 flex flex-col justify-between select-none transition-all duration-200 ${className}`}
     >
       {/* Interactive Dot-Matrix background (proximity ripple, hero only) */}
       <HeroDotGridCanvas />
@@ -172,29 +172,26 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             <span className="font-sans font-medium text-sm sm:text-base text-fg leading-snug">
               {dayName}
             </span>
-            <span className="font-mono text-[11px] text-muted tracking-wider uppercase">
+            <span className="font-sans text-xs text-muted/90">
               {dateFormatted}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             {isFlow ? (
-              <div className="inline-flex min-w-[110px] items-center font-mono text-xs tracking-wider uppercase text-fg">
-                <span>{running ? 'FLOW ACTIVE' : 'FREE FLOW'}</span>
+              <div className="inline-flex min-w-[100px] items-center font-sans text-xs font-medium text-fg">
+                <span>{running ? 'Flow active' : 'Free flow'}</span>
               </div>
             ) : (
-              <div className="inline-flex items-center gap-2 font-mono text-xs tracking-wider uppercase">
+              <div className="inline-flex items-center gap-2 font-sans text-xs">
                 <span className="text-fg font-medium">{shownLabel}</span>
                 <span className="text-muted/40">·</span>
-                <span className="text-muted text-[10px] sm:text-xs">
-                  ROUND {(completedFocusInCycle % safeRounds) + 1} / {safeRounds}
+                <span className="text-muted text-xs">
+                  Round {(completedFocusInCycle % safeRounds) + 1} of {safeRounds}
                 </span>
                 <div className="flex items-center gap-1 ml-0.5" title={`Cycle: ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`}>
                   {Array.from({ length: safeRounds }).map((_, rIdx) => {
                     const currentRoundIdx = completedFocusInCycle % safeRounds
-                    // Same semantics as Timer.tsx: only completed rounds are
-                    // filled; the current round gets its own pulsing style so
-                    // done vs. active are distinguishable.
                     const isCompleted = rIdx < currentRoundIdx
                     const isCurrent = rIdx === currentRoundIdx
                     return (
@@ -238,14 +235,14 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         </div>
       </div>
 
-      {/* Action Controls Bar */}
+      {/* Action Controls Bar with Fitts's Law 44px+ Hitboxes */}
       <div className="relative z-10 mt-3 flex items-center justify-between gap-3 pt-3 border-t border-line/60 shrink-0">
         <div className="flex items-center gap-2">
           {/* Main Start / Pause Trigger */}
           <button
             type="button"
             onClick={handleToggleClick}
-            className="h-10 w-[180px] sm:w-[200px] inline-flex items-center justify-center rounded-full border border-fg px-4 sm:px-6 font-mono text-xs leading-none tracking-widest uppercase font-semibold transition-colors cursor-pointer bg-fg text-canvas hover:opacity-90 active:opacity-80 shrink-0"
+            className="h-11 min-h-[44px] w-[180px] sm:w-[200px] inline-flex items-center justify-center rounded-full border border-fg px-4 sm:px-6 font-sans text-xs sm:text-sm font-semibold tracking-wider uppercase transition-all cursor-pointer bg-fg text-canvas hover:opacity-90 active:scale-[0.98] shrink-0 shadow-sm"
           >
             {running ? t.timer.pause : t.timer.start}
           </button>
@@ -256,33 +253,33 @@ export const HeroTimerCard = memo(function HeroTimerCard({
               type="button"
               onClick={handleAddFive}
               title="+5 minutes"
-              className="h-10 rounded-full px-3 border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg font-mono text-[10px] tracking-wider uppercase transition-colors inline-flex items-center gap-1 cursor-pointer shrink-0"
+              className="h-11 min-h-[44px] rounded-full px-3.5 border border-white/15 dark:border-white/15 border-black/15 bg-canvas/60 hover:border-fg/40 text-muted hover:text-fg font-sans text-xs font-medium tracking-wide transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95"
             >
-              <Plus size={11} />
-              5M
+              <Plus size={12} />
+              5m
             </button>
           )}
         </div>
 
-        {/* Secondary Action Controls */}
+        {/* Secondary Action Controls with 44x44px Touch Targets */}
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleResetClick}
             title={t.shortcuts.reset}
             aria-label={t.shortcuts.reset}
-            className="h-10 w-10 flex items-center justify-center shrink-0 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer"
+            className="h-11 w-11 min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0 rounded-full border border-white/15 dark:border-white/15 border-black/15 bg-canvas/60 hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer active:scale-95"
           >
-            <RotateCcw size={13} />
+            <RotateCcw size={14} />
           </button>
           <button
             type="button"
             onClick={handleSkipClick}
             title={t.shortcuts.skip}
             aria-label={t.shortcuts.skip}
-            className="h-10 w-10 flex items-center justify-center shrink-0 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer"
+            className="h-11 w-11 min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0 rounded-full border border-white/15 dark:border-white/15 border-black/15 bg-canvas/60 hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer active:scale-95"
           >
-            <SkipForward size={13} />
+            <SkipForward size={14} />
           </button>
         </div>
       </div>

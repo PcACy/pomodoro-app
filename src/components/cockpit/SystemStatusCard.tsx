@@ -49,7 +49,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
 
   return (
     <BentoCard
-      label="DAILY STREAK"
+      label="Daily Streak"
       action={
         <button
           type="button"
@@ -58,13 +58,13 @@ export const SystemStatusCard = memo(function SystemStatusCard({
             playMicroClick('tap')
             onOpenAnalyticsModal?.()
           }}
-          className="font-mono text-[9px] text-muted hover:text-fg tracking-wider uppercase transition-colors cursor-pointer"
+          className="font-sans text-xs text-muted/90 hover:text-fg font-medium transition-colors cursor-pointer py-1 px-1.5"
           title="Open detailed analytics"
         >
-          STATS ↗
+          Stats ↗
         </button>
       }
-      className={`cursor-pointer hover:border-fg/30 transition-colors ${className}`}
+      className={`cursor-pointer hover:border-white/20 transition-all rounded-[28px] ${className}`}
       contentClassName="justify-between h-full"
       onClick={() => {
         playMicroClick('tap')
@@ -73,48 +73,31 @@ export const SystemStatusCard = memo(function SystemStatusCard({
     >
       {/* Top: Digit + Circuit Status */}
       <div className="flex items-center gap-2.5">
-        <span className="font-sans text-3xl sm:text-4xl font-medium text-fg tracking-tight tabular-nums">
+        <span className="font-sans text-3xl sm:text-4xl font-semibold text-fg tracking-tight tabular-nums">
           {streak}
         </span>
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-[#EB1E23] animate-pulse" />
-            <span className="font-mono text-[10px] text-fg font-medium tracking-wider uppercase">
-              {streak === 1 ? 'DAY STREAK' : 'DAYS STREAK'}
+            <span className="font-sans text-xs text-fg font-medium">
+              {streak === 1 ? 'Day streak' : 'Days streak'}
             </span>
           </div>
-          <span className="font-mono text-[9px] text-muted tracking-wider uppercase">
-            CIRCUIT: {hasLoggedToday ? 'CLOSED' : 'OPEN'}
+          <span className="font-sans text-[11px] text-muted">
+            Circuit: {hasLoggedToday ? 'Closed' : 'Standby'}
           </span>
         </div>
       </div>
 
-      {/* Middle: PCB Trace / Connected Circuit */}
-      <div className="w-full flex flex-col gap-2 my-2 select-none">
-        {/* Weekday labels */}
-        <div className="w-full flex items-center justify-between px-2">
-          {WEEK_DAYS.map((dayName, i) => {
-            const isCurrentDay = sameDay(addDays(weekStart, i), today)
-            return (
-              <span
-                key={i}
-                className={`w-3 text-center font-mono text-[11px] tracking-wider uppercase ${
-                  isCurrentDay ? 'text-fg dark:text-white font-medium' : 'text-neutral-500'
-                }`}
-              >
-                {dayName}
-              </span>
-            )
-          })}
-        </div>
-
-        {/* Horizontal PCB Trace with 7 Pads */}
-        <div className="relative w-full flex items-center justify-between px-2 my-1">
+      {/* Middle: PCB Trace / Connected Circuit with 44px Tap Hitboxes */}
+      <div className="w-full flex flex-col gap-1 my-1.5 select-none">
+        {/* Horizontal PCB Trace with 7 Pads & Labels */}
+        <div className="relative w-full flex items-center justify-between px-1">
           {/* Inactive Base Trace Line */}
-          <div className="absolute left-[14px] right-[14px] top-1/2 -translate-y-1/2 h-[1.5px] bg-black/10 dark:bg-white/10 z-0" />
+          <div className="absolute left-[18px] right-[18px] top-[26px] h-[1.5px] bg-black/10 dark:bg-white/10 z-0" />
 
           {/* Active Connected Circuit Segments */}
-          <div className="absolute left-[14px] right-[14px] top-1/2 -translate-y-1/2 h-[1.5px] z-[1] pointer-events-none">
+          <div className="absolute left-[18px] right-[18px] top-[26px] h-[1.5px] z-[1] pointer-events-none">
             {Array.from({ length: 6 }).map((_, i) => {
               const isConnected = dayLogged[i] && dayLogged[i + 1]
               if (!isConnected) return null
@@ -131,7 +114,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
             })}
           </div>
 
-          {/* 7 Circular Contact Pads */}
+          {/* 7 Touch-Friendly Day Columns (min-h-[44px]) */}
           {WEEK_DAYS.map((dayName, i) => {
             const isCurrentDay = sameDay(addDays(weekStart, i), today)
             const hasLogged = dayLogged[i]
@@ -139,27 +122,40 @@ export const SystemStatusCard = memo(function SystemStatusCard({
             return (
               <div
                 key={i}
-                title={`${dayName}: ${hasLogged ? 'LOGGED' : 'INACTIVE'}`}
-                className={`relative z-10 h-3 w-3 rounded-full transition-all duration-150 ${
-                  hasLogged
-                    ? 'bg-[#EB1E23] border border-[#EB1E23]'
-                    : 'bg-surface dark:bg-[#0c0c0c] border border-black/20 dark:border-white/20'
-                } ${
-                  isCurrentDay
-                    ? 'ring-2 ring-fg/40 dark:ring-white/40 ring-offset-2 ring-offset-surface dark:ring-offset-black'
-                    : ''
-                }`}
-              />
+                title={`${dayName}: ${hasLogged ? 'Logged' : 'No sessions'}`}
+                className="relative z-10 flex flex-col items-center justify-center min-h-[44px] min-w-[32px] sm:min-w-[36px] py-1 rounded-lg transition-colors hover:bg-white/[0.04]"
+              >
+                {/* Pad */}
+                <div
+                  className={`h-3 w-3 rounded-full transition-all duration-150 mb-1.5 ${
+                    hasLogged
+                      ? 'bg-[#EB1E23] border border-[#EB1E23]'
+                      : 'bg-surface dark:bg-[#0c0c0c] border border-black/20 dark:border-white/20'
+                  } ${
+                    isCurrentDay
+                      ? 'ring-2 ring-fg/40 dark:ring-white/40 ring-offset-2 ring-offset-surface dark:ring-offset-black'
+                      : ''
+                  }`}
+                />
+                {/* Day Label */}
+                <span
+                  className={`font-sans text-[11px] ${
+                    isCurrentDay ? 'text-fg dark:text-white font-semibold' : 'text-neutral-500'
+                  }`}
+                >
+                  {dayName}
+                </span>
+              </div>
             )
           })}
         </div>
       </div>
 
       {/* Bottom Row: Weekly consistency metric */}
-      <div className="flex items-center justify-between font-mono text-[10px] text-muted tracking-wider uppercase pt-2 border-t border-line/40">
-        <span>ACTIVE DAYS</span>
+      <div className="flex items-center justify-between font-sans text-xs text-muted pt-2 border-t border-line/40">
+        <span>Active days</span>
         <span className="text-fg/90 font-medium tabular-nums">
-          {activeDaysThisWeek} / 7 DAYS
+          {activeDaysThisWeek} of 7 days
         </span>
       </div>
     </BentoCard>

@@ -46,12 +46,12 @@ export const FocusTimeCard = memo(function FocusTimeCard({
 
   return (
     <BentoCard
-      label="DAILY FOCUS"
+      label="Daily Focus"
       action={
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {streak > 0 && (
-            <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full border border-line bg-canvas text-fg tracking-wider uppercase">
-              {streak}D STREAK
+            <span className="font-sans text-[10px] font-medium px-2 py-0.5 rounded-full border border-line bg-canvas text-fg">
+              {streak}d streak
             </span>
           )}
           {onOpenSettings && (
@@ -62,9 +62,9 @@ export const FocusTimeCard = memo(function FocusTimeCard({
                 onOpenSettings()
               }}
               title="Edit Daily Goal"
-              className="text-muted hover:text-fg transition-colors p-0.5 cursor-pointer"
+              className="min-w-[36px] min-h-[36px] flex items-center justify-center -mr-1 rounded-full hover:bg-neutral-500/10 active:scale-95 transition-all text-muted hover:text-fg cursor-pointer"
             >
-              <SettingsIcon size={12} />
+              <SettingsIcon size={14} />
             </button>
           )}
         </div>
@@ -80,23 +80,23 @@ export const FocusTimeCard = memo(function FocusTimeCard({
             <span className="font-sans text-3xl sm:text-4xl font-medium tracking-tight text-fg tabular-nums">
               {hours}
             </span>
-            <span className="font-mono text-xs text-muted uppercase">H</span>
+            <span className="font-sans text-xs text-muted font-normal">h</span>
           </div>
-          <div className="font-mono text-[10px] text-muted tracking-wider uppercase mt-0.5">
-            / {targetHours} H TARGET
+          <div className="font-sans text-[11px] text-muted font-normal mt-0.5">
+            / {targetHours} h target
           </div>
         </div>
-        <div className="text-right font-mono">
-          <span className="text-xs sm:text-sm font-bold text-fg tabular-nums">{clampedPct}%</span>
-          <div className="text-[9px] text-muted tracking-wider uppercase">
-            {todaySessions.length} {todaySessions.length === 1 ? 'SESSION' : 'SESSIONS'}
+        <div className="text-right">
+          <span className="font-mono text-sm sm:text-base font-bold text-fg tabular-nums">{clampedPct}%</span>
+          <div className="font-sans text-[10px] text-muted">
+            {todaySessions.length} {todaySessions.length === 1 ? 'session' : 'sessions'}
           </div>
         </div>
       </div>
 
       {/* 24-Hour Timeline Bar with Red Needle */}
       <div className="mt-3">
-        <div className="relative h-3 w-full rounded-none bg-canvas border border-line/60 overflow-hidden">
+        <div className="relative h-3 w-full rounded-md bg-canvas/60 border border-line/60 overflow-hidden">
           {/* Hour tick marks */}
           <div className="absolute inset-0 flex justify-between pointer-events-none opacity-30">
             {Array.from({ length: 9 }).map((_, i) => (
@@ -116,7 +116,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
               <div
                 key={session.id}
                 title={`${session.task || 'Session'} (${durMin}m)`}
-                className="absolute top-0.5 bottom-0.5 rounded-none bg-fg/80 hover:bg-fg transition-colors"
+                className="absolute top-0.5 bottom-0.5 rounded-sm bg-fg/80 hover:bg-fg transition-colors"
                 style={{
                   left: `${leftPct}%`,
                   width: `${Math.max(0.5, widthPct)}%`,
@@ -134,10 +134,10 @@ export const FocusTimeCard = memo(function FocusTimeCard({
         </div>
 
         {/* Hour Axis Labels */}
-        <div className="mt-1 flex items-center justify-between font-mono text-[8px] sm:text-[9px] text-muted tracking-wider tabular-nums">
+        <div className="mt-1 flex items-center justify-between font-sans text-[9px] text-muted tabular-nums">
           <span>00:00</span>
           <span>12:00</span>
-          <span className="text-muted font-medium">NOW {timeStr}</span>
+          <span className="text-fg/80 font-medium">Now {timeStr}</span>
           <span>24:00</span>
         </div>
       </div>

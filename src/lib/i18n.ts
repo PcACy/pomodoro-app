@@ -160,8 +160,8 @@ const de: Messages = {
   paused: 'pausiert',
   timer: {
     flow: 'Flow',
-    start: 'Start (Leertaste)',
-    pause: 'Pause (Leertaste)',
+    start: 'Start',
+    pause: 'Pause',
   },
   flow: {
     finish: 'Flow beenden & speichern',
@@ -327,8 +327,8 @@ const en: Messages = {
   paused: 'paused',
   timer: {
     flow: 'Flow',
-    start: 'Start (Space)',
-    pause: 'Pause (Space)',
+    start: 'Start',
+    pause: 'Pause',
   },
   flow: {
     finish: 'Finish flow & save',

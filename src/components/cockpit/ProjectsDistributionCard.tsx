@@ -125,38 +125,38 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
 
   return (
     <BentoCard
-      label={`PROJECTS · ${totalWeekHours} H WEEK`}
+      label={`Projects · ${totalWeekHours} h week`}
       action={
         <button
           type="button"
           onClick={handleNextTrack}
           disabled={tracks.length <= 1}
-          className={`font-mono text-[9px] px-2 py-0.5 rounded-full border border-line bg-canvas text-muted tracking-wider uppercase transition-colors select-none ${
+          className={`font-sans text-[10px] font-medium px-2.5 py-1 rounded-full border border-line bg-canvas text-muted transition-colors select-none ${
             tracks.length > 1
               ? 'hover:text-fg hover:border-fg/40 cursor-pointer active:scale-95'
               : 'cursor-default'
           }`}
           title={tracks.length > 1 ? 'Click to switch track' : undefined}
         >
-          TRK {currentTrackIndex + 1}/{tracks.length}
+          Track {currentTrackIndex + 1} of {tracks.length}
         </button>
       }
       className={className}
       contentClassName="justify-between"
     >
-      <div className="flex-1 flex flex-col justify-between py-0.5 gap-2.5">
-        {/* Project Selection / Active Track Row with Stepper Controls */}
-        <div className="flex h-6 items-center justify-between font-mono text-[10px] tracking-wider uppercase select-none">
-          <div className="flex items-center gap-1.5 min-w-0">
-            {/* Stepper controls */}
-            <div className="flex items-center gap-0.5">
+      <div className="flex-1 flex flex-col justify-between py-0.5 gap-2">
+        {/* Project Selection / Active Track Row with 44px Touch Targets */}
+        <div className="flex min-h-[44px] items-center justify-between select-none">
+          <div className="flex items-center gap-1 min-w-0">
+            {/* Stepper controls with Fitts's Law 44px hitboxes */}
+            <div className="flex items-center -ml-2">
               <button
                 type="button"
                 onClick={handlePrevTrack}
                 disabled={tracks.length <= 1}
-                className={`h-5 w-4 flex items-center justify-center rounded-[2px] transition-colors ${
+                className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-base transition-colors ${
                   tracks.length > 1
-                    ? 'text-muted hover:text-fg hover:bg-fg/10 active:scale-95 cursor-pointer'
+                    ? 'text-muted hover:text-fg hover:bg-neutral-500/10 active:scale-90 cursor-pointer'
                     : 'text-muted/30 cursor-default'
                 }`}
                 title="Previous track (‹)"
@@ -169,14 +169,14 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
                 type="button"
                 onClick={handleNextTrack}
                 disabled={tracks.length <= 1}
-                className={`flex items-center gap-1 px-1 py-0.5 rounded-[2px] transition-colors ${
+                className={`min-h-[44px] px-3 flex items-center rounded-lg font-sans font-medium text-xs sm:text-sm text-fg transition-colors ${
                   tracks.length > 1
-                    ? 'hover:bg-fg/10 active:scale-98 cursor-pointer'
+                    ? 'hover:bg-neutral-500/10 active:scale-98 cursor-pointer'
                     : 'cursor-default'
                 }`}
                 title="Click to switch track"
               >
-                <span className="text-fg font-medium truncate">
+                <span className="truncate max-w-[140px] sm:max-w-[200px]">
                   {activeTrack}
                 </span>
               </button>
@@ -185,9 +185,9 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
                 type="button"
                 onClick={handleNextTrack}
                 disabled={tracks.length <= 1}
-                className={`h-5 w-4 flex items-center justify-center rounded-[2px] transition-colors ${
+                className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-base transition-colors ${
                   tracks.length > 1
-                    ? 'text-muted hover:text-fg hover:bg-fg/10 active:scale-95 cursor-pointer'
+                    ? 'text-muted hover:text-fg hover:bg-neutral-500/10 active:scale-90 cursor-pointer'
                     : 'text-muted/30 cursor-default'
                 }`}
                 title="Next track (›)"
@@ -198,13 +198,13 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
             </div>
           </div>
 
-          <span className="text-fg/80 tabular-nums font-mono text-[10px] shrink-0 ml-2">
-            {activeTrackHours} H
+          <span className="text-fg/80 tabular-nums font-sans font-medium text-xs sm:text-sm shrink-0 ml-2">
+            {activeTrackHours} h
           </span>
         </div>
 
         {/* 7-Column Full-Width VU-Meter LED Equalizer Grid */}
-        <div className="w-full grid grid-cols-7 gap-2 sm:gap-2.5 px-1 my-2">
+        <div className="w-full grid grid-cols-7 gap-2 sm:gap-2.5 px-1 my-1">
           {DAY_LABELS.map((label, dayIdx) => {
             const dayMins = dayMinutes[dayIdx] ?? 0
             const isToday = dayIdx === todayIdx
@@ -215,12 +215,12 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
               <div
                 key={dayIdx}
                 className="flex flex-col items-center gap-1.5 w-full"
-                title={`${label}: ${dayMins} MIN`}
+                title={`${label}: ${dayMins} min`}
               >
                 {/* Day header letter */}
                 <span
-                  className={`font-mono text-[9px] sm:text-[10px] tracking-wider uppercase select-none ${
-                    isToday ? 'text-fg dark:text-white font-medium' : 'text-muted/60 font-normal'
+                  className={`font-sans text-[10px] sm:text-[11px] select-none ${
+                    isToday ? 'text-fg dark:text-white font-bold' : 'text-muted/60 font-normal'
                   }`}
                 >
                   {label}
@@ -242,7 +242,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
 
                     if (isActive) {
                       if (isToday && isPeak) {
-                        segmentStyle = 'bg-[#EB1E23] border border-[#EB1E23]'
+                        segmentStyle = 'bg-accent border border-accent'
                       } else {
                         segmentStyle = 'bg-fg border border-fg'
                       }
@@ -262,23 +262,23 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
         </div>
 
         {/* Fixed Footer Status Line */}
-        <div className="pt-1.5 border-t border-line/40 flex h-6 items-center justify-between font-mono text-[9px] text-muted tracking-widest uppercase select-none">
-          <span className="flex items-center gap-1.5">
+        <div className="pt-2 border-t border-line/40 flex h-7 items-center justify-between font-sans text-[11px] text-muted select-none">
+          <span className="flex items-center gap-2">
             <span
-              className={`h-1.5 w-1.5 rounded-full ${
-                hasActivity ? 'bg-[#EB1E23] animate-pulse' : 'bg-muted/40'
+              className={`h-2 w-2 rounded-full ${
+                hasActivity ? 'bg-accent animate-pulse' : 'bg-muted/40'
               }`}
             />
             <span>
               {hasActivity
-                ? `${activeTrackHours} H LOGGED THIS WEEK`
+                ? `${activeTrackHours} h logged this week`
                 : isAllTrack
-                  ? 'NO ACTIVITY THIS WEEK'
-                  : `NO ACTIVITY ON ${activeTrack}`}
+                  ? 'No activity this week'
+                  : `No activity on ${activeTrack}`}
             </span>
           </span>
-          <span className="text-muted/70 tracking-wider">
-            {hasActivity ? 'ACTIVE' : 'STANDBY'}
+          <span className="text-muted/60 text-[10px]">
+            {hasActivity ? 'Active' : 'Standby'}
           </span>
         </div>
       </div>

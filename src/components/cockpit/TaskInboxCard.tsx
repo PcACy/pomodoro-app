@@ -91,7 +91,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
 
   return (
     <BentoCard
-      label="TASK INBOX"
+      label="Task Inbox"
       action={
         <button
           type="button"
@@ -99,10 +99,10 @@ export const TaskInboxCard = memo(function TaskInboxCard({
             playMicroClick('tap')
             onOpenTodoManager()
           }}
-          className="font-mono text-[9px] px-2 py-0.5 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg tracking-wider uppercase transition-colors flex items-center gap-1 cursor-pointer"
+          className="font-sans text-[11px] font-medium px-2.5 py-1 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors flex items-center gap-1.5 cursor-pointer select-none active:scale-95"
         >
-          <Maximize2 size={10} />
-          EXPAND
+          <Maximize2 size={12} />
+          Expand
         </button>
       }
       className={className}
@@ -134,9 +134,9 @@ export const TaskInboxCard = memo(function TaskInboxCard({
         {tags.length > 0 && (
           <div className="relative shrink-0" ref={tagDropdownRef}>
             <div
-              className={`h-7 px-2.5 rounded-lg border text-[10px] font-mono tracking-wider uppercase transition-colors flex items-center gap-1.5 select-none ${
+              className={`h-8 px-2.5 rounded-lg border text-xs font-sans transition-colors flex items-center gap-1.5 select-none ${
                 selectedTag
-                  ? 'border-fg/40 bg-surface text-fg'
+                  ? 'border-fg/40 bg-surface text-fg font-medium'
                   : 'border-line bg-canvas text-muted hover:text-fg hover:border-fg/30'
               }`}
             >
@@ -156,12 +156,12 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                         backgroundColor: getTagColor(selectedTag),
                       }}
                     />
-                    <span className="max-w-[70px] truncate uppercase">{selectedTag}</span>
+                    <span className="max-w-[70px] truncate">{selectedTag}</span>
                   </>
                 ) : (
                   <>
                     <span className="text-muted/70">#</span>
-                    <span>TAG</span>
+                    <span>Tag</span>
                   </>
                 )}
               </button>
@@ -179,7 +179,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
             </div>
 
             {isTagDropdownOpen && (
-              <div className="absolute right-0 top-full mt-1 z-30 min-w-[130px] rounded-lg border border-line bg-surface p-1 shadow-none flex flex-col gap-0.5 font-mono text-[10px] tracking-wider uppercase">
+              <div className="absolute right-0 top-full mt-1 z-30 min-w-[130px] rounded-lg border border-line bg-surface p-1 shadow-none flex flex-col gap-0.5 font-sans text-xs">
                 <button
                   type="button"
                   onClick={() => {
@@ -190,8 +190,8 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                     !selectedTag ? 'text-fg font-medium bg-canvas/60' : 'text-muted'
                   }`}
                 >
-                  <span>{tr.todo.noTag.toUpperCase()}</span>
-                  {!selectedTag && <span className="text-[9px]">✓</span>}
+                  <span>{tr.todo.noTag}</span>
+                  {!selectedTag && <span className="text-[10px]">✓</span>}
                 </button>
                 {tags.map((tag) => (
                   <button
@@ -211,8 +211,8 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                         backgroundColor: getTagColor(tag),
                       }}
                     />
-                    <span className="truncate flex-1 uppercase">{tag}</span>
-                    {selectedTag === tag && <span className="text-[9px]">✓</span>}
+                    <span className="truncate flex-1">{tag}</span>
+                    {selectedTag === tag && <span className="text-[10px]">✓</span>}
                   </button>
                 ))}
               </div>
@@ -224,7 +224,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
       {/* Task List */}
       <div className="flex-1 flex flex-col gap-1.5">
         {pendingTodos.length === 0 ? (
-          <div className="py-4 text-center font-mono text-[11px] text-muted tracking-wider uppercase">
+          <div className="py-4 text-center font-sans text-xs text-muted">
             No pending tasks
           </div>
         ) : (
@@ -239,14 +239,14 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                   playMicroClick('tap')
                   onFocus(todo.id)
                 }}
-                className={`group flex items-center justify-between gap-2.5 px-3 py-2 rounded-[8px] border transition-colors cursor-pointer ${
+                className={`group flex min-h-[44px] items-center justify-between gap-2.5 px-3 py-1.5 rounded-xl border transition-colors cursor-pointer ${
                   isActive
                     ? 'border-fg bg-surface-raised text-fg'
                     : 'border-line/60 bg-canvas/40 hover:border-line hover:bg-canvas text-fg/90'
                 }`}
               >
-                <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  {/* Mechanical Checkbox */}
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  {/* Mechanical Checkbox with Fitts's Law touch target */}
                   <button
                     type="button"
                     onClick={(e) => {
@@ -254,33 +254,38 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                       playMicroClick('tick')
                       onToggle(todo.id)
                     }}
-                    className={`h-4 w-4 shrink-0 rounded-sm border flex items-center justify-center transition-colors cursor-pointer ${
-                      todo.done
-                        ? 'bg-fg border-fg text-canvas'
-                        : 'border-line bg-canvas hover:border-fg/40'
-                    }`}
+                    className="h-8 w-8 -ml-1.5 shrink-0 flex items-center justify-center cursor-pointer text-muted hover:text-fg"
+                    aria-label={todo.done ? 'Mark as incomplete' : 'Mark as done'}
                   >
-                    {todo.done && <Check size={11} strokeWidth={3} />}
+                    <div
+                      className={`h-4 w-4 rounded-[4px] border flex items-center justify-center transition-colors ${
+                        todo.done
+                          ? 'bg-fg border-fg text-canvas'
+                          : 'border-line bg-canvas hover:border-fg/40'
+                      }`}
+                    >
+                      {todo.done && <Check size={11} strokeWidth={3} />}
+                    </div>
                   </button>
 
                   <span className="font-sans text-xs truncate">{todo.title}</span>
 
                   {todo.tag && (
-                    <span className="inline-flex items-center gap-1.5 font-mono text-[9px] text-muted shrink-0 uppercase tracking-wider leading-none">
+                    <span className="inline-flex items-center gap-1.5 font-sans text-[11px] text-muted shrink-0">
                       <span
                         className="h-1.5 w-1.5 rounded-full shrink-0 -translate-y-px"
                         style={{
                           backgroundColor: tagColor,
                         }}
                       />
-                      <span className="leading-none">{todo.tag}</span>
+                      <span>{todo.tag}</span>
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-0.5 shrink-0">
                   {isActive ? (
-                    <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+                    <span className="h-2 w-2 rounded-full bg-accent animate-pulse mr-1" />
                   ) : (
                     <button
                       type="button"
@@ -290,9 +295,9 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                         onFocus(todo.id)
                       }}
                       title="Set as active focus"
-                      className="opacity-0 group-hover:opacity-100 p-1 text-muted hover:text-fg transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 sm:opacity-0 max-sm:opacity-100 h-8 w-8 flex items-center justify-center text-muted hover:text-fg transition-opacity cursor-pointer active:scale-95"
                     >
-                      <Target size={12} />
+                      <Target size={14} />
                     </button>
                   )}
                   <button
@@ -304,9 +309,9 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                     }}
                     title={tr.todo.delete}
                     aria-label={tr.todo.delete}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-muted hover:text-accent transition-opacity cursor-pointer"
+                    className="opacity-0 group-hover:opacity-100 sm:opacity-0 max-sm:opacity-100 h-8 w-8 flex items-center justify-center text-muted hover:text-accent transition-opacity cursor-pointer active:scale-95"
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
@@ -318,7 +323,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
           <button
             type="button"
             onClick={onOpenTodoManager}
-            className="text-left font-mono text-[10px] text-muted hover:text-fg tracking-wider uppercase pt-1 transition-colors cursor-pointer"
+            className="text-left font-sans text-xs text-muted hover:text-fg pt-1 transition-colors cursor-pointer"
           >
             + {remainingCount} more tasks in inbox
           </button>

@@ -287,7 +287,7 @@ export const Timer = memo(function Timer({
 
       {/* Keyboard Shortcuts Hint */}
       <div
-        className={`flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-muted font-mono tracking-wider uppercase mt-2 select-none transition-opacity duration-200 [@media(hover:none)]:hidden ${
+        className={`flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-muted font-mono tracking-wider uppercase mt-2 select-none transition-opacity duration-200 [@media(hover:none)]:hidden [@media(pointer:coarse)]:hidden ${
           running ? 'pointer-events-none opacity-0' : 'opacity-80'
         }`}
       >
