@@ -257,7 +257,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           <h3 className={`font-sans font-medium text-lg sm:text-xl truncate ${activeTodo ? 'text-fg' : 'text-muted'}`}>
             {activeTodo?.title || 'No tape inserted'}
           </h3>
-          <div className="mt-1 h-5 flex items-center gap-2 font-sans text-xs text-muted leading-none">
+          <div className="mt-1 h-5 flex items-center gap-2 font-sans text-xs text-neutral-600 dark:text-muted leading-none">
             {activeTodo?.tag ? (
               <span className="flex items-center gap-1.5 rounded-full border border-line bg-canvas px-2 py-0.5">
                 <span
@@ -291,14 +291,14 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
                 </span>
               ))}
             </div>
-            <span className="font-sans text-[11px] text-muted tabular-nums">
+            <span className="font-sans text-[11px] text-neutral-600 dark:text-muted tabular-nums">
               {activeTodo ? `${displayMinutes} min focused` : 'Tape counter'}
             </span>
           </div>
         </div>
 
         {/* Stationary Cassette Window Frame - Never hops or shifts */}
-        <div className="shrink-0 relative overflow-hidden rounded-xl border border-black/10 bg-black/[0.02] p-2 dark:border-white/5 dark:bg-white/[0.02]">
+        <div className="shrink-0 relative overflow-hidden rounded-xl border border-black/5 dark:border-white/5 bg-neutral-100/90 dark:bg-neutral-900/50 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.4)] p-2">
           <div className="flex flex-col items-center">
             {/* Reel and Spindle Mount */}
             <div className="relative">
@@ -355,7 +355,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
               {/* Fixed magnetic head: 100% stationary chassis mount */}
               <div className="absolute left-1/2 top-[3px] flex -translate-x-1/2 items-end gap-[3px]">
                 <span className="h-1.5 w-px bg-fg/30" />
-                <span className="h-[5px] w-2.5 rounded-[1px] border border-fg/30 bg-canvas" />
+                <span className="h-[5px] w-2.5 rounded-[1px] border border-fg/30 bg-neutral-200 dark:bg-canvas" />
                 <span className="h-1.5 w-px bg-fg/30" />
               </div>
             </div>

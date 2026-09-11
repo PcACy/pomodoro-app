@@ -141,7 +141,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
               running ? 'bg-accent animate-pulse' : 'bg-line'
             }`}
           />
-          <span className="font-mono text-[10px] sm:text-xs tracking-widest text-muted uppercase">
+          <span className="font-mono text-[10px] sm:text-xs tracking-widest text-neutral-700 dark:text-neutral-400 uppercase font-medium">
             {isFlow ? 'FLOW' : 'POMODORO'}
           </span>
         </div>
@@ -172,7 +172,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             <span className="font-sans font-medium text-sm sm:text-base text-fg leading-snug">
               {dayName}
             </span>
-            <span className="font-sans text-xs text-muted/90">
+            <span className="font-sans text-xs text-neutral-600 dark:text-neutral-400 font-normal">
               {dateFormatted}
             </span>
           </div>
@@ -185,8 +185,8 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             ) : (
               <div className="inline-flex items-center gap-2 font-sans text-xs">
                 <span className="text-fg font-medium">{shownLabel}</span>
-                <span className="text-muted/40">·</span>
-                <span className="text-muted text-xs">
+                <span className="text-neutral-400 dark:text-neutral-500">·</span>
+                <span className="text-neutral-700 dark:text-neutral-300 text-xs font-medium">
                   Round {(completedFocusInCycle % safeRounds) + 1} of {safeRounds}
                 </span>
                 <div className="flex items-center gap-1 ml-0.5" title={`Cycle: ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`}>
@@ -202,7 +202,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
                             ? 'bg-fg'
                             : isCurrent
                               ? 'bg-accent'
-                              : 'border border-line bg-canvas'
+                              : 'border border-neutral-400/50 dark:border-line bg-canvas'
                         }`}
                       />
                     )
@@ -227,7 +227,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
               <div
                 key={i}
                 className={`flex-1 h-1.5 rounded-full transition-colors duration-150 ${
-                  isFilled ? 'bg-fg' : 'bg-line/40'
+                  isFilled ? 'bg-fg' : 'bg-neutral-300/80 dark:bg-line/40'
                 }`}
               />
             )
@@ -253,7 +253,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
               type="button"
               onClick={handleAddFive}
               title="+5 minutes"
-              className="h-11 min-h-[44px] rounded-full px-3.5 border border-white/15 dark:border-white/15 border-black/15 bg-canvas/60 hover:border-fg/40 text-muted hover:text-fg font-sans text-xs font-medium tracking-wide transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95"
+              className="h-11 min-h-[44px] rounded-full px-3.5 border border-black/10 dark:border-white/10 bg-neutral-200/60 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-900 dark:bg-neutral-900/60 dark:hover:bg-neutral-800/60 dark:text-neutral-400 dark:hover:text-white font-sans text-xs font-medium tracking-wide transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95"
             >
               <Plus size={12} />
               5m
@@ -268,7 +268,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             onClick={handleResetClick}
             title={t.shortcuts.reset}
             aria-label={t.shortcuts.reset}
-            className="h-11 w-11 min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0 rounded-full border border-white/15 dark:border-white/15 border-black/15 bg-canvas/60 hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer active:scale-95"
+            className="h-11 w-11 min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0 rounded-full border border-black/10 dark:border-white/10 bg-neutral-200/60 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-900 dark:bg-neutral-900/60 dark:hover:bg-neutral-800/60 dark:text-neutral-400 dark:hover:text-white transition-colors cursor-pointer active:scale-95"
           >
             <RotateCcw size={14} />
           </button>
@@ -277,7 +277,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
             onClick={handleSkipClick}
             title={t.shortcuts.skip}
             aria-label={t.shortcuts.skip}
-            className="h-11 w-11 min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0 rounded-full border border-white/15 dark:border-white/15 border-black/15 bg-canvas/60 hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer active:scale-95"
+            className="h-11 w-11 min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0 rounded-full border border-black/10 dark:border-white/10 bg-neutral-200/60 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-900 dark:bg-neutral-900/60 dark:hover:bg-neutral-800/60 dark:text-neutral-400 dark:hover:text-white transition-colors cursor-pointer active:scale-95"
           >
             <SkipForward size={14} />
           </button>

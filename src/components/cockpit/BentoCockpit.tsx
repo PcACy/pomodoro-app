@@ -53,6 +53,11 @@ interface BentoCockpitProps {
   onToggleZen: () => void
 }
 
+function formatSystemClock(d: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
 export const BentoCockpit = memo(function BentoCockpit({
   phaseLabel,
   status,
@@ -87,8 +92,17 @@ export const BentoCockpit = memo(function BentoCockpit({
 }: BentoCockpitProps) {
   const isRunning = mode === 'flow' ? flowStatus === 'running' : status === 'running'
   const [activeScreen, setActiveScreen] = useState<number>(0)
+  const [systemTime, setSystemTime] = useState(() => formatSystemClock(new Date()))
   const scrollerRef = useRef<HTMLDivElement>(null)
   const isProgrammaticScrollRef = useRef(false)
+
+  // Minimalist system clock interval
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSystemTime(formatSystemClock(new Date()))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   // Smoothly scrolls to target deck (0: Focus Deck, 1: Tasks Deck, 2: Stats Deck)
   const scrollToScreen = useCallback((index: number) => {
@@ -199,16 +213,17 @@ export const BentoCockpit = memo(function BentoCockpit({
           </button>
         </div>
 
-        {/* Ambient Hardware Status Label */}
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[9px] text-muted/60 tracking-widest uppercase hidden sm:inline">
-            {activeScreen === 0
-              ? 'Focus Deck · Operative'
-              : activeScreen === 1
-                ? 'Tasks Deck · Workspace'
-                : 'Stats Deck · Analytics'}
+        {/* Minimalist Desk Clock (HH:mm:ss) & Hardware Status LED */}
+        <div className="flex items-center gap-2 select-none">
+          <span className="font-mono text-[10px] sm:text-[11px] text-neutral-600 dark:text-neutral-400 tracking-wider tabular-nums font-medium">
+            {systemTime}
           </span>
-          <span className={`h-1.5 w-1.5 rounded-full ${isRunning ? 'bg-accent animate-pulse' : 'bg-line'}`} />
+          <span
+            className={`h-1.5 w-1.5 rounded-full transition-colors ${
+              isRunning ? 'bg-accent animate-pulse' : 'bg-line'
+            }`}
+            title={isRunning ? 'Recording' : 'Standby'}
+          />
         </div>
       </div>
 
