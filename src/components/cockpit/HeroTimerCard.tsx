@@ -128,7 +128,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[24px] backdrop-blur-md bg-neutral-950/60 dark:bg-neutral-950/60 bg-white/80 border border-white/10 dark:border-white/10 border-black/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_24px_-4px_rgba(0,0,0,0.3)] p-4 sm:p-5 flex flex-col justify-between select-none transition-all duration-200 ${className}`}
+      className={`relative overflow-hidden rounded-[24px] backdrop-blur-md bg-white/85 dark:bg-neutral-950/60 border border-black/10 dark:border-white/10 shadow-none dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_24px_-4px_rgba(0,0,0,0.3)] p-4 sm:p-5 flex flex-col justify-between select-none transition-all duration-200 ${className}`}
     >
       {/* Interactive Dot-Matrix background (proximity ripple, hero only) */}
       <HeroDotGridCanvas />
