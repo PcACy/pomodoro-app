@@ -153,6 +153,48 @@ export const BentoCockpit = memo(
       [onDeckChange],
     )
 
+    // Touch swipe gesture detector for horizontal deck switching on mobile devices
+    const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null)
+
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+      if (e.touches.length === 1) {
+        touchStartRef.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+          time: Date.now(),
+        }
+      }
+    }, [])
+
+    const handleTouchEnd = useCallback(
+      (e: React.TouchEvent) => {
+        const start = touchStartRef.current
+        touchStartRef.current = null
+        if (!start || e.changedTouches.length === 0) return
+
+        const deltaX = e.changedTouches[0].clientX - start.x
+        const deltaY = e.changedTouches[0].clientY - start.y
+        const elapsed = Date.now() - start.time
+
+        // Swipe requirement: horizontal distance >= 40px, predominantly horizontal (1.2x vertical), within 700ms
+        if (Math.abs(deltaX) >= 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2 && elapsed < 700) {
+          const current = activeScreenRef.current
+          if (deltaX < 0 && current < 2) {
+            // Swiped left -> Next deck
+            scrollToScreen(current + 1)
+          } else if (deltaX > 0 && current > 0) {
+            // Swiped right -> Previous deck
+            scrollToScreen(current - 1)
+          }
+        }
+      },
+      [scrollToScreen],
+    )
+
+    const handleTouchCancel = useCallback(() => {
+      touchStartRef.current = null
+    }, [])
+
     // Expose imperative API for external control (e.g. from topbar or deep links)
     useImperativeHandle(
       ref,
@@ -272,8 +314,16 @@ export const BentoCockpit = memo(
         <div
           ref={scrollerRef}
           onScroll={handleScroll}
-          className="w-full flex-1 min-h-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar touch-pan-x"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchCancel}
+          className="w-full flex-1 min-h-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar overscroll-x-contain touch-manipulation"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            touchAction: 'pan-x pan-y',
+            WebkitOverflowScrolling: 'touch',
+          }}
         >
           {/* SCREEN 01: FOCUS DECK (Operative Ebene) */}
           <section
@@ -332,7 +382,7 @@ export const BentoCockpit = memo(
             </div>
 
             {/* Portrait Layout (Tablets & Mobile Portrait) */}
-            <div className="flex lg:hidden flex-col h-full min-h-0 gap-2.5 sm:gap-3 overflow-y-auto no-scrollbar touch-pan-y">
+            <div className="flex lg:hidden flex-col h-full min-h-0 gap-2.5 sm:gap-3 overflow-y-auto no-scrollbar">
               {/* Hero Timer */}
               <div className="w-full shrink-0 min-h-[360px] sm:min-h-0 sm:flex-1">
                 <HeroTimerCard
@@ -386,7 +436,7 @@ export const BentoCockpit = memo(
             aria-label="Screen 2: Tasks Deck"
             className="w-full min-w-full shrink-0 snap-start snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch overflow-y-auto md:overflow-hidden no-scrollbar touch-pan-y">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch overflow-y-auto md:overflow-hidden no-scrollbar">
               {/* Left: Task Inbox with Quick Add & Interactive Task List */}
               <TaskInboxCard
                 todos={todos}
@@ -474,7 +524,7 @@ export const BentoCockpit = memo(
               {statsSubView === 'overview' ? (
                 <div
                   key="stats-overview"
-                  className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch overflow-y-auto md:overflow-hidden no-scrollbar touch-pan-y animate-fade-in"
+                  className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch overflow-y-auto md:overflow-hidden no-scrollbar animate-fade-in"
                 >
                   {/* 1. Weekly Goal Load */}
                   <GoalLoadCard
