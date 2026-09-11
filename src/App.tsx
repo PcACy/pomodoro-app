@@ -28,11 +28,6 @@ import { SettingsModal } from './components/cockpit/SettingsModal'
 
 const ReflectionModal = lazy(() => import('./components/ReflectionModal').then((m) => ({ default: m.ReflectionModal })))
 
-function formatSystemClock(d: Date): string {
-  const pad = (n: number) => n.toString().padStart(2, '0')
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
-}
-
 export default function App() {
   const { t } = useTranslation()
   const [colorMode, setColorMode, themeId, setThemeId] = useTheme()
@@ -44,14 +39,6 @@ export default function App() {
   const [mode, setMode] = useLocalState<TimerMode>(STORAGE_KEYS.mode, 'pomodoro')
   const [activeDeck, setActiveDeck] = useState<number>(0)
   const cockpitRef = useRef<BentoCockpitRef>(null)
-  const [systemTime, setSystemTime] = useState(() => formatSystemClock(new Date()))
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setSystemTime(formatSystemClock(new Date()))
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
 
   const handleSelectDeck = useCallback((deck: number) => {
     setActiveDeck(deck)
@@ -408,19 +395,6 @@ export default function App() {
             <SettingsIcon size={13} />
             <span className="hidden md:inline">{t.nav.settings}</span>
           </button>
-
-          {/* 4. Minimalist Digital Clock (HH:mm:ss) + Hardware Status LED */}
-          <div className="flex items-center gap-2 pl-1.5 sm:pl-2.5 border-l border-line/60 select-none">
-            <span className="font-mono text-[10px] sm:text-[11px] text-neutral-600 dark:text-neutral-400 tracking-wider tabular-nums font-medium">
-              {systemTime}
-            </span>
-            <span
-              className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                isRunning ? 'bg-accent animate-pulse' : 'bg-line'
-              }`}
-              title={isRunning ? 'Recording' : 'Standby'}
-            />
-          </div>
         </div>
       </header>
 
