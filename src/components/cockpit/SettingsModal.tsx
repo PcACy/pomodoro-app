@@ -1,7 +1,8 @@
 import { memo, useEffect } from 'react'
 import { X } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../../types'
-import type { ColorMode } from '../../themes'
+import type { ColorMode, ThemeId } from '../../themes'
+import { THEMES, THEME_LIST } from '../../themes'
 import type { SyncStatus } from '../../hooks/useSync'
 import type { GitHubProfile } from '../../hooks/useAuth'
 import { SettingsPanel } from '../Settings'
@@ -15,6 +16,8 @@ interface SettingsModalProps {
   update: (updater: (s: Settings) => Settings) => void
   colorMode: ColorMode
   onColorModeChange: (m: ColorMode) => void
+  themeId?: ThemeId
+  onThemeChange?: (theme: ThemeId) => void
   sessions: Session[]
   todos: TodoItem[]
   syncStatus: SyncStatus
@@ -35,6 +38,8 @@ export const SettingsModal = memo(function SettingsModal({
   update,
   colorMode,
   onColorModeChange,
+  themeId,
+  onThemeChange,
   sessions,
   todos,
   syncStatus,
@@ -105,6 +110,60 @@ export const SettingsModal = memo(function SettingsModal({
           </button>
         </div>
 
+        {/* Nothing OS 5.0 & CMF Colorways Theme Selector */}
+        {onThemeChange && (
+          <div className="pb-3 border-b border-line/60">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-fg">
+                  Colorway · Nothing OS & CMF
+                </h3>
+                <p className="font-sans text-[11px] text-muted">
+                  Curated industrial palettes with dynamic hardware accents.
+                </p>
+              </div>
+              {themeId && (
+                <span className="font-mono text-[9px] text-muted uppercase tracking-wider px-2 py-0.5 rounded-full border border-line bg-canvas">
+                  {THEMES[themeId]?.name || 'Theme'}
+                </span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {THEME_LIST.map((th) => {
+                const isSelected = themeId === th.id
+                return (
+                  <button
+                    key={th.id}
+                    type="button"
+                    onClick={() => {
+                      playMicroClick('toggle')
+                      onThemeChange(th.id)
+                    }}
+                    className={`group relative flex items-center gap-2 px-3 py-2 rounded-xl border font-mono text-xs transition-all duration-200 cursor-pointer ${
+                      isSelected
+                        ? 'border-fg bg-surface shadow-sm ring-1 ring-fg/20 font-bold text-fg'
+                        : 'border-line/70 bg-canvas hover:border-fg/40 text-muted hover:text-fg'
+                    }`}
+                    title={`${th.name} — ${th.subtitle}`}
+                  >
+                    <div
+                      className="relative h-4 w-4 rounded-full border border-white/20 shrink-0 shadow-inner flex items-center justify-center"
+                      style={{ backgroundColor: th.canvas }}
+                    >
+                      <span
+                        className="h-1.5 w-1.5 rounded-full shadow-sm"
+                        style={{ backgroundColor: th.accent }}
+                      />
+                    </div>
+                    <span className="text-[11px] uppercase tracking-wider">{th.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Embedded SettingsPanel */}
         <div className="flex-1">
           <SettingsPanel
@@ -112,6 +171,8 @@ export const SettingsModal = memo(function SettingsModal({
             update={update}
             colorMode={colorMode}
             onColorModeChange={onColorModeChange}
+            themeId={themeId}
+            onThemeChange={onThemeChange}
             sessions={sessions}
             todos={todos}
             syncStatus={syncStatus}

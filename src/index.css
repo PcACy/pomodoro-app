@@ -158,13 +158,78 @@
 }
 
 /* =========================================================================
-   ACCENT COLOR TOKENS
-   Nothing spec: static signal red #D71921 (no accent picker).
+   NOTHING OS 5.0 & CMF COLORWAYS THEME TOKENS
    ========================================================================= */
 :root {
-  --accent: 215 25 33 !important;
-  --accent-strong: 215 25 33 !important;
-  --accent-subtle: rgba(215, 25, 33, 0.15) !important;
+  --bg-canvas: #050505;
+  --bg-card: rgba(15, 15, 15, 0.7);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --accent: 229 30 43;
+  --accent-hex: #E51E2B;
+  --accent-strong: 229 30 43;
+  --accent-subtle: rgba(229, 30, 43, 0.125);
+  --text-primary: #E8E8E8;
+  --text-muted: #999999;
+}
+
+[data-theme-id='nothing-dark'] {
+  --bg-canvas: #050505;
+  --bg-card: rgba(15, 15, 15, 0.7);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --accent: 229 30 43;
+  --accent-hex: #E51E2B;
+  --accent-strong: 229 30 43;
+  --accent-subtle: rgba(229, 30, 43, 0.125);
+  --text-primary: #E8E8E8;
+  --text-muted: #999999;
+}
+
+[data-theme-id='nothing-light'] {
+  --bg-canvas: #EFEFEF;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(0, 0, 0, 0.06);
+  --accent: 215 25 33;
+  --accent-hex: #D71921;
+  --accent-strong: 215 25 33;
+  --accent-subtle: rgba(215, 25, 33, 0.12);
+  --text-primary: #171717;
+  --text-muted: #737373;
+}
+
+[data-theme-id='cmf-orange'] {
+  --bg-canvas: #0B0B0C;
+  --bg-card: rgba(20, 20, 22, 0.8);
+  --card-border: rgba(255, 85, 0, 0.12);
+  --accent: 255 85 0;
+  --accent-hex: #FF5500;
+  --accent-strong: 255 85 0;
+  --accent-subtle: rgba(255, 85, 0, 0.15);
+  --text-primary: #EAEAEA;
+  --text-muted: #9E9EA4;
+}
+
+[data-theme-id='nothing-sage'] {
+  --bg-canvas: #121614;
+  --bg-card: rgba(26, 32, 28, 0.8);
+  --card-border: rgba(138, 155, 133, 0.15);
+  --accent: 138 155 133;
+  --accent-hex: #8A9B85;
+  --accent-strong: 138 155 133;
+  --accent-subtle: rgba(138, 155, 133, 0.2);
+  --text-primary: #E8EBE8;
+  --text-muted: #9BA49B;
+}
+
+[data-theme-id='nothing-cobalt'] {
+  --bg-canvas: #080A10;
+  --bg-card: rgba(16, 20, 32, 0.8);
+  --card-border: rgba(24, 72, 224, 0.15);
+  --accent: 43 92 255;
+  --accent-hex: #2B5CFF;
+  --accent-strong: 43 92 255;
+  --accent-subtle: rgba(43, 92, 255, 0.2);
+  --text-primary: #E8EAF6;
+  --text-muted: #9499B3;
 }
 
 /* =========================================================================
@@ -188,7 +253,9 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   touch-action: pan-y;
-  @apply bg-canvas text-fg antialiased;
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  @apply antialiased transition-colors duration-300;
   font-family: var(--font-body, 'Space Grotesk', system-ui, sans-serif);
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);

@@ -1,11 +1,13 @@
 import { memo } from 'react'
 import type { PhaseId, TimerStatus } from '../types'
-import type { ColorMode } from '../themes'
+import { THEMES } from '../themes'
+import type { ColorMode, ThemeId } from '../themes'
 import type { SyncStatus } from '../hooks/useSync'
 import { useFlowTimerTick, useTimerTick } from '../hooks/useTimerTick'
 
 export interface StatusBarProps {
   colorMode: ColorMode
+  themeId?: ThemeId
   mode: 'pomodoro' | 'flow'
   phase: PhaseId
   status: TimerStatus
@@ -20,6 +22,7 @@ export interface StatusBarProps {
 
 export const StatusBar = memo(function StatusBar({
   colorMode,
+  themeId,
   mode,
   phase,
   status,
@@ -105,8 +108,8 @@ export const StatusBar = memo(function StatusBar({
             SYNC:{syncStatus}
           </span>
         )}
-        <span className="hidden sm:inline text-muted/60 text-[10px]">
-          NOTHING-{colorMode}
+        <span className="hidden sm:inline text-muted/60 text-[10px] tracking-wider uppercase">
+          THEME: {themeId ? (THEMES[themeId]?.badge || themeId.toUpperCase()) : `NOTHING-${colorMode}`.toUpperCase()}
         </span>
       </div>
     </footer>

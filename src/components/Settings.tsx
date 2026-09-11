@@ -16,7 +16,8 @@ import {
   X,
 } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../types'
-import type { ColorMode } from '../themes'
+import type { ColorMode, ThemeId } from '../themes'
+import { THEMES, THEME_LIST } from '../themes'
 import { clearSessions, exportAll } from '../lib/db'
 import { dayKey } from '../lib/time'
 import { downloadText, sessionsToCsv, sessionsToJson, todosToCsv, todosToJson } from '../lib/dataExport'
@@ -269,6 +270,8 @@ interface Props {
   update: (updater: (s: Settings) => Settings) => void
   colorMode: ColorMode
   onColorModeChange: (mode: ColorMode) => void
+  themeId?: ThemeId
+  onThemeChange?: (theme: ThemeId) => void
   sessions: Session[]
   todos: TodoItem[]
   syncStatus: SyncStatus
@@ -287,6 +290,8 @@ export const SettingsPanel = memo(function SettingsPanel({
   update,
   colorMode,
   onColorModeChange,
+  themeId,
+  onThemeChange,
   sessions,
   todos,
   syncStatus,
@@ -671,6 +676,59 @@ export const SettingsPanel = memo(function SettingsPanel({
           />
         </div>
 
+        {/* Nothing OS 5.0 & CMF Colorways Theme Selector */}
+        {onThemeChange && (
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-muted">
+                  Colorway · Nothing OS & CMF
+                </h3>
+                <p className="text-[11px] text-muted">
+                  Curated industrial palettes with dynamic hardware accents.
+                </p>
+              </div>
+              {themeId && (
+                <span className="font-mono text-[9px] text-muted uppercase tracking-wider px-2 py-0.5 rounded-full border border-line bg-canvas">
+                  {THEMES[themeId]?.name || 'Theme'}
+                </span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {THEME_LIST.map((th) => {
+                const isSelected = themeId === th.id
+                return (
+                  <button
+                    key={th.id}
+                    type="button"
+                    onClick={() => {
+                      playMicroClick('toggle')
+                      onThemeChange(th.id)
+                    }}
+                    className={`group relative flex items-center gap-2 px-3 py-2 rounded-xl border font-mono text-xs transition-all duration-200 cursor-pointer ${
+                      isSelected
+                        ? 'border-fg bg-surface shadow-sm ring-1 ring-fg/20 font-bold text-fg'
+                        : 'border-line/70 bg-canvas hover:border-fg/40 text-muted hover:text-fg'
+                    }`}
+                    title={`${th.name} — ${th.subtitle}`}
+                  >
+                    <div
+                      className="relative h-4 w-4 rounded-full border border-white/20 shrink-0 shadow-inner flex items-center justify-center"
+                      style={{ backgroundColor: th.canvas }}
+                    >
+                      <span
+                        className="h-1.5 w-1.5 rounded-full shadow-sm"
+                        style={{ backgroundColor: th.accent }}
+                      />
+                    </div>
+                    <span className="text-[11px] uppercase tracking-wider">{th.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Subtle Divider */}
         <div className="my-1 border-t border-line/40" />

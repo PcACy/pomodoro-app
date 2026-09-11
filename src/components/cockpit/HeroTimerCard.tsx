@@ -128,7 +128,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[24px] backdrop-blur-md bg-white/85 dark:bg-neutral-950/60 border border-black/10 dark:border-white/10 shadow-none dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_24px_-4px_rgba(0,0,0,0.3)] p-4 sm:p-5 flex flex-col justify-between select-none transition-all duration-200 ${className}`}
+      className={`relative overflow-hidden rounded-[24px] backdrop-blur-md bg-[var(--bg-card)] border border-[var(--card-border)] shadow-none dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_24px_-4px_rgba(0,0,0,0.3)] p-4 sm:p-5 flex flex-col justify-between select-none transition-colors duration-300 ${className}`}
     >
       {/* Interactive Dot-Matrix background (proximity ripple, hero only) */}
       <HeroDotGridCanvas />
@@ -242,7 +242,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
           <button
             type="button"
             onClick={handleToggleClick}
-            className="h-11 min-h-[44px] w-[180px] sm:w-[200px] inline-flex items-center justify-center rounded-full border border-fg px-4 sm:px-6 font-sans text-xs sm:text-sm font-semibold tracking-wider uppercase transition-all cursor-pointer bg-fg text-canvas hover:opacity-90 active:scale-[0.98] shrink-0 shadow-sm"
+            className="h-11 min-h-[44px] w-[180px] sm:w-[200px] inline-flex items-center justify-center rounded-full border border-fg px-4 sm:px-6 font-sans text-xs sm:text-sm font-semibold tracking-wider uppercase transition-all duration-300 cursor-pointer bg-fg text-canvas hover:bg-accent hover:border-accent hover:text-white active:scale-[0.98] shrink-0 shadow-sm"
           >
             {running ? t.timer.pause : t.timer.start}
           </button>
