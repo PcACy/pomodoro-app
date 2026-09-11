@@ -13,7 +13,7 @@ vi.stubGlobal('localStorage', {
   },
 })
 
-import { drainQueue, enqueue, hasPendingOps, requeue } from './syncQueue'
+import { commitQueue, drainQueue, enqueue, hasPendingOps, markFailed, peekQueue, requeue } from './syncQueue'
 import type { SyncOp } from './syncQueue'
 
 const upsert = (table: 'sessions' | 'todos', id: string): SyncOp => ({ kind: 'upsert', table, id })
@@ -91,5 +91,39 @@ describe('syncQueue', () => {
     expect(drainQueue()).toEqual([])
     store.set('pomodoro.sync.queue', JSON.stringify({ nope: true }))
     expect(hasPendingOps()).toBe(false)
+  })
+
+  it('peekQueue inspects without clearing and commitQueue removes only completed ops', () => {
+    enqueue(upsert('todos', 't1'))
+    enqueue(upsert('sessions', 's1'))
+    expect(peekQueue()).toEqual([upsert('todos', 't1'), upsert('sessions', 's1')])
+    expect(hasPendingOps()).toBe(true)
+
+    // Commit only todos
+    commitQueue([upsert('todos', 't1')])
+    expect(peekQueue()).toEqual([upsert('sessions', 's1')])
+
+    // Commit sessions
+    commitQueue([upsert('sessions', 's1')])
+    expect(peekQueue()).toEqual([])
+    expect(hasPendingOps()).toBe(false)
+  })
+
+  it('markFailed increments attempts on matching ops and drops poison ops', () => {
+    enqueue(upsert('todos', 't1'))
+    enqueue(upsert('todos', 't2'))
+
+    markFailed([upsert('todos', 't1')])
+    expect(peekQueue()).toEqual([
+      { ...upsert('todos', 't1'), attempts: 1 },
+      upsert('todos', 't2'),
+    ])
+
+    // Fail t1 up to limit
+    for (let i = 0; i < 5; i++) {
+      markFailed([upsert('todos', 't1')])
+    }
+    // t1 dropped, t2 remains
+    expect(peekQueue()).toEqual([upsert('todos', 't2')])
   })
 })

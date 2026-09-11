@@ -8,11 +8,17 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.VibratorManager;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import java.lang.reflect.Method;
@@ -264,10 +270,44 @@ public class TimerForegroundService extends Service {
 
                 if (remainingSec > 0) {
                     mainHandler.postDelayed(this, 1000);
+                } else {
+                    triggerCompletionAlert();
                 }
             }
         };
         mainHandler.postDelayed(tickerRunnable, 1000);
+    }
+
+    private void triggerCompletionAlert() {
+        try {
+            Uri alertUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            if (alertUri == null) {
+                alertUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            }
+            if (alertUri != null) {
+                Ringtone ringtone = RingtoneManager.getRingtone(getApplicationContext(), alertUri);
+                if (ringtone != null) {
+                    ringtone.play();
+                }
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                VibratorManager vibratorManager = (VibratorManager) getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
+                if (vibratorManager != null) {
+                    vibratorManager.getDefaultVibrator().vibrate(
+                        VibrationEffect.createWaveform(new long[]{0, 200, 150, 400}, -1)
+                    );
+                }
+            } else {
+                Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                if (vibrator != null) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        vibrator.vibrate(VibrationEffect.createWaveform(new long[]{0, 200, 150, 400}, -1));
+                    } else {
+                        vibrator.vibrate(new long[]{0, 200, 150, 400}, -1);
+                    }
+                }
+            }
+        } catch (Throwable ignored) {}
     }
 
     private void stopTicker() {

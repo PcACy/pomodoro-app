@@ -175,6 +175,22 @@ export const BentoCockpit = memo(
       }
     }, [activeScreen, onDeckChange])
 
+    // Keep scroll position aligned to activeScreen across container resizes (e.g. rotation, splitscreen, keyboard)
+    useEffect(() => {
+      const scroller = scrollerRef.current
+      if (!scroller || typeof ResizeObserver === 'undefined') return
+      const observer = new ResizeObserver(() => {
+        if (!isProgrammaticScrollRef.current) {
+          scroller.scrollTo({
+            left: activeScreen * scroller.clientWidth,
+            behavior: 'instant' as ScrollBehavior,
+          })
+        }
+      })
+      observer.observe(scroller)
+      return () => observer.disconnect()
+    }, [activeScreen])
+
     // Keyboard shortcuts:
     // '1' -> Focus Deck (0)
     // '2' -> Tasks Deck (1)
@@ -184,13 +200,16 @@ export const BentoCockpit = memo(
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
         const activeEl = document.activeElement
+        // Ignore shortcuts when user is typing or if any modal/dialog is currently active
         if (
-          activeEl &&
-          (activeEl.tagName === 'INPUT' ||
-            activeEl.tagName === 'TEXTAREA' ||
-            activeEl.tagName === 'SELECT' ||
-            activeEl.getAttribute('contenteditable') === 'true' ||
-            (activeEl as HTMLElement).isContentEditable)
+          document.querySelector('[role="dialog"]') !== null ||
+          (activeEl &&
+            (activeEl.tagName === 'INPUT' ||
+              activeEl.tagName === 'TEXTAREA' ||
+              activeEl.tagName === 'SELECT' ||
+              activeEl.getAttribute('contenteditable') === 'true' ||
+              (activeEl as HTMLElement).isContentEditable ||
+              activeEl.closest('[role="dialog"]')))
         ) {
           return
         }

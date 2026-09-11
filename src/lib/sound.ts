@@ -171,14 +171,14 @@ if (typeof window !== 'undefined') {
   window.addEventListener('touchstart', unlockAudio, { passive: true })
 }
 
-export function playChime(kind: ChimeKind = 'focus'): void {
+export async function playChime(kind: ChimeKind = 'focus'): Promise<void> {
   playHaptic(kind === 'focus' ? [40, 60, 80] : [50, 50])
   if (!isSoundEnabled()) return
   try {
     const audio = ensureCtx()
     if (!audio) return
     if (audio.state === 'suspended') {
-      audio.resume().catch(() => {})
+      await audio.resume().catch(() => {})
     }
     const buf = getBuffer(audio, kind)
     if (!buf) return

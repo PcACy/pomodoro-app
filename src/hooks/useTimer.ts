@@ -89,13 +89,14 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       if (!skipped) {
         nextCycle = cycle + 1
         const durationMs = Math.max(phases.focus * MS_PER_MINUTE, m.totalMs)
-        // Anchor start to the logged duration so span (end - start) always
-        // equals durationMs. Using the raw phase start would include paused
-        // time in the span and make exports/stats disagree on the length.
-        const sessionStart = Math.max(0, now - durationMs)
+        // When completing naturally, anchor the end to the scheduled target end
+        // timestamp so device sleep or background throttling does not shift the
+        // logged session into the future.
+        const effectiveEnd = skipped ? now : (endRef.current ?? now)
+        const sessionStart = Math.max(0, effectiveEnd - durationMs)
         onFocusCompleteRef.current({
           start: sessionStart,
-          end: now,
+          end: effectiveEnd,
           durationMs,
           task: taskRef.current,
           tag: tagRef.current,

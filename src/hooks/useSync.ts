@@ -5,7 +5,7 @@ import type { Session, TodoItem } from '../types'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase'
 import { db } from '../lib/db'
 import { readTodosLocal } from '../lib/localTodos'
-import { drainQueue, hasPendingOps, requeue } from '../lib/syncQueue'
+import { commitQueue, hasPendingOps, markFailed, peekQueue } from '../lib/syncQueue'
 
 export type SyncStatus = 'unsupported' | 'signed-out' | 'syncing' | 'synced' | 'offline' | 'error'
 
@@ -125,7 +125,7 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       return false
     }
-    const ops = drainQueue()
+    const ops = peekQueue()
     if (ops.length === 0) return true
     // Snapshot the user before pushing: a logout/login mid-push must not
     // attribute drained ops to a different account.
@@ -140,9 +140,9 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
       }
       return cachedLocalTodos
     }
-    // Tables fully pushed before a later failure must NOT be requeued:
-    // upserts/deletes are idempotent, but re-pushing them on every retry
-    // wastes traffic and can resurrect rows deleted remotely meanwhile.
+    // Tables fully pushed before a later failure are committed immediately:
+    // upserts/deletes are idempotent, and committing per table ensures that
+    // subsequent retry batches only process remaining tables.
     const pushedTables = new Set<string>()
     try {
       for (const table of ['sessions', 'todos'] as const) {
@@ -209,12 +209,13 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
           }
         }
         pushedTables.add(table)
+        commitQueue(tOps)
       }
       return true
     } catch (e) {
       console.error('[sync] push failed:', e)
-      // Merge failed ops back without clobbering ops enqueued mid-sync.
-      requeue(ops.filter((o) => !pushedTables.has(o.table)))
+      const failedOps = ops.filter((o) => !pushedTables.has(o.table))
+      markFailed(failedOps)
       return false
     }
   }, [])
@@ -275,7 +276,8 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
           setLastSyncAt(Date.now())
           setStatus('synced')
         } else {
-          setStatus('offline')
+          const isOnline = typeof navigator === 'undefined' || navigator.onLine
+          setStatus(isOnline ? 'error' : 'offline')
           if (typeof window !== 'undefined') {
             const backoffMs = Math.min(30_000, 1000 * Math.pow(2, retryCountRef.current))
             retryCountRef.current = Math.min(retryCountRef.current + 1, 5)

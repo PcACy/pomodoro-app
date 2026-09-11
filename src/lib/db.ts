@@ -26,6 +26,17 @@ class PomodoroDB extends Dexie {
 export const db = new PomodoroDB()
 
 export async function addSession(session: Omit<Session, 'id'>): Promise<string> {
+  // Guard against duplicate insertions from concurrent tabs or background races
+  // that finish the exact same focus session (matching start and matching end within 2 sec).
+  const existing = await db.sessions
+    .where('start')
+    .equals(session.start)
+    .filter((s) => Math.abs(s.end - session.end) <= 2000)
+    .first()
+  if (existing) {
+    return existing.id
+  }
+
   const id = uid()
   const now = Date.now()
   const record: Session = { ...session, id, updatedAt: now }
