@@ -66,7 +66,7 @@ export const GoalLoadCard = memo(function GoalLoadCard({
       }
       onClick={onOpenSettings}
       className={`${onOpenSettings ? 'cursor-pointer hover:border-white/20 transition-all' : ''} ${className}`}
-      contentClassName="justify-between py-1"
+      contentClassName="justify-between h-full py-1"
     >
       {/* Value Display */}
       <div className="flex items-baseline justify-between gap-2">

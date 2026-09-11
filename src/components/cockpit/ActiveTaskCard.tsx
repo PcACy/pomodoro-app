@@ -231,7 +231,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
         </span>
       }
       className={className}
-      contentClassName="justify-between"
+      contentClassName="justify-between h-full"
     >
       <div className="flex items-center justify-between gap-4">
         {/* Track info with smooth stationary cross-fade (no hopping) */}

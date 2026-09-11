@@ -71,21 +71,53 @@ export const SystemStatusCard = memo(function SystemStatusCard({
         onOpenAnalyticsModal?.()
       }}
     >
-      {/* Top: Digit + Circuit Status */}
-      <div className="flex items-center gap-2.5">
-        <span className="font-sans text-3xl sm:text-4xl font-semibold text-fg tracking-tight tabular-nums">
-          {streak}
-        </span>
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#EB1E23] animate-pulse" />
-            <span className="font-sans text-xs text-fg font-medium">
-              {streak === 1 ? 'Day streak' : 'Days streak'}
+      {/* Top: Digit + Circuit Status + Glyph Ring */}
+      <div className="flex items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2.5">
+          <span className="font-sans text-3xl sm:text-4xl font-semibold text-fg tracking-tight tabular-nums">
+            {streak}
+          </span>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#EB1E23] animate-pulse" />
+              <span className="font-sans text-xs text-fg font-medium">
+                {streak === 1 ? 'Day streak' : 'Days streak'}
+              </span>
+            </div>
+            <span className="font-sans text-[11px] text-muted">
+              Circuit: {hasLoggedToday ? 'Closed' : 'Standby'}
             </span>
           </div>
-          <span className="font-sans text-[11px] text-muted">
-            Circuit: {hasLoggedToday ? 'Closed' : 'Standby'}
-          </span>
+        </div>
+
+        {/* Nothing OS Radial Glyph Ring (7 arc segments for days of week) */}
+        <div className="relative h-11 w-11 shrink-0 flex items-center justify-center select-none" aria-hidden="true">
+          <svg className="w-full h-full -rotate-90" viewBox="0 0 44 44">
+            <circle
+              cx="22"
+              cy="22"
+              r="17"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              className="text-black/10 dark:text-white/10"
+            />
+            <circle
+              cx="22"
+              cy="22"
+              r="17"
+              fill="none"
+              stroke={hasLoggedToday ? '#EB1E23' : 'currentColor'}
+              strokeWidth="2.5"
+              strokeDasharray="106.8"
+              strokeDashoffset={106.8 - (106.8 * Math.min(7, activeDaysThisWeek)) / 7}
+              strokeLinecap="round"
+              className={`transition-all duration-500 ${hasLoggedToday ? 'text-[#EB1E23]' : 'text-fg/50'}`}
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center font-sans text-[10px] text-muted font-medium tabular-nums">
+            {activeDaysThisWeek}/7
+          </div>
         </div>
       </div>
 

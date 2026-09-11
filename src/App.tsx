@@ -287,7 +287,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen min-h-[100dvh] flex flex-col justify-start px-4 sm:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] max-w-7xl 2xl:max-w-[1440px] mx-auto relative w-full">
+    <div className="h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col justify-start px-3 sm:px-6 pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.5rem,env(safe-area-inset-bottom))] max-w-7xl 2xl:max-w-[1440px] mx-auto relative w-full">
       {/* Dynamic Document Title & Favicon Manager (Isolated from App re-renders) */}
       <DocumentChrome phase={chromePhase} status={chromeStatus} mode={mode} />
 
@@ -296,7 +296,7 @@ export default function App() {
         {liveAnnouncement.message}
       </div>
 
-      <header className="flex w-full h-11 shrink-0 items-center justify-between gap-4 px-1 mb-2 sm:mb-3">
+      <header className="flex w-full h-10 shrink-0 items-center justify-between gap-3 px-1 mb-1 sm:mb-2">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors">
             <CatLogo
@@ -375,7 +375,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex w-full flex-1 flex-col items-center justify-start">
+      <main className="flex w-full flex-1 min-h-0 flex-col items-stretch overflow-hidden">
         {!isZenMode && (
           <BentoCockpit
             phaseLabel={timer.phaseLabel}

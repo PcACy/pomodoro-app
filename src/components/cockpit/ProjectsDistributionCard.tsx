@@ -142,9 +142,9 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
         </button>
       }
       className={className}
-      contentClassName="justify-between"
+      contentClassName="justify-between h-full"
     >
-      <div className="flex-1 flex flex-col justify-between py-0.5 gap-2">
+      <div className="flex-1 flex flex-col justify-between py-0.5 gap-2 h-full">
         {/* Project Selection / Active Track Row with 44px Touch Targets */}
         <div className="flex min-h-[44px] items-center justify-between select-none">
           <div className="flex items-center gap-1 min-w-0">

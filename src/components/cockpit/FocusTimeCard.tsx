@@ -71,7 +71,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
       }
       onClick={onOpenSettings}
       className={`${onOpenSettings ? 'cursor-pointer hover:border-fg/30 transition-colors' : ''} ${className}`}
-      contentClassName="justify-between"
+      contentClassName="justify-between h-full"
     >
       {/* Top Value & Percent Summary */}
       <div className="my-auto flex items-baseline justify-between gap-2">
