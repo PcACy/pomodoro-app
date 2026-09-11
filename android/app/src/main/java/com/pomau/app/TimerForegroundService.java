@@ -9,17 +9,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import java.lang.reflect.Method;
+import java.util.Locale;
 import org.json.JSONObject;
 
 public class TimerForegroundService extends Service {
 
-    public static final String CHANNEL_ID = "pomodoro_focus_island";
-    public static final String CHANNEL_NAME = "Pomodoro Timer Capsule";
-    public static final int NOTIFICATION_ID = 1001;
+    public static final String CHANNEL_ID = "pomodoro_live_timer";
+    public static final String CHANNEL_NAME = "Pomodoro Timer";
+    public static final int NOTIFICATION_ID = 1;
 
     public static final String ACTION_START = "com.pomau.app.action.START_TIMER";
     public static final String ACTION_STOP = "com.pomau.app.action.STOP_TIMER";
@@ -30,6 +34,13 @@ public class TimerForegroundService extends Service {
     public static final String EXTRA_COUNTDOWN = "extra_countdown";
 
     private PowerManager.WakeLock wakeLock;
+    private Handler mainHandler;
+    private Runnable tickerRunnable;
+
+    private String currentTitle = "Pomodoro";
+    private String currentContent = "";
+    private long currentTargetWhen = 0;
+    private boolean currentIsCountdown = true;
 
     @Nullable
     @Override
@@ -40,6 +51,7 @@ public class TimerForegroundService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mainHandler = new Handler(Looper.getMainLooper());
         createNotificationChannel();
     }
 
@@ -69,13 +81,12 @@ public class TimerForegroundService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             if (manager != null) {
-                // IMPORTANCE_HIGH is required by HyperOS to promote the notification to the Super Island capsule
                 NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_HIGH
+                    NotificationManager.IMPORTANCE_DEFAULT
                 );
-                channel.setDescription("Laufender Timer Countdown in der Xiaomi HyperOS Island");
+                channel.setDescription("Pomodoro Live Countdown (Xiaomi HyperOS Island / Now Bar)");
                 channel.enableLights(false);
                 channel.enableVibration(false);
                 channel.setSound(null, null);
@@ -85,17 +96,43 @@ public class TimerForegroundService extends Service {
         }
     }
 
-    /**
-     * Builds the proprietary Xiaomi HyperOS / MIUI Focus Notification payload
-     * to display the live countdown inside the camera punch-hole / status bar capsule.
-     */
-    private String buildXiaomiIslandPayload(String title, String content, long targetWhenMs) {
-        try {
-            long remainingSec = Math.max(0, (targetWhenMs - System.currentTimeMillis()) / 1000);
-            long mins = remainingSec / 60;
-            long secs = remainingSec % 60;
-            String timeText = String.format(java.util.Locale.US, "%02d:%02d", mins, secs);
+    private String formatTime(long seconds) {
+        long mins = Math.max(0, seconds) / 60;
+        long secs = Math.max(0, seconds) % 60;
+        return String.format(Locale.US, "%02d:%02d", mins, secs);
+    }
 
+    /**
+     * Applies the standard Android 16 / HyperOS Promoted Ongoing Notification API.
+     * This promotes the notification to the status bar pill / Dynamic Island / Now Bar.
+     */
+    private void applyPromotedOngoing(NotificationCompat.Builder builder, String shortText) {
+        try {
+            builder.setRequestPromotedOngoing(true);
+        } catch (Throwable t) {
+            try {
+                Method m = builder.getClass().getMethod("setRequestPromotedOngoing", boolean.class);
+                m.invoke(builder, true);
+            } catch (Throwable ignored) {}
+        }
+
+        if (shortText != null && !shortText.isEmpty()) {
+            try {
+                builder.setShortCriticalText(shortText);
+            } catch (Throwable t) {
+                try {
+                    Method m = builder.getClass().getMethod("setShortCriticalText", CharSequence.class);
+                    m.invoke(builder, shortText);
+                } catch (Throwable ignored) {}
+            }
+        }
+    }
+
+    /**
+     * Builds the proprietary Xiaomi HyperOS / MIUI Focus Notification payload as extra fallback.
+     */
+    private String buildXiaomiIslandPayload(String title, String content, long targetWhenMs, String timeText) {
+        try {
             JSONObject root = new JSONObject();
             JSONObject paramV2 = new JSONObject();
             paramV2.put("business", "timer");
@@ -134,7 +171,7 @@ public class TimerForegroundService extends Service {
         }
     }
 
-    private Notification buildNotification(String title, String content, long targetWhenMs, boolean isCountDown) {
+    private Notification buildNotification(String title, String content, long targetWhenMs, boolean isCountDown, String shortText) {
         Intent launchIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
         PendingIntent pendingIntent = null;
         if (launchIntent != null) {
@@ -146,15 +183,21 @@ public class TimerForegroundService extends Service {
             pendingIntent = PendingIntent.getActivity(this, 0, launchIntent, pendingFlags);
         }
 
-        int smallIcon = getResources().getIdentifier("ic_stat_timer", "drawable", getPackageName());
+        int smallIcon = R.drawable.ic_stat_timer;
         if (smallIcon == 0) {
             smallIcon = getApplicationInfo().icon;
         }
 
+        String displayTitle = title + "  ·  " + shortText;
+        String body = (content != null && !content.trim().isEmpty()) ? content : "Pomau Focus Timer";
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(title)
+            .setContentTitle(displayTitle)
+            .setContentText(body)
             .setSmallIcon(smallIcon)
+            .setColor(0xFFD71921) // Nothing Red Accent
             .setOngoing(true)
+            .setSilent(true)
             .setOnlyAlertOnce(true)
             .setCategory(NotificationCompat.CATEGORY_STOPWATCH)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -164,10 +207,6 @@ public class TimerForegroundService extends Service {
             .setChronometerCountDown(isCountDown)
             .setWhen(targetWhenMs);
 
-        if (content != null && !content.trim().isEmpty()) {
-            builder.setContentText(content);
-        }
-
         if (pendingIntent != null) {
             builder.setContentIntent(pendingIntent);
         }
@@ -176,8 +215,11 @@ public class TimerForegroundService extends Service {
             builder.setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE);
         }
 
+        // Apply Android 16 / HyperOS Promoted Ongoing Live Update API
+        applyPromotedOngoing(builder, shortText);
+
         // Attach Xiaomi HyperOS Super Island capsule payload
-        String islandPayload = buildXiaomiIslandPayload(title, content, targetWhenMs);
+        String islandPayload = buildXiaomiIslandPayload(title, content, targetWhenMs, shortText);
         if (islandPayload != null) {
             builder.getExtras().putString("miui.focus.param", islandPayload);
         }
@@ -187,7 +229,17 @@ public class TimerForegroundService extends Service {
 
     private void startTimerService(String title, String content, long targetWhen, boolean isCountDown) {
         acquireWakeLock();
-        Notification notification = buildNotification(title, content, targetWhen, isCountDown);
+        this.currentTitle = title != null ? title : "Pomodoro";
+        this.currentContent = content != null ? content : "";
+        this.currentTargetWhen = targetWhen;
+        this.currentIsCountdown = isCountDown;
+
+        stopTicker();
+
+        long remainingSec = Math.max(0, (targetWhen - System.currentTimeMillis()) / 1000);
+        String shortText = formatTime(remainingSec);
+
+        Notification notification = buildNotification(currentTitle, currentContent, currentTargetWhen, currentIsCountdown, shortText);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
@@ -196,14 +248,56 @@ public class TimerForegroundService extends Service {
         } else {
             startForeground(NOTIFICATION_ID, notification);
         }
+
+        startTicker();
+    }
+
+    private void startTicker() {
+        tickerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                long now = System.currentTimeMillis();
+                long remainingSec = Math.max(0, (currentTargetWhen - now) / 1000);
+                String shortText = formatTime(remainingSec);
+
+                updateNotification(shortText);
+
+                if (remainingSec > 0) {
+                    mainHandler.postDelayed(this, 1000);
+                }
+            }
+        };
+        mainHandler.postDelayed(tickerRunnable, 1000);
+    }
+
+    private void stopTicker() {
+        if (tickerRunnable != null && mainHandler != null) {
+            mainHandler.removeCallbacks(tickerRunnable);
+            tickerRunnable = null;
+        }
+    }
+
+    private void updateNotification(String shortText) {
+        try {
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager != null) {
+                Notification notification = buildNotification(currentTitle, currentContent, currentTargetWhen, currentIsCountdown, shortText);
+                manager.notify(NOTIFICATION_ID, notification);
+            }
+        } catch (Exception ignored) {}
     }
 
     private void stopTimerService() {
+        stopTicker();
         releaseWakeLock();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE);
         } else {
             stopForeground(true);
+        }
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager != null) {
+            manager.cancel(NOTIFICATION_ID);
         }
         stopSelf();
     }
@@ -227,6 +321,7 @@ public class TimerForegroundService extends Service {
 
     @Override
     public void onDestroy() {
+        stopTicker();
         releaseWakeLock();
         super.onDestroy();
     }
