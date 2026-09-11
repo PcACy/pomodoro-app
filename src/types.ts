@@ -56,14 +56,3 @@ export const STORAGE_KEYS = {
   mode: 'pomodoro.mode',
   todos: 'pomodoro.todos',
 } as const
-
-declare global {
-  interface DocumentPictureInPicture {
-    requestWindow(options?: { width?: number; height?: number }): Promise<Window>
-    window: Window | null
-  }
-
-  interface Window {
-    documentPictureInPicture?: DocumentPictureInPicture
-  }
-}

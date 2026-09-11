@@ -97,18 +97,3 @@ export function stopForegroundTimer(): Promise<void> {
 
   return operationChain
 }
-
-/**
- * Backward-compatible helper for simple title/body updates.
- */
-export function updateForegroundTimer(title: string, body?: string): Promise<void> {
-  if (!isForegroundServiceSupported()) {
-    return Promise.resolve()
-  }
-  return startForegroundTimer({
-    title,
-    content: body,
-    targetTime: Date.now(),
-    isCountDown: true,
-  })
-}

@@ -8,7 +8,7 @@ import {
 } from '../themes'
 import type { ColorMode, ThemeId } from '../themes'
 
-export const applyTheme = (themeId: ThemeId): void => {
+const applyTheme = (themeId: ThemeId): void => {
   if (typeof document === 'undefined') return
   const config = THEMES[themeId] || THEMES[DEFAULT_THEME]
   const root = document.documentElement
@@ -126,41 +126,4 @@ export function useTheme(): ThemeHookTuple {
   }, [colorMode, setColorMode, themeId, setThemeId])
 
   return result
-}
-
-const readVar = (name: string): string =>
-  getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-
-export interface ThemeColors {
-  canvas: string
-  surface: string
-  raised: string
-  line: string
-  fg: string
-  muted: string
-  accent: string
-  accentStrong: string
-  break: string
-  long: string
-  chart: string[]
-}
-
-/** Resolves the theme CSS variables to concrete `rgb(...)` strings (for Recharts, inline styles). */
-export function useThemeColors(colorMode: ColorMode): ThemeColors {
-  return useMemo(() => {
-    const rgb = (name: string) => `rgb(${readVar(name)})`
-    return {
-      canvas: rgb('--c-canvas'),
-      surface: rgb('--c-surface'),
-      raised: rgb('--c-raised'),
-      line: rgb('--c-line'),
-      fg: rgb('--c-fg'),
-      muted: rgb('--c-muted'),
-      accent: rgb('--c-accent'),
-      accentStrong: rgb('--c-accent-strong'),
-      break: rgb('--c-break'),
-      long: rgb('--c-long'),
-      chart: Array.from({ length: 8 }, (_, i) => rgb(`--c-chart-${i + 1}`)),
-    }
-  }, [colorMode])
 }
