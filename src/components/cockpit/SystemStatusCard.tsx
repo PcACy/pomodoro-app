@@ -64,12 +64,8 @@ export const SystemStatusCard = memo(function SystemStatusCard({
           Stats ↗
         </button>
       }
-      className={`cursor-pointer hover:border-white/20 transition-all rounded-[28px] ${className}`}
+      className={`rounded-[28px] ${className}`}
       contentClassName="justify-between h-full"
-      onClick={() => {
-        playMicroClick('tap')
-        onOpenAnalyticsModal?.()
-      }}
     >
       {/* Top: Digit + Circuit Status + Glyph Ring */}
       <div className="flex items-center justify-between gap-2.5">

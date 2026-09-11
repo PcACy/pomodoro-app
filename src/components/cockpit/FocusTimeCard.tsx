@@ -69,8 +69,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
           )}
         </div>
       }
-      onClick={onOpenSettings}
-      className={`${onOpenSettings ? 'cursor-pointer hover:border-fg/30 transition-colors' : ''} ${className}`}
+      className={className}
       contentClassName="justify-between h-full"
     >
       {/* Top Value & Percent Summary */}

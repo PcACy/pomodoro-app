@@ -99,11 +99,7 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
           More ↗
         </button>
       }
-      onClick={() => {
-        playMicroClick('tap')
-        onOpenSettingsModal()
-      }}
-      className={`cursor-pointer hover:border-white/20 transition-all rounded-[28px] ${className}`}
+      className={`rounded-[28px] ${className}`}
       contentClassName="justify-between"
     >
       <div className="flex flex-col gap-1 sm:gap-1.5 my-auto">

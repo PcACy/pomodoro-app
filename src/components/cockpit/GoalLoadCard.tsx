@@ -64,8 +64,7 @@ export const GoalLoadCard = memo(function GoalLoadCard({
           </button>
         ) : null
       }
-      onClick={onOpenSettings}
-      className={`${onOpenSettings ? 'cursor-pointer hover:border-white/20 transition-all' : ''} ${className}`}
+      className={className}
       contentClassName="justify-between h-full py-1"
     >
       {/* Value Display */}
