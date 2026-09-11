@@ -65,8 +65,8 @@ export const TaskInboxCard = memo(function TaskInboxCard({
     }
   }, [isTagDropdownOpen])
 
-  const pendingTodos = todos.filter((t) => !t.done).slice(0, 4)
-  const remainingCount = Math.max(0, todos.filter((t) => !t.done).length - 4)
+  const pendingTodos = todos.filter((t) => !t.done)
+  const remainingCount = 0
 
   const submitTask = useCallback(() => {
     if (!quickTitle.trim()) return
@@ -106,6 +106,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
         </button>
       }
       className={className}
+      contentClassName="justify-between h-full min-h-0"
     >
       {/* Quick Add Bar */}
       <div className="relative mb-3 flex items-center gap-2">
@@ -222,7 +223,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
       </div>
 
       {/* Task List */}
-      <div className="flex-1 flex flex-col gap-1.5">
+      <div className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-y-auto no-scrollbar pr-0.5">
         {pendingTodos.length === 0 ? (
           <div className="py-4 text-center font-sans text-xs text-muted">
             No pending tasks

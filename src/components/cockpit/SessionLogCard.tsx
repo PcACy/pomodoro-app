@@ -59,6 +59,7 @@ export const SessionLogCard = memo(function SessionLogCard({
         </button>
       }
       className={className}
+      contentClassName="justify-between h-full min-h-0"
     >
       {todaySessions.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center py-6 sm:py-8 text-center text-muted select-none">
@@ -73,9 +74,9 @@ export const SessionLogCard = memo(function SessionLogCard({
           </span>
         </div>
       ) : (
-        <div className="flex flex-col gap-2 flex-1 justify-between">
-          <div className="flex flex-col gap-1.5">
-            {todaySessions.slice(0, 4).map((s) => {
+        <div className="flex flex-col gap-2 flex-1 min-h-0 justify-between">
+          <div className="flex flex-col gap-1.5 flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5">
+            {todaySessions.map((s) => {
               const durationMin = Math.max(1, Math.round(s.durationMs / 60000))
               const isFlow = s.mode === 'flow'
               return (
@@ -107,18 +108,16 @@ export const SessionLogCard = memo(function SessionLogCard({
             })}
           </div>
 
-          {todaySessions.length > 4 && (
-            <button
-              type="button"
-              onClick={() => {
-                playMicroClick('tap')
-                onOpenAnalyticsModal()
-              }}
-              className="mt-1 text-center font-sans text-xs text-muted hover:text-fg py-1 cursor-pointer transition-colors"
-            >
-              + {todaySessions.length - 4} more in Analytics ↗
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              playMicroClick('tap')
+              onOpenAnalyticsModal()
+            }}
+            className="mt-1 shrink-0 text-center font-sans text-xs text-muted hover:text-fg py-1 cursor-pointer transition-colors"
+          >
+            Detailed Analytics & History ↗
+          </button>
         </div>
       )}
     </BentoCard>

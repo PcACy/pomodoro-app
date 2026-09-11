@@ -7,6 +7,8 @@ import { ActiveTaskCard } from './ActiveTaskCard'
 import { ProjectsDistributionCard } from './ProjectsDistributionCard'
 import { QuickSettingsCard } from './QuickSettingsCard'
 import { SystemStatusCard } from './SystemStatusCard'
+import { TaskInboxCard } from './TaskInboxCard'
+import { SessionLogCard } from './SessionLogCard'
 import { playMicroClick } from '../../lib/sound'
 
 interface BentoCockpitProps {
@@ -69,12 +71,12 @@ export const BentoCockpit = memo(function BentoCockpit({
   onReset,
   onAddTime,
   todos,
-  activeTodoId: _activeTodoId,
+  activeTodoId,
   activeTodo,
   onTodoToggle,
   onTodoFocus,
-  onTodoAdd: _onTodoAdd,
-  onTodoRemove: _onTodoRemove,
+  onTodoAdd,
+  onTodoRemove,
   onOpenTodoManager,
   sessions,
   settings,
@@ -88,15 +90,16 @@ export const BentoCockpit = memo(function BentoCockpit({
   const scrollerRef = useRef<HTMLDivElement>(null)
   const isProgrammaticScrollRef = useRef(false)
 
-  // Smoothly scrolls to target deck (0: Focus Deck, 1: Insights Deck)
+  // Smoothly scrolls to target deck (0: Focus Deck, 1: Tasks Deck, 2: Stats Deck)
   const scrollToScreen = useCallback((index: number) => {
     const scroller = scrollerRef.current
     if (!scroller) return
+    const clampedIndex = Math.max(0, Math.min(2, index))
     isProgrammaticScrollRef.current = true
     playMicroClick('toggle')
-    setActiveScreen(index)
+    setActiveScreen(clampedIndex)
     scroller.scrollTo({
-      left: index * scroller.clientWidth,
+      left: clampedIndex * scroller.clientWidth,
       behavior: 'smooth',
     })
     setTimeout(() => {
@@ -111,13 +114,13 @@ export const BentoCockpit = memo(function BentoCockpit({
     const width = scroller.clientWidth
     if (width > 0) {
       const pageIndex = Math.round(scroller.scrollLeft / width)
-      if (pageIndex !== activeScreen && (pageIndex === 0 || pageIndex === 1)) {
+      if (pageIndex !== activeScreen && pageIndex >= 0 && pageIndex <= 2) {
         setActiveScreen(pageIndex)
       }
     }
   }, [activeScreen])
 
-  // Desktop keyboard shortcuts: Left / Right arrows to switch deck
+  // Desktop keyboard shortcuts: Left / Right arrows to switch between 3 decks
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeEl = document.activeElement
@@ -133,22 +136,22 @@ export const BentoCockpit = memo(function BentoCockpit({
 
       if (e.key === 'ArrowLeft') {
         e.preventDefault()
-        scrollToScreen(0)
+        scrollToScreen(activeScreen - 1)
       } else if (e.key === 'ArrowRight') {
         e.preventDefault()
-        scrollToScreen(1)
+        scrollToScreen(activeScreen + 1)
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [scrollToScreen])
+  }, [activeScreen, scrollToScreen])
 
   return (
     <div className="w-full h-full min-h-0 flex-1 flex flex-col justify-between select-none overflow-hidden">
       {/* 1. Deck Switcher Header Bar */}
       <div className="h-7 shrink-0 flex items-center justify-between px-1 mb-1 sm:mb-1.5 select-none">
-        {/* Clickable Deck Switcher [ 01 FOCUS // 02 STATS ] */}
+        {/* Clickable Deck Switcher [ 01 FOCUS // 02 TASKS // 03 STATS ] */}
         <div className="flex items-center gap-1 font-mono text-[10px] sm:text-[11px] tracking-wider uppercase">
           <button
             type="button"
@@ -159,7 +162,7 @@ export const BentoCockpit = memo(function BentoCockpit({
                 : 'text-muted hover:text-fg hover:bg-fg/5'
             }`}
             aria-pressed={activeScreen === 0}
-            title="Switch to Focus Deck (←)"
+            title="Switch to Focus Deck (01)"
           >
             <span className="text-[9px] opacity-70">01</span>
             <span>Focus</span>
@@ -174,9 +177,24 @@ export const BentoCockpit = memo(function BentoCockpit({
                 : 'text-muted hover:text-fg hover:bg-fg/5'
             }`}
             aria-pressed={activeScreen === 1}
-            title="Switch to Insights Deck (→)"
+            title="Switch to Tasks Deck (02)"
           >
             <span className="text-[9px] opacity-70">02</span>
+            <span>Tasks</span>
+          </button>
+          <span className="text-muted/30 select-none">//</span>
+          <button
+            type="button"
+            onClick={() => scrollToScreen(2)}
+            className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeScreen === 2
+                ? 'bg-fg text-canvas font-bold shadow-sm'
+                : 'text-muted hover:text-fg hover:bg-fg/5'
+            }`}
+            aria-pressed={activeScreen === 2}
+            title="Switch to Stats Deck (03)"
+          >
+            <span className="text-[9px] opacity-70">03</span>
             <span>Stats</span>
           </button>
         </div>
@@ -184,20 +202,24 @@ export const BentoCockpit = memo(function BentoCockpit({
         {/* Ambient Hardware Status Label */}
         <div className="flex items-center gap-2">
           <span className="font-mono text-[9px] text-muted/60 tracking-widest uppercase hidden sm:inline">
-            {activeScreen === 0 ? 'Focus Deck · Operative' : 'Insights Deck · Analytics'}
+            {activeScreen === 0
+              ? 'Focus Deck · Operative'
+              : activeScreen === 1
+                ? 'Tasks Deck · Workspace'
+                : 'Stats Deck · Analytics'}
           </span>
           <span className={`h-1.5 w-1.5 rounded-full ${isRunning ? 'bg-accent animate-pulse' : 'bg-line'}`} />
         </div>
       </div>
 
-      {/* 2. Horizontal 2-Screen Scroll-Snap Viewport (100dvh Zero-Scroll) */}
+      {/* 2. Horizontal 3-Screen Scroll-Snap Viewport (100dvh Zero-Scroll) */}
       <div
         ref={scrollerRef}
         onScroll={handleScroll}
         className="w-full flex-1 min-h-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar touch-pan-x"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {/* SCREEN 1: FOCUS DECK (Operative Ebene) */}
+        {/* SCREEN 01: FOCUS DECK (Operative Ebene) */}
         <section
           aria-label="Screen 1: Focus Deck"
           className="w-full min-w-full shrink-0 snap-center snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
@@ -237,6 +259,7 @@ export const BentoCockpit = memo(function BentoCockpit({
                 sessions={sessions}
                 focusMinutes={settings.phases.focus}
                 onOpenTodoManager={onOpenTodoManager}
+                onOpenTodoDeck={() => scrollToScreen(1)}
                 onToggleDone={onTodoToggle}
                 onFocus={onTodoFocus}
                 className="flex-1 min-h-0"
@@ -286,6 +309,7 @@ export const BentoCockpit = memo(function BentoCockpit({
                 sessions={sessions}
                 focusMinutes={settings.phases.focus}
                 onOpenTodoManager={onOpenTodoManager}
+                onOpenTodoDeck={() => scrollToScreen(1)}
                 onToggleDone={onTodoToggle}
                 onFocus={onTodoFocus}
                 className="min-h-[140px]"
@@ -301,9 +325,41 @@ export const BentoCockpit = memo(function BentoCockpit({
           </div>
         </section>
 
-        {/* SCREEN 2: INSIGHTS DECK (Metriken & Fortschritt - 2x2 Bento Grid) */}
+        {/* SCREEN 02: TASKS DECK (Workspace & Log - 2-Column Split) */}
         <section
-          aria-label="Screen 2: Insights Deck"
+          aria-label="Screen 2: Tasks Deck"
+          className="w-full min-w-full shrink-0 snap-center snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch">
+            {/* Left: Task Inbox with Quick Add & Interactive Task List */}
+            <TaskInboxCard
+              todos={todos}
+              tags={settings.tags}
+              activeTodoId={activeTodoId}
+              onToggle={onTodoToggle}
+              onFocus={(id) => {
+                onTodoFocus(id)
+                // Auto-return: Load cassette and smoothly slide back to Focus Deck!
+                scrollToScreen(0)
+              }}
+              onAdd={onTodoAdd}
+              onRemove={onTodoRemove}
+              onOpenTodoManager={onOpenTodoManager}
+              className="h-full min-h-0"
+            />
+
+            {/* Right: Today's Focus Session Log */}
+            <SessionLogCard
+              sessions={sessions}
+              onOpenAnalyticsModal={onOpenAnalyticsModal}
+              className="h-full min-h-0"
+            />
+          </div>
+        </section>
+
+        {/* SCREEN 03: STATS DECK (Metriken & Fortschritt - 2x2 Bento Grid) */}
+        <section
+          aria-label="Screen 3: Stats Deck"
           className="w-full min-w-full shrink-0 snap-center snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 grid-rows-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch">
@@ -340,7 +396,7 @@ export const BentoCockpit = memo(function BentoCockpit({
         </section>
       </div>
 
-      {/* 3. Bottom Pagination Indicator (Nothing OS Pill & Dot) */}
+      {/* 3. Bottom Pagination Indicator (Nothing OS Pill & Dots) */}
       <div className="h-6 shrink-0 flex items-center justify-center gap-2 pt-1 select-none">
         <button
           type="button"
@@ -355,9 +411,19 @@ export const BentoCockpit = memo(function BentoCockpit({
         <button
           type="button"
           onClick={() => scrollToScreen(1)}
-          aria-label="Screen 2: Insights Deck"
+          aria-label="Screen 2: Tasks Deck"
           className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
             activeScreen === 1
+              ? 'w-5 bg-fg'
+              : 'w-1.5 bg-fg/25 hover:bg-fg/50'
+          }`}
+        />
+        <button
+          type="button"
+          onClick={() => scrollToScreen(2)}
+          aria-label="Screen 3: Stats Deck"
+          className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+            activeScreen === 2
               ? 'w-5 bg-fg'
               : 'w-1.5 bg-fg/25 hover:bg-fg/50'
           }`}
@@ -366,4 +432,5 @@ export const BentoCockpit = memo(function BentoCockpit({
     </div>
   )
 })
+
 

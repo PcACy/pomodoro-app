@@ -16,6 +16,7 @@ interface ActiveTaskCardProps {
   sessions?: Session[]
   focusMinutes?: number
   onOpenTodoManager?: () => void
+  onOpenTodoDeck?: () => void
   onToggleDone?: (id: string) => void
   onFocus?: (id: string) => void
   className?: string
@@ -122,10 +123,12 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   sessions,
   focusMinutes = 25,
   onOpenTodoManager,
+  onOpenTodoDeck,
   onToggleDone,
   onFocus,
   className = '',
 }: ActiveTaskCardProps) {
+  const openTasksDeck = onOpenTodoDeck || onOpenTodoManager
   const flowTick = useFlowTimerTick()
   const isFlowMode = mode === 'flow'
   const tagColor = activeTodo?.tag ? getTagColor(activeTodo.tag) : undefined
@@ -213,22 +216,37 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
     <BentoCard
       label="Active Task"
       action={
-        <span
-          className={`h-6 min-w-[76px] inline-flex items-center justify-center gap-1.5 px-2.5 font-sans text-[10px] font-medium leading-none rounded-full border transition-colors ${
-            isRunning
-              ? 'border-accent/60 text-accent bg-accent/10'
-              : 'border-line text-muted bg-canvas'
-          }`}
-        >
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              playMicroClick('toggle')
+              openTasksDeck?.()
+            }}
+            title="Open Tasks Deck (02 TASKS)"
+            className="h-6 px-2.5 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg font-sans text-[10px] font-medium transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+          >
+            <span>Tasks</span>
+            <span className="text-[9px] text-muted/60">02</span>
+          </button>
           <span
-            className={`h-1.5 w-1.5 rounded-full shrink-0 transition-colors ${
-              isRunning ? 'bg-accent animate-pulse [animation-duration:1s]' : 'bg-muted/40'
+            className={`h-6 min-w-[76px] inline-flex items-center justify-center gap-1.5 px-2.5 font-sans text-[10px] font-medium leading-none rounded-full border transition-colors ${
+              isRunning
+                ? 'border-accent/60 text-accent bg-accent/10'
+                : 'border-line text-muted bg-canvas'
             }`}
-          />
-          <span>
-            {isRunning ? 'Recording' : hasProgress ? 'Paused' : 'Standby'}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full shrink-0 transition-colors ${
+                isRunning ? 'bg-accent animate-pulse [animation-duration:1s]' : 'bg-muted/40'
+              }`}
+            />
+            <span>
+              {isRunning ? 'Recording' : hasProgress ? 'Paused' : 'Standby'}
+            </span>
           </span>
-        </span>
+        </div>
       }
       className={className}
       contentClassName="justify-between h-full"
@@ -355,7 +373,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
               onFocus?.(activeTodo.id)
             } else {
               playMicroClick('toggle')
-              onOpenTodoManager?.()
+              openTasksDeck?.()
             }
           }}
           title={activeTodo ? 'Eject tape (standby)' : 'Insert tape'}
@@ -394,7 +412,7 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           {remainingPickCount > 0 ? (
             <button
               type="button"
-              onClick={onOpenTodoManager}
+              onClick={openTasksDeck}
               className="text-muted hover:text-fg transition-colors cursor-pointer text-xs"
             >
               +{remainingPickCount} more
@@ -406,8 +424,11 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
           )}
         </div>
         {pickPool.length === 0 ? (
-          <p className="flex h-[44px] items-center font-sans text-xs text-muted">
-            {activeTodo ? 'No other tapes queued' : 'No open tasks — add one in Task Inbox'}
+          <p
+            onClick={openTasksDeck}
+            className="flex h-[44px] items-center font-sans text-xs text-muted hover:text-fg cursor-pointer transition-colors"
+          >
+            {activeTodo ? 'No other tapes queued — click for Tasks' : 'No open tasks — add one in Task Inbox'}
           </p>
         ) : (
           <ul className="divide-y divide-line/60">
