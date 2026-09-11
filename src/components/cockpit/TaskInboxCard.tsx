@@ -228,7 +228,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
           <div className="flex-1 min-h-0 flex flex-col items-center justify-center py-6 px-4 my-auto border border-dashed border-line/60 rounded-2xl select-none">
             {/* Technical Hardware Status */}
             <div className="font-mono text-[11px] font-bold tracking-widest text-muted uppercase mb-1">
-              // INBOX CLEAR
+              INBOX CLEAR
             </div>
 
             <p className="font-sans text-xs text-muted/70 text-center max-w-[240px] mb-4">
