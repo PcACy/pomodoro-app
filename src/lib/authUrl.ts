@@ -34,3 +34,4 @@ export function parseAuthUrl(rawUrl: string): ParsedAuthUrl {
     return {}
   }
 }
+

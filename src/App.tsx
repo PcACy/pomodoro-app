@@ -287,7 +287,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen min-h-[100dvh] flex flex-col justify-start px-4 sm:px-6 pt-3 pb-4 max-w-7xl 2xl:max-w-[1440px] mx-auto relative w-full">
+    <div className="min-h-screen min-h-[100dvh] flex flex-col justify-start px-4 sm:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] max-w-7xl 2xl:max-w-[1440px] mx-auto relative w-full">
       {/* Dynamic Document Title & Favicon Manager (Isolated from App re-renders) */}
       <DocumentChrome phase={chromePhase} status={chromeStatus} mode={mode} />
 

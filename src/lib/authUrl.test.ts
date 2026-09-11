@@ -40,3 +40,4 @@ describe('parseAuthUrl', () => {
     expect(parseAuthUrl('invalid-url-string')).toEqual({})
   })
 })
+

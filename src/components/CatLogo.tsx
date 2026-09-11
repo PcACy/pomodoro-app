@@ -31,35 +31,44 @@ export const CatLogo: FC<CatLogoProps> = ({
         className={`transition-transform duration-200 ${className}`}
         {...props}
       >
-        {/* Nothing Monoline Geometry: Outer Cat Contour (1.5px stroke) */}
+        {/* Nothing Geometric Monoline Contour */}
         <path
-          d="M4 8.5L3 4.5L7.5 6C9 5.3 10.5 5 12 5C13.5 5 15 5.3 16.5 6L21 4.5L20 8.5C21 10.5 21.5 12.5 21.5 15C21.5 19 18 21 12 21C6 21 2.5 19 2.5 15C2.5 12.5 3 10.5 4 8.5Z"
+          d="M4 8.5L5.5 4L9 7H15L18.5 4L20 8.5V16L16.5 19.5H7.5L4 16V8.5Z"
           stroke="currentColor"
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
 
-        {/* Eyes: Precision Nothing Dot-Matrix Circles or Sleeping Ticks */}
+        {/* Forehead Dot-Matrix Triad */}
+        <circle cx="10.5" cy="9" r="0.65" fill="currentColor" opacity={isFocus ? 0.85 : 0.4} />
+        <circle cx="12" cy="9" r="0.65" fill="currentColor" opacity={isFocus ? 0.85 : 0.4} />
+        <circle cx="13.5" cy="9" r="0.65" fill="currentColor" opacity={isFocus ? 0.85 : 0.4} />
+
+        {/* Eyes: Precision Dot Matrix or Sleeping Ticks */}
         {isBreak ? (
           <>
-            <line x1="7.5" y1="13.5" x2="10.5" y2="13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="13.5" y1="13.5" x2="16.5" y2="13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="6.75" y1="12.5" x2="9.25" y2="12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="14.75" y1="12.5" x2="17.25" y2="12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </>
         ) : (
           <>
-            <circle cx="8.5" cy="13" r="1.25" fill="currentColor" />
-            <circle cx="15.5" cy="13" r="1.25" fill="currentColor" />
+            <circle cx="8" cy="12.5" r="1.25" fill="currentColor" />
+            <circle cx="16" cy="12.5" r="1.25" fill="currentColor" />
           </>
         )}
 
-        {/* Nose / Technical Focal Point */}
+        {/* Whisker Micro-Ticks / Hardware Grille */}
+        <line x1="5.2" y1="14" x2="6.5" y2="14" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.35" />
+        <line x1="17.5" y1="14" x2="18.8" y2="14" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.35" />
+
+        {/* Signature Nothing Red Signal LED Dot (#D71921) */}
         <circle
           cx="12"
-          cy="16.5"
-          r="1.25"
-          fill={isFocus ? '#D71921' : 'currentColor'}
-          className="transition-colors duration-150"
+          cy="15.5"
+          r="1.3"
+          fill="#D71921"
+          className={`transition-all duration-300 ${isFocus ? 'animate-pulse' : 'opacity-90'}`}
         />
       </svg>
     </div>
