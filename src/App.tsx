@@ -297,9 +297,6 @@ export default function App() {
 
   return (
     <div className="h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col justify-start px-3 sm:px-6 pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.5rem,env(safe-area-inset-bottom))] max-w-7xl 2xl:max-w-[1440px] mx-auto relative w-full">
-      {/* Ambient Backdrop Glow */}
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--accent-hex)_0%,_transparent_70%)] opacity-[0.07] blur-3xl transition-colors duration-500" />
-
       {/* Dynamic Document Title & Favicon Manager (Isolated from App re-renders) */}
       <DocumentChrome phase={chromePhase} status={chromeStatus} mode={mode} />
 

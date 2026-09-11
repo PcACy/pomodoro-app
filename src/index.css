@@ -80,7 +80,6 @@
   --color-tag-border: rgb(var(--border-visible));
   --color-streak: #d4a843;
   --color-success: #4a9e5c;
-  --glow-opacity: 0;
   --heatmap-l0: rgba(255, 255, 255, 0.04);
   --heatmap-l0-border: rgb(var(--border));
 }
@@ -152,7 +151,6 @@
   --color-tag-border: rgb(var(--border-visible));
   --color-streak: #d4a843;
   --color-success: #4a9e5c;
-  --glow-opacity: 0;
   --heatmap-l0: rgba(0, 0, 0, 0.04);
   --heatmap-l0-border: rgb(var(--border));
 }
