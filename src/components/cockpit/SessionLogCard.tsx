@@ -24,9 +24,8 @@ export const SessionLogCard = memo(function SessionLogCard({
   className = '',
 }: SessionLogCardProps) {
   const { t } = useTranslation()
-  const { todaySessions, totalMinutesToday, nowPct } = useMemo(() => {
-    const now = new Date()
-    const todayStr = now.toDateString()
+  const { todaySessions, totalMinutesToday } = useMemo(() => {
+    const todayStr = new Date().toDateString()
     const filtered = sessions.filter((s) => {
       const d = new Date(s.start)
       return d.toDateString() === todayStr
@@ -36,9 +35,7 @@ export const SessionLogCard = memo(function SessionLogCard({
     const minutes = Math.round(
       filtered.reduce((acc, s) => acc + (s.durationMs || 0), 0) / 60000
     )
-    const nowMinutes = now.getHours() * 60 + now.getMinutes()
-    const currentPct = Math.min(100, Math.max(0, (nowMinutes / 1440) * 100))
-    return { todaySessions: filtered, totalMinutesToday: minutes, nowPct: currentPct }
+    return { todaySessions: filtered, totalMinutesToday: minutes }
   }, [sessions])
 
   const sessionCount = todaySessions.length
@@ -68,55 +65,6 @@ export const SessionLogCard = memo(function SessionLogCard({
       className={className}
       contentClassName="justify-between h-full min-h-0"
     >
-      {/* 24-Hour Daytime Timeline Bar */}
-      <div className="w-full mb-3 shrink-0 flex flex-col gap-1 select-none">
-        <div className="flex items-center justify-between text-[9px] font-mono text-muted/70 tracking-wider">
-          <span>00:00</span>
-          <span>06:00</span>
-          <span>12:00</span>
-          <span>18:00</span>
-          <span>24:00</span>
-        </div>
-
-        {/* Timeline Track with Ticks & Session Segments */}
-        <div className="relative h-3.5 w-full rounded-md border border-line bg-surface/40 overflow-hidden">
-          {/* Hour Grid Markers */}
-          <div className="absolute inset-0 pointer-events-none">
-            <span className="absolute top-0 bottom-0 w-px bg-line/40" style={{ left: '25%' }} />
-            <span className="absolute top-0 bottom-0 w-px bg-line/60" style={{ left: '50%' }} />
-            <span className="absolute top-0 bottom-0 w-px bg-line/40" style={{ left: '75%' }} />
-          </div>
-
-          {/* Rendered Focus Session Blocks */}
-          {todaySessions.map((s) => {
-            const d = new Date(s.start)
-            const startMin = d.getHours() * 60 + d.getMinutes()
-            const durMin = Math.max(5, Math.round((s.durationMs || 0) / 60000))
-            const left = Math.min(100, Math.max(0, (startMin / 1440) * 100))
-            const width = Math.min(100 - left, Math.max(0.8, (durMin / 1440) * 100))
-            return (
-              <div
-                key={s.id}
-                title={`${formatSessionTime(s.start)} - ${s.task || 'Focus'} (${Math.round((s.durationMs || 0) / 60000)}m)`}
-                className="absolute top-0.5 bottom-0.5 rounded-[2px] bg-accent/80 hover:bg-accent transition-colors cursor-pointer"
-                style={{
-                  left: `${left}%`,
-                  width: `${width}%`,
-                }}
-              />
-            )
-          })}
-
-          {/* Current Live Time Marker (NOW) */}
-          <div
-            className="absolute top-0 bottom-0 w-px bg-fg z-10 pointer-events-none"
-            style={{ left: `${nowPct}%` }}
-          >
-            <span className="absolute -top-1 -left-[3px] h-1.5 w-1.5 rounded-full bg-fg" />
-          </div>
-        </div>
-      </div>
-
       {todaySessions.length === 0 ? (
         <div className="flex-1 min-h-0 flex flex-col items-center justify-center py-6 px-4 my-auto border border-dashed border-line/60 rounded-2xl text-center select-none">
           {/* Technical Telemetry Status */}
