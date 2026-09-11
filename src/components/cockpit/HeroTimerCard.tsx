@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react'
 import { RotateCcw, SkipForward, Plus } from 'lucide-react'
-import type { TimerMode, TimerStatus } from '../../types'
+import type { TimerMode, TimerStatus, TodoItem } from '../../types'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useFlowTimerTick, useTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
@@ -18,6 +18,7 @@ interface HeroTimerCardProps {
   flowTime?: string
   completedFocusInCycle: number
   roundsBeforeLongBreak: number
+  activeTodo?: TodoItem | null
   onModeChange: (m: TimerMode) => void
   onToggle: () => void
   onSkip: () => void
@@ -38,6 +39,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   flowTime,
   completedFocusInCycle,
   roundsBeforeLongBreak,
+  activeTodo,
   onModeChange,
   onToggle,
   onSkip,
@@ -166,8 +168,25 @@ export const HeroTimerCard = memo(function HeroTimerCard({
           <GlyphTimeDisplay time={shownTime} />
         </div>
 
+        {/* Active Task Pill (if active todo loaded) */}
+        {activeTodo && (
+          <div className="mt-1 flex items-center justify-center shrink-0">
+            <div className="inline-flex max-w-full items-center gap-1.5 px-3 py-1 text-xs rounded-full border border-line bg-canvas/70 text-fg font-mono shadow-sm">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent animate-pulse" />
+              <span className="max-w-[180px] sm:max-w-[280px] truncate font-medium leading-none">
+                {activeTodo.title}
+              </span>
+              {activeTodo.tag && (
+                <span className="shrink-0 text-[10px] font-mono text-muted uppercase">
+                  #{activeTodo.tag}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Date & Phase Info */}
-        <div className="mt-2 flex min-h-[36px] items-center justify-between gap-4 flex-wrap shrink-0">
+        <div className="mt-2 flex min-h-[36px] items-center justify-between gap-2 sm:gap-4 flex-wrap shrink-0">
           <div className="flex flex-col">
             <span className="font-sans font-medium text-sm sm:text-base text-fg leading-snug">
               {dayName}
@@ -236,13 +255,13 @@ export const HeroTimerCard = memo(function HeroTimerCard({
       </div>
 
       {/* Action Controls Bar with Fitts's Law 44px+ Hitboxes */}
-      <div className="relative z-10 mt-3 flex items-center justify-between gap-3 pt-3 border-t border-line/60 shrink-0">
-        <div className="flex items-center gap-2">
+      <div className="relative z-10 mt-3 flex items-center justify-between gap-2 sm:gap-3 pt-3 border-t border-line/60 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
           {/* Main Start / Pause Trigger */}
           <button
             type="button"
             onClick={handleToggleClick}
-            className="h-11 min-h-[44px] w-[180px] sm:w-[200px] inline-flex items-center justify-center rounded-full border border-fg px-4 sm:px-6 font-sans text-xs sm:text-sm font-semibold tracking-wider uppercase transition-all duration-300 cursor-pointer bg-fg text-canvas hover:bg-accent hover:border-accent hover:text-white active:scale-[0.98] shrink-0 shadow-sm"
+            className="h-11 min-h-[44px] flex-1 sm:flex-none sm:w-[200px] min-w-[120px] inline-flex items-center justify-center rounded-full border border-fg px-3 sm:px-6 font-sans text-xs sm:text-sm font-semibold tracking-wider uppercase transition-all duration-300 cursor-pointer bg-fg text-canvas hover:bg-accent hover:border-accent hover:text-white active:scale-[0.98] shadow-sm"
           >
             {running ? t.timer.pause : t.timer.start}
           </button>
@@ -253,7 +272,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
               type="button"
               onClick={handleAddFive}
               title="+5 minutes"
-              className="h-11 min-h-[44px] rounded-full px-3.5 border border-black/10 dark:border-white/10 bg-neutral-200/60 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-900 dark:bg-neutral-900/60 dark:hover:bg-neutral-800/60 dark:text-neutral-400 dark:hover:text-white font-sans text-xs font-medium tracking-wide transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95"
+              className="h-11 min-h-[44px] rounded-full px-3 sm:px-3.5 border border-black/10 dark:border-white/10 bg-neutral-200/60 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-900 dark:bg-neutral-900/60 dark:hover:bg-neutral-800/60 dark:text-neutral-400 dark:hover:text-white font-sans text-xs font-medium tracking-wide transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95"
             >
               <Plus size={12} />
               5m
@@ -262,7 +281,7 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         </div>
 
         {/* Secondary Action Controls with 44x44px Touch Targets */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
             type="button"
             onClick={handleResetClick}

@@ -294,6 +294,7 @@ export const BentoCockpit = memo(
                   flowTime={flowTime}
                   completedFocusInCycle={completedFocusInCycle}
                   roundsBeforeLongBreak={roundsBeforeLongBreak}
+                  activeTodo={activeTodo}
                   onModeChange={onModeChange}
                   onToggle={onToggle}
                   onSkip={onSkip}
@@ -331,9 +332,9 @@ export const BentoCockpit = memo(
             </div>
 
             {/* Portrait Layout (Tablets & Mobile Portrait) */}
-            <div className="flex lg:hidden flex-col h-full min-h-0 gap-2.5 sm:gap-3">
+            <div className="flex lg:hidden flex-col h-full min-h-0 gap-2.5 sm:gap-3 overflow-y-auto no-scrollbar touch-pan-y">
               {/* Hero Timer */}
-              <div className="flex-1 min-h-0">
+              <div className="w-full shrink-0 min-h-[360px] sm:min-h-0 sm:flex-1">
                 <HeroTimerCard
                   phaseLabel={phaseLabel}
                   status={status}
@@ -344,17 +345,18 @@ export const BentoCockpit = memo(
                   flowTime={flowTime}
                   completedFocusInCycle={completedFocusInCycle}
                   roundsBeforeLongBreak={roundsBeforeLongBreak}
+                  activeTodo={activeTodo}
                   onModeChange={onModeChange}
                   onToggle={onToggle}
                   onSkip={onSkip}
                   onReset={onReset}
                   onAddTime={onAddTime}
-                  className="h-full min-h-0"
+                  className="h-full min-h-[360px] sm:min-h-0"
                 />
               </div>
 
               {/* Bottom Row Companion */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 shrink-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 shrink-0 pb-2">
                 <ActiveTaskCard
                   activeTodo={activeTodo}
                   todos={todos}
@@ -368,14 +370,12 @@ export const BentoCockpit = memo(
                   onOpenTodoDeck={() => scrollToScreen(1)}
                   onToggleDone={onTodoToggle}
                   onFocus={onTodoFocus}
-                  className="min-h-[140px]"
                 />
 
                 <QuickSettingsCard
                   isZenMode={isZenMode}
                   onToggleZen={onToggleZen}
                   onOpenSettingsModal={onOpenSettingsModal}
-                  className="min-h-[140px]"
                 />
               </div>
             </div>
@@ -386,7 +386,7 @@ export const BentoCockpit = memo(
             aria-label="Screen 2: Tasks Deck"
             className="w-full min-w-full shrink-0 snap-start snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch overflow-y-auto md:overflow-hidden no-scrollbar touch-pan-y">
               {/* Left: Task Inbox with Quick Add & Interactive Task List */}
               <TaskInboxCard
                 todos={todos}
@@ -401,7 +401,7 @@ export const BentoCockpit = memo(
                 onAdd={onTodoAdd}
                 onRemove={onTodoRemove}
                 onOpenTodoManager={onOpenTodoManager}
-                className="h-full min-h-0"
+                className="h-full min-h-[260px] md:min-h-0"
               />
 
               {/* Right: Today's Focus Session Log with Deep Link to Deck 03 Activity Log */}
@@ -413,7 +413,7 @@ export const BentoCockpit = memo(
                 onJumpToFocus={() => {
                   scrollToScreen(0)
                 }}
-                className="h-full min-h-0"
+                className="h-full min-h-[260px] md:min-h-0"
               />
             </div>
           </section>
@@ -474,14 +474,14 @@ export const BentoCockpit = memo(
               {statsSubView === 'overview' ? (
                 <div
                   key="stats-overview"
-                  className="grid grid-cols-1 md:grid-cols-2 grid-rows-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch animate-fade-in"
+                  className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch overflow-y-auto md:overflow-hidden no-scrollbar touch-pan-y animate-fade-in"
                 >
                   {/* 1. Weekly Goal Load */}
                   <GoalLoadCard
                     sessions={sessions}
                     settings={settings}
                     onOpenSettings={onOpenSettingsModal}
-                    className="h-full min-h-0"
+                    className="h-full min-h-[180px] md:min-h-0"
                   />
 
                   {/* 2. Daily Focus Time */}
@@ -489,14 +489,14 @@ export const BentoCockpit = memo(
                     sessions={sessions}
                     settings={settings}
                     onOpenSettings={onOpenSettingsModal}
-                    className="h-full min-h-0"
+                    className="h-full min-h-[180px] md:min-h-0"
                   />
 
                   {/* 3. Projects Distribution Overview */}
                   <ProjectsDistributionCard
                     sessions={sessions}
                     tags={settings.tags}
-                    className="h-full min-h-0"
+                    className="h-full min-h-[180px] md:min-h-0"
                   />
 
                   {/* 4. Daily Streak & System Status */}
@@ -505,7 +505,7 @@ export const BentoCockpit = memo(
                     onOpenActivityLog={() => {
                       setStatsSubView('log')
                     }}
-                    className="h-full min-h-0"
+                    className="h-full min-h-[180px] md:min-h-0"
                   />
                 </div>
               ) : (
