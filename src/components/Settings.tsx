@@ -8,15 +8,13 @@ import {
   Loader2,
   LogOut,
   Minus,
-  Moon,
   Plus,
   RefreshCw,
-  Sun,
   Trash2,
   X,
 } from 'lucide-react'
 import type { Settings, Session, TodoItem } from '../types'
-import type { ColorMode, ThemeId } from '../themes'
+import type { ThemeId } from '../themes'
 import { THEMES, THEME_LIST } from '../themes'
 import { clearSessions, exportAll } from '../lib/db'
 import { dayKey } from '../lib/time'
@@ -268,8 +266,6 @@ function ProfileAvatar({ avatarUrl, name }: { avatarUrl?: string; name: string }
 interface Props {
   settings: Settings
   update: (updater: (s: Settings) => Settings) => void
-  colorMode: ColorMode
-  onColorModeChange: (mode: ColorMode) => void
   themeId?: ThemeId
   onThemeChange?: (theme: ThemeId) => void
   sessions: Session[]
@@ -288,8 +284,6 @@ interface Props {
 export const SettingsPanel = memo(function SettingsPanel({
   settings,
   update,
-  colorMode,
-  onColorModeChange,
   themeId,
   onThemeChange,
   sessions,
@@ -646,33 +640,6 @@ export const SettingsPanel = memo(function SettingsPanel({
             size="md"
             fullWidth
             ariaLabel={t.settings.language}
-          />
-        </div>
-
-        {/* Dark / Light Color Mode */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-muted">{t.settings.colorMode}</h3>
-            <p className="text-[11px] text-muted">{t.settings.colorModeHint}</p>
-          </div>
-          <SlidingSegmentedControl<ColorMode>
-            options={[
-              {
-                value: 'dark',
-                label: t.settings.dark,
-                icon: <Moon size={13} />,
-              },
-              {
-                value: 'light',
-                label: t.settings.light,
-                icon: <Sun size={13} />,
-              },
-            ]}
-            value={colorMode}
-            onChange={onColorModeChange}
-            size="md"
-            fullWidth
-            ariaLabel={t.settings.colorMode}
           />
         </div>
 

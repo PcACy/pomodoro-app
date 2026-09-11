@@ -609,8 +609,6 @@ export default function App() {
         onClose={() => setIsSettingsModalOpen(false)}
         settings={settings}
         update={updateSettings}
-        colorMode={colorMode}
-        onColorModeChange={setColorMode}
         themeId={themeId}
         onThemeChange={setThemeId}
         sessions={sessions}
