@@ -66,7 +66,6 @@ export const TaskInboxCard = memo(function TaskInboxCard({
   }, [isTagDropdownOpen])
 
   const pendingTodos = todos.filter((t) => !t.done)
-  const remainingCount = 0
 
   const submitTask = useCallback(() => {
     if (!quickTitle.trim()) return
@@ -343,16 +342,6 @@ export const TaskInboxCard = memo(function TaskInboxCard({
               </div>
             )
           })
-        )}
-
-        {remainingCount > 0 && (
-          <button
-            type="button"
-            onClick={onOpenTodoManager}
-            className="text-left font-sans text-xs text-muted hover:text-fg pt-1 transition-colors cursor-pointer"
-          >
-            + {remainingCount} more tasks in inbox
-          </button>
         )}
       </div>
     </BentoCard>

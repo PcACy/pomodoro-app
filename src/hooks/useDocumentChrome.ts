@@ -35,6 +35,7 @@ function canvasFaviconDataUri(
   running: boolean,
   progress: number,
   remainingMs: number,
+  isFlow = false,
 ): string {
   const c = getFaviconCanvas()
   if (!c) return DEFAULT_FAVICON
@@ -66,7 +67,9 @@ function canvasFaviconDataUri(
   ctx.strokeStyle = color
   ctx.stroke()
 
-  const mins = Math.max(1, Math.ceil(remainingMs / MS_PER_MINUTE))
+  const mins = isFlow
+    ? Math.floor(remainingMs / MS_PER_MINUTE)
+    : Math.max(1, Math.ceil(remainingMs / MS_PER_MINUTE))
   ctx.fillStyle = FG_FAVICON_COLOR
   ctx.font = 'bold 9px ui-monospace, SFMono-Regular, Menlo, monospace'
   ctx.textAlign = 'center'
@@ -129,6 +132,7 @@ function useDocumentChrome(
         status === 'running',
         mode === 'flow' ? 1 : progressRef.current,
         remainingMsRef.current,
+        mode === 'flow',
       )
       lastFaviconRef.current = { key: cacheKey, uri }
       link.href = uri

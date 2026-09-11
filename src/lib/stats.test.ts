@@ -7,6 +7,7 @@ import {
   heatmapData,
   minutesByTag,
   pomodoroVsFlowBreakdown,
+  rangeBarStats,
   sessionsByHour,
   todayMinutes,
   weekMinutes,
@@ -247,6 +248,22 @@ describe('stats lib', () => {
       expect(weeks.length).toBeGreaterThanOrEqual(1)
       const lastWeek = weeks[weeks.length - 1]
       expect(lastWeek.days).toHaveLength(7)
+    })
+
+    it('rangeBarStats handles large session arrays without call stack overflow', () => {
+      const base = new Date(2025, 0, 1).getTime()
+      const largeSessions: Session[] = Array.from({ length: 70_000 }, (_, i) => ({
+        id: `s-${i}`,
+        start: base + (i % 365) * 86_400_000,
+        end: base + (i % 365) * 86_400_000 + 25 * 60_000,
+        durationMs: 25 * 60_000,
+        task: 'Task',
+        tag: 'Tag',
+      }))
+
+      expect(() => rangeBarStats(largeSessions, 'all')).not.toThrow()
+      const res = rangeBarStats(largeSessions, 'all')
+      expect(res.length).toBeGreaterThan(0)
     })
   })
 })

@@ -29,7 +29,7 @@ import { SettingsModal } from './components/cockpit/SettingsModal'
 const ReflectionModal = lazy(() => import('./components/ReflectionModal').then((m) => ({ default: m.ReflectionModal })))
 
 export default function App() {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const [colorMode, setColorMode, themeId, setThemeId] = useTheme()
   const [settings, updateSettings] = useSettings()
   const [isTodoModalOpen, setIsTodoModalOpen] = useState(false)
@@ -274,10 +274,16 @@ export default function App() {
     if (liveAnnouncement.phase !== timer.phase) {
       const phaseName = t.phases[timer.phase]
       const durationMins = Math.round(timer.totalMs / 60_000)
-      message = `${phaseName} gestartet (${durationMins} Minuten).`
+      message =
+        lang === 'de'
+          ? `${phaseName} gestartet (${durationMins} Minuten).`
+          : `${phaseName} started (${durationMins} minutes).`
     } else if (liveAnnouncement.status !== timer.status) {
-      if (timer.status === 'paused') message = `${t.phases[timer.phase]} pausiert.`
-      else if (timer.status === 'running') message = `${t.phases[timer.phase]} fortgesetzt.`
+      if (timer.status === 'paused') {
+        message = lang === 'de' ? `${t.phases[timer.phase]} pausiert.` : `${t.phases[timer.phase]} paused.`
+      } else if (timer.status === 'running') {
+        message = lang === 'de' ? `${t.phases[timer.phase]} fortgesetzt.` : `${t.phases[timer.phase]} resumed.`
+      }
     }
     setLiveAnnouncement({ phase: timer.phase, status: timer.status, message })
   }
@@ -317,18 +323,10 @@ export default function App() {
               { id: 0, num: '01', label: 'Focus' },
               { id: 1, num: '02', label: 'Tasks' },
               { id: 2, num: '03', label: 'Stats' },
-            ].map((deck, idx) => {
+            ].map((deck) => {
               const isActive = activeDeck === deck.id
               return (
                 <div key={deck.id} className="flex items-center">
-                  {idx > 0 && (
-                    <span
-                      className="text-line dark:text-white/20 select-none font-mono text-[10px] mx-0.5"
-                      aria-hidden="true"
-                    >
-                      //
-                    </span>
-                  )}
                   <button
                     type="button"
                     onClick={() => handleSelectDeck(deck.id)}

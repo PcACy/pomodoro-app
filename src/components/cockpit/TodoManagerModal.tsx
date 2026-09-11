@@ -69,7 +69,7 @@ export const TodoManagerModal = memo(function TodoManagerModal({
         <div className="flex items-center justify-between pb-3 border-b border-line">
           <div>
             <span className="font-mono text-[10px] sm:text-xs tracking-widest text-muted uppercase">
-              TASK MANAGER // INBOX & ARCHIVE
+              TASK MANAGER · INBOX & ARCHIVE
             </span>
             <div className="flex items-center gap-3 mt-0.5">
               <h2 className="font-sans text-lg font-medium text-fg">

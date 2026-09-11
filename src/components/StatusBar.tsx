@@ -4,6 +4,7 @@ import { THEMES } from '../themes'
 import type { ColorMode, ThemeId } from '../themes'
 import type { SyncStatus } from '../hooks/useSync'
 import { useFlowTimerTick, useTimerTick } from '../hooks/useTimerTick'
+import { useTranslation } from '../hooks/useTranslation'
 
 export interface StatusBarProps {
   colorMode: ColorMode
@@ -36,6 +37,7 @@ export const StatusBar = memo(function StatusBar({
 }: StatusBarProps) {
   const timerTick = useTimerTick()
   const flowTick = useFlowTimerTick()
+  const { t } = useTranslation()
 
   const activeTime = time ?? (mode === 'flow' ? flowTick.time : timerTick.time)
   const activeProgress = progress ?? (mode === 'flow' ? 1 : timerTick.progress)
@@ -74,7 +76,7 @@ export const StatusBar = memo(function StatusBar({
         </div>
 
         <span className="text-fg font-medium truncate hidden sm:inline">
-          {mode === 'flow' ? 'FLOW SESSION' : `POMODORO // ${phase}`}
+          {mode === 'flow' ? 'FLOW SESSION' : `POMODORO · ${t.phases[phase] || phase}`}
         </span>
 
         {task && (

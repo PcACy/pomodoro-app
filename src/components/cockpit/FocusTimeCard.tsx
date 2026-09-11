@@ -4,6 +4,7 @@ import type { Session, Settings } from '../../types'
 import { currentStreakDays, todayMinutes } from '../../lib/stats'
 import { sameDay } from '../../lib/time'
 import { BentoCard } from './BentoCard'
+import { useTranslation } from '../../hooks/useTranslation'
 
 interface FocusTimeCardProps {
   sessions: Session[]
@@ -18,6 +19,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
   onOpenSettings,
   className = '',
 }: FocusTimeCardProps) {
+  const { t, lang } = useTranslation()
   const [now, setNow] = useState(() => new Date())
 
   useEffect(() => {
@@ -46,12 +48,12 @@ export const FocusTimeCard = memo(function FocusTimeCard({
 
   return (
     <BentoCard
-      label="Daily Focus"
+      label={t.dashboard.focusTime || 'Daily Focus'}
       action={
         <div className="flex items-center gap-1">
           {streak > 0 && (
             <span className="font-sans text-[10px] font-medium px-2 py-0.5 rounded-full border border-line bg-canvas text-fg">
-              {streak}d streak
+              {streak} {lang === 'de' ? 'Tage' : 'd'} streak
             </span>
           )}
           {onOpenSettings && (
@@ -61,7 +63,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
                 e.stopPropagation()
                 onOpenSettings()
               }}
-              title="Edit Daily Goal"
+              title={lang === 'de' ? 'Tagesziel anpassen' : 'Edit Daily Goal'}
               className="min-w-[36px] min-h-[36px] flex items-center justify-center -mr-1 rounded-full hover:bg-neutral-500/10 active:scale-95 transition-all text-muted hover:text-fg cursor-pointer"
             >
               <SettingsIcon size={14} />
@@ -82,13 +84,20 @@ export const FocusTimeCard = memo(function FocusTimeCard({
             <span className="font-sans text-xs text-muted font-normal">h</span>
           </div>
           <div className="font-sans text-[11px] text-muted font-normal mt-0.5">
-            / {targetHours} h target
+            / {targetHours} h {lang === 'de' ? 'Ziel' : 'target'}
           </div>
         </div>
         <div className="text-right">
           <span className="font-mono text-sm sm:text-base font-bold text-fg tabular-nums">{clampedPct}%</span>
           <div className="font-sans text-[10px] text-muted">
-            {todaySessions.length} {todaySessions.length === 1 ? 'session' : 'sessions'}
+            {todaySessions.length}{' '}
+            {todaySessions.length === 1
+              ? lang === 'de'
+                ? 'Session'
+                : 'session'
+              : lang === 'de'
+                ? 'Sessions'
+                : 'sessions'}
           </div>
         </div>
       </div>
@@ -128,7 +137,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
           <div
             className="absolute top-0 bottom-0 w-[2px] bg-accent z-10"
             style={{ left: `${nowFraction * 100}%` }}
-            title={`Current Time: ${timeStr}`}
+            title={lang === 'de' ? `Aktuelle Uhrzeit: ${timeStr}` : `Current Time: ${timeStr}`}
           />
         </div>
 
@@ -136,7 +145,9 @@ export const FocusTimeCard = memo(function FocusTimeCard({
         <div className="mt-1 flex items-center justify-between font-sans text-[9px] text-muted tabular-nums">
           <span>00:00</span>
           <span>12:00</span>
-          <span className="text-fg/80 font-medium">Now {timeStr}</span>
+          <span className="text-fg/80 font-medium">
+            {lang === 'de' ? 'Jetzt' : 'Now'} {timeStr}
+          </span>
           <span>24:00</span>
         </div>
       </div>

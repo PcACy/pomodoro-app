@@ -5,6 +5,8 @@ import { BentoCard } from './BentoCard'
 import { playMicroClick } from '../../lib/sound'
 import { useTranslation } from '../../hooks/useTranslation'
 
+import { dayKey, sameDay } from '../../lib/time'
+
 interface SessionLogCardProps {
   sessions: Session[]
   onOpenActivityLog?: () => void
@@ -23,30 +25,33 @@ export const SessionLogCard = memo(function SessionLogCard({
   onJumpToFocus,
   className = '',
 }: SessionLogCardProps) {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
+  const todayKey = dayKey(new Date())
+
   const { todaySessions, totalMinutesToday } = useMemo(() => {
-    const todayStr = new Date().toDateString()
-    const filtered = sessions.filter((s) => {
-      const d = new Date(s.start)
-      return d.toDateString() === todayStr
-    })
+    const [y, m, d] = todayKey.split('-').map(Number)
+    const today = new Date(y, (m ?? 1) - 1, d)
+    const filtered = sessions.filter((s) => sameDay(new Date(s.start), today))
     // Sort descending by start time (newest first)
     filtered.sort((a, b) => b.start - a.start)
     const minutes = Math.round(
       filtered.reduce((acc, s) => acc + (s.durationMs || 0), 0) / 60000
     )
     return { todaySessions: filtered, totalMinutesToday: minutes }
-  }, [sessions])
+  }, [sessions, todayKey])
 
   const sessionCount = todaySessions.length
   const totalHours = (totalMinutesToday / 60).toFixed(1)
+  const sessionUnit = lang === 'de'
+    ? (sessionCount === 1 ? 'Session' : 'Sessions')
+    : (sessionCount === 1 ? 'session' : 'sessions')
 
   return (
     <BentoCard
-      label="Session Log · Today"
+      label={lang === 'de' ? 'Session-Log · Heute' : 'Session Log · Today'}
       indicator={
         <span className="font-sans text-[11px] text-muted">
-          {sessionCount} {sessionCount === 1 ? 'session' : 'sessions'} · {totalHours} h
+          {sessionCount} {sessionUnit} · {totalHours} h
         </span>
       }
       action={

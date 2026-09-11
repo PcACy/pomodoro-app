@@ -4,6 +4,7 @@ import { BentoCard } from './BentoCard'
 import { currentStreakDays } from '../../lib/stats'
 import { addDays, dayKey, sameDay, startOfWeek } from '../../lib/time'
 import { playMicroClick } from '../../lib/sound'
+import { useTranslation } from '../../hooks/useTranslation'
 
 interface SystemStatusCardProps {
   sessions: Session[]
@@ -11,13 +12,13 @@ interface SystemStatusCardProps {
   className?: string
 }
 
-const WEEK_DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-
 export const SystemStatusCard = memo(function SystemStatusCard({
   sessions = [],
   onOpenActivityLog,
   className = '',
 }: SystemStatusCardProps) {
+  const { t, lang } = useTranslation()
+  const weekDays = t.weekdays.map((w) => w.charAt(0))
   const streak = currentStreakDays(sessions)
   // Day-granular cache key: `new Date()` inline would defeat the memo below
   // (fresh object identity each render) and go stale after midnight; the key
@@ -31,7 +32,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
     const [y, m, d] = todayKey.split('-').map(Number)
     const today = new Date(y, (m ?? 1) - 1, d)
     const weekStart = startOfWeek(today)
-    const logged = WEEK_DAYS.map((_, i) => {
+    const logged = weekDays.map((_, i) => {
       const dayDate = addDays(weekStart, i)
       return sessions.some((s) => sameDay(new Date(s.start), dayDate))
     })
@@ -45,11 +46,11 @@ export const SystemStatusCard = memo(function SystemStatusCard({
       weekStart,
       today,
     }
-  }, [sessions, todayKey])
+  }, [sessions, todayKey, weekDays])
 
   return (
     <BentoCard
-      label="Daily Streak"
+      label={t.dashboard.streak}
       action={
         <button
           type="button"
@@ -61,7 +62,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
           className="font-sans text-xs text-muted/90 hover:text-fg font-medium transition-colors cursor-pointer py-1 px-1.5"
           title="Open activity log"
         >
-          Stats ↗
+          {t.dashboard.sessions} ↗
         </button>
       }
       className={`rounded-[28px] ${className}`}
@@ -77,11 +78,15 @@ export const SystemStatusCard = memo(function SystemStatusCard({
             <div className="flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-[#EB1E23] animate-pulse" />
               <span className="font-sans text-xs text-fg font-medium">
-                {streak === 1 ? 'Day streak' : 'Days streak'}
+                {streak === 1
+                  ? (lang === 'de' ? 'Tag Streak' : 'Day streak')
+                  : (lang === 'de' ? 'Tage Streak' : 'Days streak')}
               </span>
             </div>
             <span className="font-sans text-[11px] text-muted">
-              Circuit: {hasLoggedToday ? 'Closed' : 'Standby'}
+              {lang === 'de'
+                ? (hasLoggedToday ? 'Status: Aktiv' : 'Status: Bereit')
+                : (hasLoggedToday ? 'Circuit: Closed' : 'Circuit: Standby')}
             </span>
           </div>
         </div>
@@ -153,14 +158,14 @@ export const SystemStatusCard = memo(function SystemStatusCard({
 
           {/* 7 Columns: Pads and Labels */}
           <div className="relative z-10 grid grid-cols-7 w-full">
-            {WEEK_DAYS.map((dayName, i) => {
+            {weekDays.map((dayName, i) => {
               const isCurrentDay = sameDay(addDays(weekStart, i), today)
               const hasLogged = dayLogged[i]
 
               return (
                 <div
                   key={i}
-                  title={`${dayName}: ${hasLogged ? 'Logged' : 'No sessions'}`}
+                  title={`${dayName}: ${hasLogged ? (lang === 'de' ? 'Erfasst' : 'Logged') : (lang === 'de' ? 'Keine Sessions' : 'No sessions')}`}
                   className="flex flex-col items-center justify-start group cursor-default"
                 >
                   {/* Pad container: fixed height 24px so center is exactly at 12px */}

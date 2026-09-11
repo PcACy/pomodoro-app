@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from '../hooks/useTranslation'
+import { lockBodyScroll } from '../lib/modalScrollLock'
 
 interface Props {
   onSave: (notes: string) => void
@@ -37,7 +38,9 @@ export function ReflectionModal({ onSave, onSkip }: Props) {
   useEffect(() => {
     previousFocusRef.current = document.activeElement as HTMLElement | null
     inputRef.current?.focus()
+    const unlock = lockBodyScroll()
     return () => {
+      unlock()
       previousFocusRef.current?.focus?.()
       if (timerRef.current != null) {
         window.clearTimeout(timerRef.current)
@@ -79,7 +82,7 @@ export function ReflectionModal({ onSave, onSkip }: Props) {
       onClick={(e) => {
         if (e.target === e.currentTarget) handleSkip()
       }}
-      className={`modal-backdrop fixed inset-0 z-40 flex items-start justify-center bg-black/80 p-4 pt-[15vh] ${
+      className={`modal-backdrop fixed inset-0 z-50 flex items-start justify-center bg-black/80 p-4 pt-[15vh] ${
         closing ? 'modal-backdrop--closing' : ''
       }`}
     >

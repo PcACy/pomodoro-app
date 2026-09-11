@@ -4,8 +4,7 @@ import type { Session, Settings } from '../../types'
 import { weekMinutes } from '../../lib/stats'
 import { addDays, sameDay, startOfWeek } from '../../lib/time'
 import { BentoCard } from './BentoCard'
-
-const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+import { useTranslation } from '../../hooks/useTranslation'
 
 interface GoalLoadCardProps {
   sessions: Session[]
@@ -20,6 +19,8 @@ export const GoalLoadCard = memo(function GoalLoadCard({
   onOpenSettings,
   className = '',
 }: GoalLoadCardProps) {
+  const { t, lang } = useTranslation()
+  const dayLabels = t.weekdays.map((w) => w.charAt(0))
   const currentWeekMinutes = weekMinutes(sessions)
   const targetWeekMinutes = Math.max(60, settings.weeklyGoalMinutes || 300)
   const ratio = Math.max(0, currentWeekMinutes / targetWeekMinutes)
@@ -33,7 +34,7 @@ export const GoalLoadCard = memo(function GoalLoadCard({
     const weekStart = startOfWeek(new Date())
     const today = new Date()
     let tIdx = 0
-    const mins = DAY_LABELS.map((_, i) => {
+    const mins = dayLabels.map((_, i) => {
       const day = addDays(weekStart, i)
       if (sameDay(day, today)) tIdx = i
       return sessions
@@ -44,11 +45,11 @@ export const GoalLoadCard = memo(function GoalLoadCard({
         }, 0)
     })
     return { dayMinutes: mins, maxDay: Math.max(1, ...mins), todayIdx: tIdx }
-  }, [sessions])
+  }, [sessions, dayLabels])
 
   return (
     <BentoCard
-      label="Weekly Goal"
+      label={t.dashboard.weeklyGoal}
       action={
         onOpenSettings ? (
           <button
@@ -76,7 +77,7 @@ export const GoalLoadCard = memo(function GoalLoadCard({
           <span className="font-sans text-sm text-muted">%</span>
         </div>
         <span className="font-sans text-xs text-muted tabular-nums">
-          {currentHours} of {targetHours} h
+          {currentHours} {lang === 'de' ? 'von' : 'of'} {targetHours} h
         </span>
       </div>
 
@@ -84,7 +85,7 @@ export const GoalLoadCard = memo(function GoalLoadCard({
       <div
         className="mt-3 flex h-16 items-stretch gap-1 select-none"
         role="img"
-        aria-label={`Daily focus this week: ${dayMinutes.map((m, i) => `${DAY_LABELS[i]} ${m} minutes`).join(', ')}`}
+        aria-label={`Daily focus this week: ${dayMinutes.map((m, i) => `${dayLabels[i]} ${m} minutes`).join(', ')}`}
       >
         {dayMinutes.map((mins, i) => (
           <div key={i} className="flex flex-1 flex-col items-center justify-end gap-1.5 min-h-[44px]" title={`${mins} min`}>
@@ -99,7 +100,7 @@ export const GoalLoadCard = memo(function GoalLoadCard({
                 i === todayIdx ? 'text-fg font-semibold' : 'text-neutral-500'
               }`}
             >
-              {DAY_LABELS[i]}
+              {dayLabels[i]}
             </span>
           </div>
         ))}

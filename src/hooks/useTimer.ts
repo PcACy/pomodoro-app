@@ -119,7 +119,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
         }
       }
       const rounds = Math.max(1, Math.round(phases.roundsBeforeLongBreak) || 1)
-      nextPhase = nextCycle % rounds === 0 ? 'longBreak' : 'shortBreak'
+      nextPhase = nextCycle > 0 && nextCycle % rounds === 0 ? 'longBreak' : 'shortBreak'
     } else {
       const isLong = m.phase === 'longBreak'
       nextPhase = 'focus'

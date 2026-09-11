@@ -243,7 +243,13 @@ export function rangeBarStats(
     return out
   }
 
-  const earliest = new Date(Math.min(...sessions.map((s) => s.start)))
+  let earliestStart = Infinity
+  for (const s of sessions) {
+    if (typeof s.start === 'number' && Number.isFinite(s.start) && s.start < earliestStart) {
+      earliestStart = s.start
+    }
+  }
+  const earliest = new Date(Number.isFinite(earliestStart) ? earliestStart : today.getTime())
   const startMonth = new Date(earliest.getFullYear(), earliest.getMonth(), 1)
   const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1)
 

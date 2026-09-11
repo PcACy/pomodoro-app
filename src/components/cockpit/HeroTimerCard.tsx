@@ -199,16 +199,29 @@ export const HeroTimerCard = memo(function HeroTimerCard({
           <div className="flex items-center gap-2">
             {isFlow ? (
               <div className="inline-flex min-w-[100px] items-center font-sans text-xs font-medium text-fg">
-                <span>{running ? 'Flow active' : 'Free flow'}</span>
+                <span>
+                  {running
+                    ? (lang === 'de' ? 'Flow aktiv' : 'Flow active')
+                    : (lang === 'de' ? 'Freier Flow' : 'Free flow')}
+                </span>
               </div>
             ) : (
               <div className="inline-flex items-center gap-2 font-sans text-xs">
                 <span className="text-fg font-medium">{shownLabel}</span>
                 <span className="text-neutral-400 dark:text-neutral-500">·</span>
                 <span className="text-neutral-700 dark:text-neutral-300 text-xs font-medium">
-                  Round {(completedFocusInCycle % safeRounds) + 1} of {safeRounds}
+                  {lang === 'de'
+                    ? `Runde ${(completedFocusInCycle % safeRounds) + 1} von ${safeRounds}`
+                    : `Round ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`}
                 </span>
-                <div className="flex items-center gap-1 ml-0.5" title={`Cycle: ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`}>
+                <div
+                  className="flex items-center gap-1 ml-0.5"
+                  title={
+                    lang === 'de'
+                      ? `Zyklus: ${(completedFocusInCycle % safeRounds) + 1} von ${safeRounds}`
+                      : `Cycle: ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`
+                  }
+                >
                   {Array.from({ length: safeRounds }).map((_, rIdx) => {
                     const currentRoundIdx = completedFocusInCycle % safeRounds
                     const isCompleted = rIdx < currentRoundIdx
