@@ -116,6 +116,10 @@ export const BentoCockpit = memo(
     // 52-Week Heatmap data computed from sessions
     const heat = useMemo(() => heatmapData(sessions, 52), [sessions])
 
+    const activeScreenRef = useRef(activeScreen)
+    activeScreenRef.current = activeScreen
+    const prevWidthRef = useRef<number>(0)
+
     // Smoothly scrolls to target deck (0: Focus Deck, 1: Tasks Deck, 2: Stats Deck)
     const scrollToScreen = useCallback(
       (index: number, subView?: 'overview' | 'log') => {
@@ -129,13 +133,22 @@ export const BentoCockpit = memo(
         if (subView) {
           setStatsSubView(subView)
         }
+        // Temporarily disable CSS scroll snapping during programmatic scroll
+        // so the browser engine does not fight smooth scrolling halfway.
+        scroller.style.scrollSnapType = 'none'
         scroller.scrollTo({
           left: clampedIndex * scroller.clientWidth,
           behavior: 'smooth',
         })
-        setTimeout(() => {
+        const onScrollEnd = () => {
+          scroller.style.scrollSnapType = ''
           isProgrammaticScrollRef.current = false
-        }, 450)
+        }
+        if ('onscrollend' in window) {
+          scroller.addEventListener('scrollend', onScrollEnd, { once: true })
+        } else {
+          setTimeout(onScrollEnd, 450)
+        }
       },
       [onDeckChange],
     )
@@ -175,21 +188,27 @@ export const BentoCockpit = memo(
       }
     }, [activeScreen, onDeckChange])
 
-    // Keep scroll position aligned to activeScreen across container resizes (e.g. rotation, splitscreen, keyboard)
+    // Keep scroll position aligned to activeScreen only when container actually resizes
     useEffect(() => {
       const scroller = scrollerRef.current
       if (!scroller || typeof ResizeObserver === 'undefined') return
-      const observer = new ResizeObserver(() => {
-        if (!isProgrammaticScrollRef.current) {
-          scroller.scrollTo({
-            left: activeScreen * scroller.clientWidth,
-            behavior: 'instant' as ScrollBehavior,
-          })
+      prevWidthRef.current = scroller.clientWidth
+
+      const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const newWidth = entry.contentRect.width
+          if (newWidth > 0 && Math.abs(newWidth - prevWidthRef.current) > 2) {
+            prevWidthRef.current = newWidth
+            scroller.scrollTo({
+              left: activeScreenRef.current * newWidth,
+              behavior: 'auto',
+            })
+          }
         }
       })
       observer.observe(scroller)
       return () => observer.disconnect()
-    }, [activeScreen])
+    }, [])
 
     // Keyboard shortcuts:
     // '1' -> Focus Deck (0)
@@ -259,7 +278,7 @@ export const BentoCockpit = memo(
           {/* SCREEN 01: FOCUS DECK (Operative Ebene) */}
           <section
             aria-label="Screen 1: Focus Deck"
-            className="w-full min-w-full shrink-0 snap-center snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
+            className="w-full min-w-full shrink-0 snap-start snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
           >
             {/* Landscape 2-Column: Dominant Hero Timer (~67%) + Right Companion Column (~33%) */}
             <div className="hidden lg:grid lg:grid-cols-12 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch">
@@ -365,7 +384,7 @@ export const BentoCockpit = memo(
           {/* SCREEN 02: TASKS DECK (Workspace & Log - 2-Column Split) */}
           <section
             aria-label="Screen 2: Tasks Deck"
-            className="w-full min-w-full shrink-0 snap-center snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
+            className="w-full min-w-full shrink-0 snap-start snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch">
               {/* Left: Task Inbox with Quick Add & Interactive Task List */}
@@ -399,7 +418,7 @@ export const BentoCockpit = memo(
           {/* SCREEN 03: STATS DECK (Unified Insights Hub) */}
           <section
             aria-label="Screen 3: Stats Deck"
-            className="w-full min-w-full shrink-0 snap-center snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
+            className="w-full min-w-full shrink-0 snap-start snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
           >
             {/* Deck 03 Sub-Navigation Pill Toggle */}
             <div className="h-7 shrink-0 flex items-center justify-between px-1 mb-1 sm:mb-1.5 select-none">
