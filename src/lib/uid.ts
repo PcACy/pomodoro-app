@@ -1,21 +1,22 @@
+const fallbackCrypto = typeof globalThis !== 'undefined' ? globalThis.crypto : undefined
+
 export const uid = (): string => {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID()
+  const gCrypto = typeof globalThis !== 'undefined' ? globalThis.crypto : undefined
+  const c = gCrypto?.randomUUID || gCrypto?.getRandomValues ? gCrypto : fallbackCrypto
+
+  if (c && typeof c.randomUUID === 'function') {
+    return c.randomUUID()
   }
-  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+  if (c && typeof c.getRandomValues === 'function') {
     const bytes = new Uint8Array(16)
-    crypto.getRandomValues(bytes)
+    c.getRandomValues(bytes)
     bytes[6] = (bytes[6] & 0x0f) | 0x40
     bytes[8] = (bytes[8] & 0x3f) | 0x80
     const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`
   }
-  // Last resort: non-cryptographic fallback so session/todo creation never
-  // hard-crashes on platforms without WebCrypto (ids stay unique enough).
-  const r = (): string => Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, '0')
-  const a = r()
-  const b = r()
-  return `${a.slice(0, 8)}-${b.slice(0, 4)}-4${b.slice(5, 8)}-${((parseInt(b.slice(0, 1), 16) & 0x3) | 0x8).toString(16)}${a.slice(1, 4)}-${a.slice(4, 8)}${b.slice(4, 8)}${r().slice(0, 4)}`
+
+  throw new Error('Cryptographically secure random number generator is unavailable')
 }
 
 /** Stable, content-derived valid UUID (RFC-4122-style) so identical payloads map to the same id. */

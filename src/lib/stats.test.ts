@@ -26,10 +26,11 @@ describe('stats lib', () => {
     vi.useRealTimers()
   })
 
+  let sessionSeq = 0
   const makeSession = (
     overrides: Partial<Session> & { start: number; durationMs: number }
   ): Session => ({
-    id: `session-${Math.random().toString(36).substring(2, 9)}`,
+    id: `session-${++sessionSeq}`,
     end: overrides.start + overrides.durationMs,
     task: 'Test Task',
     tag: 'Coding',

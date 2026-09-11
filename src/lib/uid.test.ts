@@ -57,7 +57,7 @@ describe('uid', () => {
       expect(id).toMatch(UUID_V4_REGEX)
     })
 
-    it('falls back to Math.random UUID when crypto is undefined', () => {
+    it('falls back to secure node crypto UUID when crypto is undefined', () => {
       Object.defineProperty(globalThis, 'crypto', {
         value: undefined,
         configurable: true,
@@ -68,7 +68,7 @@ describe('uid', () => {
       expect(id).toMatch(UUID_V4_REGEX)
     })
 
-    it('falls back to Math.random UUID when crypto has neither randomUUID nor getRandomValues', () => {
+    it('falls back to secure node crypto UUID when crypto has neither randomUUID nor getRandomValues', () => {
       Object.defineProperty(globalThis, 'crypto', {
         value: {},
         configurable: true,

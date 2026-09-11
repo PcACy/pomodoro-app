@@ -1,4 +1,5 @@
 import type { PhaseId, TimerStatus } from '../types'
+import { uid } from './uid'
 
 interface TimerBroadcastPayload {
   status: TimerStatus
@@ -15,7 +16,7 @@ interface TimerBroadcastPayload {
 type BroadcastMessage = { type: 'timer_state'; payload: TimerBroadcastPayload }
 
 const CHANNEL_NAME = 'pomau_sync_channel'
-const TAB_INSTANCE_ID = Math.random().toString(36).slice(2, 9)
+const TAB_INSTANCE_ID = uid().slice(0, 8)
 
 // Monotonic per-tab sequence counter: when two tabs drive the timer at once,
 // receivers apply last-writer-wins per sender instead of flapping between
