@@ -18,7 +18,6 @@ export interface Messages {
   }
   shortcuts: { skip: string; reset: string }
   zen: { exitHint: string; enterHint: string }
-  pip: { open: string; close: string }
   todo: {
     title: string
     tag: string
@@ -175,7 +174,6 @@ const de: Messages = {
     exitHint: 'Zen-Modus · Z oder Esc zum Beenden',
     enterHint: 'Zen-Modus aktivieren',
   },
-  pip: { open: 'Mini-Player (PiP)', close: 'Mini-Player schließen' },
   todo: {
     title: 'To-Do',
     tag: 'Tag',
@@ -344,7 +342,6 @@ const en: Messages = {
     exitHint: 'Zen Mode · Press Z or Esc to exit',
     enterHint: 'Enter Zen Mode',
   },
-  pip: { open: 'Mini-Player (PiP)', close: 'Close Mini-Player' },
   todo: {
     title: 'To-Do',
     tag: 'Tag',

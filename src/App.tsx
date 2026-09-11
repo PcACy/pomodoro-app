@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
-import { Moon, PictureInPicture2, Settings as SettingsIcon, Sun } from 'lucide-react'
+import { Moon, Settings as SettingsIcon, Sun } from 'lucide-react'
 import { useSettings } from './hooks/useSettings'
 import { useLocalState } from './hooks/useLocalState'
 import { useSessions } from './hooks/useSessions'
@@ -9,7 +9,6 @@ import { useKeyboard } from './hooks/useKeyboard'
 import { DocumentChrome } from './hooks/useDocumentChrome'
 import { useTheme } from './hooks/useTheme'
 import { useServiceWorker } from './hooks/useServiceWorker'
-import { usePictureInPicture } from './hooks/usePictureInPicture'
 import { useWakeLock } from './hooks/useWakeLock'
 import { useNotificationActions } from './hooks/useNotificationActions'
 import { useTodos } from './hooks/useTodos'
@@ -21,7 +20,6 @@ import { requestNotificationPermission } from './lib/notify'
 import { playMicroClick } from './lib/sound'
 import { STORAGE_KEYS, type Session, type Settings, type TimerMode } from './types'
 import { Timer } from './components/Timer'
-import { PipTimer, PipCanvas } from './components/PipTimer'
 import { CatLogo } from './components/CatLogo'
 import { StatusBar } from './components/StatusBar'
 import { BentoCockpit, type BentoCockpitRef } from './components/cockpit/BentoCockpit'
@@ -250,8 +248,6 @@ export default function App() {
   const isRunning = chromeStatus === 'running'
 
   const { updateAvailable, reload } = useServiceWorker()
-  const { pipWindow, isSupported: pipSupported, open: openPip, close: closePip, mode: pipMode, canvasRef, videoRef } =
-    usePictureInPicture()
 
   useWakeLock(chromeStatus === 'running')
 
@@ -274,11 +270,6 @@ export default function App() {
   const handleImportSettings = useCallback((s: unknown) => {
     if (s && typeof s === 'object') updateSettings(() => s as Settings)
   }, [updateSettings])
-
-  const handlePipToggle = useCallback(() => {
-    if (pipMode !== 'none') closePip()
-    else void openPip()
-  }, [pipMode, closePip, openPip])
 
   const syncNow = sync.sync
   const handleSyncNow = useCallback(() => void syncNow(true), [syncNow])
@@ -391,24 +382,7 @@ export default function App() {
 
         {/* Right: Exclusively Global Utilities and System Controls */}
         <div className="flex items-center gap-1.5 sm:gap-2 font-mono text-xs shrink-0">
-          {/* 1. Picture-in-Picture Button */}
-          {pipSupported && (
-            <button
-              type="button"
-              onClick={handlePipToggle}
-              title={pipMode !== 'none' ? 'Close PiP' : 'Picture-in-Picture'}
-              aria-label="Picture-in-Picture"
-              className={`flex items-center justify-center h-8 w-8 rounded-full border transition-colors cursor-pointer ${
-                pipMode !== 'none'
-                  ? 'border-accent bg-surface-raised text-accent'
-                  : 'border-line bg-surface hover:border-fg/40 text-muted hover:text-fg'
-              }`}
-            >
-              <PictureInPicture2 size={14} />
-            </button>
-          )}
-
-          {/* 2. Dark / Light Mode Toggle */}
+          {/* 1. Dark / Light Mode Toggle */}
           <button
             type="button"
             onClick={() => {
@@ -537,9 +511,6 @@ export default function App() {
               onToggle={handleToggle}
               onSkip={handleSkip}
               onReset={handleReset}
-              pipSupported={false}
-              pipOpen={pipMode !== 'none'}
-              onPipToggle={handlePipToggle}
               isZenMode={isZenMode}
               onToggleZen={handleToggleZen}
             />
@@ -565,30 +536,6 @@ export default function App() {
           [{toast.message}]
         </div>
       )}
-
-      <PipTimer
-        mode={pipMode}
-        pipWindow={pipWindow}
-        phase={chromePhase}
-        phaseLabel={mode === 'flow' ? 'Flow' : timer.phaseLabel}
-        status={chromeStatus}
-        isFlow={mode === 'flow'}
-        activeTodo={sessionTask}
-        onToggle={handleToggle}
-        onSkip={handleSkip}
-      />
-
-      <div className="fixed -left-[9999px] -top-[9999px] pointer-events-none opacity-0" aria-hidden="true">
-        <canvas ref={canvasRef} width={480} height={320} style={{ width: 240, height: 160 }} />
-        <video ref={videoRef} muted playsInline autoPlay style={{ width: 240, height: 160 }} />
-      </div>
-      <PipCanvas
-        canvasRef={canvasRef}
-        phaseLabel={mode === 'flow' ? 'Flow' : timer.phaseLabel}
-        status={chromeStatus}
-        isFlow={mode === 'flow'}
-        enabled={pipMode === 'video'}
-      />
 
       {pendingSessionId != null && (
         <Suspense fallback={null}>

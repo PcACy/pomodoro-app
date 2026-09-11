@@ -1,5 +1,4 @@
 import { memo, useCallback } from 'react'
-import { PictureInPicture2 } from 'lucide-react'
 import type { TimerStatus, TimerMode } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
 import { playMicroClick } from '../lib/sound'
@@ -22,9 +21,6 @@ interface Props {
   onToggle: () => void
   onSkip: () => void
   onReset: () => void
-  pipSupported: boolean
-  pipOpen: boolean
-  onPipToggle: () => void
   isZenMode?: boolean
   onToggleZen?: () => void
   borderless?: boolean
@@ -53,9 +49,6 @@ export const Timer = memo(function Timer({
   onToggle,
   onSkip,
   onReset,
-  pipSupported,
-  pipOpen,
-  onPipToggle,
   isZenMode = false,
   onToggleZen,
   borderless = false,
@@ -307,30 +300,6 @@ export const Timer = memo(function Timer({
           ESC: EXIT ZEN
         </button>
       </div>
-
-      {/* PiP Button (only in standard bordered mode, never in Zen/borderless mode) */}
-      {!isZenMode && !borderless && pipSupported && (
-        <div className="group/pip absolute bottom-3 right-3 z-10">
-          <button
-            type="button"
-            onClick={onPipToggle}
-            aria-label={pipOpen ? t.pip.close : t.pip.open}
-            className={`rounded-full p-2 border transition-all duration-200 ${
-              pipOpen
-                ? 'border-accent bg-accent/15 text-accent opacity-100'
-                : 'border-line text-muted opacity-60 hover:opacity-100 hover:text-fg hover:border-fg'
-            }`}
-          >
-            <PictureInPicture2 size={15} />
-          </button>
-          <span
-            role="tooltip"
-            className="pointer-events-none absolute bottom-full right-0 mb-2 whitespace-nowrap rounded-sm border border-line bg-surface px-2 py-1 font-mono text-[10px] uppercase text-fg opacity-0 transition-opacity duration-150 group-hover/pip:opacity-100"
-          >
-            {pipOpen ? t.pip.close : t.pip.open}
-          </span>
-        </div>
-      )}
     </section>
   )
 })

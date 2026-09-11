@@ -22,7 +22,7 @@ const TAB_INSTANCE_ID = Math.random().toString(36).slice(2, 9)
 // interleaved stale and fresh states.
 let broadcastSeq = 0
 // Last applied seq per sender tab; bounded below to avoid unbounded growth
-// from short-lived tabs (e.g. repeatedly opened PiP/refresh cycles).
+// from short-lived tabs (e.g. repeatedly opened tabs/refresh cycles).
 const lastSeqBySender = new Map<string, number>()
 
 let channel: BroadcastChannel | null = null
