@@ -7,7 +7,7 @@ import { playMicroClick } from '../../lib/sound'
 
 interface SystemStatusCardProps {
   sessions: Session[]
-  onOpenAnalyticsModal?: () => void
+  onOpenActivityLog?: () => void
   className?: string
 }
 
@@ -15,7 +15,7 @@ const WEEK_DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
 export const SystemStatusCard = memo(function SystemStatusCard({
   sessions = [],
-  onOpenAnalyticsModal,
+  onOpenActivityLog,
   className = '',
 }: SystemStatusCardProps) {
   const streak = currentStreakDays(sessions)
@@ -56,10 +56,10 @@ export const SystemStatusCard = memo(function SystemStatusCard({
           onClick={(e) => {
             e.stopPropagation()
             playMicroClick('tap')
-            onOpenAnalyticsModal?.()
+            onOpenActivityLog?.()
           }}
           className="font-sans text-xs text-muted/90 hover:text-fg font-medium transition-colors cursor-pointer py-1 px-1.5"
-          title="Open detailed analytics"
+          title="Open activity log"
         >
           Stats ↗
         </button>

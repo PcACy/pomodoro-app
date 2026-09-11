@@ -6,7 +6,7 @@ import { playMicroClick } from '../../lib/sound'
 
 interface SessionLogCardProps {
   sessions: Session[]
-  onOpenAnalyticsModal: () => void
+  onOpenActivityLog?: () => void
   className?: string
 }
 
@@ -17,7 +17,7 @@ function formatSessionTime(timestamp: number): string {
 
 export const SessionLogCard = memo(function SessionLogCard({
   sessions,
-  onOpenAnalyticsModal,
+  onOpenActivityLog,
   className = '',
 }: SessionLogCardProps) {
   const { todaySessions, totalMinutesToday } = useMemo(() => {
@@ -50,7 +50,7 @@ export const SessionLogCard = memo(function SessionLogCard({
           type="button"
           onClick={() => {
             playMicroClick('tap')
-            onOpenAnalyticsModal()
+            onOpenActivityLog?.()
           }}
           className="font-sans text-[11px] font-medium px-2.5 py-1 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors flex items-center gap-1 cursor-pointer select-none active:scale-95"
         >
@@ -112,7 +112,7 @@ export const SessionLogCard = memo(function SessionLogCard({
             type="button"
             onClick={() => {
               playMicroClick('tap')
-              onOpenAnalyticsModal()
+              onOpenActivityLog?.()
             }}
             className="mt-1 shrink-0 text-center font-sans text-xs text-muted hover:text-fg py-1 cursor-pointer transition-colors"
           >

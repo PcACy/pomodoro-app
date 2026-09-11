@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
-import { BarChart3, Moon, PictureInPicture2, Settings as SettingsIcon, Sun } from 'lucide-react'
+import { Moon, PictureInPicture2, Settings as SettingsIcon, Sun } from 'lucide-react'
 import { useSettings } from './hooks/useSettings'
 import { useLocalState } from './hooks/useLocalState'
 import { useSessions } from './hooks/useSessions'
@@ -24,23 +24,41 @@ import { Timer } from './components/Timer'
 import { PipTimer, PipCanvas } from './components/PipTimer'
 import { CatLogo } from './components/CatLogo'
 import { StatusBar } from './components/StatusBar'
-import { BentoCockpit } from './components/cockpit/BentoCockpit'
+import { BentoCockpit, type BentoCockpitRef } from './components/cockpit/BentoCockpit'
 import { TodoManagerModal } from './components/cockpit/TodoManagerModal'
-import { AnalyticsModal } from './components/cockpit/AnalyticsModal'
 import { SettingsModal } from './components/cockpit/SettingsModal'
 
 const ReflectionModal = lazy(() => import('./components/ReflectionModal').then((m) => ({ default: m.ReflectionModal })))
+
+function formatSystemClock(d: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
 
 export default function App() {
   const { t } = useTranslation()
   const [colorMode, setColorMode, themeId, setThemeId] = useTheme()
   const [settings, updateSettings] = useSettings()
   const [isTodoModalOpen, setIsTodoModalOpen] = useState(false)
-  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [isZenMode, setIsZenMode] = useState(false)
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null)
   const [mode, setMode] = useLocalState<TimerMode>(STORAGE_KEYS.mode, 'pomodoro')
+  const [activeDeck, setActiveDeck] = useState<number>(0)
+  const cockpitRef = useRef<BentoCockpitRef>(null)
+  const [systemTime, setSystemTime] = useState(() => formatSystemClock(new Date()))
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSystemTime(formatSystemClock(new Date()))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const handleSelectDeck = useCallback((deck: number) => {
+    setActiveDeck(deck)
+    cockpitRef.current?.scrollToDeck(deck)
+  }, [])
   const [activeTodoId, setActiveTodoId] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; id: number } | null>(null)
   const toastTimer = useRef<number | null>(null)
@@ -213,7 +231,7 @@ export default function App() {
   }, [])
 
   const isModalOpen =
-    isSettingsModalOpen || isAnalyticsModalOpen || isTodoModalOpen || pendingSessionId != null
+    isSettingsModalOpen || isTodoModalOpen || pendingSessionId != null
 
   useKeyboard(
     {
@@ -299,22 +317,74 @@ export default function App() {
         {liveAnnouncement.message}
       </div>
 
-      <header className="flex w-full h-10 shrink-0 items-center justify-between gap-3 px-1 mb-1 sm:mb-2">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors">
-            <CatLogo
-              className="text-fg"
-              size={18}
-              state={isRunning ? chromePhase : 'idle'}
-            />
+      <header className="flex w-full h-10 shrink-0 items-center justify-between gap-2 sm:gap-4 px-1 mb-1 sm:mb-2 select-none">
+        {/* Left: Logo + 3-Deck Switcher */}
+        <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors shrink-0">
+              <CatLogo
+                className="text-fg"
+                size={18}
+                state={isRunning ? chromePhase : 'idle'}
+              />
+            </div>
+            <div className="hidden sm:flex items-center font-mono">
+              <h1 className="text-sm font-bold tracking-widest uppercase text-fg">Pomau</h1>
+            </div>
           </div>
-          <div className="flex items-center font-mono">
-            <h1 className="text-sm font-bold tracking-widest uppercase text-fg">Pomau</h1>
-          </div>
+
+          {/* 3-Deck Switcher [ 01 FOCUS // 02 TASKS // 03 STATS ] */}
+          <nav aria-label="Deck Switcher" className="flex items-center gap-1 font-mono text-[10px] sm:text-[11px] tracking-wider uppercase">
+            <button
+              type="button"
+              onClick={() => handleSelectDeck(0)}
+              className={`px-2 sm:px-2.5 py-0.5 rounded-full transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
+                activeDeck === 0
+                  ? 'bg-fg text-canvas font-bold shadow-sm'
+                  : 'text-muted hover:text-fg hover:bg-fg/5'
+              }`}
+              aria-pressed={activeDeck === 0}
+              title="Focus Deck (01)"
+            >
+              <span className="text-[9px] opacity-70">01</span>
+              <span className="hidden xs:inline">Focus</span>
+            </button>
+            <span className="text-muted/30 select-none">//</span>
+            <button
+              type="button"
+              onClick={() => handleSelectDeck(1)}
+              className={`px-2 sm:px-2.5 py-0.5 rounded-full transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
+                activeDeck === 1
+                  ? 'bg-fg text-canvas font-bold shadow-sm'
+                  : 'text-muted hover:text-fg hover:bg-fg/5'
+              }`}
+              aria-pressed={activeDeck === 1}
+              title="Tasks Deck (02)"
+            >
+              <span className="text-[9px] opacity-70">02</span>
+              <span className="hidden xs:inline">Tasks</span>
+            </button>
+            <span className="text-muted/30 select-none">//</span>
+            <button
+              type="button"
+              onClick={() => handleSelectDeck(2)}
+              className={`px-2 sm:px-2.5 py-0.5 rounded-full transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
+                activeDeck === 2
+                  ? 'bg-fg text-canvas font-bold shadow-sm'
+                  : 'text-muted hover:text-fg hover:bg-fg/5'
+              }`}
+              aria-pressed={activeDeck === 2}
+              title="Stats Deck (03)"
+            >
+              <span className="text-[9px] opacity-70">03</span>
+              <span className="hidden xs:inline">Stats</span>
+            </button>
+          </nav>
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-xs">
-          {/* Picture-in-Picture Button */}
+        {/* Right: Exclusively Global Utilities and System Controls */}
+        <div className="flex items-center gap-1.5 sm:gap-2 font-mono text-xs shrink-0">
+          {/* 1. Picture-in-Picture Button */}
           {pipSupported && (
             <button
               type="button"
@@ -331,7 +401,7 @@ export default function App() {
             </button>
           )}
 
-          {/* Dark / Light Mode Toggle */}
+          {/* 2. Dark / Light Mode Toggle */}
           <button
             type="button"
             onClick={() => {
@@ -346,22 +416,7 @@ export default function App() {
             {colorMode === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
           </button>
 
-          {/* Analytics Modal Trigger */}
-          <button
-            type="button"
-            onClick={() => {
-              playMicroClick('tab')
-              setIsAnalyticsModalOpen(true)
-            }}
-            title={t.nav.statistics}
-            aria-label={t.nav.statistics}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-line bg-surface hover:border-fg/40 text-muted hover:text-fg uppercase tracking-wider transition-colors cursor-pointer text-[11px]"
-          >
-            <BarChart3 size={13} />
-            <span className="hidden md:inline">{t.nav.statistics}</span>
-          </button>
-
-          {/* Settings Modal Trigger */}
+          {/* 3. Settings Modal Trigger */}
           <button
             type="button"
             onClick={() => {
@@ -370,17 +425,31 @@ export default function App() {
             }}
             title={t.nav.settings}
             aria-label={t.nav.settings}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-line bg-surface hover:border-fg/40 text-muted hover:text-fg uppercase tracking-wider transition-colors cursor-pointer text-[11px]"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full border border-line bg-surface hover:border-fg/40 text-muted hover:text-fg uppercase tracking-wider transition-colors cursor-pointer text-[11px]"
           >
             <SettingsIcon size={13} />
             <span className="hidden md:inline">{t.nav.settings}</span>
           </button>
+
+          {/* 4. Minimalist Digital Clock (HH:mm:ss) + Hardware Status LED */}
+          <div className="flex items-center gap-2 pl-1.5 sm:pl-2.5 border-l border-line/60 select-none">
+            <span className="font-mono text-[10px] sm:text-[11px] text-neutral-600 dark:text-neutral-400 tracking-wider tabular-nums font-medium">
+              {systemTime}
+            </span>
+            <span
+              className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                isRunning ? 'bg-accent animate-pulse' : 'bg-line'
+              }`}
+              title={isRunning ? 'Recording' : 'Standby'}
+            />
+          </div>
         </div>
       </header>
 
       <main className="flex w-full flex-1 min-h-0 flex-col items-stretch overflow-hidden">
         {!isZenMode && (
           <BentoCockpit
+            ref={cockpitRef}
             phaseLabel={timer.phaseLabel}
             status={timer.status}
             time={timer.time}
@@ -406,9 +475,11 @@ export default function App() {
             onTodoRemove={handleTodoRemove}
             onOpenTodoManager={() => setIsTodoModalOpen(true)}
             sessions={sessions}
+            onImportSettings={handleImportSettings}
             settings={settings}
             onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
-            onOpenAnalyticsModal={() => setIsAnalyticsModalOpen(true)}
+            activeDeck={activeDeck}
+            onDeckChange={setActiveDeck}
             isZenMode={isZenMode}
             onToggleZen={handleToggleZen}
           />
@@ -531,16 +602,6 @@ export default function App() {
         onEdit={todosApi.edit}
         onRemove={handleTodoRemove}
         onFocus={handleFocusTodoFromModal}
-      />
-
-      <AnalyticsModal
-        isOpen={isAnalyticsModalOpen}
-        onClose={() => setIsAnalyticsModalOpen(false)}
-        sessions={sessions}
-        settings={settings}
-        colorMode={colorMode}
-        todos={todosApi.todos}
-        onImportSettings={handleImportSettings}
       />
 
       <SettingsModal

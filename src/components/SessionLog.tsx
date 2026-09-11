@@ -12,9 +12,10 @@ import { playMicroClick } from '../lib/sound'
 interface Props {
   sessions: Session[]
   todos: TodoItem[]
-  title: string
+  title?: string
   onClear: () => void
   onImportSettings: (s: unknown) => void
+  className?: string
 }
 
 const SessionRow = memo(function SessionRow({ s, locale }: { s: Session; locale: string }) {
@@ -80,7 +81,14 @@ const SessionRow = memo(function SessionRow({ s, locale }: { s: Session; locale:
   )
 })
 
-export const SessionLog = memo(function SessionLog({ sessions, todos, title, onClear, onImportSettings }: Props) {
+export const SessionLog = memo(function SessionLog({
+  sessions,
+  todos,
+  title,
+  onClear,
+  onImportSettings,
+  className = '',
+}: Props) {
   const { t, lang } = useTranslation()
   const locale = lang === 'de' ? 'de-DE' : 'en-GB'
   const [query, setQuery] = useState('')
@@ -180,13 +188,19 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
   }
 
   return (
-    <div className="flex flex-col gap-3 font-mono select-none">
-      <div className="flex flex-wrap items-center justify-between gap-2.5 pb-1 border-b border-line/60">
-        <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
-          <h3 className="text-xs font-bold uppercase tracking-widest text-fg">{title}</h3>
-          <span className="text-[10px] text-muted tracking-wider">[{filtered.length} ENTRIES]</span>
-        </div>
+    <div className={`flex flex-col gap-2.5 sm:gap-3 font-mono select-none h-full min-h-0 ${className}`}>
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-1 border-b border-line/60 shrink-0">
+        {title ? (
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
+            <h3 className="text-xs font-bold uppercase tracking-widest text-fg">{title}</h3>
+            <span className="text-[10px] text-muted tracking-wider">[{filtered.length} ENTRIES]</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-muted tracking-wider uppercase">[{filtered.length} SESSIONS RECORDED]</span>
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -330,9 +344,9 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
           </p>
         </div>
       ) : (
-        <div className="flex flex-col w-full overflow-x-auto [scrollbar-width:thin]">
+        <div className="flex-1 min-h-0 flex flex-col w-full overflow-x-auto [scrollbar-width:thin]">
           {/* Telemetry Column Headers */}
-          <div className="flex items-center gap-2.5 px-2 py-1.5 border-b border-line/50 text-[9px] uppercase tracking-wider text-muted font-bold min-w-[540px]">
+          <div className="flex items-center gap-2.5 px-2 py-1.5 border-b border-line/50 text-[9px] uppercase tracking-wider text-muted font-bold min-w-[540px] shrink-0">
             <span className="w-24 sm:w-28 shrink-0">TIMESTAMP</span>
             <span className="w-14 shrink-0">DURATION</span>
             <span className="w-12 sm:w-14 shrink-0">MODE</span>
@@ -341,7 +355,7 @@ export const SessionLog = memo(function SessionLog({ sessions, todos, title, onC
             <span className="w-16 shrink-0 text-right">STATUS</span>
           </div>
 
-          <ul className="max-h-80 divide-y divide-line/30 overflow-y-auto min-w-[540px]">
+          <ul className="flex-1 min-h-0 divide-y divide-line/30 overflow-y-auto min-w-[540px] [scrollbar-width:thin]">
             {filtered.map((s) => (
               <SessionRow key={s.id} s={s} locale={locale} />
             ))}
