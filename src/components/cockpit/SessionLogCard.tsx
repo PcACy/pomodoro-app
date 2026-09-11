@@ -68,9 +68,8 @@ export const SessionLogCard = memo(function SessionLogCard({
       {todaySessions.length === 0 ? (
         <div className="flex-1 min-h-0 flex flex-col items-center justify-center py-6 px-4 my-auto border border-dashed border-line/60 rounded-2xl text-center select-none">
           {/* Technical Telemetry Status */}
-          <div className="flex items-center gap-2 font-mono text-[11px] font-bold tracking-widest text-muted uppercase mb-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-            <span>// TELEMETRY STANDBY</span>
+          <div className="font-mono text-[11px] font-bold tracking-widest text-muted uppercase mb-1">
+            // TELEMETRY STANDBY
           </div>
 
           <p className="font-sans text-xs text-muted/70 max-w-[240px] mb-4">
