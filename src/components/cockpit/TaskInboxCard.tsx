@@ -236,7 +236,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
             </p>
 
             {/* Keyboard Shortcuts Hint Bar */}
-            <div className="flex flex-wrap items-center justify-center gap-2 font-mono text-[10px] text-muted mb-5">
+            <div className="flex flex-wrap items-center justify-center gap-2 font-mono text-[10px] text-muted">
               <span className="flex items-center gap-1">
                 <kbd className="px-1.5 py-0.5 rounded border border-line bg-surface text-fg font-semibold shadow-xs">↵</kbd>
                 <span>Add Task</span>
@@ -251,33 +251,6 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                 <kbd className="px-1.5 py-0.5 rounded border border-line bg-surface text-fg font-semibold shadow-xs">1</kbd>
                 <span>Focus</span>
               </span>
-            </div>
-
-            {/* Quick Starter Chips */}
-            <div className="flex flex-col items-center gap-1.5 w-full max-w-[320px]">
-              <span className="font-mono text-[9px] uppercase tracking-wider text-muted/60">
-                Quick Start Templates
-              </span>
-              <div className="flex flex-wrap items-center justify-center gap-1.5">
-                {[
-                  { title: 'Deep Work Session', tag: 'focus' },
-                  { title: 'Code Review & Audit', tag: 'code' },
-                  { title: 'Admin & Inbox Zero', tag: 'admin' },
-                ].map((preset) => (
-                  <button
-                    key={preset.title}
-                    type="button"
-                    onClick={() => {
-                      playMicroClick('pop')
-                      onAdd(preset.title, preset.tag)
-                    }}
-                    className="font-mono text-[10px] px-2.5 py-1 rounded-full border border-line bg-surface hover:border-fg/40 hover:bg-canvas text-muted hover:text-fg transition-all cursor-pointer active:scale-95"
-                    title={`Create task: "${preset.title}"`}
-                  >
-                    + {preset.title}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
         ) : (
