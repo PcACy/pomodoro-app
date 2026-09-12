@@ -1,4 +1,4 @@
-import { forwardRef, memo, useState, useRef, useCallback, useEffect, useImperativeHandle, useMemo, startTransition } from 'react'
+import { forwardRef, memo, useState, useRef, useCallback, useEffect, useImperativeHandle, useMemo } from 'react'
 import type { Session, Settings, TimerMode, TimerStatus, TodoItem } from '../../types'
 import { HeroTimerCard } from './HeroTimerCard'
 import { GoalLoadCard } from './GoalLoadCard'
@@ -119,6 +119,7 @@ export const BentoCockpit = memo(
     const activeScreenRef = useRef(activeScreen)
     activeScreenRef.current = activeScreen
     const prevWidthRef = useRef<number>(0)
+    const prevPropDeckRef = useRef<number>(activeDeck)
 
     // Smoothly scrolls to target deck (0: Focus Deck, 1: Tasks Deck, 2: Stats Deck)
     const scrollToScreen = useCallback(
@@ -126,28 +127,49 @@ export const BentoCockpit = memo(
         const scroller = scrollerRef.current
         if (!scroller) return
         const clampedIndex = Math.max(0, Math.min(2, index))
-        isProgrammaticScrollRef.current = true
+        prevPropDeckRef.current = clampedIndex
         playMicroClick('toggle')
         setActiveScreen(clampedIndex)
         onDeckChange?.(clampedIndex)
         if (subView) {
           setStatsSubView(subView)
         }
+
+        const targetLeft = clampedIndex * scroller.clientWidth
+        // If already aligned to target position, exit cleanly and ensure snapping is active
+        if (Math.abs(scroller.scrollLeft - targetLeft) < 2) {
+          scroller.style.scrollSnapType = ''
+          isProgrammaticScrollRef.current = false
+          return
+        }
+
+        isProgrammaticScrollRef.current = true
         // Temporarily disable CSS scroll snapping during programmatic scroll
         // so the browser engine does not fight smooth scrolling halfway.
         scroller.style.scrollSnapType = 'none'
         scroller.scrollTo({
-          left: clampedIndex * scroller.clientWidth,
+          left: targetLeft,
           behavior: 'smooth',
         })
+
+        let settled = false
         const onScrollEnd = () => {
+          if (settled) return
+          settled = true
           scroller.style.scrollSnapType = ''
           isProgrammaticScrollRef.current = false
         }
+
+        const timerId = window.setTimeout(onScrollEnd, 450)
         if ('onscrollend' in window) {
-          scroller.addEventListener('scrollend', onScrollEnd, { once: true })
-        } else {
-          setTimeout(onScrollEnd, 450)
+          scroller.addEventListener(
+            'scrollend',
+            () => {
+              window.clearTimeout(timerId)
+              onScrollEnd()
+            },
+            { once: true },
+          )
         }
       },
       [onDeckChange],
@@ -195,6 +217,31 @@ export const BentoCockpit = memo(
       touchStartRef.current = null
     }, [])
 
+    // Trackpad swipe and mouse wheel horizontal navigation
+    const handleWheel = useCallback(
+      (e: React.WheelEvent<HTMLDivElement>) => {
+        const scroller = scrollerRef.current
+        if (!scroller || isProgrammaticScrollRef.current) return
+
+        // If the gesture is horizontal (trackpad swipe or Shift+Wheel), let native overflow-x handle it
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 5) {
+          return
+        }
+
+        // If user rolls standard vertical mouse wheel over non-scrollable parts of the cockpit
+        const target = e.target as HTMLElement | null
+        const scrollableParent = target?.closest('.overflow-y-auto')
+        if (!scrollableParent && Math.abs(e.deltaY) > 25) {
+          if (e.deltaY > 0 && activeScreenRef.current < 2) {
+            scrollToScreen(activeScreenRef.current + 1)
+          } else if (e.deltaY < 0 && activeScreenRef.current > 0) {
+            scrollToScreen(activeScreenRef.current - 1)
+          }
+        }
+      },
+      [scrollToScreen],
+    )
+
     // Expose imperative API for external control (e.g. from topbar or deep links)
     useImperativeHandle(
       ref,
@@ -209,28 +256,30 @@ export const BentoCockpit = memo(
       [scrollToScreen],
     )
 
-    // Sync from activeDeck prop when changed outside
+    // Sync from activeDeck prop ONLY when changed from an external parent update
     useEffect(() => {
-      if (activeDeck !== undefined && activeDeck !== activeScreen && !isProgrammaticScrollRef.current) {
-        scrollToScreen(activeDeck)
+      if (activeDeck !== undefined && activeDeck !== prevPropDeckRef.current) {
+        prevPropDeckRef.current = activeDeck
+        if (activeDeck !== activeScreenRef.current) {
+          scrollToScreen(activeDeck)
+        }
       }
-    }, [activeDeck, activeScreen, scrollToScreen])
+    }, [activeDeck, scrollToScreen])
 
-    // Sync activeScreen state on touch swipe / snap settle
+    // Sync activeScreen state on touch swipe / trackpad / snap settle
     const handleScroll = useCallback(() => {
       const scroller = scrollerRef.current
       if (!scroller || isProgrammaticScrollRef.current) return
       const width = scroller.clientWidth
       if (width > 0) {
         const pageIndex = Math.round(scroller.scrollLeft / width)
-        if (pageIndex !== activeScreen && pageIndex >= 0 && pageIndex <= 2) {
+        if (pageIndex !== activeScreenRef.current && pageIndex >= 0 && pageIndex <= 2) {
+          prevPropDeckRef.current = pageIndex
           setActiveScreen(pageIndex)
-          startTransition(() => {
-            onDeckChange?.(pageIndex)
-          })
+          onDeckChange?.(pageIndex)
         }
       }
-    }, [activeScreen, onDeckChange])
+    }, [onDeckChange])
 
     // Keep scroll position aligned to activeScreen only when container actually resizes
     useEffect(() => {
@@ -316,6 +365,7 @@ export const BentoCockpit = memo(
         <div
           ref={scrollerRef}
           onScroll={handleScroll}
+          onWheel={handleWheel}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           onTouchCancel={handleTouchCancel}
