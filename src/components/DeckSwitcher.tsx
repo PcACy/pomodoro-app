@@ -27,12 +27,12 @@ export const DeckSwitcher = memo(function DeckSwitcher({
             <button
               type="button"
               onClick={() => onSelectDeck(deck.id)}
-              className="relative flex items-center justify-center min-h-[44px] min-w-[36px] sm:min-w-[40px] px-0.5 cursor-pointer outline-none select-none group focus-visible:ring-1 focus-visible:ring-fg/50 rounded-full"
+              className="relative flex items-center min-h-[44px] px-0.5 cursor-pointer outline-none select-none group focus-visible:ring-1 focus-visible:ring-fg/50 rounded-full active:scale-95 transition-transform duration-150"
               aria-pressed={isActive}
               title={`${deck.label} Deck (${deck.num})`}
             >
               <div
-                className={`flex items-center rounded-full font-mono font-semibold tracking-wider uppercase text-[10px] sm:text-[11px] px-2.5 py-1 transition-[background-color,color,box-shadow] duration-200 ease-out will-change-[background-color,color] ${
+                className={`flex items-center rounded-full font-mono font-semibold tracking-wider uppercase text-[10px] sm:text-[11px] px-2.5 py-1 transition-[background-color,color,box-shadow] duration-240 ease-[cubic-bezier(0.25,1,0.5,1)] will-change-[background-color,color] ${
                   isActive
                     ? 'bg-fg text-canvas shadow-sm ring-1 ring-fg/10'
                     : 'text-muted hover:text-fg hover:bg-fg/5'
@@ -40,10 +40,10 @@ export const DeckSwitcher = memo(function DeckSwitcher({
               >
                 <span className="tabular-nums opacity-90">{deck.num}</span>
                 <span
-                  className={`inline-block overflow-hidden whitespace-nowrap transition-[max-width,opacity,padding] duration-200 ease-out will-change-[max-width,opacity] transform-gpu motion-reduce:transition-none ${
+                  className={`inline-block overflow-hidden whitespace-nowrap will-change-[max-width,opacity,transform] transform-gpu motion-reduce:transition-none ${
                     isActive
-                      ? 'max-w-[70px] opacity-100 pl-1.5'
-                      : 'max-w-0 opacity-0 pl-0 pointer-events-none'
+                      ? 'max-w-[44px] opacity-100 translate-x-0 pl-1.5 transition-[max-width,opacity,transform] duration-240 ease-[cubic-bezier(0.25,1,0.5,1)]'
+                      : 'max-w-0 opacity-0 -translate-x-1 pl-0 pointer-events-none transition-[max-width,opacity,transform] duration-200 ease-in-out'
                   }`}
                   aria-hidden={!isActive}
                 >
@@ -57,4 +57,3 @@ export const DeckSwitcher = memo(function DeckSwitcher({
     </nav>
   )
 })
-
