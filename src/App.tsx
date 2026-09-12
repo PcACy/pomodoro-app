@@ -511,8 +511,6 @@ export default function App() {
         status={chromeStatus}
         task={sessionTask}
         tag={sessionTag}
-        completedRounds={timer.completedFocusInCycle}
-        totalRounds={settings.phases.roundsBeforeLongBreak}
         syncStatus={sync.status}
       />
     </div>
