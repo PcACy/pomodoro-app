@@ -1,4 +1,4 @@
-import { forwardRef, memo, useState, useRef, useCallback, useEffect, useImperativeHandle, useMemo } from 'react'
+import { forwardRef, memo, useState, useRef, useCallback, useEffect, useImperativeHandle, useMemo, startTransition } from 'react'
 import type { Session, Settings, TimerMode, TimerStatus, TodoItem } from '../../types'
 import { HeroTimerCard } from './HeroTimerCard'
 import { GoalLoadCard } from './GoalLoadCard'
@@ -225,7 +225,9 @@ export const BentoCockpit = memo(
         const pageIndex = Math.round(scroller.scrollLeft / width)
         if (pageIndex !== activeScreen && pageIndex >= 0 && pageIndex <= 2) {
           setActiveScreen(pageIndex)
-          onDeckChange?.(pageIndex)
+          startTransition(() => {
+            onDeckChange?.(pageIndex)
+          })
         }
       }
     }, [activeScreen, onDeckChange])
@@ -482,9 +484,9 @@ export const BentoCockpit = memo(
                     playMicroClick('toggle')
                     setStatsSubView('overview')
                   }}
-                  className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-2.5 py-0.5 rounded-full font-semibold transition-[background-color,color] duration-150 ease-out cursor-pointer flex items-center gap-1.5 ${
                     statsSubView === 'overview'
-                      ? 'bg-fg text-canvas font-bold shadow-sm'
+                      ? 'bg-fg text-canvas shadow-sm'
                       : 'text-muted hover:text-fg hover:bg-fg/5'
                   }`}
                   aria-pressed={statsSubView === 'overview'}
@@ -493,16 +495,16 @@ export const BentoCockpit = memo(
                   <span className="text-[9px] opacity-70">01</span>
                   <span>Overview</span>
                 </button>
-                <span className="text-muted/30 select-none">//</span>
+                <span className="text-muted/30 select-none">·</span>
                 <button
                   type="button"
                   onClick={() => {
                     playMicroClick('toggle')
                     setStatsSubView('log')
                   }}
-                  className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-2.5 py-0.5 rounded-full font-semibold transition-[background-color,color] duration-150 ease-out cursor-pointer flex items-center gap-1.5 ${
                     statsSubView === 'log'
-                      ? 'bg-fg text-canvas font-bold shadow-sm'
+                      ? 'bg-fg text-canvas shadow-sm'
                       : 'text-muted hover:text-fg hover:bg-fg/5'
                   }`}
                   aria-pressed={statsSubView === 'log'}
@@ -607,31 +609,21 @@ export const BentoCockpit = memo(
         </div>
 
         {/* 3. Bottom Pagination Indicator (Nothing OS Pill & Dots) */}
-        <div className="h-6 shrink-0 flex items-center justify-center gap-2 pt-1 select-none">
-          <button
-            type="button"
-            onClick={() => scrollToScreen(0)}
-            aria-label="Screen 1: Focus Deck"
-            className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-              activeScreen === 0 ? 'w-5 bg-fg' : 'w-1.5 bg-fg/25 hover:bg-fg/50'
-            }`}
-          />
-          <button
-            type="button"
-            onClick={() => scrollToScreen(1)}
-            aria-label="Screen 2: Tasks Deck"
-            className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-              activeScreen === 1 ? 'w-5 bg-fg' : 'w-1.5 bg-fg/25 hover:bg-fg/50'
-            }`}
-          />
-          <button
-            type="button"
-            onClick={() => scrollToScreen(2)}
-            aria-label="Screen 3: Stats Deck"
-            className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-              activeScreen === 2 ? 'w-5 bg-fg' : 'w-1.5 bg-fg/25 hover:bg-fg/50'
-            }`}
-          />
+        <div className="h-6 shrink-0 flex items-center justify-center gap-2 pt-1 select-none contain-paint">
+          {[0, 1, 2].map((idx) => {
+            const isActive = activeScreen === idx
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => scrollToScreen(idx)}
+                aria-label={`Screen ${idx + 1}`}
+                className={`h-1.5 rounded-full cursor-pointer transition-[width,background-color] duration-200 ease-out will-change-[width] transform-gpu motion-reduce:transition-none ${
+                  isActive ? 'w-5 bg-fg' : 'w-1.5 bg-fg/25 hover:bg-fg/50'
+                }`}
+              />
+            )
+          })}
         </div>
       </div>
     )

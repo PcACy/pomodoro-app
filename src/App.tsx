@@ -25,6 +25,7 @@ import { StatusBar } from './components/StatusBar'
 import { BentoCockpit, type BentoCockpitRef } from './components/cockpit/BentoCockpit'
 import { TodoManagerModal } from './components/cockpit/TodoManagerModal'
 import { SettingsModal } from './components/cockpit/SettingsModal'
+import { DeckSwitcher } from './components/DeckSwitcher'
 
 const ReflectionModal = lazy(() => import('./components/ReflectionModal').then((m) => ({ default: m.ReflectionModal })))
 
@@ -314,52 +315,8 @@ export default function App() {
             </div>
           </div>
 
-          {/* Morphing Pill 3-Deck Switcher */}
-          <nav
-            aria-label="Deck Switcher"
-            className="flex items-center gap-0.5 sm:gap-1 font-mono select-none shrink-0 min-w-[165px] sm:min-w-[180px]"
-          >
-            {[
-              { id: 0, num: '01', label: 'Focus' },
-              { id: 1, num: '02', label: 'Tasks' },
-              { id: 2, num: '03', label: 'Stats' },
-            ].map((deck) => {
-              const isActive = activeDeck === deck.id
-              return (
-                <div key={deck.id} className="flex items-center">
-                  <button
-                    type="button"
-                    onClick={() => handleSelectDeck(deck.id)}
-                    className="relative flex items-center justify-center min-h-[44px] min-w-[36px] sm:min-w-[40px] px-0.5 cursor-pointer outline-none select-none group"
-                    aria-pressed={isActive}
-                    title={`${deck.label} Deck (${deck.num})`}
-                  >
-                    <div
-                      className={`flex items-center rounded-full transition-all duration-300 ease-out font-mono tracking-wider uppercase text-[10px] sm:text-[11px] ${
-                        isActive
-                          ? 'bg-fg text-canvas font-bold px-2.5 sm:px-3 py-1 shadow-sm ring-1 ring-fg/10'
-                          : 'text-muted hover:text-fg hover:bg-fg/5 px-2 py-1'
-                      }`}
-                    >
-                      <span className={`tabular-nums ${isActive ? 'opacity-85' : 'opacity-90'}`}>
-                        {deck.num}
-                      </span>
-                      <span
-                        className={`inline-block overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${
-                          isActive
-                            ? 'max-w-[65px] opacity-100 ml-1.5'
-                            : 'max-w-0 opacity-0 ml-0'
-                        }`}
-                        aria-hidden={!isActive}
-                      >
-                        {deck.label}
-                      </span>
-                    </div>
-                  </button>
-                </div>
-              )
-            })}
-          </nav>
+          {/* High-Performance 3-Deck Pill Switcher */}
+          <DeckSwitcher activeDeck={activeDeck} onSelectDeck={handleSelectDeck} />
         </div>
 
         {/* Right: Exclusively Global Utilities and System Controls */}
