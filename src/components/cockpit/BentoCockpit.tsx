@@ -136,17 +136,13 @@ export const BentoCockpit = memo(
         }
 
         const targetLeft = clampedIndex * scroller.clientWidth
-        // If already aligned to target position, exit cleanly and ensure snapping is active
+        // If already aligned to target position, exit cleanly
         if (Math.abs(scroller.scrollLeft - targetLeft) < 2) {
-          scroller.style.scrollSnapType = ''
           isProgrammaticScrollRef.current = false
           return
         }
 
         isProgrammaticScrollRef.current = true
-        // Temporarily disable CSS scroll snapping during programmatic scroll
-        // so the browser engine does not fight smooth scrolling halfway.
-        scroller.style.scrollSnapType = 'none'
         scroller.scrollTo({
           left: targetLeft,
           behavior: 'smooth',
@@ -156,7 +152,6 @@ export const BentoCockpit = memo(
         const onScrollEnd = () => {
           if (settled) return
           settled = true
-          scroller.style.scrollSnapType = ''
           isProgrammaticScrollRef.current = false
         }
 
@@ -174,48 +169,6 @@ export const BentoCockpit = memo(
       },
       [onDeckChange],
     )
-
-    // Touch swipe gesture detector for horizontal deck switching on mobile devices
-    const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null)
-
-    const handleTouchStart = useCallback((e: React.TouchEvent) => {
-      if (e.touches.length === 1) {
-        touchStartRef.current = {
-          x: e.touches[0].clientX,
-          y: e.touches[0].clientY,
-          time: Date.now(),
-        }
-      }
-    }, [])
-
-    const handleTouchEnd = useCallback(
-      (e: React.TouchEvent) => {
-        const start = touchStartRef.current
-        touchStartRef.current = null
-        if (!start || e.changedTouches.length === 0) return
-
-        const deltaX = e.changedTouches[0].clientX - start.x
-        const deltaY = e.changedTouches[0].clientY - start.y
-        const elapsed = Date.now() - start.time
-
-        // Swipe requirement: horizontal distance >= 40px, predominantly horizontal (1.2x vertical), within 700ms
-        if (Math.abs(deltaX) >= 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2 && elapsed < 700) {
-          const current = activeScreenRef.current
-          if (deltaX < 0 && current < 2) {
-            // Swiped left -> Next deck
-            scrollToScreen(current + 1)
-          } else if (deltaX > 0 && current > 0) {
-            // Swiped right -> Previous deck
-            scrollToScreen(current - 1)
-          }
-        }
-      },
-      [scrollToScreen],
-    )
-
-    const handleTouchCancel = useCallback(() => {
-      touchStartRef.current = null
-    }, [])
 
     // Trackpad swipe and mouse wheel horizontal navigation
     const handleWheel = useCallback(
@@ -366,14 +319,10 @@ export const BentoCockpit = memo(
           ref={scrollerRef}
           onScroll={handleScroll}
           onWheel={handleWheel}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={handleTouchCancel}
-          className="w-full flex-1 min-h-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar overscroll-x-contain touch-manipulation"
+          className="w-full flex-1 min-h-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar overscroll-x-contain touch-pan-x"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
-            touchAction: 'pan-x pan-y',
             WebkitOverflowScrolling: 'touch',
           }}
         >
