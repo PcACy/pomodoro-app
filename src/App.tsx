@@ -506,8 +506,6 @@ export default function App() {
 
       {/* Dynamic Status Bar */}
       <StatusBar
-        colorMode={colorMode}
-        themeId={themeId}
         mode={mode}
         phase={chromePhase}
         status={chromeStatus}

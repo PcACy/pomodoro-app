@@ -657,24 +657,6 @@ export const BentoCockpit = memo(
             </div>
           </section>
         </div>
-
-        {/* 3. Bottom Pagination Indicator (Nothing OS Pill & Dots) */}
-        <div className="h-6 shrink-0 flex items-center justify-center gap-2 pt-1 select-none contain-paint">
-          {[0, 1, 2].map((idx) => {
-            const isActive = activeScreen === idx
-            return (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => scrollToScreen(idx)}
-                aria-label={`Screen ${idx + 1}`}
-                className={`h-1.5 rounded-full cursor-pointer transition-[width,background-color] duration-200 ease-out will-change-[width] transform-gpu motion-reduce:transition-none ${
-                  isActive ? 'w-5 bg-fg' : 'w-1.5 bg-fg/25 hover:bg-fg/50'
-                }`}
-              />
-            )
-          })}
-        </div>
       </div>
     )
   }),
