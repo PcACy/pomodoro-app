@@ -66,7 +66,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
         </button>
       }
       className={`rounded-[28px] ${className}`}
-      contentClassName="justify-between h-full"
+      contentClassName="justify-between"
     >
       {/* Top: Digit + Circuit Status + Glyph Ring */}
       <div className="flex items-center justify-between gap-2.5">
@@ -123,7 +123,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
       </div>
 
       {/* Middle: PCB Trace / Connected Circuit */}
-      <div className="w-full flex flex-col justify-center my-auto py-2 select-none">
+      <div className="w-full flex flex-col justify-center my-auto py-1 sm:py-2 select-none">
         <div className="relative w-full">
           {/* Inactive Base Trace Line (starts at pad 0 center, ends at pad 6 center) */}
           <div
@@ -199,7 +199,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
       </div>
 
       {/* Bottom Row: Weekly consistency metric */}
-      <div className="flex items-center justify-between font-sans text-xs text-muted pt-2 border-t border-line/40">
+      <div className="flex items-center justify-between font-sans text-xs text-muted pt-1.5 sm:pt-2 border-t border-line/40">
         <span>Active days</span>
         <span className="text-fg/90 font-medium tabular-nums">
           {activeDaysThisWeek} of 7 days

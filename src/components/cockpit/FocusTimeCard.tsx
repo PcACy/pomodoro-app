@@ -72,7 +72,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
         </div>
       }
       className={className}
-      contentClassName="justify-between h-full"
+      contentClassName="justify-between"
     >
       {/* Top Value & Percent Summary */}
       <div className="my-auto flex items-baseline justify-between gap-2">
@@ -103,7 +103,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
       </div>
 
       {/* 24-Hour Timeline Bar with Red Needle */}
-      <div className="mt-3">
+      <div className="mt-2 sm:mt-3">
         <div className="relative h-3 w-full rounded-md bg-canvas/60 border border-line/60 overflow-hidden">
           {/* Hour tick marks */}
           <div className="absolute inset-0 flex justify-between pointer-events-none opacity-30">

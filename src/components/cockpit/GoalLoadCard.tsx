@@ -66,7 +66,7 @@ export const GoalLoadCard = memo(function GoalLoadCard({
         ) : null
       }
       className={className}
-      contentClassName="justify-between h-full py-1"
+      contentClassName="justify-between py-0.5"
     >
       {/* Value Display */}
       <div className="flex items-baseline justify-between gap-2">
@@ -83,7 +83,7 @@ export const GoalLoadCard = memo(function GoalLoadCard({
 
       {/* 7-Day Vertical Distribution with 44px Hitboxes */}
       <div
-        className="mt-3 flex h-16 items-stretch gap-1 select-none"
+        className="mt-2 sm:mt-3 flex h-14 sm:h-16 items-stretch gap-1 select-none"
         role="img"
         aria-label={`Daily focus this week: ${dayMinutes.map((m, i) => `${dayLabels[i]} ${m} minutes`).join(', ')}`}
       >

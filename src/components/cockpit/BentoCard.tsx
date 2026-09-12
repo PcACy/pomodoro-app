@@ -25,7 +25,7 @@ export const BentoCard = memo(function BentoCard({
       className={`relative overflow-hidden rounded-[24px] backdrop-blur-md bg-[var(--bg-card)] border border-[var(--card-border)] shadow-none dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_24px_-4px_rgba(0,0,0,0.3)] p-4 sm:p-5 flex flex-col justify-between select-none transition-colors duration-300 ${className}`}
     >
       {/* Header with proportional Sans label (Sentence Case) and optional actions */}
-      <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
+      <div className="relative z-10 flex items-center justify-between gap-2 mb-2 sm:mb-3 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           {indicator}
           <span className="font-sans font-medium text-xs sm:text-[13px] text-muted/90 dark:text-neutral-300 tracking-normal truncate">
@@ -36,7 +36,7 @@ export const BentoCard = memo(function BentoCard({
       </div>
 
       {/* Content */}
-      <div className={`relative z-10 flex-1 flex flex-col ${contentClassName}`}>{children}</div>
+      <div className={`relative z-10 flex-1 min-h-0 flex flex-col ${contentClassName}`}>{children}</div>
     </div>
   )
 })

@@ -142,11 +142,11 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
         </button>
       }
       className={className}
-      contentClassName="justify-between h-full"
+      contentClassName="justify-between"
     >
-      <div className="flex-1 flex flex-col justify-between py-0.5 gap-2 h-full">
+      <div className="flex-1 flex flex-col justify-between py-0.5 gap-1.5 sm:gap-2">
         {/* Project Selection / Active Track Row with 44px Touch Targets */}
-        <div className="flex min-h-[44px] items-center justify-between select-none">
+        <div className="flex min-h-[38px] sm:min-h-[44px] items-center justify-between select-none">
           <div className="flex items-center gap-1 min-w-0">
             {/* Stepper controls with Fitts's Law 44px hitboxes */}
             <div className="flex items-center -ml-2">
@@ -154,7 +154,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
                 type="button"
                 onClick={handlePrevTrack}
                 disabled={tracks.length <= 1}
-                className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-base transition-colors ${
+                className={`min-w-[40px] sm:min-w-[44px] min-h-[40px] sm:min-h-[44px] flex items-center justify-center rounded-full text-base transition-colors ${
                   tracks.length > 1
                     ? 'text-muted hover:text-fg hover:bg-neutral-500/10 active:scale-90 cursor-pointer'
                     : 'text-muted/30 cursor-default'
@@ -169,7 +169,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
                 type="button"
                 onClick={handleNextTrack}
                 disabled={tracks.length <= 1}
-                className={`min-h-[44px] px-3 flex items-center rounded-lg font-sans font-medium text-xs sm:text-sm text-fg transition-colors ${
+                className={`min-h-[38px] sm:min-h-[44px] px-2.5 sm:px-3 flex items-center rounded-lg font-sans font-medium text-xs sm:text-sm text-fg transition-colors ${
                   tracks.length > 1
                     ? 'hover:bg-neutral-500/10 active:scale-98 cursor-pointer'
                     : 'cursor-default'
@@ -185,7 +185,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
                 type="button"
                 onClick={handleNextTrack}
                 disabled={tracks.length <= 1}
-                className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-base transition-colors ${
+                className={`min-w-[40px] sm:min-w-[44px] min-h-[40px] sm:min-h-[44px] flex items-center justify-center rounded-full text-base transition-colors ${
                   tracks.length > 1
                     ? 'text-muted hover:text-fg hover:bg-neutral-500/10 active:scale-90 cursor-pointer'
                     : 'text-muted/30 cursor-default'
@@ -204,7 +204,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
         </div>
 
         {/* 7-Column Full-Width VU-Meter LED Equalizer Grid */}
-        <div className="w-full grid grid-cols-7 gap-2 sm:gap-2.5 px-1 my-1">
+        <div className="w-full grid grid-cols-7 gap-1.5 sm:gap-2.5 px-1 my-0.5 sm:my-1">
           {DAY_LABELS.map((label, dayIdx) => {
             const dayMins = dayMinutes[dayIdx] ?? 0
             const isToday = dayIdx === todayIdx
@@ -214,7 +214,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
             return (
               <div
                 key={dayIdx}
-                className="flex flex-col items-center gap-1.5 w-full"
+                className="flex flex-col items-center gap-1 sm:gap-1.5 w-full"
                 title={`${label}: ${dayMins} min`}
               >
                 {/* Day header letter */}
@@ -262,7 +262,7 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
         </div>
 
         {/* Fixed Footer Status Line */}
-        <div className="pt-2 border-t border-line/40 flex h-7 items-center justify-between font-sans text-[11px] text-muted select-none">
+        <div className="pt-1.5 sm:pt-2 border-t border-line/40 flex min-h-[26px] sm:h-7 items-center justify-between font-sans text-[10px] sm:text-[11px] text-muted select-none">
           <span className="flex items-center gap-2">
             <span
               className={`h-2 w-2 rounded-full ${

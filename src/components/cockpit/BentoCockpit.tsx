@@ -525,14 +525,14 @@ export const BentoCockpit = memo(
               {statsSubView === 'overview' ? (
                 <div
                   key="stats-overview"
-                  className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch overflow-y-auto md:overflow-hidden no-scrollbar animate-fade-in"
+                  className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch overflow-y-auto md:overflow-hidden no-scrollbar pb-3 md:pb-0 animate-fade-in"
                 >
                   {/* 1. Weekly Goal Load */}
                   <GoalLoadCard
                     sessions={sessions}
                     settings={settings}
                     onOpenSettings={onOpenSettingsModal}
-                    className="h-full min-h-[180px] md:min-h-0"
+                    className="min-h-[195px] md:h-full md:min-h-0"
                   />
 
                   {/* 2. Daily Focus Time */}
@@ -540,14 +540,14 @@ export const BentoCockpit = memo(
                     sessions={sessions}
                     settings={settings}
                     onOpenSettings={onOpenSettingsModal}
-                    className="h-full min-h-[180px] md:min-h-0"
+                    className="min-h-[185px] md:h-full md:min-h-0"
                   />
 
                   {/* 3. Projects Distribution Overview */}
                   <ProjectsDistributionCard
                     sessions={sessions}
                     tags={settings.tags}
-                    className="h-full min-h-[180px] md:min-h-0"
+                    className="min-h-[235px] md:h-full md:min-h-0"
                   />
 
                   {/* 4. Daily Streak & System Status */}
@@ -556,13 +556,13 @@ export const BentoCockpit = memo(
                     onOpenActivityLog={() => {
                       setStatsSubView('log')
                     }}
-                    className="h-full min-h-[180px] md:min-h-0"
+                    className="min-h-[205px] md:h-full md:min-h-0"
                   />
                 </div>
               ) : (
                 <div
                   key="stats-log"
-                  className="flex flex-col gap-2.5 sm:gap-3 h-full min-h-0 animate-fade-in"
+                  className="flex flex-col gap-2.5 sm:gap-3 h-full min-h-0 overflow-y-auto md:overflow-hidden no-scrollbar pb-3 md:pb-0 animate-fade-in"
                 >
                   {/* View B Top: 52-Week Activity Heatmap */}
                   <BentoCard
@@ -588,7 +588,7 @@ export const BentoCockpit = memo(
                         TELEMETRY FEED
                       </span>
                     }
-                    className="flex-1 min-h-0 p-3.5 sm:p-4 rounded-[24px]"
+                    className="flex-1 min-h-[300px] md:min-h-0 p-3.5 sm:p-4 rounded-[24px]"
                     contentClassName="h-full min-h-0 overflow-hidden"
                   >
                     <SessionLog
