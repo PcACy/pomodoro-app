@@ -22,3 +22,4 @@ describe('DeckSwitcher', () => {
     expect(html1).toContain('aria-pressed="true"')
   })
 })
+
