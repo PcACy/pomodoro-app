@@ -1,17 +1,112 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Session, TodoItem } from '../types'
+import { DEFAULT_SETTINGS, STORAGE_KEYS, type Session, type TodoItem } from '../types'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase'
 import { db } from '../lib/db'
 import { readTodosLocal } from '../lib/localTodos'
-import { commitQueue, hasPendingOps, markFailed, peekQueue } from '../lib/syncQueue'
+import { commitQueue, hasPendingOps, markFailed, peekQueue, type SyncOp } from '../lib/syncQueue'
 
 export type SyncStatus = 'unsupported' | 'signed-out' | 'syncing' | 'synced' | 'offline' | 'error'
 
 interface Options {
   user: User | null
   mergeRemoteTodos: (remote: TodoItem[]) => void
+  tags?: string[]
+  mergeRemoteTags?: (remote: string[]) => void
+}
+
+interface TagRow {
+  id: string
+  user_id: string
+  name: string
+  color: string | null
+  updated_at: number
+}
+
+export const tagRowId = (userId: string, name: string): string =>
+  `${userId}:${encodeURIComponent(name.trim().toLowerCase())}`
+
+const tagToRow = (name: string, userId: string): TagRow => ({
+  id: tagRowId(userId, name),
+  user_id: userId,
+  name: name.trim().slice(0, 100),
+  color: null,
+  updated_at: Date.now(),
+})
+
+export function readTagsLocal(): string[] {
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.settings) : null
+    if (!raw) return DEFAULT_SETTINGS.tags
+    const parsed = JSON.parse(raw)
+    if (parsed && Array.isArray(parsed.tags)) {
+      const valid = parsed.tags
+        .filter((t: unknown): t is string => typeof t === 'string' && t.trim().length > 0)
+        .map((t: string) => t.slice(0, 50))
+      return valid.length > 0 ? valid : DEFAULT_SETTINGS.tags
+    }
+    return DEFAULT_SETTINGS.tags
+  } catch {
+    return DEFAULT_SETTINGS.tags
+  }
+}
+
+export function mergeRemoteTagsList(
+  currentTags: string[],
+  remoteTags: string[],
+  pendingOps: SyncOp[] = [],
+): string[] {
+  const tagOps = pendingOps.filter((op) => op.table === 'tags')
+  const pendingDeletes = new Set(
+    tagOps.filter((op) => op.kind === 'delete').map((op) => op.id.trim().toLowerCase()),
+  )
+  const pendingUpserts = tagOps
+    .filter((op): op is Extract<typeof op, { kind: 'upsert' }> => op.kind === 'upsert')
+    .map((op) => op.id.trim())
+
+  const result: string[] = []
+  const seen = new Set<string>()
+
+  // 1. Keep local tags that also exist in remote or are pending local addition,
+  // preserving the user's local tag order.
+  for (const localTag of currentTags) {
+    const trimmed = localTag.trim()
+    const lower = trimmed.toLowerCase()
+    if (!trimmed || pendingDeletes.has(lower)) continue
+    const inRemote = remoteTags.some((r) => r.trim().toLowerCase() === lower)
+    const inPendingUpsert = pendingUpserts.some((u) => u.toLowerCase() === lower)
+    if (inRemote || inPendingUpsert) {
+      if (!seen.has(lower)) {
+        seen.add(lower)
+        result.push(trimmed)
+      }
+    }
+  }
+
+  // 2. Add remote tags from other devices not yet seen locally
+  for (const remoteTag of remoteTags) {
+    const trimmed = remoteTag.trim()
+    const lower = trimmed.toLowerCase()
+    if (!trimmed || pendingDeletes.has(lower)) continue
+    if (!seen.has(lower)) {
+      seen.add(lower)
+      result.push(trimmed.slice(0, 50))
+    }
+  }
+
+  // 3. Add pending upserts not yet seen
+  for (const pendingTag of pendingUpserts) {
+    const trimmed = pendingTag.trim()
+    const lower = trimmed.toLowerCase()
+    if (!trimmed || pendingDeletes.has(lower)) continue
+    if (!seen.has(lower)) {
+      seen.add(lower)
+      result.push(trimmed.slice(0, 50))
+    }
+  }
+
+  return result.length > 0 ? result : (currentTags.length > 0 ? currentTags : DEFAULT_SETTINGS.tags)
 }
 
 interface TodoRow extends Omit<TodoItem, 'createdAt' | 'completedAt' | 'updatedAt'> {
@@ -110,7 +205,7 @@ async function mergeSessionsIntoDb(remote: Session[]): Promise<void> {
   }
 }
 
-export function useSync({ user, mergeRemoteTodos }: Options) {
+export function useSync({ user, mergeRemoteTodos, tags, mergeRemoteTags }: Options) {
   const [status, setStatus] = useState<SyncStatus>(isSupabaseConfigured ? 'signed-out' : 'unsupported')
   const [lastSyncAt, setLastSyncAt] = useState<number | null>(null)
   const [pending, setPending] = useState(false)
@@ -118,9 +213,13 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
   const syncAgainRef = useRef(false)
   const userRef = useRef(user)
   const mergeRef = useRef(mergeRemoteTodos)
+  const tagsRef = useRef(tags)
+  const mergeTagsRef = useRef(mergeRemoteTags)
   useEffect(() => {
     userRef.current = user
     mergeRef.current = mergeRemoteTodos
+    tagsRef.current = tags
+    mergeTagsRef.current = mergeRemoteTags
   })
 
   const pushQueue = useCallback(async (supabase: SupabaseClient): Promise<boolean> => {
@@ -148,7 +247,7 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
     // subsequent retry batches only process remaining tables.
     const pushedTables = new Set<string>()
     try {
-      for (const table of ['sessions', 'todos'] as const) {
+      for (const table of ['sessions', 'todos', 'tags'] as const) {
         ensureSameUser()
         const tOps = ops.filter((o) => o.table === table)
         if (tOps.length === 0) continue
@@ -159,7 +258,7 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
         const nonReplaceOps = tOps.filter((o) => o.kind !== 'replace')
         for (const op of nonReplaceOps) {
           if (op.kind === 'delete') {
-            deletes.push(op.id)
+            deletes.push(table === 'tags' ? tagRowId(userId, op.id) : op.id)
           }
         }
 
@@ -177,13 +276,20 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
               if (!rec) deletes.push(op.id)
               else upserts.push(sessionToRow(rec, userId))
             }
-          } else {
+          } else if (table === 'todos') {
             const localTodos = getLocalTodos()
             const todosMap = new Map(localTodos.map((t) => [t.id, t]))
             for (const op of upsertOps) {
               const rec = todosMap.get(op.id)
               if (!rec) deletes.push(op.id)
               else upserts.push(todoToRow(rec, userId))
+            }
+          } else {
+            const currentTags = tagsRef.current ?? readTagsLocal()
+            for (const op of upsertOps) {
+              const rec = currentTags.find((t) => t.trim().toLowerCase() === op.id.trim().toLowerCase())
+              if (!rec) deletes.push(tagRowId(userId, op.id))
+              else upserts.push(tagToRow(rec, userId))
             }
           }
         }
@@ -193,11 +299,15 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
           const all =
             table === 'sessions'
               ? await db.sessions.toArray()
-              : getLocalTodos()
+              : table === 'todos'
+                ? getLocalTodos()
+                : (tagsRef.current ?? readTagsLocal())
           if (all.length) {
-            const rows = all.map((r) =>
-              table === 'sessions' ? sessionToRow(r as Session, userId) : todoToRow(r as TodoItem, userId),
-            )
+            const rows = all.map((r) => {
+              if (table === 'sessions') return sessionToRow(r as Session, userId)
+              if (table === 'todos') return todoToRow(r as TodoItem, userId)
+              return tagToRow(r as string, userId)
+            })
             const resUpsert = await supabase.from(table).upsert(rows, { onConflict: 'id' })
             if (resUpsert.error) throw resUpsert.error
           }
@@ -207,7 +317,8 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
             if (resUpsert.error) throw resUpsert.error
           }
           if (deletes.length) {
-            const resDel = await supabase.from(table).delete().in('id', deletes).eq('user_id', userId)
+            const uniqueDeletes = Array.from(new Set(deletes))
+            const resDel = await supabase.from(table).delete().in('id', uniqueDeletes).eq('user_id', userId)
             if (resDel.error) throw resDel.error
           }
         }
@@ -230,17 +341,31 @@ export function useSync({ user, mergeRemoteTodos }: Options) {
     }
     const userId = userRef.current.id
     try {
-      const [sess, todos] = await Promise.all([
+      const [sess, todos, tagsRes] = await Promise.all([
         supabase.from('sessions').select('*').eq('user_id', userId),
         supabase.from('todos').select('*').eq('user_id', userId),
+        supabase.from('tags').select('*').eq('user_id', userId),
       ])
       if (sess.error) throw sess.error
       if (todos.error) throw todos.error
+      if (tagsRes.error) throw tagsRes.error
       // The user may have logged out while the pull was in flight: never
       // merge another account's rows into the local store.
       if (userRef.current?.id !== userId) return false
       await mergeSessionsIntoDb((sess.data ?? []).map((r) => rowToSession(r as SessionRow)))
       mergeRef.current((todos.data ?? []).map((r) => rowToTodo(r as TodoRow)))
+
+      const remoteTags = (tagsRes.data ?? []) as TagRow[]
+      if (remoteTags.length === 0) {
+        // Initial sync on fresh account: seed remote with existing local tags
+        const currentTags = tagsRef.current ?? readTagsLocal()
+        if (currentTags.length > 0) {
+          const seedRows = currentTags.map((t) => tagToRow(t, userId))
+          await supabase.from('tags').upsert(seedRows, { onConflict: 'id' })
+        }
+      } else {
+        mergeTagsRef.current?.(remoteTags.map((r) => r.name))
+      }
       return true
     } catch (e) {
       console.error('[sync] pull failed:', e)

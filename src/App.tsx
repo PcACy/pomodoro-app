@@ -13,7 +13,8 @@ import { useWakeLock } from './hooks/useWakeLock'
 import { useNotificationActions } from './hooks/useNotificationActions'
 import { useTodos } from './hooks/useTodos'
 import { useAuth } from './hooks/useAuth'
-import { useSync } from './hooks/useSync'
+import { useSync, mergeRemoteTagsList } from './hooks/useSync'
+import { enqueue, peekQueue } from './lib/syncQueue'
 import { useTranslation } from './hooks/useTranslation'
 import { addSession, updateSessionNotes } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
@@ -60,7 +61,28 @@ export default function App() {
   const sessionTask = activeTodo?.title ?? ''
   const sessionTag = activeTodo?.tag ?? ''
   const auth = useAuth()
-  const sync = useSync({ user: auth.user, mergeRemoteTodos: todosApi.mergeRemote })
+  const handleMergeRemoteTags = useCallback(
+    (remoteTags: string[]) => {
+      if (!remoteTags.length) return
+      updateSettings((prev) => {
+        const merged = mergeRemoteTagsList(prev.tags, remoteTags, peekQueue())
+        if (
+          merged.length === prev.tags.length &&
+          merged.every((t, i) => t === prev.tags[i])
+        ) {
+          return prev
+        }
+        return { ...prev, tags: merged }
+      })
+    },
+    [updateSettings],
+  )
+  const sync = useSync({
+    user: auth.user,
+    mergeRemoteTodos: todosApi.mergeRemote,
+    tags: settings.tags,
+    mergeRemoteTags: handleMergeRemoteTags,
+  })
 
   const [isMouseActive, setIsMouseActive] = useState(true)
   const mouseTimerRef = useRef<number | null>(null)
@@ -259,7 +281,10 @@ export default function App() {
   })
 
   const handleImportSettings = useCallback((s: unknown) => {
-    if (s && typeof s === 'object') updateSettings(() => s as Settings)
+    if (s && typeof s === 'object') {
+      updateSettings(() => s as Settings)
+      enqueue({ kind: 'replace', table: 'tags' })
+    }
   }, [updateSettings])
 
   const syncNow = sync.sync

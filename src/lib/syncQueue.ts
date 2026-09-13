@@ -1,4 +1,4 @@
-type SyncTable = 'sessions' | 'todos'
+type SyncTable = 'sessions' | 'todos' | 'tags'
 
 export type SyncOp =
   | { kind: 'upsert'; table: SyncTable; id: string; attempts?: number }
@@ -20,10 +20,10 @@ let lastRawString: string | null = null
 function isValidSyncOp(op: unknown): op is SyncOp {
   if (!op || typeof op !== 'object') return false
   const o = op as Record<string, unknown>
-  if (o.table !== 'sessions' && o.table !== 'todos') return false
+  if (o.table !== 'sessions' && o.table !== 'todos' && o.table !== 'tags') return false
   if (o.kind === 'replace') return true
   if (o.kind === 'upsert' || o.kind === 'delete') {
-    return typeof o.id === 'string' && o.id.length > 0 && o.id.length <= 128
+    return typeof o.id === 'string' && o.id.length > 0 && o.id.length <= 256
   }
   return false
 }

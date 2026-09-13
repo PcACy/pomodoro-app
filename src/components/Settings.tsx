@@ -27,6 +27,7 @@ import type { GitHubProfile } from '../hooks/useAuth'
 import { SlidingSegmentedControl } from './SlidingSegmentedControl'
 import { getTagColor } from './TodoList'
 import { MechanicalSwitch } from './MechanicalSwitch'
+import { enqueue } from '../lib/syncQueue'
 
 import {
   SOUND_KEY,
@@ -420,6 +421,7 @@ export const SettingsPanel = memo(function SettingsPanel({
     }
     playMicroClick('tap')
     update((s) => ({ ...s, tags: [...s.tags, trimmed] }))
+    enqueue({ kind: 'upsert', table: 'tags', id: trimmed })
     setNewTag('')
     setTagError(null)
     inputRef.current?.focus()
@@ -428,6 +430,7 @@ export const SettingsPanel = memo(function SettingsPanel({
   const removeTag = (tag: string) => {
     playMicroClick('tap')
     update((s) => ({ ...s, tags: s.tags.filter((t) => t !== tag) }))
+    enqueue({ kind: 'delete', table: 'tags', id: tag })
   }
 
   return (

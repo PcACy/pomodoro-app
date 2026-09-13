@@ -16,8 +16,8 @@ vi.stubGlobal('localStorage', {
 import { commitQueue, drainQueue, enqueue, hasPendingOps, markFailed, peekQueue, requeue } from './syncQueue'
 import type { SyncOp } from './syncQueue'
 
-const upsert = (table: 'sessions' | 'todos', id: string): SyncOp => ({ kind: 'upsert', table, id })
-const del = (table: 'sessions' | 'todos', id: string): SyncOp => ({ kind: 'delete', table, id })
+const upsert = (table: 'sessions' | 'todos' | 'tags', id: string): SyncOp => ({ kind: 'upsert', table, id })
+const del = (table: 'sessions' | 'todos' | 'tags', id: string): SyncOp => ({ kind: 'delete', table, id })
 
 describe('syncQueue', () => {
   beforeEach(() => store.clear())
@@ -27,6 +27,13 @@ describe('syncQueue', () => {
     enqueue(upsert('todos', 'b'))
     enqueue(del('todos', 'a'))
     expect(drainQueue()).toEqual([upsert('todos', 'b'), del('todos', 'a')])
+  })
+
+  it('supports tag queueing and deduplication', () => {
+    enqueue(upsert('tags', 'Work'))
+    enqueue(upsert('tags', 'Personal'))
+    enqueue(del('tags', 'Work'))
+    expect(drainQueue()).toEqual([upsert('tags', 'Personal'), del('tags', 'Work')])
   })
 
   it('replace supersedes all prior ops of the same table only', () => {
