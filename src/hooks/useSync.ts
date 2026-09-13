@@ -65,6 +65,27 @@ export function readSettingsLocal(): Settings {
   }
 }
 
+export function isTableMissingError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false
+  const e = err as { code?: string; message?: string; status?: number; statusCode?: number }
+  if (e.code === '42P01' || e.code === 'PGRST205' || e.code === 'PGRST200' || e.code === 'PGRST204') {
+    return true
+  }
+  if (e.status === 404 || e.statusCode === 404) {
+    return true
+  }
+  if (typeof e.message === 'string') {
+    const msg = e.message.toLowerCase()
+    return (
+      msg.includes('schema cache') ||
+      msg.includes('does not exist') ||
+      msg.includes('relation') ||
+      msg.includes('not found')
+    )
+  }
+  return false
+}
+
 export function mergeRemoteTagsList(
   currentTags: string[],
   remoteTags: string[],
@@ -334,7 +355,15 @@ export function useSync({
 
         if (replace) {
           const resDel = await supabase.from(dbTable).delete().eq('user_id', userId)
-          if (resDel.error) throw resDel.error
+          if (resDel.error) {
+            if (isTableMissingError(resDel.error)) {
+              console.warn(`[sync] Table ${dbTable} not found on Supabase. Skipping ${table} replace.`)
+              pushedTables.add(table)
+              commitQueue(tOps)
+              continue
+            }
+            throw resDel.error
+          }
           if (table === 'settings') {
             const currentSettings = settingsRef.current ?? readSettingsLocal()
             const row = {
@@ -347,7 +376,7 @@ export function useSync({
               updated_at: currentSettings.updatedAt ?? Date.now(),
             }
             const resUpsert = await supabase.from('user_settings').upsert([row], { onConflict: 'user_id' })
-            if (resUpsert.error) throw resUpsert.error
+            if (resUpsert.error && !isTableMissingError(resUpsert.error)) throw resUpsert.error
           } else {
             const all =
               table === 'sessions'
@@ -362,18 +391,34 @@ export function useSync({
                 return tagToRow(r as string, userId)
               })
               const resUpsert = await supabase.from(dbTable).upsert(rows, { onConflict: 'id' })
-              if (resUpsert.error) throw resUpsert.error
+              if (resUpsert.error && !isTableMissingError(resUpsert.error)) throw resUpsert.error
             }
           }
         } else {
           if (upserts.length) {
             const resUpsert = await supabase.from(dbTable).upsert(upserts, { onConflict })
-            if (resUpsert.error) throw resUpsert.error
+            if (resUpsert.error) {
+              if (isTableMissingError(resUpsert.error)) {
+                console.warn(`[sync] Table ${dbTable} not found on Supabase. Skipping ${table} push.`)
+                pushedTables.add(table)
+                commitQueue(tOps)
+                continue
+              }
+              throw resUpsert.error
+            }
           }
           if (deletes.length) {
             const uniqueDeletes = Array.from(new Set(deletes))
             const resDel = await supabase.from(dbTable).delete().in('id', uniqueDeletes).eq('user_id', userId)
-            if (resDel.error) throw resDel.error
+            if (resDel.error) {
+              if (isTableMissingError(resDel.error)) {
+                console.warn(`[sync] Table ${dbTable} not found on Supabase. Skipping ${table} delete.`)
+                pushedTables.add(table)
+                commitQueue(tOps)
+                continue
+              }
+              throw resDel.error
+            }
           }
         }
         pushedTables.add(table)
@@ -403,48 +448,66 @@ export function useSync({
       ])
       if (sess.error) throw sess.error
       if (todos.error) throw todos.error
-      if (tagsRes.error) throw tagsRes.error
-      if (userSettingsRes.error) throw userSettingsRes.error
       // The user may have logged out while the pull was in flight: never
       // merge another account's rows into the local store.
       if (userRef.current?.id !== userId) return false
       await mergeSessionsIntoDb((sess.data ?? []).map((r) => rowToSession(r as SessionRow)))
       mergeRef.current((todos.data ?? []).map((r) => rowToTodo(r as TodoRow)))
 
-      const remoteTags = (tagsRes.data ?? []) as TagRow[]
-      if (remoteTags.length === 0) {
-        // Initial sync on fresh account: seed remote with existing local tags
-        const currentTags = tagsRef.current ?? readTagsLocal()
-        if (currentTags.length > 0) {
-          const seedRows = currentTags.map((t) => tagToRow(t, userId))
-          await supabase.from('tags').upsert(seedRows, { onConflict: 'id' })
+      if (tagsRes.error) {
+        if (isTableMissingError(tagsRes.error)) {
+          console.warn('[sync] public.tags table not found on Supabase. Apply schema.sql to enable tag sync.')
+        } else {
+          throw tagsRes.error
         }
       } else {
-        mergeTagsRef.current?.(remoteTags.map((r) => r.name))
+        const remoteTags = (tagsRes.data ?? []) as TagRow[]
+        if (remoteTags.length === 0) {
+          // Initial sync on fresh account: seed remote with existing local tags
+          const currentTags = tagsRef.current ?? readTagsLocal()
+          if (currentTags.length > 0) {
+            const seedRows = currentTags.map((t) => tagToRow(t, userId))
+            const seedRes = await supabase.from('tags').upsert(seedRows, { onConflict: 'id' })
+            if (seedRes.error && !isTableMissingError(seedRes.error)) throw seedRes.error
+          }
+        } else {
+          mergeTagsRef.current?.(remoteTags.map((r) => r.name))
+        }
       }
 
-      const remoteSettingsRow = userSettingsRes.data as {
-        user_id: string
-        settings: Partial<Settings>
-        updated_at: number
-      } | null
-      if (!remoteSettingsRow) {
-        // Initial sync on fresh account: seed remote with existing local settings
-        const currentSettings = settingsRef.current ?? readSettingsLocal()
-        await supabase.from('user_settings').upsert(
-          {
-            user_id: userId,
-            settings: {
-              phases: currentSettings.phases,
-              dailyGoalMinutes: currentSettings.dailyGoalMinutes,
-              weeklyGoalMinutes: currentSettings.weeklyGoalMinutes,
-            },
-            updated_at: currentSettings.updatedAt ?? Date.now(),
-          },
-          { onConflict: 'user_id' },
-        )
+      if (userSettingsRes.error) {
+        if (isTableMissingError(userSettingsRes.error)) {
+          console.warn(
+            '[sync] public.user_settings table not found on Supabase. Apply schema.sql to enable settings sync.',
+          )
+        } else {
+          throw userSettingsRes.error
+        }
       } else {
-        mergeSettingsRef.current?.(remoteSettingsRow.settings, remoteSettingsRow.updated_at)
+        const remoteSettingsRow = userSettingsRes.data as {
+          user_id: string
+          settings: Partial<Settings>
+          updated_at: number
+        } | null
+        if (!remoteSettingsRow) {
+          // Initial sync on fresh account: seed remote with existing local settings
+          const currentSettings = settingsRef.current ?? readSettingsLocal()
+          const seedRes = await supabase.from('user_settings').upsert(
+            {
+              user_id: userId,
+              settings: {
+                phases: currentSettings.phases,
+                dailyGoalMinutes: currentSettings.dailyGoalMinutes,
+                weeklyGoalMinutes: currentSettings.weeklyGoalMinutes,
+              },
+              updated_at: currentSettings.updatedAt ?? Date.now(),
+            },
+            { onConflict: 'user_id' },
+          )
+          if (seedRes.error && !isTableMissingError(seedRes.error)) throw seedRes.error
+        } else {
+          mergeSettingsRef.current?.(remoteSettingsRow.settings, remoteSettingsRow.updated_at)
+        }
       }
       return true
     } catch (e) {

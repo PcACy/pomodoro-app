@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mergeRemoteTagsList, tagRowId } from './useSync'
+import { isTableMissingError, mergeRemoteTagsList, tagRowId } from './useSync'
 import { mergeWithDefaults } from './useSettings'
 import type { SyncOp } from '../lib/syncQueue'
 
@@ -116,6 +116,28 @@ describe('useSync tag synchronization helpers', () => {
       expect(parsed.dailyGoalMinutes).toBe(0)
       expect(parsed.weeklyGoalMinutes).toBe(300) // fallback to default
       expect(parsed.updatedAt).toBe(1700000000000)
+    })
+  })
+
+  describe('isTableMissingError', () => {
+    it('detects missing relation error codes and messages', () => {
+      expect(isTableMissingError({ code: '42P01' })).toBe(true)
+      expect(isTableMissingError({ code: 'PGRST205' })).toBe(true)
+      expect(isTableMissingError({ code: 'PGRST200' })).toBe(true)
+      expect(isTableMissingError({ code: 'PGRST204' })).toBe(true)
+      expect(isTableMissingError({ status: 404 })).toBe(true)
+      expect(isTableMissingError({ statusCode: 404 })).toBe(true)
+      expect(
+        isTableMissingError({ message: "Could not find the public.tags table in the schema cache" }),
+      ).toBe(true)
+      expect(isTableMissingError({ message: 'relation "public.tags" does not exist' })).toBe(true)
+    })
+
+    it('returns false for unrelated errors', () => {
+      expect(isTableMissingError(null)).toBe(false)
+      expect(isTableMissingError(undefined)).toBe(false)
+      expect(isTableMissingError({ code: '23505', message: 'duplicate key value violates unique constraint' })).toBe(false)
+      expect(isTableMissingError({ status: 500, message: 'Internal Server Error' })).toBe(false)
     })
   })
 })
