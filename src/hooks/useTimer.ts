@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PhaseId, Session, Settings, TimerStatus } from '../types'
 import { MS_PER_MINUTE } from '../lib/time'
 import { getTickerWorker } from '../lib/tickerWorker'
@@ -9,7 +9,7 @@ import { getLang, translations } from '../lib/i18n'
 import { useTranslation } from './useTranslation'
 import { broadcastTimerState, subscribeBroadcast } from '../lib/broadcast'
 import { AUTO_BREAKS_KEY, readFlag } from '../lib/flagsStore'
-import { getTimerTickSnapshot, setTimerTickSnapshot, subscribeTimerTick } from '../lib/timerStore'
+import { setTimerTickSnapshot } from '../lib/timerStore'
 import { startForegroundTimer, stopForegroundTimer } from '../lib/foregroundTimer'
 
 interface Options {
@@ -23,18 +23,23 @@ interface CoarseTimerState {
   phase: PhaseId
   status: TimerStatus
   totalMs: number
+  remainingMs: number
   completedFocusInCycle: number
 }
 
 const phaseDuration = (settings: Settings, phase: PhaseId): number =>
   settings.phases[phase] * MS_PER_MINUTE
 
-const initialMachine = (settings: Settings): CoarseTimerState => ({
-  phase: 'focus',
-  status: 'idle',
-  totalMs: phaseDuration(settings, 'focus'),
-  completedFocusInCycle: 0,
-})
+const initialMachine = (settings: Settings): CoarseTimerState => {
+  const d = phaseDuration(settings, 'focus')
+  return {
+    phase: 'focus',
+    status: 'idle',
+    totalMs: d,
+    remainingMs: d,
+    completedFocusInCycle: 0,
+  }
+}
 
 export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
   const { t } = useTranslation()
@@ -170,6 +175,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       phase: nextPhase,
       status: nextStatus,
       totalMs: d,
+      remainingMs: d,
       completedFocusInCycle: nextCycle,
     }
     machineRef.current = nextMachine
@@ -251,7 +257,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     // Sync the ref immediately (see finishCurrentPhase): a second call in the
     // same tick must see 'running', otherwise e.g. a fast double-toggle would
     // run start() twice instead of start() then pause().
-    const nextMachine = { ...m, status: 'running' as TimerStatus }
+    const nextMachine = { ...m, status: 'running' as TimerStatus, remainingMs: remainingMsRef.current }
     machineRef.current = nextMachine
     setMachine(nextMachine)
     broadcastTimerState({
@@ -282,7 +288,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     void stopForegroundTimer()
 
     // Sync the ref immediately (see start()).
-    const nextMachine = { ...m, status: 'paused' as TimerStatus }
+    const nextMachine = { ...m, status: 'paused' as TimerStatus, remainingMs: remaining }
     machineRef.current = nextMachine
     setMachine(nextMachine)
     broadcastTimerState({
@@ -325,7 +331,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     void stopForegroundTimer()
 
     // Sync the ref immediately (see start()).
-    const nextMachine = { ...m, status: 'idle' as TimerStatus, totalMs: total }
+    const nextMachine = { ...m, status: 'idle' as TimerStatus, totalMs: total, remainingMs: total }
     machineRef.current = nextMachine
     setMachine(nextMachine)
     broadcastTimerState({
@@ -370,7 +376,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     }
 
     // Sync the ref immediately (see start()).
-    const nextMachine = { ...m, totalMs: total }
+    const nextMachine = { ...m, totalMs: total, remainingMs: rem }
     machineRef.current = nextMachine
     setMachine(nextMachine)
 
@@ -429,6 +435,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
           status: p.status,
           phase: p.phase,
           totalMs: p.totalMs,
+          remainingMs: p.remainingMs,
           completedFocusInCycle: p.completedFocusInCycle,
         }
         machineRef.current = nextMachine
@@ -482,17 +489,16 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
         time: fmtTime(d),
         progress: 1,
       })
-      return { ...prev, totalMs: d }
+      return { ...prev, totalMs: d, remainingMs: d }
     })
   }, [settings])
 
   const roundsBeforeLongBreak = settings.phases.roundsBeforeLongBreak
 
-  // Live tick values: reading remainingMsRef during render would freeze
-  // `remainingMs`/`time`/`progress` between machine state changes, since
-  // ticks publish through the store without re-rendering this hook.
-  const liveTick = useSyncExternalStore(subscribeTimerTick, getTimerTickSnapshot)
-  const curRem = liveTick.remainingMs
+  // Decouple high-frequency ticks from useTimer so App and BentoCockpit do not
+  // re-render every second. Leaf components (HeroTimerCard, Timer, ActiveTaskCard,
+  // DocumentChrome) subscribe to timerStore directly.
+  const curRem = machine.remainingMs
   const curTot = machine.totalMs
 
   return {

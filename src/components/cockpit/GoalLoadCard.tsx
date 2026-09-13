@@ -20,7 +20,7 @@ export const GoalLoadCard = memo(function GoalLoadCard({
   className = '',
 }: GoalLoadCardProps) {
   const { t, lang } = useTranslation()
-  const dayLabels = t.weekdays.map((w) => w.charAt(0))
+  const dayLabels = useMemo(() => t.weekdays.map((w) => w.charAt(0)), [t.weekdays])
   const currentWeekMinutes = weekMinutes(sessions)
   const targetWeekMinutes = Math.max(60, settings.weeklyGoalMinutes || 300)
   const ratio = Math.max(0, currentWeekMinutes / targetWeekMinutes)
@@ -34,7 +34,7 @@ export const GoalLoadCard = memo(function GoalLoadCard({
     const weekStart = startOfWeek(new Date())
     const today = new Date()
     let tIdx = 0
-    const mins = dayLabels.map((_, i) => {
+    const mins = Array.from({ length: 7 }, (_, i) => {
       const day = addDays(weekStart, i)
       if (sameDay(day, today)) tIdx = i
       return sessions
@@ -45,7 +45,7 @@ export const GoalLoadCard = memo(function GoalLoadCard({
         }, 0)
     })
     return { dayMinutes: mins, maxDay: Math.max(1, ...mins), todayIdx: tIdx }
-  }, [sessions, dayLabels])
+  }, [sessions])
 
   return (
     <BentoCard

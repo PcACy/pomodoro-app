@@ -30,6 +30,7 @@ interface SessionRow {
   task: string
   tag: string
   notes: string | null
+  mode: string | null
   updated_at: number
 }
 
@@ -65,6 +66,7 @@ const sessionToRow = (s: Session, userId: string): SessionRow => ({
   task: s.task,
   tag: s.tag,
   notes: s.notes ?? null,
+  mode: s.mode ?? null,
   updated_at: s.updatedAt ?? s.start,
 })
 
@@ -76,6 +78,7 @@ const rowToSession = (r: SessionRow): Session => ({
   task: r.task,
   tag: r.tag,
   notes: r.notes ?? undefined,
+  mode: r.mode === 'flow' || r.mode === 'pomodoro' ? r.mode : undefined,
   updatedAt: r.updated_at,
 })
 

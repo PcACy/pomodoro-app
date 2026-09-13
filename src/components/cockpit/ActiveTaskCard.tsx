@@ -1,9 +1,9 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { ArrowUpFromLine, Square } from 'lucide-react'
 import type { Session, TodoItem, TimerMode } from '../../types'
 import { BentoCard } from './BentoCard'
 import { getTagColor } from '../TodoList'
-import { useFlowTimerTick } from '../../hooks/useTimerTick'
+import { useFlowTimerTick, useTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
 
 interface ActiveTaskCardProps {
@@ -90,7 +90,7 @@ function Reel({
       {/* Hub + spokes: rotates while the deck is running */}
       <svg
         viewBox="0 0 64 64"
-        className={`absolute inset-0 h-full w-full animate-spin [animation-duration:3.5s] ${
+        className={`absolute inset-0 h-full w-full will-change-transform animate-spin [animation-duration:3.5s] ${
           reverse ? '[animation-direction:reverse]' : ''
         } ${spinning ? '' : '[animation-play-state:paused]'}`}
       >
@@ -129,16 +129,19 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   className = '',
 }: ActiveTaskCardProps) {
   const openTasksDeck = onOpenTodoDeck || onOpenTodoManager
+  const timerTick = useTimerTick()
   const flowTick = useFlowTimerTick()
   const isFlowMode = mode === 'flow'
   const tagColor = activeTodo?.tag ? getTagColor(activeTodo.tag) : undefined
+
+  const liveRemaining = isRunning ? timerTick.remainingMs : (remainingMs ?? timerTick.remainingMs)
 
   // Tape position: elapsed / total. Flow has no fixed length — packs rest
   // centered while the counter runs up.
   const elapsedMs = activeTodo
     ? isFlowMode
       ? Math.max(0, flowTick.elapsedMs)
-      : Math.max(0, totalMs - remainingMs)
+      : Math.max(0, totalMs - liveRemaining)
     : 0
   const ratio = activeTodo && !isFlowMode && totalMs > 0
     ? Math.min(1, Math.max(0, elapsedMs / totalMs))
@@ -151,18 +154,20 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
     .padStart(3, '0')
     .split('')
 
-  const taskMinutes = activeTodo && sessions
-    ? sessions
-        .filter((s) => s.task && s.task.trim().toLowerCase() === activeTodo.title.trim().toLowerCase())
-        .reduce((sum, s) => {
-          const d = s.durationMs
-          return sum + (typeof d === 'number' && Number.isFinite(d) && d > 0 ? Math.round(d / 60_000) : 0)
-        }, 0)
-    : 0
+  const taskMinutes = useMemo(() => {
+    if (!activeTodo || !sessions) return 0
+    const targetTitle = activeTodo.title.trim().toLowerCase()
+    return sessions
+      .filter((s) => s.task && s.task.trim().toLowerCase() === targetTitle)
+      .reduce((sum, s) => {
+        const d = s.durationMs
+        return sum + (typeof d === 'number' && Number.isFinite(d) && d > 0 ? Math.round(d / 60_000) : 0)
+      }, 0)
+  }, [activeTodo, sessions])
   const minutesPerPomodoro = Number.isFinite(focusMinutes) && focusMinutes > 0 ? focusMinutes : 25
   const displayMinutes = taskMinutes > 0 ? taskMinutes : (activeTodo ? activeTodo.pomodoros * minutesPerPomodoro : 0)
 
-  const openTodos = todos.filter((x) => !x.done)
+  const openTodos = useMemo(() => todos.filter((x) => !x.done), [todos])
   // Focused: offer the other open todos as tape switch. Empty: quick-pick.
   // Either way the slot below renders exactly SLOT_ROWS rows.
   const pickPool = activeTodo ? openTodos.filter((x) => x.id !== activeTodo.id) : openTodos

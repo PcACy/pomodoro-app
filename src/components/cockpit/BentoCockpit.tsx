@@ -1,5 +1,5 @@
 import { forwardRef, memo, useState, useRef, useCallback, useEffect, useImperativeHandle, useMemo } from 'react'
-import type { Session, Settings, TimerMode, TimerStatus, TodoItem } from '../../types'
+import type { PhaseId, Session, Settings, TimerMode, TimerStatus, TodoItem } from '../../types'
 import { HeroTimerCard } from './HeroTimerCard'
 import { GoalLoadCard } from './GoalLoadCard'
 import { FocusTimeCard } from './FocusTimeCard'
@@ -24,6 +24,7 @@ export interface BentoCockpitRef {
 
 interface BentoCockpitProps {
   // Timer props
+  phase?: PhaseId
   phaseLabel: string
   status: TimerStatus
   time?: string
@@ -71,6 +72,7 @@ interface BentoCockpitProps {
 export const BentoCockpit = memo(
   forwardRef<BentoCockpitRef, BentoCockpitProps>(function BentoCockpit(
     {
+      phase,
       phaseLabel,
       status,
       time,
@@ -336,6 +338,7 @@ export const BentoCockpit = memo(
               {/* Left: Hero Timer Card */}
               <div className="lg:col-span-8 h-full min-h-0 flex flex-col">
                 <HeroTimerCard
+                  phase={phase}
                   phaseLabel={phaseLabel}
                   status={status}
                   time={time}
@@ -387,6 +390,7 @@ export const BentoCockpit = memo(
               {/* Hero Timer */}
               <div className="w-full shrink-0 min-h-[360px] sm:min-h-0 sm:flex-1">
                 <HeroTimerCard
+                  phase={phase}
                   phaseLabel={phaseLabel}
                   status={status}
                   time={time}

@@ -1,6 +1,6 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { RotateCcw, SkipForward, Plus } from 'lucide-react'
-import type { TimerMode, TimerStatus, TodoItem } from '../../types'
+import type { PhaseId, TimerMode, TimerStatus, TodoItem } from '../../types'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useFlowTimerTick, useTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
@@ -9,6 +9,7 @@ import { HeroDotGridCanvas } from './HeroDotGridCanvas'
 import { SlidingSegmentedControl } from '../SlidingSegmentedControl'
 
 interface HeroTimerCardProps {
+  phase?: PhaseId
   phaseLabel: string
   status: TimerStatus
   time?: string
@@ -30,6 +31,7 @@ interface HeroTimerCardProps {
 const TOTAL_SEGMENTS = 20
 
 export const HeroTimerCard = memo(function HeroTimerCard({
+  phase,
   phaseLabel,
   status,
   time,
@@ -125,8 +127,10 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   }
 
   const locale = lang === 'de' ? 'de-DE' : 'en-US'
-  const dayName = localDate.toLocaleDateString(locale, { weekday: 'long' })
-  const dateFormatted = localDate.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
+  const { dayName, dateFormatted } = useMemo(() => ({
+    dayName: localDate.toLocaleDateString(locale, { weekday: 'long' }),
+    dateFormatted: localDate.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }),
+  }), [localDate, locale])
 
   return (
     <div
@@ -210,22 +214,27 @@ export const HeroTimerCard = memo(function HeroTimerCard({
                 <span className="text-fg font-medium">{shownLabel}</span>
                 <span className="text-neutral-400 dark:text-neutral-500">·</span>
                 <span className="text-neutral-700 dark:text-neutral-300 text-xs font-medium">
-                  {lang === 'de'
-                    ? `Runde ${(completedFocusInCycle % safeRounds) + 1} von ${safeRounds}`
-                    : `Round ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`}
+                  {phase === 'longBreak'
+                    ? (lang === 'de' ? `Zyklus vollendet (${safeRounds}/${safeRounds})` : `Cycle complete (${safeRounds}/${safeRounds})`)
+                    : (lang === 'de'
+                        ? `Runde ${(completedFocusInCycle % safeRounds) + 1} von ${safeRounds}`
+                        : `Round ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`)}
                 </span>
                 <div
                   className="flex items-center gap-1 ml-0.5"
                   title={
-                    lang === 'de'
-                      ? `Zyklus: ${(completedFocusInCycle % safeRounds) + 1} von ${safeRounds}`
-                      : `Cycle: ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`
+                    phase === 'longBreak'
+                      ? (lang === 'de' ? `Zyklus vollendet: ${safeRounds} von ${safeRounds}` : `Cycle complete: ${safeRounds} of ${safeRounds}`)
+                      : (lang === 'de'
+                          ? `Zyklus: ${(completedFocusInCycle % safeRounds) + 1} von ${safeRounds}`
+                          : `Cycle: ${(completedFocusInCycle % safeRounds) + 1} of ${safeRounds}`)
                   }
                 >
                   {Array.from({ length: safeRounds }).map((_, rIdx) => {
+                    const isLongBreak = phase === 'longBreak'
                     const currentRoundIdx = completedFocusInCycle % safeRounds
-                    const isCompleted = rIdx < currentRoundIdx
-                    const isCurrent = rIdx === currentRoundIdx
+                    const isCompleted = isLongBreak ? true : rIdx < currentRoundIdx
+                    const isCurrent = isLongBreak ? false : rIdx === currentRoundIdx
                     return (
                       <span
                         key={rIdx}

@@ -23,11 +23,17 @@ import { Timer } from './components/Timer'
 import { CatLogo } from './components/CatLogo'
 import { StatusBar } from './components/StatusBar'
 import { BentoCockpit, type BentoCockpitRef } from './components/cockpit/BentoCockpit'
-import { TodoManagerModal } from './components/cockpit/TodoManagerModal'
-import { SettingsModal } from './components/cockpit/SettingsModal'
 import { DeckSwitcher } from './components/DeckSwitcher'
 
-const ReflectionModal = lazy(() => import('./components/ReflectionModal').then((m) => ({ default: m.ReflectionModal })))
+const TodoManagerModal = lazy(() =>
+  import('./components/cockpit/TodoManagerModal').then((m) => ({ default: m.TodoManagerModal })),
+)
+const SettingsModal = lazy(() =>
+  import('./components/cockpit/SettingsModal').then((m) => ({ default: m.SettingsModal })),
+)
+const ReflectionModal = lazy(() =>
+  import('./components/ReflectionModal').then((m) => ({ default: m.ReflectionModal })),
+)
 
 export default function App() {
   const { t, lang } = useTranslation()
@@ -239,9 +245,6 @@ export default function App() {
 
   useWakeLock(chromeStatus === 'running')
 
-  // Note: AudioContext auto-unlock on first user gesture is handled centrally
-  // in lib/sound.ts (module-level once-listeners calling initAudio).
-
   useNotificationActions({
     onStartPhase: () => {
       if (mode === 'flow') {
@@ -263,30 +266,47 @@ export default function App() {
   const handleSyncNow = useCallback(() => void syncNow(true), [syncNow])
 
   const [liveAnnouncement, setLiveAnnouncement] = useState({
-    phase: timer.phase,
-    status: timer.status,
+    phase: chromePhase,
+    status: chromeStatus,
+    mode,
     message: '',
   })
   // Render-phase adjustment (React-endorsed "adjust state during render"):
   // derives the screen-reader announcement from phase/status transitions
   // without an effect + prev refs and without a cascading re-render.
-  if (liveAnnouncement.phase !== timer.phase || liveAnnouncement.status !== timer.status) {
+  if (
+    liveAnnouncement.phase !== chromePhase ||
+    liveAnnouncement.status !== chromeStatus ||
+    liveAnnouncement.mode !== mode
+  ) {
     let message = liveAnnouncement.message
-    if (liveAnnouncement.phase !== timer.phase) {
-      const phaseName = t.phases[timer.phase]
-      const durationMins = Math.round(timer.totalMs / 60_000)
-      message =
-        lang === 'de'
-          ? `${phaseName} gestartet (${durationMins} Minuten).`
-          : `${phaseName} started (${durationMins} minutes).`
-    } else if (liveAnnouncement.status !== timer.status) {
-      if (timer.status === 'paused') {
-        message = lang === 'de' ? `${t.phases[timer.phase]} pausiert.` : `${t.phases[timer.phase]} paused.`
-      } else if (timer.status === 'running') {
-        message = lang === 'de' ? `${t.phases[timer.phase]} fortgesetzt.` : `${t.phases[timer.phase]} resumed.`
+    if (mode === 'flow') {
+      if (liveAnnouncement.status !== flow.status) {
+        if (flow.status === 'running') {
+          message = lang === 'de' ? 'Flow gestartet.' : 'Flow started.'
+        } else if (flow.status === 'paused') {
+          message = lang === 'de' ? 'Flow pausiert.' : 'Flow paused.'
+        } else if (flow.status === 'idle') {
+          message = lang === 'de' ? 'Flow beendet.' : 'Flow finished.'
+        }
+      }
+    } else {
+      if (liveAnnouncement.phase !== timer.phase) {
+        const phaseName = t.phases[timer.phase]
+        const durationMins = Math.round(timer.totalMs / 60_000)
+        message =
+          lang === 'de'
+            ? `${phaseName} gestartet (${durationMins} Minuten).`
+            : `${phaseName} started (${durationMins} minutes).`
+      } else if (liveAnnouncement.status !== timer.status) {
+        if (timer.status === 'paused') {
+          message = lang === 'de' ? `${t.phases[timer.phase]} pausiert.` : `${t.phases[timer.phase]} paused.`
+        } else if (timer.status === 'running') {
+          message = lang === 'de' ? `${t.phases[timer.phase]} fortgesetzt.` : `${t.phases[timer.phase]} resumed.`
+        }
       }
     }
-    setLiveAnnouncement({ phase: timer.phase, status: timer.status, message })
+    setLiveAnnouncement({ phase: chromePhase, status: chromeStatus, mode, message })
   }
 
   return (
@@ -357,6 +377,7 @@ export default function App() {
         {!isZenMode && (
           <BentoCockpit
             ref={cockpitRef}
+            phase={timer.phase}
             phaseLabel={timer.phaseLabel}
             status={timer.status}
             time={timer.time}
@@ -422,6 +443,7 @@ export default function App() {
             <Timer
               large
               borderless
+              phase={timer.phase}
               phaseLabel={timer.phaseLabel}
               status={timer.status}
               time={timer.time}
@@ -470,39 +492,47 @@ export default function App() {
       )}
 
       {/* Modals for Expanded Views */}
-      <TodoManagerModal
-        isOpen={isTodoModalOpen}
-        onClose={() => setIsTodoModalOpen(false)}
-        todos={todosApi.todos}
-        tags={settings.tags}
-        activeTodoId={activeTodoId}
-        timerRunning={isRunning}
-        onAdd={todosApi.add}
-        onToggle={todosApi.toggle}
-        onEdit={todosApi.edit}
-        onRemove={handleTodoRemove}
-        onFocus={handleFocusTodoFromModal}
-      />
+      {isTodoModalOpen && (
+        <Suspense fallback={null}>
+          <TodoManagerModal
+            isOpen={isTodoModalOpen}
+            onClose={() => setIsTodoModalOpen(false)}
+            todos={todosApi.todos}
+            tags={settings.tags}
+            activeTodoId={activeTodoId}
+            timerRunning={isRunning}
+            onAdd={todosApi.add}
+            onToggle={todosApi.toggle}
+            onEdit={todosApi.edit}
+            onRemove={handleTodoRemove}
+            onFocus={handleFocusTodoFromModal}
+          />
+        </Suspense>
+      )}
 
-      <SettingsModal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
-        settings={settings}
-        update={updateSettings}
-        themeId={themeId}
-        onThemeChange={setThemeId}
-        sessions={sessions}
-        todos={todosApi.todos}
-        syncStatus={sync.status}
-        syncPending={sync.pending}
-        syncLastSyncAt={sync.lastSyncAt}
-        syncProfile={auth.profile}
-        syncAvailable={auth.available}
-        syncLoading={auth.loading}
-        onSyncLogin={auth.login}
-        onSyncLogout={auth.logout}
-        onSyncNow={handleSyncNow}
-      />
+      {isSettingsModalOpen && (
+        <Suspense fallback={null}>
+          <SettingsModal
+            isOpen={isSettingsModalOpen}
+            onClose={() => setIsSettingsModalOpen(false)}
+            settings={settings}
+            update={updateSettings}
+            themeId={themeId}
+            onThemeChange={setThemeId}
+            sessions={sessions}
+            todos={todosApi.todos}
+            syncStatus={sync.status}
+            syncPending={sync.pending}
+            syncLastSyncAt={sync.lastSyncAt}
+            syncProfile={auth.profile}
+            syncAvailable={auth.available}
+            syncLoading={auth.loading}
+            onSyncLogin={auth.login}
+            onSyncLogout={auth.logout}
+            onSyncNow={handleSyncNow}
+          />
+        </Suspense>
+      )}
 
       {/* Dynamic Status Bar */}
       <StatusBar

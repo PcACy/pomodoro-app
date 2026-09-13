@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react'
-import type { TimerStatus, TimerMode } from '../types'
+import type { PhaseId, TimerStatus, TimerMode } from '../types'
 import { useTranslation } from '../hooks/useTranslation'
 import { playMicroClick } from '../lib/sound'
 import { useFlowTimerTick, useTimerTick } from '../hooks/useTimerTick'
@@ -7,6 +7,7 @@ import { SlidingSegmentedControl } from './SlidingSegmentedControl'
 import { GlyphTimeDisplay } from './cockpit/GlyphTimeDisplay'
 
 interface Props {
+  phase?: PhaseId
   phaseLabel: string
   status: TimerStatus
   time?: string
@@ -35,6 +36,7 @@ const MODES: { value: TimerMode; label: string }[] = [
 const TOTAL_SEGMENTS = 20
 
 export const Timer = memo(function Timer({
+  phase,
   phaseLabel,
   status,
   time,
@@ -190,13 +192,23 @@ export const Timer = memo(function Timer({
               <span>{shownLabel}</span>
               <span className="text-muted/40">·</span>
               <span>
-                ROUND {currentRoundIndex + 1} / {safeRounds}
+                {phase === 'longBreak'
+                  ? `CYCLE COMPLETE (${safeRounds}/${safeRounds})`
+                  : `ROUND ${currentRoundIndex + 1} / ${safeRounds}`}
               </span>
               {/* 4 Tactile Cycle LEDs */}
-              <div className="flex items-center gap-1.5 ml-1" title={`Cycle: ${currentRoundIndex + 1} of ${safeRounds}`}>
+              <div
+                className="flex items-center gap-1.5 ml-1"
+                title={
+                  phase === 'longBreak'
+                    ? `Cycle complete: ${safeRounds} of ${safeRounds}`
+                    : `Cycle: ${currentRoundIndex + 1} of ${safeRounds}`
+                }
+              >
                 {Array.from({ length: safeRounds }).map((_, rIdx) => {
-                  const isCompleted = rIdx < currentRoundIndex
-                  const isCurrent = rIdx === currentRoundIndex
+                  const isLongBreak = phase === 'longBreak'
+                  const isCompleted = isLongBreak ? true : rIdx < currentRoundIndex
+                  const isCurrent = isLongBreak ? false : rIdx === currentRoundIndex
                   return (
                     <span
                       key={rIdx}

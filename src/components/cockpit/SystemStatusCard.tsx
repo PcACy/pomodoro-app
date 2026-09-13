@@ -18,7 +18,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
   className = '',
 }: SystemStatusCardProps) {
   const { t, lang } = useTranslation()
-  const weekDays = t.weekdays.map((w) => w.charAt(0))
+  const weekDays = useMemo(() => t.weekdays.map((w) => w.charAt(0)), [t.weekdays])
   const streak = currentStreakDays(sessions)
   // Day-granular cache key: `new Date()` inline would defeat the memo below
   // (fresh object identity each render) and go stale after midnight; the key
@@ -32,7 +32,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
     const [y, m, d] = todayKey.split('-').map(Number)
     const today = new Date(y, (m ?? 1) - 1, d)
     const weekStart = startOfWeek(today)
-    const logged = weekDays.map((_, i) => {
+    const logged = Array.from({ length: 7 }, (_, i) => {
       const dayDate = addDays(weekStart, i)
       return sessions.some((s) => sameDay(new Date(s.start), dayDate))
     })
@@ -46,7 +46,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
       weekStart,
       today,
     }
-  }, [sessions, todayKey, weekDays])
+  }, [sessions, todayKey])
 
   return (
     <BentoCard
@@ -200,9 +200,11 @@ export const SystemStatusCard = memo(function SystemStatusCard({
 
       {/* Bottom Row: Weekly consistency metric */}
       <div className="flex items-center justify-between font-sans text-xs text-muted pt-1.5 sm:pt-2 border-t border-line/40">
-        <span>Active days</span>
+        <span>{lang === 'de' ? 'Aktive Tage' : 'Active days'}</span>
         <span className="text-fg/90 font-medium tabular-nums">
-          {activeDaysThisWeek} of 7 days
+          {lang === 'de'
+            ? `${activeDaysThisWeek} von 7 Tagen`
+            : `${activeDaysThisWeek} of 7 days`}
         </span>
       </div>
     </BentoCard>

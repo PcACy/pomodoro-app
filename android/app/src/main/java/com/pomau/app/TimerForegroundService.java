@@ -242,8 +242,11 @@ public class TimerForegroundService extends Service {
 
         stopTicker();
 
-        long remainingSec = Math.max(0, (targetWhen - System.currentTimeMillis()) / 1000);
-        String shortText = formatTime(remainingSec);
+        long now = System.currentTimeMillis();
+        long diffSec = currentIsCountdown
+            ? Math.max(0, (targetWhen - now) / 1000)
+            : Math.max(0, (now - targetWhen) / 1000);
+        String shortText = formatTime(diffSec);
 
         Notification notification = buildNotification(currentTitle, currentContent, currentTargetWhen, currentIsCountdown, shortText);
 
@@ -263,15 +266,22 @@ public class TimerForegroundService extends Service {
             @Override
             public void run() {
                 long now = System.currentTimeMillis();
-                long remainingSec = Math.max(0, (currentTargetWhen - now) / 1000);
-                String shortText = formatTime(remainingSec);
+                if (currentIsCountdown) {
+                    long remainingSec = Math.max(0, (currentTargetWhen - now) / 1000);
+                    String shortText = formatTime(remainingSec);
+                    updateNotification(shortText);
 
-                updateNotification(shortText);
-
-                if (remainingSec > 0) {
-                    mainHandler.postDelayed(this, 1000);
+                    if (remainingSec > 0) {
+                        mainHandler.postDelayed(this, 1000);
+                    } else {
+                        triggerCompletionAlert();
+                        releaseWakeLock();
+                    }
                 } else {
-                    triggerCompletionAlert();
+                    long elapsedSec = Math.max(0, (now - currentTargetWhen) / 1000);
+                    String shortText = formatTime(elapsedSec);
+                    updateNotification(shortText);
+                    mainHandler.postDelayed(this, 1000);
                 }
             }
         };
@@ -347,7 +357,8 @@ public class TimerForegroundService extends Service {
             PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
             if (pm != null) {
                 wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Pomau:TimerWakeLock");
-                wakeLock.acquire();
+                // 6-hour safety timeout to prevent permanent battery drain in background
+                wakeLock.acquire(6 * 3600 * 1000L);
             }
         }
     }

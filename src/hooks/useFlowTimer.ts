@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Session, TimerStatus } from '../types'
 import { getTickerWorker } from '../lib/tickerWorker'
 import { fmtFlowTime } from '../lib/time'
-import { getFlowTickSnapshot, setFlowTickSnapshot, subscribeFlowTick } from '../lib/timerStore'
+import { setFlowTickSnapshot } from '../lib/timerStore'
 import { startForegroundTimer, stopForegroundTimer } from '../lib/foregroundTimer'
 
 const MIN_FLOW_SESSION_MS = 60_000
@@ -22,9 +22,15 @@ interface FlowTimerOptions {
   onFinish: (session: Omit<Session, 'id' | 'notes'>) => void
 }
 
+interface CoarseFlowState {
+  status: TimerStatus
+  elapsedMs: number
+}
+
 /** Open-ended count-up stopwatch. `finishSession()` logs the interval, `resetTimer()` discards it. */
 export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTimerApi {
-  const [status, setStatus] = useState<TimerStatus>('idle')
+  const [flowState, setFlowState] = useState<CoarseFlowState>({ status: 'idle', elapsedMs: 0 })
+  const status = flowState.status
   const statusRef = useRef(status)
   const elapsedRef = useRef(0)
   const segStartRef = useRef<number | null>(null)
@@ -73,7 +79,7 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
     // Sync the ref immediately: setStatus re-renders async, so a second
     // toggle in the same tick would otherwise read the stale status.
     statusRef.current = 'running'
-    setStatus('running')
+    setFlowState({ status: 'running', elapsedMs: elapsedRef.current })
   }, [])
 
   const pause = useCallback(() => {
@@ -91,7 +97,7 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
     })
     void stopForegroundTimer()
     statusRef.current = 'paused'
-    setStatus('paused')
+    setFlowState({ status: 'paused', elapsedMs: total })
   }, [])
 
   const toggle = useCallback(() => {
@@ -115,7 +121,7 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
     })
     void stopForegroundTimer()
     statusRef.current = 'idle'
-    setStatus('idle')
+    setFlowState({ status: 'idle', elapsedMs: 0 })
     if (total < MIN_FLOW_SESSION_MS) return
     onFinishRef.current({
       start: end - total,
@@ -139,7 +145,7 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
     })
     void stopForegroundTimer()
     statusRef.current = 'idle'
-    setStatus('idle')
+    setFlowState({ status: 'idle', elapsedMs: 0 })
   }, [])
 
   // Keep the shared worker running only while the flow timer runs.
@@ -201,16 +207,10 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
     return () => w.removeEventListener('message', handler)
   }, [])
 
-  // The tick store is the live source of truth while counting: reading
-  // elapsedRef during render would freeze `elapsedMs`/`time` at the value from
-  // the last status change, since ticks never re-render this hook.
-  const liveFlow = useSyncExternalStore(subscribeFlowTick, getFlowTickSnapshot)
-  const liveElapsed = status === 'idle' ? 0 : liveFlow.elapsedMs
-
   return {
-    status,
-    elapsedMs: liveElapsed,
-    time: fmtFlowTime(liveElapsed),
+    status: flowState.status,
+    elapsedMs: flowState.elapsedMs,
+    time: fmtFlowTime(flowState.elapsedMs),
     toggle,
     finishSession,
     resetTimer,

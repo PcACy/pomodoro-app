@@ -31,12 +31,13 @@ function toCsv(rows: unknown[][], delimiter: string): string {
 }
 
 export function sessionsToCsv(sessions: Session[], delimiter = ';'): string {
-  const header = ['id', 'start', 'end', 'duration_ms', 'task', 'tag', 'notes', 'date']
+  const header = ['id', 'start', 'end', 'duration_ms', 'mode', 'task', 'tag', 'notes', 'date']
   const rows = sessions.map((s) => [
     s.id,
     s.start,
     s.end,
     s.durationMs,
+    s.mode ?? 'pomodoro',
     s.task,
     s.tag,
     s.notes ?? '',
