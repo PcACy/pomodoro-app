@@ -39,7 +39,7 @@ const ReflectionModal = lazy(() =>
 export default function App() {
   const { t, lang } = useTranslation()
   const [colorMode, setColorMode, themeId, setThemeId] = useTheme()
-  const [settings, updateSettings] = useSettings()
+  const [settings, updateSettings, mergeRemoteSettings] = useSettings()
   const [isTodoModalOpen, setIsTodoModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [isZenMode, setIsZenMode] = useState(false)
@@ -82,6 +82,8 @@ export default function App() {
     mergeRemoteTodos: todosApi.mergeRemote,
     tags: settings.tags,
     mergeRemoteTags: handleMergeRemoteTags,
+    settings,
+    mergeRemoteSettings,
   })
 
   const [isMouseActive, setIsMouseActive] = useState(true)
@@ -284,6 +286,7 @@ export default function App() {
     if (s && typeof s === 'object') {
       updateSettings(() => s as Settings)
       enqueue({ kind: 'replace', table: 'tags' })
+      enqueue({ kind: 'replace', table: 'settings' })
     }
   }, [updateSettings])
 

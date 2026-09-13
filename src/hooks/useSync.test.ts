@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mergeRemoteTagsList, tagRowId } from './useSync'
+import { mergeWithDefaults } from './useSettings'
 import type { SyncOp } from '../lib/syncQueue'
 
 describe('useSync tag synchronization helpers', () => {
@@ -84,6 +85,37 @@ describe('useSync tag synchronization helpers', () => {
     it('falls back to default or local tags if all would be deleted', () => {
       const result = mergeRemoteTagsList([], [], [])
       expect(result.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('settings synchronization helpers', () => {
+    it('parses settings with updatedAt correctly', () => {
+      const parsed = mergeWithDefaults({
+        phases: { focus: 45, shortBreak: 10, longBreak: 20, roundsBeforeLongBreak: 3 },
+        dailyGoalMinutes: 180,
+        weeklyGoalMinutes: 900,
+        updatedAt: 1700000000000,
+      })
+      expect(parsed.phases.focus).toBe(45)
+      expect(parsed.dailyGoalMinutes).toBe(180)
+      expect(parsed.weeklyGoalMinutes).toBe(900)
+      expect(parsed.updatedAt).toBe(1700000000000)
+    })
+
+    it('sanitizes corrupt or negative numbers while preserving valid fields and updatedAt', () => {
+      const parsed = mergeWithDefaults({
+        phases: { focus: -10, shortBreak: 0, longBreak: 200, roundsBeforeLongBreak: 0 },
+        dailyGoalMinutes: -50,
+        weeklyGoalMinutes: NaN,
+        updatedAt: 1700000000000,
+      })
+      expect(parsed.phases.focus).toBe(25) // fallback to default
+      expect(parsed.phases.shortBreak).toBe(5) // fallback to default
+      expect(parsed.phases.longBreak).toBe(180) // capped at max 180
+      expect(parsed.phases.roundsBeforeLongBreak).toBe(4) // fallback to default
+      expect(parsed.dailyGoalMinutes).toBe(0)
+      expect(parsed.weeklyGoalMinutes).toBe(300) // fallback to default
+      expect(parsed.updatedAt).toBe(1700000000000)
     })
   })
 })

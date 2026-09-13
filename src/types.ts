@@ -14,6 +14,7 @@ export interface Settings {
   dailyGoalMinutes: number
   weeklyGoalMinutes: number
   tags: string[]
+  updatedAt?: number
 }
 
 export interface Session {

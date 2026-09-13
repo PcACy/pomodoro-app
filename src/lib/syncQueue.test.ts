@@ -16,8 +16,8 @@ vi.stubGlobal('localStorage', {
 import { commitQueue, drainQueue, enqueue, hasPendingOps, markFailed, peekQueue, requeue } from './syncQueue'
 import type { SyncOp } from './syncQueue'
 
-const upsert = (table: 'sessions' | 'todos' | 'tags', id: string): SyncOp => ({ kind: 'upsert', table, id })
-const del = (table: 'sessions' | 'todos' | 'tags', id: string): SyncOp => ({ kind: 'delete', table, id })
+const upsert = (table: 'sessions' | 'todos' | 'tags' | 'settings', id: string): SyncOp => ({ kind: 'upsert', table, id })
+const del = (table: 'sessions' | 'todos' | 'tags' | 'settings', id: string): SyncOp => ({ kind: 'delete', table, id })
 
 describe('syncQueue', () => {
   beforeEach(() => store.clear())
@@ -34,6 +34,12 @@ describe('syncQueue', () => {
     enqueue(upsert('tags', 'Personal'))
     enqueue(del('tags', 'Work'))
     expect(drainQueue()).toEqual([upsert('tags', 'Personal'), del('tags', 'Work')])
+  })
+
+  it('supports settings queueing and replace', () => {
+    enqueue(upsert('settings', 'settings'))
+    enqueue({ kind: 'replace', table: 'settings' })
+    expect(drainQueue()).toEqual([{ kind: 'replace', table: 'settings' }])
   })
 
   it('replace supersedes all prior ops of the same table only', () => {
