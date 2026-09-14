@@ -60,6 +60,11 @@ jobs:
           echo "Found APK at: $APK_FILE"
           echo "apk_path=$APK_FILE" >> "$GITHUB_OUTPUT"
 
+      - name: Verify APK Signature
+        run: |
+          echo "Verifying APK signing certificate..."
+          keytool -printcert -jarfile "${{ steps.locate-apk.outputs.apk_path }}"
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
