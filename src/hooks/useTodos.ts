@@ -138,5 +138,9 @@ export function useTodos() {
     [updateTodos],
   )
 
-  return { todos, add, toggle, edit, remove, incrementPomodoros, mergeRemote }
+  const clearAll = useCallback(() => {
+    updateTodos(() => [])
+  }, [updateTodos])
+
+  return { todos, add, toggle, edit, remove, incrementPomodoros, mergeRemote, clearAll }
 }

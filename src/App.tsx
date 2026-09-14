@@ -14,9 +14,9 @@ import { useNotificationActions } from './hooks/useNotificationActions'
 import { useTodos } from './hooks/useTodos'
 import { useAuth } from './hooks/useAuth'
 import { useSync, mergeRemoteTagsList } from './hooks/useSync'
-import { enqueue, peekQueue } from './lib/syncQueue'
+import { drainQueue, enqueue, peekQueue } from './lib/syncQueue'
 import { useTranslation } from './hooks/useTranslation'
-import { addSession, updateSessionNotes } from './lib/db'
+import { addSession, clearSessions, updateSessionNotes } from './lib/db'
 import { requestNotificationPermission } from './lib/notify'
 import { playMicroClick } from './lib/sound'
 import { STORAGE_KEYS, type Session, type Settings, type TimerMode } from './types'
@@ -283,6 +283,18 @@ export default function App() {
 
   const syncNow = sync.sync
   const handleSyncNow = useCallback(() => void syncNow(true), [syncNow])
+  const handleSyncLogout = useCallback(
+    async (clearLocalData: boolean) => {
+      if (clearLocalData) {
+        await clearSessions()
+        todosApi.clearAll()
+        drainQueue()
+        showToast(t.sync.logoutClear)
+      }
+      await auth.logout()
+    },
+    [auth, showToast, t, todosApi],
+  )
 
   const [liveAnnouncement, setLiveAnnouncement] = useState({
     phase: chromePhase,
@@ -547,7 +559,7 @@ export default function App() {
             syncAvailable={auth.available}
             syncLoading={auth.loading}
             onSyncLogin={auth.login}
-            onSyncLogout={auth.logout}
+            onSyncLogout={handleSyncLogout}
             onSyncNow={handleSyncNow}
           />
         </Suspense>

@@ -24,7 +24,7 @@ interface SettingsModalProps {
   syncAvailable: boolean
   syncLoading: boolean
   onSyncLogin: () => void
-  onSyncLogout: () => void
+  onSyncLogout: (clearLocalData: boolean) => void
   onSyncNow: () => void
 }
 

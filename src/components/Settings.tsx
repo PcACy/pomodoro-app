@@ -278,7 +278,7 @@ interface Props {
   syncAvailable: boolean
   syncLoading: boolean
   onSyncLogin: () => void
-  onSyncLogout: () => void
+  onSyncLogout: (clearLocalData: boolean) => void
   onSyncNow: () => void
 }
 
@@ -312,6 +312,7 @@ export const SettingsPanel = memo(function SettingsPanel({
 
   // Destructive Confirmation State (Inline Two-Step)
   const [confirmClear, setConfirmClear] = useState(false)
+  const [confirmLogout, setConfirmLogout] = useState(false)
 
   // Listen for storage events across tabs / components
   useEffect(() => {
@@ -949,15 +950,64 @@ export const SettingsPanel = memo(function SettingsPanel({
                 type="button"
                 onClick={() => {
                   playMicroClick('tap')
-                  onSyncLogout()
+                  setConfirmLogout((v) => !v)
                 }}
-                className="flex items-center gap-1.5 rounded-full border border-line bg-canvas px-3 py-1 text-xs text-muted hover:text-fg hover:border-fg/40 transition-colors cursor-pointer"
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors cursor-pointer ${
+                  confirmLogout
+                    ? 'border-accent text-accent bg-accent/10'
+                    : 'border-line bg-canvas text-muted hover:text-fg hover:border-fg/40'
+                }`}
               >
                 <LogOut size={12} /> {t.sync.logout}
               </button>
             </span>
           </div>
         ) : null}
+
+        {confirmLogout && syncProfile && (
+          <div className="flex flex-col gap-2.5 rounded-card border border-accent/40 bg-accent/5 p-3.5 animate-fade-in font-mono">
+            <div className="flex items-center gap-2 text-xs font-bold text-fg">
+              <AlertTriangle size={14} className="text-accent shrink-0" />
+              <span>{t.sync.logoutConfirmTitle}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 pt-0.5">
+              <button
+                type="button"
+                onClick={() => {
+                  playMicroClick('tap')
+                  setConfirmLogout(false)
+                  onSyncLogout(false)
+                }}
+                className="rounded-full border border-line bg-surface px-3 py-1 text-xs text-fg hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
+              >
+                {t.sync.logoutKeep}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playMicroClick('tap')
+                  setConfirmLogout(false)
+                  onSyncLogout(true)
+                }}
+                className="rounded-full border border-accent bg-accent text-white px-3 py-1 text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer"
+              >
+                {t.sync.logoutClear}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playMicroClick('tap')
+                  setConfirmLogout(false)
+                }}
+                className="ml-auto rounded-full p-1 text-muted hover:text-fg hover:bg-canvas transition-colors cursor-pointer"
+                title="Cancel"
+                aria-label="Cancel"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {syncStatus === 'synced' && syncLastSyncAt != null && (
           <p className="text-[10px] text-muted">

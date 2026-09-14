@@ -132,6 +132,9 @@ export interface Messages {
     notConfigured: string
     login: string
     logout: string
+    logoutKeep: string
+    logoutClear: string
+    logoutConfirmTitle: string
     syncing: string
     synced: string
     pending: string
@@ -296,6 +299,9 @@ const de: Messages = {
       'Cloud-Sync ist nicht konfiguriert. Ergänze VITE_SUPABASE_URL und VITE_SUPABASE_ANON_KEY – die App bleibt vollständig lokal.',
     login: 'Mit GitHub synchronisieren',
     logout: 'Abmelden',
+    logoutKeep: 'Abmelden & Daten behalten',
+    logoutClear: 'Abmelden & Daten löschen',
+    logoutConfirmTitle: 'Lokale Daten auf diesem Gerät behalten?',
     syncing: 'Synchronisiere …',
     synced: 'Synchronisiert',
     pending: 'Änderungen ausstehend',
@@ -465,6 +471,9 @@ const en: Messages = {
       'Cloud sync is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY – the app keeps working fully local.',
     login: 'Sync with GitHub',
     logout: 'Log out',
+    logoutKeep: 'Log out & keep data',
+    logoutClear: 'Log out & clear data',
+    logoutConfirmTitle: 'Keep local data on this device?',
     syncing: 'Syncing …',
     synced: 'Synced',
     pending: 'Changes pending',
