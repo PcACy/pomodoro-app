@@ -86,7 +86,7 @@ const TagSelect = memo(function TagSelect({
                 backgroundColor: selectedColor || '#ffffff',
               }}
             />
-            <span className="max-w-[80px] sm:max-w-[110px] truncate">{value}</span>
+            <span className="max-w-[80px] sm:max-w-[140px] truncate">{value}</span>
           </>
         ) : (
           <span>{noTagLabel}</span>

@@ -62,17 +62,20 @@ export const TodoManagerModal = memo(function TodoManagerModal({
       }}
     >
       <div
-        className="modal-panel relative w-full max-w-[480px] max-h-[85vh] overflow-y-auto rounded-card bg-surface border border-line p-5 sm:p-7 flex flex-col gap-4 shadow-none"
+        className="modal-panel relative w-full max-w-2xl lg:max-w-3xl max-h-[90vh] overflow-y-auto rounded-card bg-surface border border-line p-5 sm:p-7 flex flex-col gap-5 shadow-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-line">
+        <div className="flex items-center justify-between pb-3.5 border-b border-line">
           <div>
-            <span className="font-mono text-[10px] sm:text-xs tracking-widest text-muted uppercase">
-              TASK MANAGER · INBOX & ARCHIVE
-            </span>
-            <div className="flex items-center gap-3 mt-0.5">
-              <h2 className="font-sans text-lg font-medium text-fg">
+            <div className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
+              <span className="font-mono text-[10px] sm:text-xs tracking-widest text-muted uppercase">
+                TASK MANAGER · INBOX & ARCHIVE
+              </span>
+            </div>
+            <div className="flex items-center gap-3 mt-1">
+              <h2 className="font-sans text-lg sm:text-xl font-medium text-fg">
                 Manage Tasks & Projects
               </h2>
               <span className="rounded-full border border-line bg-canvas px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted">
@@ -87,7 +90,7 @@ export const TodoManagerModal = memo(function TodoManagerModal({
               playMicroClick('tap')
               onClose()
             }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
           >
             <X size={13} />
             <span>ESC</span>
