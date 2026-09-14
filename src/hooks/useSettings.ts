@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useLocalState } from './useLocalState'
 import { DEFAULT_SETTINGS, STORAGE_KEYS, type PhaseConfig, type Settings } from '../types'
 import { enqueue } from '../lib/syncQueue'
@@ -7,7 +7,9 @@ import { enqueue } from '../lib/syncQueue'
 const positiveNumber = (value: unknown, fallback: number): number =>
   typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : fallback
 
-export function mergeWithDefaults(stored: Partial<Settings> | undefined): Settings {
+export type StoredSettings = Partial<Omit<Settings, 'phases'>> & { phases?: Partial<PhaseConfig> }
+
+export function mergeWithDefaults(stored: StoredSettings | undefined): Settings {
   // Imported settings files are merged blind (`s as Settings`) and may contain
   // 0/NaN/negative phase durations or corrupted tags which would render the timer unusable.
   const s = (stored && typeof stored === 'object' ? stored : {}) as Partial<Settings>
@@ -51,28 +53,63 @@ export function mergeWithDefaults(stored: Partial<Settings> | undefined): Settin
   }
 }
 
+export function haveSettingsChanged(prev: Settings, next: Settings): boolean {
+  return (
+    prev.phases.focus !== next.phases.focus ||
+    prev.phases.shortBreak !== next.phases.shortBreak ||
+    prev.phases.longBreak !== next.phases.longBreak ||
+    prev.phases.roundsBeforeLongBreak !== next.phases.roundsBeforeLongBreak ||
+    prev.dailyGoalMinutes !== next.dailyGoalMinutes ||
+    prev.weeklyGoalMinutes !== next.weeklyGoalMinutes
+  )
+}
+
+export function haveTagsChanged(prevTags: string[], nextTags: string[]): boolean {
+  if (prevTags.length !== nextTags.length) return true
+  return prevTags.some((t, i) => t !== nextTags[i])
+}
+
 const EMPTY_SETTINGS: Partial<Settings> = {}
 
 export function useSettings(): [
   Settings,
   (updater: (s: Settings) => Settings) => void,
   (remote: Partial<Settings>, remoteUpdatedAt: number) => void,
+  (tagsOrUpdater: string[] | ((currentTags: string[]) => string[])) => void,
 ] {
   const [settings, setSettings] = useLocalState<Partial<Settings>>(STORAGE_KEYS.settings, EMPTY_SETTINGS)
 
   const merged = useMemo(() => mergeWithDefaults(settings), [settings])
+  const settingsRef = useRef(merged)
+  useEffect(() => {
+    settingsRef.current = merged
+  }, [merged])
 
   const update = useCallback(
     (updater: (s: Settings) => Settings) => {
+      const current = settingsRef.current
+      const next = updater(current)
+      const settingsChanged = haveSettingsChanged(current, next)
+      const tagsChanged = haveTagsChanged(current.tags, next.tags)
+
+      if (!settingsChanged && !tagsChanged) {
+        return
+      }
+
       const now = Date.now()
       setSettings((prev) => {
-        const next = updater(mergeWithDefaults(prev))
+        const prevMerged = mergeWithDefaults(prev)
+        const updated = updater(prevMerged)
+        const didSettingsChange = haveSettingsChanged(prevMerged, updated)
         return {
-          ...next,
-          updatedAt: now,
+          ...updated,
+          ...(didSettingsChange ? { updatedAt: now } : {}),
         } as Partial<Settings>
       })
-      enqueue({ kind: 'upsert', table: 'settings', id: 'settings' })
+
+      if (settingsChanged) {
+        enqueue({ kind: 'upsert', table: 'settings', id: 'settings' })
+      }
     },
     [setSettings],
   )
@@ -96,5 +133,23 @@ export function useSettings(): [
     [setSettings],
   )
 
-  return [merged, update, mergeRemote]
+  const setRemoteTags = useCallback(
+    (tagsOrUpdater: string[] | ((currentTags: string[]) => string[])) => {
+      setSettings((prev) => {
+        const current = mergeWithDefaults(prev)
+        const nextTags =
+          typeof tagsOrUpdater === 'function' ? tagsOrUpdater(current.tags) : tagsOrUpdater
+        if (!haveTagsChanged(current.tags, nextTags)) {
+          return prev
+        }
+        return {
+          ...prev,
+          tags: nextTags,
+        }
+      })
+    },
+    [setSettings],
+  )
+
+  return [merged, update, mergeRemote, setRemoteTags]
 }

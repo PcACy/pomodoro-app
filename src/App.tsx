@@ -39,7 +39,7 @@ const ReflectionModal = lazy(() =>
 export default function App() {
   const { t, lang } = useTranslation()
   const [colorMode, setColorMode, themeId, setThemeId] = useTheme()
-  const [settings, updateSettings, mergeRemoteSettings] = useSettings()
+  const [settings, updateSettings, mergeRemoteSettings, setRemoteTags] = useSettings()
   const [isTodoModalOpen, setIsTodoModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [isZenMode, setIsZenMode] = useState(false)
@@ -64,18 +64,9 @@ export default function App() {
   const handleMergeRemoteTags = useCallback(
     (remoteTags: string[]) => {
       if (!remoteTags.length) return
-      updateSettings((prev) => {
-        const merged = mergeRemoteTagsList(prev.tags, remoteTags, peekQueue())
-        if (
-          merged.length === prev.tags.length &&
-          merged.every((t, i) => t === prev.tags[i])
-        ) {
-          return prev
-        }
-        return { ...prev, tags: merged }
-      })
+      setRemoteTags((currentTags) => mergeRemoteTagsList(currentTags, remoteTags, peekQueue()))
     },
-    [updateSettings],
+    [setRemoteTags],
   )
   const sync = useSync({
     user: auth.user,
