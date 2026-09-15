@@ -54,8 +54,8 @@ export function useTodos() {
             todosRef.current = valid
             setTodos(valid)
           }
-        } catch {
-          /* ignore */
+        } catch (err) {
+          console.error('Failed to parse todos from storage', err)
         }
       }
     }
