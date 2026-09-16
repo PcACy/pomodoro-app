@@ -22,7 +22,6 @@ export interface TimerForegroundPlugin {
 
 export const TimerForeground = registerPlugin<TimerForegroundPlugin>('TimerForeground')
 
-let isRunning = false
 let operationChain: Promise<void> = Promise.resolve()
 
 /**
@@ -63,7 +62,6 @@ export function startForegroundTimer(options: StartTimerOptions): Promise<void> 
         targetTime: options.targetTime,
         isCountDown: options.isCountDown ?? true,
       })
-      isRunning = true
     })
     .catch((err) => {
       console.warn('[ForegroundTimer] Failed to start foreground timer:', err)
@@ -82,13 +80,10 @@ export function stopForegroundTimer(): Promise<void> {
 
   operationChain = operationChain
     .then(async () => {
-      if (!isRunning) return
       try {
         await TimerForeground.stopTimer()
       } catch (err) {
         console.warn('[ForegroundTimer] Failed to stop foreground timer:', err)
-      } finally {
-        isRunning = false
       }
     })
     .catch((err) => {

@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { isTableMissingError, mergeRemoteTagsList, tagRowId } from './useSync'
+import {
+  computeMergedSessionsList,
+  isTableMissingError,
+  mergeRemoteTagsList,
+  mergeRemoteTodosList,
+  preferNewerTodo,
+  tagRowId,
+} from './useSync'
 import { mergeWithDefaults } from './useSettings'
 import type { SyncOp } from '../lib/syncQueue'
+import type { Session, TodoItem } from '../types'
 
 describe('useSync tag synchronization helpers', () => {
   describe('tagRowId', () => {
@@ -138,6 +146,158 @@ describe('useSync tag synchronization helpers', () => {
       expect(isTableMissingError(undefined)).toBe(false)
       expect(isTableMissingError({ code: '23505', message: 'duplicate key value violates unique constraint' })).toBe(false)
       expect(isTableMissingError({ status: 500, message: 'Internal Server Error' })).toBe(false)
+    })
+  })
+
+  describe('mergeRemoteTodosList & preferNewerTodo', () => {
+    const baseTodo: TodoItem = {
+      id: 't-1',
+      title: 'Task 1',
+      tag: 'Work',
+      done: false,
+      pomodoros: 0,
+      createdAt: 1000,
+      updatedAt: 1000,
+    }
+
+    describe('preferNewerTodo', () => {
+      it('selects the todo with higher updatedAt timestamp', () => {
+        const older = { ...baseTodo, updatedAt: 1000 }
+        const newer = { ...baseTodo, title: 'Updated Task', updatedAt: 2000 }
+        expect(preferNewerTodo(older, newer)).toBe(newer)
+        expect(preferNewerTodo(newer, older)).toBe(newer)
+      })
+
+      it('falls back to completedAt or createdAt if updatedAt is absent', () => {
+        const a: TodoItem = { id: 't-1', title: 'A', tag: '', done: false, pomodoros: 0, createdAt: 1000 }
+        const b: TodoItem = { id: 't-1', title: 'B', tag: '', done: true, pomodoros: 1, createdAt: 500, completedAt: 1500 }
+        expect(preferNewerTodo(a, b)).toBe(b)
+      })
+    })
+
+    describe('mergeRemoteTodosList', () => {
+      it('removes local todos that were deleted remotely when no pending local edits exist', () => {
+        const local = [
+          { ...baseTodo, id: 't-1' },
+          { ...baseTodo, id: 't-2' },
+        ]
+        const remote = [{ ...baseTodo, id: 't-1' }]
+
+        const merged = mergeRemoteTodosList(local, remote, [])
+        expect(merged.map((t) => t.id)).toEqual(['t-1'])
+      })
+
+      it('retains pending local upserts even when absent from remote', () => {
+        const local = [
+          { ...baseTodo, id: 't-1' },
+          { ...baseTodo, id: 't-new' },
+        ]
+        const remote = [{ ...baseTodo, id: 't-1' }]
+        const pendingOps: SyncOp[] = [{ kind: 'upsert', table: 'todos', id: 't-new' }]
+
+        const merged = mergeRemoteTodosList(local, remote, pendingOps)
+        expect(merged.map((t) => t.id)).toEqual(['t-1', 't-new'])
+      })
+
+      it('honors pending local deletes even if remote still returns the todo', () => {
+        const local = [{ ...baseTodo, id: 't-1' }]
+        const remote = [
+          { ...baseTodo, id: 't-1' },
+          { ...baseTodo, id: 't-2' },
+        ]
+        const pendingOps: SyncOp[] = [{ kind: 'delete', table: 'todos', id: 't-2' }]
+
+        const merged = mergeRemoteTodosList(local, remote, pendingOps)
+        expect(merged.map((t) => t.id)).toEqual(['t-1'])
+      })
+
+      it('adds new remote todos from other devices', () => {
+        const local = [{ ...baseTodo, id: 't-1' }]
+        const remote = [
+          { ...baseTodo, id: 't-1' },
+          { ...baseTodo, id: 't-remote' },
+        ]
+
+        const merged = mergeRemoteTodosList(local, remote, [])
+        expect(merged.map((t) => t.id)).toEqual(['t-1', 't-remote'])
+      })
+
+      it('resolves conflicting edits by preferring the newer version', () => {
+        const local = [{ ...baseTodo, id: 't-1', title: 'Local Version', updatedAt: 2000 }]
+        const remote = [{ ...baseTodo, id: 't-1', title: 'Remote Version', updatedAt: 3000 }]
+
+        const merged = mergeRemoteTodosList(local, remote, [])
+        expect(merged[0].title).toBe('Remote Version')
+      })
+    })
+  })
+
+  describe('computeMergedSessionsList', () => {
+    const baseSession: Session = {
+      id: 'sess-1',
+      start: 1000,
+      end: 25000,
+      durationMs: 24000,
+      task: 'Coding',
+      tag: 'Work',
+      mode: 'pomodoro',
+      updatedAt: 25000,
+    }
+
+    it('adds new remote sessions not yet present locally', () => {
+      const local: Session[] = []
+      const remote = [baseSession]
+      const { toUpsert, toDelete } = computeMergedSessionsList(local, remote, [])
+      expect(toUpsert).toEqual([baseSession])
+      expect(toDelete).toEqual([])
+    })
+
+    it('deletes local sessions that were removed on remote when no local pending ops exist', () => {
+      const local = [
+        { ...baseSession, id: 'sess-1' },
+        { ...baseSession, id: 'sess-deleted' },
+      ]
+      const remote = [{ ...baseSession, id: 'sess-1' }]
+      const { toUpsert, toDelete } = computeMergedSessionsList(local, remote, [])
+      expect(toDelete).toEqual(['sess-deleted'])
+      expect(toUpsert).toEqual([])
+    })
+
+    it('preserves local sessions absent from remote if pending local upsert exists', () => {
+      const local = [
+        { ...baseSession, id: 'sess-1' },
+        { ...baseSession, id: 'sess-offline' },
+      ]
+      const remote = [{ ...baseSession, id: 'sess-1' }]
+      const pendingOps: SyncOp[] = [{ kind: 'upsert', table: 'sessions', id: 'sess-offline' }]
+      const { toUpsert, toDelete } = computeMergedSessionsList(local, remote, pendingOps)
+      expect(toDelete).toEqual([])
+      expect(toUpsert).toEqual([])
+    })
+
+    it('updates local sessions when remote version is newer', () => {
+      const local = [{ ...baseSession, id: 'sess-1', updatedAt: 1000, notes: 'draft' }]
+      const remote = [{ ...baseSession, id: 'sess-1', updatedAt: 2000, notes: 'final notes' }]
+      const { toUpsert, toDelete } = computeMergedSessionsList(local, remote, [])
+      expect(toUpsert).toEqual([remote[0]])
+      expect(toDelete).toEqual([])
+    })
+
+    it('fills remote notes when timestamps are equal and local has no notes', () => {
+      const local = [{ ...baseSession, id: 'sess-1', updatedAt: 1000, notes: undefined }]
+      const remote = [{ ...baseSession, id: 'sess-1', updatedAt: 1000, notes: 'synced note' }]
+      const { toUpsert, toDelete } = computeMergedSessionsList(local, remote, [])
+      expect(toUpsert).toEqual([{ ...local[0], notes: 'synced note' }])
+      expect(toDelete).toEqual([])
+    })
+
+    it('returns empty operations when local device has a pending replace op', () => {
+      const local = [{ ...baseSession, id: 'sess-1' }]
+      const remote = [{ ...baseSession, id: 'sess-2' }]
+      const pendingOps: SyncOp[] = [{ kind: 'replace', table: 'sessions' }]
+      const { toUpsert, toDelete } = computeMergedSessionsList(local, remote, pendingOps)
+      expect(toUpsert).toEqual([])
+      expect(toDelete).toEqual([])
     })
   })
 })

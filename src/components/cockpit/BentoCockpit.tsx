@@ -55,6 +55,7 @@ interface BentoCockpitProps {
   // Analytics & Sessions
   sessions: Session[]
   onImportSettings: (s: unknown) => void
+  onImportTodos?: (todos: unknown[]) => void
 
   // Settings & Theme
   settings: Settings
@@ -99,6 +100,7 @@ export const BentoCockpit = memo(
       onOpenTodoManager,
       sessions,
       onImportSettings,
+      onImportTodos,
       settings,
       onOpenSettingsModal,
       activeDeck = 0,
@@ -602,6 +604,7 @@ export const BentoCockpit = memo(
                         if (window.confirm(t.settings.confirmClear)) void clearSessions()
                       }}
                       onImportSettings={onImportSettings}
+                      onImportTodos={onImportTodos}
                       className="flex-1 min-h-0"
                     />
                   </BentoCard>

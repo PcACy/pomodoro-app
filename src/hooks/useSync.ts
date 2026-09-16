@@ -143,6 +143,54 @@ export function mergeRemoteTagsList(
   return result.length > 0 ? result : (currentTags.length > 0 ? currentTags : DEFAULT_SETTINGS.tags)
 }
 
+export const preferNewerTodo = (a: TodoItem, b: TodoItem): TodoItem => {
+  const ts = (t: TodoItem): number => t.updatedAt ?? t.completedAt ?? t.createdAt
+  return ts(b) >= ts(a) ? b : a
+}
+
+export function mergeRemoteTodosList(
+  localTodos: TodoItem[],
+  remoteTodos: TodoItem[],
+  pendingOps: SyncOp[] = [],
+): TodoItem[] {
+  const todoOps = pendingOps.filter((op) => op.table === 'todos')
+  const pendingDeletes = new Set(
+    todoOps.filter((op) => op.kind === 'delete').map((op) => op.id),
+  )
+  const pendingUpserts = new Set(
+    todoOps
+      .filter((op): op is Extract<typeof op, { kind: 'upsert' }> => op.kind === 'upsert')
+      .map((op) => op.id),
+  )
+
+  const remoteMap = new Map(remoteTodos.map((t) => [t.id, t]))
+  const result: TodoItem[] = []
+  const seen = new Set<string>()
+
+  // 1. Keep local todos that also exist in remote or are pending local addition,
+  // preserving the user's local todo order.
+  for (const local of localTodos) {
+    if (pendingDeletes.has(local.id)) continue
+    const remote = remoteMap.get(local.id)
+    if (remote) {
+      result.push(preferNewerTodo(local, remote))
+      seen.add(local.id)
+    } else if (pendingUpserts.has(local.id)) {
+      result.push(local)
+      seen.add(local.id)
+    }
+  }
+
+  // 2. Add remote todos from other devices not yet seen locally
+  for (const remote of remoteTodos) {
+    if (pendingDeletes.has(remote.id) || seen.has(remote.id)) continue
+    result.push(remote)
+    seen.add(remote.id)
+  }
+
+  return result
+}
+
 interface TodoRow extends Omit<TodoItem, 'createdAt' | 'completedAt' | 'updatedAt'> {
   user_id: string
   created_at: number
@@ -214,27 +262,64 @@ const rowToSession = (r: SessionRow): Session => ({
 /** Last-write-wins merge key; falls back to `start` for legacy records. */
 const sessionTs = (s: Session): number => s.updatedAt ?? s.start
 
-async function mergeSessionsIntoDb(remote: Session[]): Promise<void> {
-  if (remote.length === 0) return
-  const local = await db.sessions.toArray()
+export function computeMergedSessionsList(
+  local: Session[],
+  remote: Session[],
+  pendingOps: SyncOp[] = [],
+): { toUpsert: Session[]; toDelete: string[] } {
+  const sessionOps = pendingOps.filter((op) => op.table === 'sessions')
+  const hasReplacePending = sessionOps.some((op) => op.kind === 'replace')
+  if (hasReplacePending) {
+    return { toUpsert: [], toDelete: [] }
+  }
+  const pendingUpsertIds = new Set(
+    sessionOps
+      .filter((op): op is Extract<typeof op, { kind: 'upsert' }> => op.kind === 'upsert')
+      .map((op) => op.id),
+  )
+
+  const remoteById = new Map(remote.map((s) => [s.id, s]))
   const localById = new Map(local.map((s) => [s.id, s]))
+
   const toUpsert: Session[] = []
-  for (const r of remote) {
-    const l = localById.get(r.id)
-    if (!l) {
-      toUpsert.push(r)
-      continue
-    }
-    if (sessionTs(r) > sessionTs(l)) {
-      toUpsert.push(r)
-    } else if (sessionTs(r) === sessionTs(l) && !l.notes && r.notes) {
-      // Same timestamp, equal data – keep the local record but fill a remote note.
-      toUpsert.push({ ...l, notes: r.notes })
+  const toDelete: string[] = []
+
+  for (const l of local) {
+    const r = remoteById.get(l.id)
+    if (r) {
+      if (sessionTs(r) > sessionTs(l)) {
+        toUpsert.push(r)
+      } else if (sessionTs(r) === sessionTs(l) && !l.notes && r.notes) {
+        toUpsert.push({ ...l, notes: r.notes })
+      }
+    } else if (!pendingUpsertIds.has(l.id)) {
+      toDelete.push(l.id)
     }
   }
-  if (toUpsert.length) {
+
+  for (const r of remote) {
+    if (!localById.has(r.id)) {
+      toUpsert.push(r)
+    }
+  }
+
+  return { toUpsert, toDelete }
+}
+
+export async function mergeSessionsIntoDb(
+  remote: Session[],
+  pendingOps: SyncOp[] = [],
+): Promise<void> {
+  const local = await db.sessions.toArray()
+  const { toUpsert, toDelete } = computeMergedSessionsList(local, remote, pendingOps)
+  if (toUpsert.length > 0 || toDelete.length > 0) {
     await db.transaction('rw', db.sessions, async () => {
-      await db.sessions.bulkPut(toUpsert)
+      if (toDelete.length > 0) {
+        await db.sessions.bulkDelete(toDelete)
+      }
+      if (toUpsert.length > 0) {
+        await db.sessions.bulkPut(toUpsert)
+      }
     })
   }
 }
@@ -446,13 +531,58 @@ export function useSync({
         supabase.from('tags').select('*').eq('user_id', userId),
         supabase.from('user_settings').select('*').eq('user_id', userId).maybeSingle(),
       ])
-      if (sess.error) throw sess.error
-      if (todos.error) throw todos.error
       // The user may have logged out while the pull was in flight: never
       // merge another account's rows into the local store.
       if (userRef.current?.id !== userId) return false
-      await mergeSessionsIntoDb((sess.data ?? []).map((r) => rowToSession(r as SessionRow)))
-      mergeRef.current((todos.data ?? []).map((r) => rowToTodo(r as TodoRow)))
+
+      const remoteSettingsRow = userSettingsRes.error
+        ? null
+        : (userSettingsRes.data as {
+            user_id: string
+            settings: Partial<Settings>
+            updated_at: number
+          } | null)
+      const isFreshAccount = !remoteSettingsRow && !userSettingsRes.error
+
+      if (sess.error) {
+        if (isTableMissingError(sess.error)) {
+          console.warn('[sync] public.sessions table not found on Supabase. Apply schema.sql to enable session sync.')
+        } else {
+          throw sess.error
+        }
+      } else {
+        const remoteSessions = (sess.data ?? []) as SessionRow[]
+        if (remoteSessions.length === 0 && isFreshAccount) {
+          const localSessions = await db.sessions.toArray()
+          if (localSessions.length > 0) {
+            const seedRows = localSessions.map((s) => sessionToRow(s, userId))
+            const seedRes = await supabase.from('sessions').upsert(seedRows, { onConflict: 'id' })
+            if (seedRes.error && !isTableMissingError(seedRes.error)) throw seedRes.error
+          }
+        } else {
+          await mergeSessionsIntoDb(remoteSessions.map((r) => rowToSession(r as SessionRow)), peekQueue())
+        }
+      }
+
+      if (todos.error) {
+        if (isTableMissingError(todos.error)) {
+          console.warn('[sync] public.todos table not found on Supabase. Apply schema.sql to enable todo sync.')
+        } else {
+          throw todos.error
+        }
+      } else {
+        const remoteTodos = (todos.data ?? []) as TodoRow[]
+        if (remoteTodos.length === 0 && isFreshAccount) {
+          const localTodos = readTodosLocal()
+          if (localTodos.length > 0) {
+            const seedRows = localTodos.map((t) => todoToRow(t, userId))
+            const seedRes = await supabase.from('todos').upsert(seedRows, { onConflict: 'id' })
+            if (seedRes.error && !isTableMissingError(seedRes.error)) throw seedRes.error
+          }
+        } else {
+          mergeRef.current(remoteTodos.map((r) => rowToTodo(r as TodoRow)))
+        }
+      }
 
       if (tagsRes.error) {
         if (isTableMissingError(tagsRes.error)) {
@@ -484,11 +614,6 @@ export function useSync({
           throw userSettingsRes.error
         }
       } else {
-        const remoteSettingsRow = userSettingsRes.data as {
-          user_id: string
-          settings: Partial<Settings>
-          updated_at: number
-        } | null
         if (!remoteSettingsRow) {
           // Initial sync on fresh account: seed remote with existing local settings
           const currentSettings = settingsRef.current ?? readSettingsLocal()

@@ -52,12 +52,13 @@ export default function App() {
     setActiveDeck(deck)
     cockpitRef.current?.scrollToDeck(deck)
   }, [])
-  const [activeTodoId, setActiveTodoId] = useState<string | null>(null)
+  const [activeTodoIdRaw, setActiveTodoId] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; id: number } | null>(null)
   const toastTimer = useRef<number | null>(null)
   const sessions = useSessions()
   const todosApi = useTodos()
-  const activeTodo = todosApi.todos.find((x) => x.id === activeTodoId) ?? null
+  const activeTodo = todosApi.todos.find((x) => x.id === activeTodoIdRaw) ?? null
+  const activeTodoId = activeTodo?.id ?? null
   const sessionTask = activeTodo?.title ?? ''
   const sessionTag = activeTodo?.tag ?? ''
   const auth = useAuth()
@@ -218,12 +219,10 @@ export default function App() {
 
   const handleTodoRemove = useCallback(
     (id: string) => {
-      if (activeTodoId === id) {
-        setActiveTodoId(null)
-      }
+      setActiveTodoId((prev) => (prev === id ? null : prev))
       todosApi.remove(id)
     },
-    [activeTodoId, todosApi],
+    [todosApi],
   )
 
   const handleToggleZen = useCallback(() => {
@@ -280,6 +279,13 @@ export default function App() {
       enqueue({ kind: 'replace', table: 'settings' })
     }
   }, [updateSettings])
+
+  const handleImportTodos = useCallback(
+    (rawTodos: unknown[]) => {
+      todosApi.importTodos(rawTodos)
+    },
+    [todosApi],
+  )
 
   const syncNow = sync.sync
   const handleSyncNow = useCallback(() => void syncNow(true), [syncNow])
@@ -435,6 +441,7 @@ export default function App() {
             onOpenTodoManager={() => setIsTodoModalOpen(true)}
             sessions={sessions}
             onImportSettings={handleImportSettings}
+            onImportTodos={handleImportTodos}
             settings={settings}
             onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
             activeDeck={activeDeck}

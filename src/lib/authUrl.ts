@@ -16,7 +16,7 @@ export function parseAuthUrl(rawUrl: string): ParsedAuthUrl {
   try {
     // Normalise scheme for URL parser so custom schemes like com.pomau.app:// don't fail
     const normalized = rawUrl.replace(/^[a-zA-Z0-9_.-]+:\/\/?/, 'https://dummy.local/')
-    const parsed = new URL(normalized)
+    const parsed = new URL(normalized, 'https://dummy.local/')
 
     const search = parsed.searchParams
     const hashStr = parsed.hash.startsWith('#') ? parsed.hash.slice(1) : parsed.hash
@@ -29,8 +29,7 @@ export function parseAuthUrl(rawUrl: string): ParsedAuthUrl {
     const errorDescription = search.get('error_description') || hash.get('error_description') || undefined
 
     return { code, accessToken, refreshToken, error, errorDescription }
-  } catch (err) {
-    console.error('[auth] Failed to parse auth URL:', rawUrl, err)
+  } catch {
     return {}
   }
 }

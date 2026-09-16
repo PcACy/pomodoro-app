@@ -79,6 +79,25 @@ describe('dataExport', () => {
       expect(parsed).toHaveLength(1)
       expect(parsed[0].task).toBe('Coding')
       expect(parsed[0].durationMs).toBe(1500000)
+      expect(parsed[0].mode).toBe('pomodoro')
+    })
+
+    it('preserves flow mode when serializing sessions', () => {
+      const sessions: Session[] = [
+        {
+          id: '123e4567-e89b-12d3-a456-426614174002',
+          start: 1700000000000,
+          end: 1700001800000,
+          durationMs: 1800000,
+          task: 'Deep Work',
+          tag: 'Work',
+          mode: 'flow',
+          updatedAt: 1700001800000,
+        },
+      ]
+      const jsonStr = sessionsToJson(sessions)
+      const parsed = JSON.parse(jsonStr)
+      expect(parsed[0].mode).toBe('flow')
     })
 
     it('serializes todos to valid JSON', () => {

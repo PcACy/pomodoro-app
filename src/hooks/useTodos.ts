@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { STORAGE_KEYS, type TodoItem } from '../types'
 import { uid } from '../lib/uid'
-import { enqueue } from '../lib/syncQueue'
+import { enqueue, peekQueue, type SyncOp } from '../lib/syncQueue'
 import { readTodosLocal, sanitizeTodoItem, writeTodosLocal } from '../lib/localTodos'
+import { mergeRemoteTodosList } from './useSync'
 
 interface TodoPatch {
   title?: string
@@ -12,11 +13,6 @@ interface TodoPatch {
 }
 
 const withUpdatedAt = (t: TodoItem): TodoItem => ({ ...t, updatedAt: Date.now() })
-
-const preferNewer = (a: TodoItem, b: TodoItem): TodoItem => {
-  const ts = (t: TodoItem): number => t.updatedAt ?? t.completedAt ?? t.createdAt
-  return ts(b) >= ts(a) ? b : a
-}
 
 export function useTodos() {
   const [todos, setTodos] = useState<TodoItem[]>(readTodosLocal)
@@ -124,16 +120,8 @@ export function useTodos() {
   )
 
   const mergeRemote = useCallback(
-    (remote: TodoItem[]) => {
-      if (!remote.length) return
-      updateTodos((prev) => {
-        const byId = new Map<string, TodoItem>()
-        for (const t of [...prev, ...remote]) {
-          const existing = byId.get(t.id)
-          byId.set(t.id, existing ? preferNewer(existing, t) : t)
-        }
-        return [...byId.values()]
-      })
+    (remote: TodoItem[], pendingOps?: SyncOp[]) => {
+      updateTodos((prev) => mergeRemoteTodosList(prev, remote, pendingOps ?? peekQueue()))
     },
     [updateTodos],
   )
@@ -142,5 +130,19 @@ export function useTodos() {
     updateTodos(() => [])
   }, [updateTodos])
 
-  return { todos, add, toggle, edit, remove, incrementPomodoros, mergeRemote, clearAll }
+  const importTodos = useCallback(
+    (incoming: unknown[]) => {
+      if (!Array.isArray(incoming)) return
+      const valid: TodoItem[] = []
+      for (const item of incoming) {
+        const sanitized = sanitizeTodoItem(item)
+        if (sanitized) valid.push(sanitized)
+      }
+      updateTodos(() => valid)
+      enqueue({ kind: 'replace', table: 'todos' })
+    },
+    [updateTodos],
+  )
+
+  return { todos, add, toggle, edit, remove, incrementPomodoros, mergeRemote, clearAll, importTodos }
 }

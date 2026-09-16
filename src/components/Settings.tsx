@@ -84,6 +84,10 @@ function useHoldToRepeat(callback: () => void, disabled: boolean) {
 
   useEffect(() => () => stop(), [stop])
 
+  useEffect(() => {
+    if (disabled) stop()
+  }, [disabled, stop])
+
   return {
     onPointerDown: start,
     onPointerUp: stop,

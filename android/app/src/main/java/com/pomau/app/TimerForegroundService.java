@@ -77,7 +77,7 @@ public class TimerForegroundService extends Service {
                 long targetWhen = intent.getLongExtra(EXTRA_TARGET_TIMESTAMP, System.currentTimeMillis());
                 boolean isCountDown = intent.getBooleanExtra(EXTRA_COUNTDOWN, true);
                 startTimerService(title, content, targetWhen, isCountDown);
-                return START_STICKY;
+                return START_NOT_STICKY;
             }
         }
         return START_NOT_STICKY;
@@ -353,7 +353,8 @@ public class TimerForegroundService extends Service {
     }
 
     private void acquireWakeLock() {
-        if (wakeLock == null) {
+        if (wakeLock == null || !wakeLock.isHeld()) {
+            releaseWakeLock();
             PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
             if (pm != null) {
                 wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Pomau:TimerWakeLock");
@@ -364,8 +365,12 @@ public class TimerForegroundService extends Service {
     }
 
     private void releaseWakeLock() {
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
+        try {
+            if (wakeLock != null && wakeLock.isHeld()) {
+                wakeLock.release();
+            }
+        } catch (Throwable ignored) {
+        } finally {
             wakeLock = null;
         }
     }

@@ -1,7 +1,8 @@
 import Dexie, { type Table } from 'dexie'
-import type { Session } from '../types'
+import type { Session, TodoItem } from '../types'
 import { uid } from './uid'
 import { enqueue } from './syncQueue'
+import { readTodosLocal } from './localTodos'
 
 class PomodoroDB extends Dexie {
   sessions!: Table<Session, string>
@@ -110,7 +111,7 @@ export async function importSessions(sessions: unknown[]): Promise<void> {
   enqueue({ kind: 'replace', table: 'sessions' })
 }
 
-export async function exportAll(): Promise<{ settings: unknown; sessions: Session[] }> {
+export async function exportAll(): Promise<{ settings: unknown; sessions: Session[]; todos: TodoItem[] }> {
   const sessions = await db.sessions.orderBy('start').toArray()
   let settings: unknown = null
   try {
@@ -119,5 +120,6 @@ export async function exportAll(): Promise<{ settings: unknown; sessions: Sessio
   } catch {
     /* fallback to null */
   }
-  return { settings, sessions }
+  const todos = readTodosLocal()
+  return { settings, sessions, todos }
 }

@@ -15,6 +15,7 @@ interface Props {
   title?: string
   onClear: () => void
   onImportSettings: (s: unknown) => void
+  onImportTodos?: (todos: unknown[]) => void
   className?: string
 }
 
@@ -87,6 +88,7 @@ export const SessionLog = memo(function SessionLog({
   title,
   onClear,
   onImportSettings,
+  onImportTodos,
   className = '',
 }: Props) {
   const { t, lang } = useTranslation()
@@ -134,22 +136,27 @@ export const SessionLog = memo(function SessionLog({
       const data = JSON.parse(text) as unknown
       let rawSessions: unknown[] | null = null
       let importedSettings: unknown = null
+      let rawTodos: unknown[] | null = null
 
       if (Array.isArray(data)) {
         rawSessions = data
       } else if (data && typeof data === 'object' && data !== null) {
-        const obj = data as { settings?: unknown; sessions?: unknown[] }
+        const obj = data as { settings?: unknown; sessions?: unknown[]; todos?: unknown[] }
         if (Array.isArray(obj.sessions)) rawSessions = obj.sessions
         if (obj.settings) importedSettings = obj.settings
+        if (Array.isArray(obj.todos)) rawTodos = obj.todos
       }
 
-      if (rawSessions && rawSessions.length > 0) {
+      if (rawSessions !== null) {
         await importSessions(rawSessions)
       }
       if (importedSettings) {
         onImportSettings(importedSettings)
       }
-      if (!rawSessions && !importedSettings) {
+      if (rawTodos !== null) {
+        onImportTodos?.(rawTodos)
+      }
+      if (rawSessions === null && !importedSettings && rawTodos === null) {
         setImportError(t.sessionLog.importFailed)
       }
     } catch {

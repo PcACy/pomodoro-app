@@ -67,6 +67,7 @@ export function sessionsToJson(sessions: Session[]): string {
       start: s.start,
       end: s.end,
       durationMs: s.durationMs,
+      mode: s.mode ?? 'pomodoro',
       task: s.task,
       tag: s.tag,
       notes: s.notes ?? null,
