@@ -5,6 +5,7 @@ import { DEFAULT_SETTINGS, STORAGE_KEYS, type Session, type Settings, type TodoI
 import { mergeWithDefaults } from './useSettings'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase'
 import { db } from '../lib/db'
+import { uid, uidFrom, UUID_REGEX } from '../lib/uid'
 import { readTodosLocal } from '../lib/localTodos'
 import { commitQueue, hasPendingOps, markFailed, peekQueue, type SyncOp } from '../lib/syncQueue'
 
@@ -65,26 +66,95 @@ export function readSettingsLocal(): Settings {
   }
 }
 
+export const SYNCED_TODOS_KEY = 'pomodoro.sync.synced_todos'
+
+export function getSyncedTodoIds(): Set<string> {
+  try {
+    if (typeof localStorage === 'undefined') return new Set()
+    const raw = localStorage.getItem(SYNCED_TODOS_KEY)
+    if (!raw) return new Set()
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed)
+      ? new Set(parsed.filter((x): x is string => typeof x === 'string'))
+      : new Set()
+  } catch {
+    return new Set()
+  }
+}
+
+export function markTodosSynced(ids: string[]): void {
+  try {
+    if (typeof localStorage === 'undefined' || ids.length === 0) return
+    const current = getSyncedTodoIds()
+    let changed = false
+    for (const id of ids) {
+      if (!current.has(id)) {
+        current.add(id)
+        changed = true
+      }
+    }
+    if (changed) {
+      localStorage.setItem(SYNCED_TODOS_KEY, JSON.stringify(Array.from(current)))
+    }
+  } catch {
+    /* ignore storage quota */
+  }
+}
+
+export function unmarkTodosSynced(ids: string[]): void {
+  try {
+    if (typeof localStorage === 'undefined' || ids.length === 0) return
+    const current = getSyncedTodoIds()
+    let changed = false
+    for (const id of ids) {
+      if (current.has(id)) {
+        current.delete(id)
+        changed = true
+      }
+    }
+    if (changed) {
+      localStorage.setItem(SYNCED_TODOS_KEY, JSON.stringify(Array.from(current)))
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+export function clearSyncedTodoIds(): void {
+  try {
+    if (typeof localStorage === 'undefined') return
+    localStorage.removeItem(SYNCED_TODOS_KEY)
+  } catch {
+    /* ignore */
+  }
+}
+
 export function isTableMissingError(err: unknown): boolean {
   if (!err || typeof err !== 'object') return false
-  const e = err as { code?: string; message?: string; status?: number; statusCode?: number }
-  if (e.code === '42P01' || e.code === 'PGRST205' || e.code === 'PGRST200' || e.code === 'PGRST204') {
+  const e = err as { code?: string; message?: string; status?: number; statusCode?: number; details?: string }
+  if (
+    e.code === '42P01' ||
+    e.code === 'PGRST205' ||
+    e.code === 'PGRST200' ||
+    e.code === 'PGRST204' ||
+    e.code === '42703'
+  ) {
     return true
   }
   if (e.status === 404 || e.statusCode === 404) {
     return true
   }
-  if (typeof e.message === 'string') {
-    const msg = e.message.toLowerCase()
-    return (
-      msg.includes('schema cache') ||
-      msg.includes('does not exist') ||
-      msg.includes('relation') ||
-      msg.includes('not found')
-    )
-  }
-  return false
+  const str = `${e.message ?? ''} ${e.details ?? ''}`.toLowerCase()
+  return (
+    str.includes('schema cache') ||
+    str.includes('does not exist') ||
+    str.includes('relation') ||
+    str.includes('not found') ||
+    str.includes('column') ||
+    str.includes('could not find')
+  )
 }
+
 
 export function mergeRemoteTagsList(
   currentTags: string[],
@@ -148,10 +218,19 @@ export const preferNewerTodo = (a: TodoItem, b: TodoItem): TodoItem => {
   return ts(b) >= ts(a) ? b : a
 }
 
+export function deduplicateByConflict<T, K extends keyof T>(rows: T[], key: K): T[] {
+  const map = new Map<unknown, T>()
+  for (const r of rows) {
+    map.set(r[key], r)
+  }
+  return Array.from(map.values())
+}
+
 export function mergeRemoteTodosList(
   localTodos: TodoItem[],
   remoteTodos: TodoItem[],
   pendingOps: SyncOp[] = [],
+  syncedIds: Set<string> = getSyncedTodoIds(),
 ): TodoItem[] {
   const todoOps = pendingOps.filter((op) => op.table === 'todos')
   const pendingDeletes = new Set(
@@ -163,19 +242,28 @@ export function mergeRemoteTodosList(
       .map((op) => op.id),
   )
 
+  // If remote is empty, never drop local todos (except local pending deletes)
+  if (remoteTodos.length === 0) {
+    return localTodos.filter((t) => !pendingDeletes.has(t.id))
+  }
+
   const remoteMap = new Map(remoteTodos.map((t) => [t.id, t]))
   const result: TodoItem[] = []
   const seen = new Set<string>()
 
-  // 1. Keep local todos that also exist in remote or are pending local addition,
-  // preserving the user's local todo order.
+  // 1. Keep local todos:
+  // - If present on remote: merge taking the newer version
+  // - If pending local upsert: keep local version
+  // - If not yet synced to remote: keep local version (created offline or before login)
+  // - If previously synced (in syncedIds) and absent from remote without pending upsert:
+  //   it was deleted remotely on another device, so drop it!
   for (const local of localTodos) {
     if (pendingDeletes.has(local.id)) continue
     const remote = remoteMap.get(local.id)
     if (remote) {
       result.push(preferNewerTodo(local, remote))
       seen.add(local.id)
-    } else if (pendingUpserts.has(local.id)) {
+    } else if (pendingUpserts.has(local.id) || !syncedIds.has(local.id)) {
       result.push(local)
       seen.add(local.id)
     }
@@ -211,19 +299,34 @@ interface SessionRow {
   updated_at: number
 }
 
-const todoToRow = (t: TodoItem, userId: string): TodoRow => ({
-  id: t.id,
-  user_id: userId,
-  title: t.title,
-  tag: t.tag,
-  done: t.done,
-  pomodoros: t.pomodoros,
-  created_at: t.createdAt,
-  completed_at: t.completedAt ?? null,
-  updated_at: t.updatedAt ?? t.completedAt ?? t.createdAt,
-})
+export const todoToRow = (t: TodoItem, userId: string): TodoRow => {
+  const id = typeof t.id === 'string' && t.id.trim() ? t.id.trim().slice(0, 256) : uid()
+  const title = typeof t.title === 'string' ? t.title.slice(0, 500) : ''
+  const tag = typeof t.tag === 'string' ? t.tag.slice(0, 100) : ''
+  const done = Boolean(t.done)
+  const pomodoros =
+    typeof t.pomodoros === 'number' && Number.isFinite(t.pomodoros) && t.pomodoros >= 0
+      ? Math.round(t.pomodoros)
+      : 0
+  const createdAt =
+    typeof t.createdAt === 'number' && Number.isFinite(t.createdAt) && t.createdAt > 0 ? t.createdAt : Date.now()
+  const completedAt = typeof t.completedAt === 'number' && Number.isFinite(t.completedAt) ? t.completedAt : null
+  const updatedAt =
+    typeof t.updatedAt === 'number' && Number.isFinite(t.updatedAt) ? t.updatedAt : (completedAt ?? createdAt)
+  return {
+    id,
+    user_id: userId,
+    title,
+    tag,
+    done,
+    pomodoros,
+    created_at: createdAt,
+    completed_at: completedAt,
+    updated_at: updatedAt,
+  }
+}
 
-const rowToTodo = (r: TodoRow): TodoItem => ({
+export const rowToTodo = (r: TodoRow): TodoItem => ({
   id: r.id,
   title: r.title,
   tag: r.tag,
@@ -234,20 +337,34 @@ const rowToTodo = (r: TodoRow): TodoItem => ({
   updatedAt: r.updated_at,
 })
 
-const sessionToRow = (s: Session, userId: string): SessionRow => ({
-  id: s.id,
-  user_id: userId,
-  start: s.start,
-  end: s.end,
-  duration_ms: s.durationMs,
-  task: s.task,
-  tag: s.tag,
-  notes: s.notes ?? null,
-  mode: s.mode ?? null,
-  updated_at: s.updatedAt ?? s.start,
-})
+export const sessionToRow = (s: Session, userId: string): SessionRow => {
+  const validId = UUID_REGEX.test(s.id) ? s.id : uidFrom(s.id)
+  const start = typeof s.start === 'number' && Number.isFinite(s.start) && s.start > 0 ? s.start : Date.now()
+  const durationMs =
+    typeof s.durationMs === 'number' && Number.isFinite(s.durationMs) && s.durationMs > 0
+      ? s.durationMs
+      : 1500_000
+  const end = typeof s.end === 'number' && Number.isFinite(s.end) && s.end >= start ? s.end : start + durationMs
+  const task = typeof s.task === 'string' ? s.task.slice(0, 500) : ''
+  const tag = typeof s.tag === 'string' && s.tag ? s.tag.slice(0, 100) : 'Unsorted'
+  const notes = typeof s.notes === 'string' && s.notes.trim() ? s.notes.slice(0, 2000) : null
+  const mode = s.mode === 'flow' || s.mode === 'pomodoro' ? s.mode : null
+  const updatedAt = typeof s.updatedAt === 'number' && Number.isFinite(s.updatedAt) ? s.updatedAt : start
+  return {
+    id: validId,
+    user_id: userId,
+    start,
+    end,
+    duration_ms: durationMs,
+    task,
+    tag,
+    notes,
+    mode,
+    updated_at: updatedAt,
+  }
+}
 
-const rowToSession = (r: SessionRow): Session => ({
+export const rowToSession = (r: SessionRow): Session => ({
   id: r.id,
   start: r.start,
   end: r.end,
@@ -272,11 +389,6 @@ export function computeMergedSessionsList(
   if (hasReplacePending) {
     return { toUpsert: [], toDelete: [] }
   }
-  const pendingUpsertIds = new Set(
-    sessionOps
-      .filter((op): op is Extract<typeof op, { kind: 'upsert' }> => op.kind === 'upsert')
-      .map((op) => op.id),
-  )
 
   const remoteById = new Map(remote.map((s) => [s.id, s]))
   const localById = new Map(local.map((s) => [s.id, s]))
@@ -284,6 +396,7 @@ export function computeMergedSessionsList(
   const toUpsert: Session[] = []
   const toDelete: string[] = []
 
+  // 1. Update local sessions with newer remote versions or notes
   for (const l of local) {
     const r = remoteById.get(l.id)
     if (r) {
@@ -292,11 +405,10 @@ export function computeMergedSessionsList(
       } else if (sessionTs(r) === sessionTs(l) && !l.notes && r.notes) {
         toUpsert.push({ ...l, notes: r.notes })
       }
-    } else if (!pendingUpsertIds.has(l.id)) {
-      toDelete.push(l.id)
     }
   }
 
+  // 2. Add remote sessions not present locally
   for (const r of remote) {
     if (!localById.has(r.id)) {
       toUpsert.push(r)
@@ -309,6 +421,8 @@ export function computeMergedSessionsList(
 export async function mergeSessionsIntoDb(
   remote: Session[],
   pendingOps: SyncOp[] = [],
+  supabase?: SupabaseClient,
+  userId?: string,
 ): Promise<void> {
   const local = await db.sessions.toArray()
   const { toUpsert, toDelete } = computeMergedSessionsList(local, remote, pendingOps)
@@ -321,6 +435,22 @@ export async function mergeSessionsIntoDb(
         await db.sessions.bulkPut(toUpsert)
       }
     })
+  }
+
+  // Push local sessions missing from remote so both local and remote have all sessions
+  if (supabase && userId) {
+    const remoteById = new Map(remote.map((s) => [s.id, s]))
+    const missingInRemote = local.filter((l) => !remoteById.has(l.id))
+    if (missingInRemote.length > 0) {
+      const rows = deduplicateByConflict(
+        missingInRemote.map((s) => sessionToRow(s, userId)),
+        'id',
+      )
+      const res = await supabase.from('sessions').upsert(rows, { onConflict: 'id' })
+      if (res.error && !isTableMissingError(res.error)) {
+        console.warn('[sync] failed to push local sessions to Supabase:', res.error)
+      }
+    }
   }
 }
 
@@ -475,13 +605,21 @@ export function useSync({
                 if (table === 'todos') return todoToRow(r as TodoItem, userId)
                 return tagToRow(r as string, userId)
               })
-              const resUpsert = await supabase.from(dbTable).upsert(rows, { onConflict: 'id' })
+              const deduplicatedRows = deduplicateByConflict(rows, 'id')
+              const resUpsert = await supabase.from(dbTable).upsert(deduplicatedRows, { onConflict: 'id' })
               if (resUpsert.error && !isTableMissingError(resUpsert.error)) throw resUpsert.error
+              if (table === 'todos') {
+                markTodosSynced(rows.map((r) => (r as TodoRow).id))
+              }
+            } else if (table === 'todos') {
+              clearSyncedTodoIds()
             }
           }
         } else {
           if (upserts.length) {
-            const resUpsert = await supabase.from(dbTable).upsert(upserts, { onConflict })
+            const typedUpserts = upserts as Array<Record<string, unknown>>
+            const deduplicatedUpserts = deduplicateByConflict(typedUpserts, onConflict)
+            const resUpsert = await supabase.from(dbTable).upsert(deduplicatedUpserts, { onConflict })
             if (resUpsert.error) {
               if (isTableMissingError(resUpsert.error)) {
                 console.warn(`[sync] Table ${dbTable} not found on Supabase. Skipping ${table} push.`)
@@ -491,18 +629,29 @@ export function useSync({
               }
               throw resUpsert.error
             }
+            if (table === 'todos') {
+              markTodosSynced(upserts.map((u) => (u as TodoRow).id))
+            }
           }
           if (deletes.length) {
-            const uniqueDeletes = Array.from(new Set(deletes))
-            const resDel = await supabase.from(dbTable).delete().in('id', uniqueDeletes).eq('user_id', userId)
-            if (resDel.error) {
-              if (isTableMissingError(resDel.error)) {
-                console.warn(`[sync] Table ${dbTable} not found on Supabase. Skipping ${table} delete.`)
-                pushedTables.add(table)
-                commitQueue(tOps)
-                continue
+            let uniqueDeletes = Array.from(new Set(deletes))
+            if (table === 'sessions') {
+              uniqueDeletes = uniqueDeletes.filter((id) => UUID_REGEX.test(id))
+            }
+            if (uniqueDeletes.length > 0) {
+              const resDel = await supabase.from(dbTable).delete().in('id', uniqueDeletes).eq('user_id', userId)
+              if (resDel.error) {
+                if (isTableMissingError(resDel.error)) {
+                  console.warn(`[sync] Table ${dbTable} not found on Supabase. Skipping ${table} delete.`)
+                  pushedTables.add(table)
+                  commitQueue(tOps)
+                  continue
+                }
+                throw resDel.error
               }
-              throw resDel.error
+              if (table === 'todos') {
+                unmarkTodosSynced(uniqueDeletes)
+              }
             }
           }
         }
@@ -535,52 +684,50 @@ export function useSync({
       // merge another account's rows into the local store.
       if (userRef.current?.id !== userId) return false
 
-      const remoteSettingsRow = userSettingsRes.error
-        ? null
-        : (userSettingsRes.data as {
-            user_id: string
-            settings: Partial<Settings>
-            updated_at: number
-          } | null)
-      const isFreshAccount = !remoteSettingsRow && !userSettingsRes.error
+      let hasCoreError = false
 
       if (sess.error) {
         if (isTableMissingError(sess.error)) {
           console.warn('[sync] public.sessions table not found on Supabase. Apply schema.sql to enable session sync.')
         } else {
-          throw sess.error
+          console.error('[sync] pull sessions failed:', sess.error)
+          hasCoreError = true
         }
       } else {
         const remoteSessions = (sess.data ?? []) as SessionRow[]
-        if (remoteSessions.length === 0 && isFreshAccount) {
-          const localSessions = await db.sessions.toArray()
-          if (localSessions.length > 0) {
-            const seedRows = localSessions.map((s) => sessionToRow(s, userId))
-            const seedRes = await supabase.from('sessions').upsert(seedRows, { onConflict: 'id' })
-            if (seedRes.error && !isTableMissingError(seedRes.error)) throw seedRes.error
-          }
-        } else {
-          await mergeSessionsIntoDb(remoteSessions.map((r) => rowToSession(r as SessionRow)), peekQueue())
-        }
+        await mergeSessionsIntoDb(
+          remoteSessions.map((r) => rowToSession(r as SessionRow)),
+          peekQueue(),
+          supabase,
+          userId,
+        )
       }
 
       if (todos.error) {
         if (isTableMissingError(todos.error)) {
           console.warn('[sync] public.todos table not found on Supabase. Apply schema.sql to enable todo sync.')
         } else {
-          throw todos.error
+          console.error('[sync] pull todos failed:', todos.error)
+          hasCoreError = true
         }
       } else {
         const remoteTodos = (todos.data ?? []) as TodoRow[]
-        if (remoteTodos.length === 0 && isFreshAccount) {
-          const localTodos = readTodosLocal()
-          if (localTodos.length > 0) {
-            const seedRows = localTodos.map((t) => todoToRow(t, userId))
-            const seedRes = await supabase.from('todos').upsert(seedRows, { onConflict: 'id' })
-            if (seedRes.error && !isTableMissingError(seedRes.error)) throw seedRes.error
+        const localTodos = readTodosLocal()
+        if (remoteTodos.length === 0 && localTodos.length > 0) {
+          // Push local todos to remote so they aren't lost
+          const seedRows = deduplicateByConflict(
+            localTodos.map((t) => todoToRow(t, userId)),
+            'id',
+          )
+          const seedRes = await supabase.from('todos').upsert(seedRows, { onConflict: 'id' })
+          if (seedRes.error && !isTableMissingError(seedRes.error)) {
+            console.warn('[sync] failed to seed local todos to Supabase:', seedRes.error)
           }
+          markTodosSynced(localTodos.map((t) => t.id))
         } else {
-          mergeRef.current(remoteTodos.map((r) => rowToTodo(r as TodoRow)))
+          const remoteList = remoteTodos.map((r) => rowToTodo(r as TodoRow))
+          mergeRef.current(remoteList)
+          markTodosSynced(remoteList.map((t) => t.id))
         }
       }
 
@@ -588,17 +735,21 @@ export function useSync({
         if (isTableMissingError(tagsRes.error)) {
           console.warn('[sync] public.tags table not found on Supabase. Apply schema.sql to enable tag sync.')
         } else {
-          throw tagsRes.error
+          console.warn('[sync] pull tags failed:', tagsRes.error)
         }
       } else {
         const remoteTags = (tagsRes.data ?? []) as TagRow[]
         if (remoteTags.length === 0) {
-          // Initial sync on fresh account: seed remote with existing local tags
           const currentTags = tagsRef.current ?? readTagsLocal()
           if (currentTags.length > 0) {
-            const seedRows = currentTags.map((t) => tagToRow(t, userId))
+            const seedRows = deduplicateByConflict(
+              currentTags.map((t) => tagToRow(t, userId)),
+              'id',
+            )
             const seedRes = await supabase.from('tags').upsert(seedRows, { onConflict: 'id' })
-            if (seedRes.error && !isTableMissingError(seedRes.error)) throw seedRes.error
+            if (seedRes.error && !isTableMissingError(seedRes.error)) {
+              console.warn('[sync] failed to seed tags to Supabase:', seedRes.error)
+            }
           }
         } else {
           mergeTagsRef.current?.(remoteTags.map((r) => r.name))
@@ -611,11 +762,15 @@ export function useSync({
             '[sync] public.user_settings table not found on Supabase. Apply schema.sql to enable settings sync.',
           )
         } else {
-          throw userSettingsRes.error
+          console.warn('[sync] pull user_settings failed:', userSettingsRes.error)
         }
       } else {
+        const remoteSettingsRow = userSettingsRes.data as {
+          user_id: string
+          settings: Partial<Settings>
+          updated_at: number
+        } | null
         if (!remoteSettingsRow) {
-          // Initial sync on fresh account: seed remote with existing local settings
           const currentSettings = settingsRef.current ?? readSettingsLocal()
           const seedRes = await supabase.from('user_settings').upsert(
             {
@@ -629,12 +784,15 @@ export function useSync({
             },
             { onConflict: 'user_id' },
           )
-          if (seedRes.error && !isTableMissingError(seedRes.error)) throw seedRes.error
+          if (seedRes.error && !isTableMissingError(seedRes.error)) {
+            console.warn('[sync] failed to seed user_settings to Supabase:', seedRes.error)
+          }
         } else {
           mergeSettingsRef.current?.(remoteSettingsRow.settings, remoteSettingsRow.updated_at)
         }
       }
-      return true
+
+      return !hasCoreError
     } catch (e) {
       console.error('[sync] pull failed:', e)
       return false

@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import type { Session, TodoItem } from '../types'
-import { uid } from './uid'
+import { uid, UUID_REGEX } from './uid'
 import { enqueue } from './syncQueue'
 import { readTodosLocal } from './localTodos'
 
@@ -55,8 +55,6 @@ export async function clearSessions(): Promise<void> {
   await db.sessions.clear()
   enqueue({ kind: 'replace', table: 'sessions' })
 }
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 export function sanitizeImportedSession(raw: unknown): Session | null {
   if (!raw || typeof raw !== 'object') return null

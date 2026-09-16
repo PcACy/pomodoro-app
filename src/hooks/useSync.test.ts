@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
   computeMergedSessionsList,
+  deduplicateByConflict,
   isTableMissingError,
   mergeRemoteTagsList,
   mergeRemoteTodosList,
   preferNewerTodo,
+  sessionToRow,
   tagRowId,
+  todoToRow,
 } from './useSync'
 import { mergeWithDefaults } from './useSettings'
 import type { SyncOp } from '../lib/syncQueue'
@@ -176,15 +179,37 @@ describe('useSync tag synchronization helpers', () => {
     })
 
     describe('mergeRemoteTodosList', () => {
-      it('removes local todos that were deleted remotely when no pending local edits exist', () => {
+      it('removes local todos that were deleted remotely when they were previously synced', () => {
         const local = [
           { ...baseTodo, id: 't-1' },
           { ...baseTodo, id: 't-2' },
         ]
         const remote = [{ ...baseTodo, id: 't-1' }]
+        const syncedIds = new Set(['t-1', 't-2'])
 
-        const merged = mergeRemoteTodosList(local, remote, [])
+        const merged = mergeRemoteTodosList(local, remote, [], syncedIds)
         expect(merged.map((t) => t.id)).toEqual(['t-1'])
+      })
+
+      it('preserves local todos that were not yet synced to remote', () => {
+        const local = [
+          { ...baseTodo, id: 't-1' },
+          { ...baseTodo, id: 't-local-new' },
+        ]
+        const remote = [{ ...baseTodo, id: 't-1' }]
+        const syncedIds = new Set(['t-1'])
+
+        const merged = mergeRemoteTodosList(local, remote, [], syncedIds)
+        expect(merged.map((t) => t.id)).toEqual(['t-1', 't-local-new'])
+      })
+
+      it('never drops local todos when remote is empty', () => {
+        const local = [
+          { ...baseTodo, id: 't-1' },
+          { ...baseTodo, id: 't-2' },
+        ]
+        const merged = mergeRemoteTodosList(local, [], [])
+        expect(merged.map((t) => t.id)).toEqual(['t-1', 't-2'])
       })
 
       it('retains pending local upserts even when absent from remote', () => {
@@ -252,14 +277,14 @@ describe('useSync tag synchronization helpers', () => {
       expect(toDelete).toEqual([])
     })
 
-    it('deletes local sessions that were removed on remote when no local pending ops exist', () => {
+    it('preserves local sessions that are absent from remote (non-destructive sync)', () => {
       const local = [
         { ...baseSession, id: 'sess-1' },
-        { ...baseSession, id: 'sess-deleted' },
+        { ...baseSession, id: 'sess-local-only' },
       ]
       const remote = [{ ...baseSession, id: 'sess-1' }]
       const { toUpsert, toDelete } = computeMergedSessionsList(local, remote, [])
-      expect(toDelete).toEqual(['sess-deleted'])
+      expect(toDelete).toEqual([])
       expect(toUpsert).toEqual([])
     })
 
@@ -300,4 +325,69 @@ describe('useSync tag synchronization helpers', () => {
       expect(toDelete).toEqual([])
     })
   })
+
+  describe('deduplicateByConflict', () => {
+    it('removes duplicate entries by conflict key and keeps the latest entry', () => {
+      const rows = [
+        { id: '1', name: 'First' },
+        { id: '2', name: 'Second' },
+        { id: '1', name: 'First Updated' },
+      ]
+      const deduped = deduplicateByConflict(rows, 'id')
+      expect(deduped).toEqual([
+        { id: '1', name: 'First Updated' },
+        { id: '2', name: 'Second' },
+      ])
+    })
+
+    it('works with user_id key for settings', () => {
+      const rows = [
+        { user_id: 'user-1', value: 10 },
+        { user_id: 'user-1', value: 20 },
+      ]
+      const deduped = deduplicateByConflict(rows, 'user_id')
+      expect(deduped).toEqual([{ user_id: 'user-1', value: 20 }])
+    })
+  })
+
+  describe('sessionToRow & todoToRow serialization safeguards', () => {
+    it('converts non-UUID session ids into valid RFC-4122 deterministic UUIDs', () => {
+      const row = sessionToRow(
+        {
+          id: 'non-uuid-legacy-id',
+          start: 1000,
+          end: 25000,
+          durationMs: 24000,
+          task: 'Testing',
+          tag: 'Work',
+          mode: 'pomodoro',
+        },
+        'user-abc',
+      )
+      const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      expect(UUID_REGEX.test(row.id)).toBe(true)
+      expect(row.user_id).toBe('user-abc')
+      expect(row.task).toBe('Testing')
+      expect(row.mode).toBe('pomodoro')
+    })
+
+    it('sanitizes todo rows ensuring valid values for DB constraints', () => {
+      const row = todoToRow(
+        {
+          id: 'todo-1',
+          title: 'Clean code',
+          tag: 'Dev',
+          done: false,
+          pomodoros: -5,
+          createdAt: 0,
+        },
+        'user-abc',
+      )
+      expect(row.pomodoros).toBe(0) // non-negative check
+      expect(row.created_at).toBeGreaterThan(0) // positive check
+      expect(row.user_id).toBe('user-abc')
+      expect(row.title).toBe('Clean code')
+    })
+  })
 })
+

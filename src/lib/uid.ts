@@ -44,3 +44,5 @@ export const uidFrom = (input: string): string => {
   const p5 = `${s3.slice(4, 8)}${s4}`
   return `${p1}-${p2}-${p3}-${p4}-${p5}`
 }
+
+export const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i

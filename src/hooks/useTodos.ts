@@ -3,7 +3,7 @@ import { STORAGE_KEYS, type TodoItem } from '../types'
 import { uid } from '../lib/uid'
 import { enqueue, peekQueue, type SyncOp } from '../lib/syncQueue'
 import { readTodosLocal, sanitizeTodoItem, writeTodosLocal } from '../lib/localTodos'
-import { mergeRemoteTodosList } from './useSync'
+import { clearSyncedTodoIds, mergeRemoteTodosList, unmarkTodosSynced } from './useSync'
 
 interface TodoPatch {
   title?: string
@@ -65,14 +65,14 @@ export function useTodos() {
       if (!t) return
       const todo: TodoItem = {
         id: uid(),
-        title: t,
-        tag,
+        title: t.slice(0, 200),
+        tag: tag.trim().slice(0, 50),
         done: false,
         pomodoros: 0,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       }
-      updateTodos((prev) => [...prev, todo])
+      updateTodos((prev) => [todo, ...prev])
       enqueue({ kind: 'upsert', table: 'todos', id: todo.id })
     },
     [updateTodos],
@@ -104,6 +104,7 @@ export function useTodos() {
     (id: string) => {
       updateTodos((prev) => prev.filter((t) => t.id !== id))
       enqueue({ kind: 'delete', table: 'todos', id })
+      unmarkTodosSynced([id])
     },
     [updateTodos],
   )
@@ -127,6 +128,7 @@ export function useTodos() {
   )
 
   const clearAll = useCallback(() => {
+    clearSyncedTodoIds()
     updateTodos(() => [])
   }, [updateTodos])
 
@@ -138,6 +140,7 @@ export function useTodos() {
         const sanitized = sanitizeTodoItem(item)
         if (sanitized) valid.push(sanitized)
       }
+      clearSyncedTodoIds()
       updateTodos(() => valid)
       enqueue({ kind: 'replace', table: 'todos' })
     },
