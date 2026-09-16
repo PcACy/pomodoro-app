@@ -390,15 +390,16 @@ export function computeMergedSessionsList(
     return { toUpsert: [], toDelete: [] }
   }
 
-  const remoteById = new Map(remote.map((s) => [s.id, s]))
-  const localById = new Map(local.map((s) => [s.id, s]))
+  const normId = (id: string): string => (UUID_REGEX.test(id) ? id : uidFrom(id))
+  const remoteById = new Map(remote.map((s) => [normId(s.id), s]))
+  const localById = new Map(local.map((s) => [normId(s.id), s]))
 
   const toUpsert: Session[] = []
   const toDelete: string[] = []
 
   // 1. Update local sessions with newer remote versions or notes
   for (const l of local) {
-    const r = remoteById.get(l.id)
+    const r = remoteById.get(normId(l.id))
     if (r) {
       if (sessionTs(r) > sessionTs(l)) {
         toUpsert.push(r)
@@ -410,7 +411,7 @@ export function computeMergedSessionsList(
 
   // 2. Add remote sessions not present locally
   for (const r of remote) {
-    if (!localById.has(r.id)) {
+    if (!localById.has(normId(r.id))) {
       toUpsert.push(r)
     }
   }
@@ -439,8 +440,9 @@ export async function mergeSessionsIntoDb(
 
   // Push local sessions missing from remote so both local and remote have all sessions
   if (supabase && userId) {
+    const localId = (s: Session): string => (UUID_REGEX.test(s.id) ? s.id : uidFrom(s.id))
     const remoteById = new Map(remote.map((s) => [s.id, s]))
-    const missingInRemote = local.filter((l) => !remoteById.has(l.id))
+    const missingInRemote = local.filter((l) => !remoteById.has(localId(l)))
     if (missingInRemote.length > 0) {
       const rows = deduplicateByConflict(
         missingInRemote.map((s) => sessionToRow(s, userId)),
@@ -713,19 +715,26 @@ export function useSync({
       } else {
         const remoteTodos = (todos.data ?? []) as TodoRow[]
         const localTodos = readTodosLocal()
-        if (remoteTodos.length === 0 && localTodos.length > 0) {
-          // Push local todos to remote so they aren't lost
+        const remoteList = remoteTodos.map((r) => rowToTodo(r as TodoRow))
+        const remoteIds = new Set(remoteList.map((r) => r.id))
+        const syncedIds = getSyncedTodoIds()
+        const unseededLocal = localTodos.filter((t) => !remoteIds.has(t.id) && !syncedIds.has(t.id))
+
+        if (unseededLocal.length > 0) {
           const seedRows = deduplicateByConflict(
-            localTodos.map((t) => todoToRow(t, userId)),
+            unseededLocal.map((t) => todoToRow(t, userId)),
             'id',
           )
           const seedRes = await supabase.from('todos').upsert(seedRows, { onConflict: 'id' })
           if (seedRes.error && !isTableMissingError(seedRes.error)) {
             console.warn('[sync] failed to seed local todos to Supabase:', seedRes.error)
           }
+          markTodosSynced(unseededLocal.map((t) => t.id))
+        }
+
+        if (remoteTodos.length === 0 && localTodos.length > 0) {
           markTodosSynced(localTodos.map((t) => t.id))
         } else {
-          const remoteList = remoteTodos.map((r) => rowToTodo(r as TodoRow))
           mergeRef.current(remoteList)
           markTodosSynced(remoteList.map((t) => t.id))
         }

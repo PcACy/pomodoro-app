@@ -912,7 +912,7 @@ export const SettingsPanel = memo(function SettingsPanel({
           <div className="flex flex-wrap items-center gap-3">
             <span className="flex items-center gap-2 text-xs text-accent">
               <span className="h-2 w-2 rounded-full bg-accent" />
-              {t.sync.offline}
+              {syncStatus === 'offline' ? t.sync.offline : t.sync.error}
             </span>
             <button
               type="button"

@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import type { Session, TodoItem } from '../types'
-import { uid, UUID_REGEX } from './uid'
+import { uid, uidFrom, UUID_REGEX } from './uid'
 import { enqueue } from './syncQueue'
 import { readTodosLocal } from './localTodos'
 
@@ -19,6 +19,22 @@ class PomodoroDB extends Dexie {
         if (existing.length) {
           await table.clear()
           await table.bulkPut(existing.map((r) => ({ ...r, id: typeof r.id === 'string' ? r.id : uid() })))
+        }
+      })
+    this.version(3)
+      .stores({
+        sessions: 'id, start, end, tag, task',
+      })
+      .upgrade(async (tx) => {
+        const table = tx.table('sessions')
+        const existing = await table.toArray()
+        if (existing.length) {
+          const updated = existing.map((r) => ({
+            ...r,
+            id: UUID_REGEX.test(r.id) ? r.id : uidFrom(r.id),
+          }))
+          await table.clear()
+          await table.bulkPut(updated)
         }
       })
   }

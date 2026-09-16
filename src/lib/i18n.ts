@@ -139,6 +139,7 @@ export interface Messages {
     synced: string
     pending: string
     offline: string
+    error: string
     retry: string
     syncNow: string
     lastSync: (d: Date) => string
@@ -306,6 +307,7 @@ const de: Messages = {
     synced: 'Synchronisiert',
     pending: 'Änderungen ausstehend',
     offline: 'Offline – lokal gespeichert',
+    error: 'Sync-Fehler – tippe auf Wiederholen',
     retry: 'Erneut versuchen',
     syncNow: 'Jetzt synchronisieren',
     lastSync: (d) =>
@@ -478,6 +480,7 @@ const en: Messages = {
     synced: 'Synced',
     pending: 'Changes pending',
     offline: 'Offline – saved locally',
+    error: 'Sync error – tap retry',
     retry: 'Retry',
     syncNow: 'Sync now',
     lastSync: (d) =>
