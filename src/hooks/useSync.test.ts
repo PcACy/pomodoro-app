@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   computeMergedSessionsList,
   deduplicateByConflict,
+  formatSyncError,
   isTableMissingError,
   mergeRemoteTagsList,
   mergeRemoteTodosList,
@@ -387,6 +388,27 @@ describe('useSync tag synchronization helpers', () => {
       expect(row.created_at).toBeGreaterThan(0) // positive check
       expect(row.user_id).toBe('user-abc')
       expect(row.title).toBe('Clean code')
+    })
+  })
+
+  describe('formatSyncError', () => {
+    it('formats error objects with code, message, and details', () => {
+      expect(
+        formatSyncError({
+          code: '42501',
+          message: 'new row violates row-level security policy',
+          details: 'Failing row contains (xyz)',
+        }),
+      ).toBe('[42501] new row violates row-level security policy (Failing row contains (xyz))')
+    })
+
+    it('formats string errors directly', () => {
+      expect(formatSyncError('Network timeout')).toBe('Network timeout')
+    })
+
+    it('handles null/undefined gracefully', () => {
+      expect(formatSyncError(null)).toBe('Unbekannter Fehler')
+      expect(formatSyncError(undefined)).toBe('Unbekannter Fehler')
     })
   })
 })

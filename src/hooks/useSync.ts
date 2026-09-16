@@ -155,6 +155,22 @@ export function isTableMissingError(err: unknown): boolean {
   )
 }
 
+export function formatSyncError(err: unknown): string {
+  if (!err) return 'Unbekannter Fehler'
+  if (typeof err === 'string') return err
+  if (typeof err === 'object') {
+    const e = err as { code?: string; message?: string; details?: string; hint?: string; error_description?: string }
+    const parts: string[] = []
+    if (e.code) parts.push(`[${e.code}]`)
+    const mainMsg = e.message || e.error_description
+    if (mainMsg) parts.push(mainMsg)
+    if (e.details && e.details !== mainMsg) parts.push(`(${e.details})`)
+    if (e.hint) parts.push(`Tipp: ${e.hint}`)
+    return parts.length > 0 ? parts.join(' ') : JSON.stringify(err)
+  }
+  return String(err)
+}
+
 
 export function mergeRemoteTagsList(
   currentTags: string[],
@@ -465,6 +481,7 @@ export function useSync({
   mergeRemoteSettings,
 }: Options) {
   const [status, setStatus] = useState<SyncStatus>(isSupabaseConfigured ? 'signed-out' : 'unsupported')
+  const [syncError, setSyncError] = useState<string | null>(null)
   const [lastSyncAt, setLastSyncAt] = useState<number | null>(null)
   const [pending, setPending] = useState(false)
   const busyRef = useRef(false)
@@ -514,6 +531,7 @@ export function useSync({
         const tOps = ops.filter((o) => o.table === table)
         if (tOps.length === 0) continue
         const replace = tOps.some((o) => o.kind === 'replace')
+        const isOptionalTable = table === 'tags' || table === 'settings'
         const upserts: unknown[] = []
         const deletes: string[] = []
 
@@ -573,8 +591,8 @@ export function useSync({
         if (replace) {
           const resDel = await supabase.from(dbTable).delete().eq('user_id', userId)
           if (resDel.error) {
-            if (isTableMissingError(resDel.error)) {
-              console.warn(`[sync] Table ${dbTable} not found on Supabase. Skipping ${table} replace.`)
+            if (isTableMissingError(resDel.error) || isOptionalTable) {
+              console.warn(`[sync] Table ${dbTable} not found or error. Skipping ${table} replace:`, resDel.error)
               pushedTables.add(table)
               commitQueue(tOps)
               continue
@@ -593,7 +611,9 @@ export function useSync({
               updated_at: currentSettings.updatedAt ?? Date.now(),
             }
             const resUpsert = await supabase.from('user_settings').upsert([row], { onConflict: 'user_id' })
-            if (resUpsert.error && !isTableMissingError(resUpsert.error)) throw resUpsert.error
+            if (resUpsert.error && !isTableMissingError(resUpsert.error)) {
+              console.warn('[sync] optional user_settings replace failed:', resUpsert.error)
+            }
           } else {
             const all =
               table === 'sessions'
@@ -609,7 +629,13 @@ export function useSync({
               })
               const deduplicatedRows = deduplicateByConflict(rows, 'id')
               const resUpsert = await supabase.from(dbTable).upsert(deduplicatedRows, { onConflict: 'id' })
-              if (resUpsert.error && !isTableMissingError(resUpsert.error)) throw resUpsert.error
+              if (resUpsert.error) {
+                if (isTableMissingError(resUpsert.error) || isOptionalTable) {
+                  console.warn(`[sync] Table ${dbTable} replace skipped:`, resUpsert.error)
+                } else {
+                  throw resUpsert.error
+                }
+              }
               if (table === 'todos') {
                 markTodosSynced(rows.map((r) => (r as TodoRow).id))
               }
@@ -623,8 +649,8 @@ export function useSync({
             const deduplicatedUpserts = deduplicateByConflict(typedUpserts, onConflict)
             const resUpsert = await supabase.from(dbTable).upsert(deduplicatedUpserts, { onConflict })
             if (resUpsert.error) {
-              if (isTableMissingError(resUpsert.error)) {
-                console.warn(`[sync] Table ${dbTable} not found on Supabase. Skipping ${table} push.`)
+              if (isTableMissingError(resUpsert.error) || isOptionalTable) {
+                console.warn(`[sync] Table ${dbTable} push skipped:`, resUpsert.error)
                 pushedTables.add(table)
                 commitQueue(tOps)
                 continue
@@ -643,8 +669,8 @@ export function useSync({
             if (uniqueDeletes.length > 0) {
               const resDel = await supabase.from(dbTable).delete().in('id', uniqueDeletes).eq('user_id', userId)
               if (resDel.error) {
-                if (isTableMissingError(resDel.error)) {
-                  console.warn(`[sync] Table ${dbTable} not found on Supabase. Skipping ${table} delete.`)
+                if (isTableMissingError(resDel.error) || isOptionalTable) {
+                  console.warn(`[sync] Table ${dbTable} delete skipped:`, resDel.error)
                   pushedTables.add(table)
                   commitQueue(tOps)
                   continue
@@ -665,6 +691,7 @@ export function useSync({
       console.error('[sync] push failed:', e)
       const failedOps = ops.filter((o) => !pushedTables.has(o.table))
       markFailed(failedOps)
+      setSyncError(`Upload: ${formatSyncError(e)}`)
       return false
     }
   }, [])
@@ -691,8 +718,11 @@ export function useSync({
       if (sess.error) {
         if (isTableMissingError(sess.error)) {
           console.warn('[sync] public.sessions table not found on Supabase. Apply schema.sql to enable session sync.')
+          setSyncError('Tabellen fehlen: Führe supabase/schema.sql im Supabase SQL Editor aus')
+          hasCoreError = true
         } else {
           console.error('[sync] pull sessions failed:', sess.error)
+          setSyncError(`Sessions: ${formatSyncError(sess.error)}`)
           hasCoreError = true
         }
       } else {
@@ -708,8 +738,11 @@ export function useSync({
       if (todos.error) {
         if (isTableMissingError(todos.error)) {
           console.warn('[sync] public.todos table not found on Supabase. Apply schema.sql to enable todo sync.')
+          setSyncError('Tabellen fehlen: Führe supabase/schema.sql im Supabase SQL Editor aus')
+          hasCoreError = true
         } else {
           console.error('[sync] pull todos failed:', todos.error)
+          setSyncError(`Todos: ${formatSyncError(todos.error)}`)
           hasCoreError = true
         }
       } else {
@@ -804,6 +837,7 @@ export function useSync({
       return !hasCoreError
     } catch (e) {
       console.error('[sync] pull failed:', e)
+      setSyncError(`Download: ${formatSyncError(e)}`)
       return false
     }
   }, [])
@@ -829,6 +863,22 @@ export function useSync({
       busyRef.current = true
       try {
         if (showSyncing) setStatus('syncing')
+
+        // Pre-refresh auth token if expired or expiring within 60 seconds
+        try {
+          const { data: sessionData } = await supabase.auth.getSession()
+          const currentSession = sessionData?.session
+          if (currentSession?.expires_at && currentSession.expires_at <= Math.floor(Date.now() / 1000) + 60) {
+            console.info('[sync] auth token expired or expiring soon, refreshing...')
+            const { error: refreshErr } = await supabase.auth.refreshSession()
+            if (refreshErr) {
+              console.warn('[sync] pre-sync session refresh failed:', refreshErr.message)
+            }
+          }
+        } catch (err) {
+          console.warn('[sync] getSession/refresh check error:', err)
+        }
+
         const pushed = await pushQueue(supabase)
         let ok = pushed
         if (ok) ok = await pullAndMerge(supabase)
@@ -837,6 +887,7 @@ export function useSync({
         if (ok) {
           retryCountRef.current = 0
           setLastSyncAt(Date.now())
+          setSyncError(null)
           setStatus('synced')
         } else {
           const isOnline = typeof navigator === 'undefined' || navigator.onLine
@@ -914,5 +965,5 @@ export function useSync({
     return () => window.clearInterval(interval)
   }, [user, sync])
 
-  return { status, lastSyncAt, pending, sync }
+  return { status, syncError, lastSyncAt, pending, sync }
 }

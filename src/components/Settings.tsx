@@ -281,6 +281,7 @@ interface Props {
   syncProfile: GitHubProfile | null
   syncAvailable: boolean
   syncLoading: boolean
+  syncError?: string | null
   onSyncLogin: () => void
   onSyncLogout: (clearLocalData: boolean) => void
   onSyncNow: () => void
@@ -299,6 +300,7 @@ export const SettingsPanel = memo(function SettingsPanel({
   syncProfile,
   syncAvailable,
   syncLoading,
+  syncError,
   onSyncLogin,
   onSyncLogout,
   onSyncNow,
@@ -909,21 +911,28 @@ export const SettingsPanel = memo(function SettingsPanel({
             <span>{t.sync.syncing}</span>
           </div>
         ) : syncStatus === 'offline' || syncStatus === 'error' ? (
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="flex items-center gap-2 text-xs text-accent">
-              <span className="h-2 w-2 rounded-full bg-accent" />
-              {syncStatus === 'offline' ? t.sync.offline : t.sync.error}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                playMicroClick('tap')
-                onSyncNow()
-              }}
-              className="flex items-center gap-1.5 rounded-full border border-line bg-canvas px-3 py-1 text-xs text-muted hover:text-fg hover:border-fg/40 transition-colors cursor-pointer"
-            >
-              <RefreshCw size={12} /> {t.sync.retry}
-            </button>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="flex items-center gap-2 text-xs text-accent">
+                <span className="h-2 w-2 rounded-full bg-accent" />
+                {syncStatus === 'offline' ? t.sync.offline : t.sync.error}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  playMicroClick('tap')
+                  onSyncNow()
+                }}
+                className="flex items-center gap-1.5 rounded-full border border-line bg-canvas px-3 py-1 text-xs text-muted hover:text-fg hover:border-fg/40 transition-colors cursor-pointer"
+              >
+                <RefreshCw size={12} /> {t.sync.retry}
+              </button>
+            </div>
+            {syncError && (
+              <div className="rounded border border-accent/40 bg-accent/10 px-2.5 py-1.5 font-mono text-[10px] text-accent break-all select-all leading-relaxed">
+                {syncError}
+              </div>
+            )}
           </div>
         ) : syncProfile ? (
           <div className="flex flex-wrap items-center gap-3">

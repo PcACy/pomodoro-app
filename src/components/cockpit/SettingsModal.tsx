@@ -23,6 +23,7 @@ interface SettingsModalProps {
   syncProfile: GitHubProfile | null
   syncAvailable: boolean
   syncLoading: boolean
+  syncError?: string | null
   onSyncLogin: () => void
   onSyncLogout: (clearLocalData: boolean) => void
   onSyncNow: () => void
@@ -43,6 +44,7 @@ export const SettingsModal = memo(function SettingsModal({
   syncProfile,
   syncAvailable,
   syncLoading,
+  syncError,
   onSyncLogin,
   onSyncLogout,
   onSyncNow,
@@ -120,6 +122,7 @@ export const SettingsModal = memo(function SettingsModal({
             syncProfile={syncProfile}
             syncAvailable={syncAvailable}
             syncLoading={syncLoading}
+            syncError={syncError}
             onSyncLogin={onSyncLogin}
             onSyncLogout={onSyncLogout}
             onSyncNow={onSyncNow}

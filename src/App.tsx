@@ -565,6 +565,7 @@ export default function App() {
             syncProfile={auth.profile}
             syncAvailable={auth.available}
             syncLoading={auth.loading}
+            syncError={sync.syncError}
             onSyncLogin={auth.login}
             onSyncLogout={handleSyncLogout}
             onSyncNow={handleSyncNow}
