@@ -197,6 +197,7 @@ export default function App() {
       } else {
         flowDiscard()
       }
+      setActiveTodoId(null)
       setMode(m)
     },
     [mode, timerReset, flowDiscard, setMode],

@@ -11,6 +11,7 @@ interface TimerBroadcastPayload {
   phaseStartedAt?: number
   senderId: string
   seq: number
+  timestamp: number
 }
 
 type BroadcastMessage = { type: 'timer_state'; payload: TimerBroadcastPayload }
@@ -40,13 +41,13 @@ function getChannel(): BroadcastChannel | null {
   return channel
 }
 
-export function broadcastTimerState(state: Omit<TimerBroadcastPayload, 'senderId' | 'seq'>): void {
+export function broadcastTimerState(state: Omit<TimerBroadcastPayload, 'senderId' | 'seq' | 'timestamp'>): void {
   try {
     broadcastSeq += 1
     const ch = getChannel()
     ch?.postMessage({
       type: 'timer_state',
-      payload: { ...state, senderId: TAB_INSTANCE_ID, seq: broadcastSeq },
+      payload: { ...state, senderId: TAB_INSTANCE_ID, seq: broadcastSeq, timestamp: Date.now() },
     } satisfies BroadcastMessage)
   } catch {
     /* ignore */

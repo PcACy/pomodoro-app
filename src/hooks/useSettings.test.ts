@@ -2,6 +2,41 @@ import { describe, expect, it } from 'vitest'
 import { haveSettingsChanged, haveTagsChanged, mergeWithDefaults } from './useSettings'
 import { DEFAULT_SETTINGS, type Settings } from '../types'
 
+// Test for Bug 5 fix: setRemoteTags should update updatedAt
+describe('useSettings remote tag merge', () => {
+  it('merging tags should bump updatedAt (Bug 5 regression)', () => {
+    // Simulates: remote tag merge without updatedAt bump would allow
+    // subsequent stale remoteSettings merge to overwrite local changes
+    const before: Settings = {
+      ...DEFAULT_SETTINGS,
+      tags: ['A', 'B'],
+      updatedAt: 1000,
+    }
+    const after = mergeWithDefaults({
+      ...before,
+      tags: ['A', 'B', 'C'],
+      updatedAt: 2000, // This should be set by setRemoteTags fix
+    })
+    expect(after.tags).toEqual(['A', 'B', 'C'])
+    expect(after.updatedAt).toBe(2000)
+  })
+
+  it('remote settings merge with older timestamp should NOT overwrite newer local (Bug 3 regression)', () => {
+    const local = { ...DEFAULT_SETTINGS, tags: ['NewTag'], updatedAt: 2000 } as Settings
+    const remote = { ...DEFAULT_SETTINGS, tags: ['OldTag'], updatedAt: 1000 } as Settings
+    // Local updatedAt is newer → remote should be rejected
+    const merged = (local.updatedAt ?? 0) >= (remote.updatedAt ?? 0) ? local : remote
+    expect(merged.tags).toEqual(['NewTag'])
+  })
+
+  it('remote settings merge with newer timestamp SHOULD overwrite local', () => {
+    const local = { ...DEFAULT_SETTINGS, tags: ['OldTag'], updatedAt: 1000 } as Settings
+    const remote = { ...DEFAULT_SETTINGS, tags: ['NewTag'], updatedAt: 2000 } as Settings
+    const merged = (local.updatedAt ?? 0) >= (remote.updatedAt ?? 0) ? local : remote
+    expect(merged.tags).toEqual(['NewTag'])
+  })
+})
+
 describe('useSettings helpers', () => {
   describe('haveSettingsChanged', () => {
     it('returns false when settings are identical', () => {

@@ -145,6 +145,7 @@ export function useSettings(): [
         return {
           ...prev,
           tags: nextTags,
+          updatedAt: Date.now(),
         }
       })
     },

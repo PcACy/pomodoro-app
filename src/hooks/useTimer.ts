@@ -25,6 +25,7 @@ interface CoarseTimerState {
   totalMs: number
   remainingMs: number
   completedFocusInCycle: number
+  updatedAt?: number
 }
 
 const phaseDuration = (settings: Settings, phase: PhaseId): number =>
@@ -403,6 +404,16 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     return subscribeBroadcast((msg) => {
       if (msg.type === 'timer_state') {
         const p = msg.payload
+
+        // If the local tab has uncommitted changes (i.e., local state was
+        // modified after the remote broadcast was sent), skip applying the
+        // remote state to avoid clobbering newer local changes.
+        const localLastModified = machineRef.current.updatedAt ?? 0
+        const remoteTimestamp = p.timestamp ?? 0
+        if (localLastModified > remoteTimestamp) {
+          return
+        }
+
         endRef.current = p.targetEnd
         cycleRef.current = p.completedFocusInCycle
         remainingMsRef.current = p.remainingMs
@@ -437,6 +448,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
           totalMs: p.totalMs,
           remainingMs: p.remainingMs,
           completedFocusInCycle: p.completedFocusInCycle,
+          updatedAt: remoteTimestamp,
         }
         machineRef.current = nextMachine
         setMachine(nextMachine)
