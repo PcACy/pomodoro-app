@@ -391,7 +391,11 @@ textarea:focus:not(:focus-visible) {
       background-color 150ms ease;
   }
 
-  .chip:hover:not(:disabled) {
+  /* Active/selected chips must be excluded from the plain hover repaint:
+     `.chip:hover` is more specific than `.chip[aria-pressed='true']`, so it
+     would otherwise set the label to --c-fg on top of the --c-fg background,
+     leaving a blank white pill. */
+  .chip:hover:not(:disabled):not([aria-pressed='true']):not([aria-checked='true']):not([data-active='true']) {
     color: rgb(var(--c-fg));
     border-color: rgb(var(--c-fg) / 0.4);
   }
