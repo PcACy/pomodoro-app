@@ -363,7 +363,7 @@ export const SessionLog = memo(function SessionLog({
           </span>
           <p className="label">No telemetry data</p>
           <p className="max-w-xs text-xs text-muted">
-            {sessions.length === 0 ? t.sessionLog.emptySub : t.sessionLog.searchPlaceholder}
+            {sessions.length === 0 ? t.sessionLog.emptySub : t.sessionLog.noResults}
           </p>
         </div>
       ) : (

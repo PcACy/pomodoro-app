@@ -178,6 +178,10 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       totalMs: d,
       remainingMs: d,
       completedFocusInCycle: nextCycle,
+      // Stamp every locally-produced state so the broadcast subscriber can
+      // reject remote messages that predate this change (see the timestamp
+      // guard in the subscriber below).
+      updatedAt: Date.now(),
     }
     machineRef.current = nextMachine
     setMachine(nextMachine)
@@ -258,7 +262,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     // Sync the ref immediately (see finishCurrentPhase): a second call in the
     // same tick must see 'running', otherwise e.g. a fast double-toggle would
     // run start() twice instead of start() then pause().
-    const nextMachine = { ...m, status: 'running' as TimerStatus, remainingMs: remainingMsRef.current }
+    const nextMachine = { ...m, status: 'running' as TimerStatus, remainingMs: remainingMsRef.current, updatedAt: now }
     machineRef.current = nextMachine
     setMachine(nextMachine)
     broadcastTimerState({
@@ -289,7 +293,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     void stopForegroundTimer()
 
     // Sync the ref immediately (see start()).
-    const nextMachine = { ...m, status: 'paused' as TimerStatus, remainingMs: remaining }
+    const nextMachine = { ...m, status: 'paused' as TimerStatus, remainingMs: remaining, updatedAt: Date.now() }
     machineRef.current = nextMachine
     setMachine(nextMachine)
     broadcastTimerState({
@@ -332,7 +336,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     void stopForegroundTimer()
 
     // Sync the ref immediately (see start()).
-    const nextMachine = { ...m, status: 'idle' as TimerStatus, totalMs: total, remainingMs: total }
+    const nextMachine = { ...m, status: 'idle' as TimerStatus, totalMs: total, remainingMs: total, updatedAt: Date.now() }
     machineRef.current = nextMachine
     setMachine(nextMachine)
     broadcastTimerState({
@@ -377,7 +381,7 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     }
 
     // Sync the ref immediately (see start()).
-    const nextMachine = { ...m, totalMs: total, remainingMs: rem }
+    const nextMachine = { ...m, totalMs: total, remainingMs: rem, updatedAt: Date.now() }
     machineRef.current = nextMachine
     setMachine(nextMachine)
 

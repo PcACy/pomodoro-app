@@ -127,5 +127,16 @@ describe('useSettings helpers', () => {
       expect(merged.phases.shortBreak).toBe(DEFAULT_SETTINGS.phases.shortBreak)
       expect(merged.tags).toEqual(['Custom'])
     })
+
+    it('preserves an explicitly empty tag list (deleting every tag is valid)', () => {
+      expect(mergeWithDefaults({ tags: [] }).tags).toEqual([])
+    })
+
+    it('falls back to default tags only when the field is absent or corrupt', () => {
+      expect(mergeWithDefaults({}).tags).toEqual(DEFAULT_SETTINGS.tags)
+      expect(mergeWithDefaults({ tags: 'nope' as unknown as string[] }).tags).toEqual(
+        DEFAULT_SETTINGS.tags,
+      )
+    })
   })
 })

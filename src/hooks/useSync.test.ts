@@ -94,9 +94,16 @@ describe('useSync tag synchronization helpers', () => {
       expect(result).toEqual(['Uni', 'Coding', 'Gym'])
     })
 
-    it('falls back to default or local tags if all would be deleted', () => {
-      const result = mergeRemoteTagsList([], [], [])
-      expect(result.length).toBeGreaterThan(0)
+    it('returns the current tags unchanged when every tag would be deleted', () => {
+      // Deleting all tags is a valid state: no default tags may be resurrected.
+      expect(mergeRemoteTagsList([], [], [])).toEqual([])
+    })
+
+    it('does not resurrect default tags after deleting the last tag while a remote merge is pending', () => {
+      const result = mergeRemoteTagsList([], ['Projekt'], [
+        { kind: 'delete', table: 'tags', id: 'Projekt' },
+      ])
+      expect(result).toEqual([])
     })
   })
 

@@ -35,10 +35,12 @@ export function mergeWithDefaults(stored: StoredSettings | undefined): Settings 
       ? s.dailyGoalMinutes
       : DEFAULT_SETTINGS.dailyGoalMinutes,
   )
+  // An explicitly empty tag list is a valid user state (every tag deleted);
+  // only fall back to the defaults when the field is absent or corrupt.
   const rawTags = Array.isArray(s.tags)
     ? s.tags.filter((t): t is string => typeof t === 'string' && t.trim().length > 0).map((t) => t.slice(0, 50))
-    : []
-  const tags = rawTags.length > 0 ? rawTags : DEFAULT_SETTINGS.tags
+    : null
+  const tags = rawTags ?? DEFAULT_SETTINGS.tags
   const updatedAt =
     typeof s.updatedAt === 'number' && Number.isFinite(s.updatedAt) && s.updatedAt > 0
       ? s.updatedAt

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { Moon, Settings as SettingsIcon, Sun } from 'lucide-react'
-import { useSettings } from './hooks/useSettings'
+import { mergeWithDefaults, useSettings } from './hooks/useSettings'
 import { useLocalState } from './hooks/useLocalState'
 import { useSessions } from './hooks/useSessions'
 import { useTimer } from './hooks/useTimer'
@@ -274,11 +274,20 @@ export default function App() {
   })
 
   const handleImportSettings = useCallback((s: unknown) => {
-    if (s && typeof s === 'object') {
-      updateSettings(() => s as Settings)
-      enqueue({ kind: 'replace', table: 'tags' })
-      enqueue({ kind: 'replace', table: 'settings' })
-    }
+    if (!s || typeof s !== 'object') return
+    // Imported backups may carry a partial (or even empty) settings object.
+    // Normalize it through mergeWithDefaults so the updater always sees a full,
+    // valid Settings — otherwise haveSettingsChanged/haveTagsChanged read
+    // missing fields and throw, aborting the rest of the import.
+    const imported = mergeWithDefaults(s as Partial<Settings>)
+    updateSettings(() => ({
+      ...imported,
+      // An import is an explicit user action: make it the newest local change
+      // so a later remote merge cannot immediately revert it.
+      updatedAt: Date.now(),
+    }))
+    enqueue({ kind: 'replace', table: 'tags' })
+    enqueue({ kind: 'replace', table: 'settings' })
   }, [updateSettings])
 
   const handleImportTodos = useCallback(

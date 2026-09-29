@@ -94,9 +94,11 @@ export const StatusBar = memo(function StatusBar({
               className="text-muted/40"
               aria-label="Cloud Sync: offline"
             />
-          ) : (
+          ) : syncStatus === 'synced' ? (
             <Cloud size={13} className="text-muted/60" aria-label="Cloud Sync: synced" />
-          )}
+          ) : null}
+          {/* 'signed-out' / 'unsupported': render no cloud so a disabled or
+              unconfigured sync is never mislabelled as "synced". */}
         </div>
       ) : null}
     </footer>

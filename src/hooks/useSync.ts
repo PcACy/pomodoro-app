@@ -45,10 +45,11 @@ export function readTagsLocal(): string[] {
     if (!raw) return DEFAULT_SETTINGS.tags
     const parsed = JSON.parse(raw)
     if (parsed && Array.isArray(parsed.tags)) {
-      const valid = parsed.tags
+      // An explicitly empty tag list is preserved (all tags deleted); defaults
+      // only apply when the field is missing/corrupt.
+      return parsed.tags
         .filter((t: unknown): t is string => typeof t === 'string' && t.trim().length > 0)
         .map((t: string) => t.slice(0, 50))
-      return valid.length > 0 ? valid : DEFAULT_SETTINGS.tags
     }
     return DEFAULT_SETTINGS.tags
   } catch {
@@ -226,7 +227,10 @@ export function mergeRemoteTagsList(
     }
   }
 
-  return result.length > 0 ? result : (currentTags.length > 0 ? currentTags : DEFAULT_SETTINGS.tags)
+  // Never invent tags: an empty result is a legitimate state (the user deleted
+  // every tag), so fall back to the current local list unchanged. Re-adding
+  // DEFAULT_SETTINGS here would resurrect the defaults on the next sync.
+  return result.length > 0 ? result : currentTags
 }
 
 export const preferNewerTodo = (a: TodoItem, b: TodoItem): TodoItem => {
@@ -753,22 +757,35 @@ export function useSync({
         const syncedIds = getSyncedTodoIds()
         const unseededLocal = localTodos.filter((t) => !remoteIds.has(t.id) && !syncedIds.has(t.id))
 
+        // Local todos absent from remote and never synced are pushed up first.
+        // Only treat them as synced once the seed actually succeeded: marking
+        // them after a failure would let the merge below classify them as
+        // remotely-deleted and silently drop them from the local store.
+        const seededLocal: TodoItem[] = []
         if (unseededLocal.length > 0) {
           const seedRows = deduplicateByConflict(
             unseededLocal.map((t) => todoToRow(t, userId)),
             'id',
           )
           const seedRes = await supabase.from('todos').upsert(seedRows, { onConflict: 'id' })
-          if (seedRes.error && !isTableMissingError(seedRes.error)) {
-            console.warn('[sync] failed to seed local todos to Supabase:', seedRes.error)
+          if (seedRes.error) {
+            if (!isTableMissingError(seedRes.error)) {
+              console.warn('[sync] failed to seed local todos to Supabase:', seedRes.error)
+            }
+          } else {
+            markTodosSynced(unseededLocal.map((t) => t.id))
+            seededLocal.push(...unseededLocal)
           }
-          markTodosSynced(unseededLocal.map((t) => t.id))
         }
 
         if (remoteTodos.length === 0 && localTodos.length > 0) {
           markTodosSynced(localTodos.map((t) => t.id))
         } else {
-          mergeRef.current(remoteList)
+          // `remoteList` was fetched before the seed above, so the freshly
+          // seeded todos are missing from it. Feed them to the merge as well;
+          // otherwise it treats them as deleted-on-another-device and drops
+          // them locally (they would only reappear on the next pull).
+          mergeRef.current(seededLocal.length > 0 ? [...remoteList, ...seededLocal] : remoteList)
           markTodosSynced(remoteList.map((t) => t.id))
         }
       }
