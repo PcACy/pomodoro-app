@@ -116,7 +116,20 @@ export const BentoCockpit = memo(
     const [activeScreen, setActiveScreen] = useState<number>(activeDeck)
     const [statsSubView, setStatsSubView] = useState<'overview' | 'log'>('overview')
     const scrollerRef = useRef<HTMLDivElement>(null)
-    const isProgrammaticScrollRef = useRef(false)
+    // Deck index an animated (programmatic) scroll is travelling to, or null
+    // while the scroller is idle or user-driven. Tracking the target lets us
+    // tell "still animating" from "settled" precisely — unlike a boolean plus a
+    // fixed timeout, which expires mid-animation on longer scrolls.
+    const scrollTargetRef = useRef<number | null>(null)
+    const settleTimerRef = useRef<number | null>(null)
+    const settleRetryRef = useRef(0)
+    // Direction of a wheel step that arrived while a deck change was still in
+    // flight. Draining it on arrival keeps continuous scrolling responsive
+    // instead of dropping every event until the animation finishes.
+    const queuedStepRef = useRef<-1 | 0 | 1>(0)
+    // `finishDeckScroll` needs to chain the queued step, but `scrollToScreen`
+    // already depends on it — a ref breaks that cycle.
+    const scrollToScreenRef = useRef<(index: number, subView?: 'overview' | 'log') => void>(() => {})
 
     // 52-Week Heatmap data computed from sessions
     const heat = useMemo(() => heatmapData(sessions, 52), [sessions])
@@ -126,6 +139,107 @@ export const BentoCockpit = memo(
     const prevWidthRef = useRef<number>(0)
     const prevPropDeckRef = useRef<number>(activeDeck)
 
+    /** Drops the pending safety timer and its retry budget. */
+    const clearSettleTimer = useCallback(() => {
+      settleRetryRef.current = 0
+      if (settleTimerRef.current != null) {
+        window.clearTimeout(settleTimerRef.current)
+        settleTimerRef.current = null
+      }
+    }, [])
+
+    /**
+     * Abandons an in-flight deck change without reporting anything: the scroller
+     * is about to be driven by the user (or the layout is changing), so neither
+     * the queued step nor a late settle should still apply.
+     */
+    const cancelPendingScroll = useCallback(() => {
+      scrollTargetRef.current = null
+      queuedStepRef.current = 0
+      clearSettleTimer()
+    }, [clearSettleTimer])
+
+    /**
+     * Completes an animated deck change: clears the in-flight marker, snaps the
+     * scroller exactly onto the deck boundary (so an interrupted animation can
+     * never leave a half-deck sliver on screen) and re-syncs the reported deck
+     * with what is actually visible. A queued wheel step continues the walk.
+     *
+     * `expected` names the deck the caller believes it is settling. A late event
+     * belonging to a scroll we already replaced (a stale `scrollend`) is ignored
+     * rather than applied to its successor — otherwise settling the old target
+     * would yank the fresh animation to the wrong deck.
+     */
+    const finishDeckScroll = useCallback(
+      (expected?: number) => {
+        const pending = scrollTargetRef.current
+        if (expected != null && pending != null && expected !== pending) return
+        clearSettleTimer()
+        const target = pending ?? expected
+        const scroller = scrollerRef.current
+        if (target == null || !scroller) return
+        scrollTargetRef.current = null
+
+        // A zero-width scroller (deck not laid out yet, or hidden) has no valid
+        // offset for this target — snapping would drag it to the left edge.
+        const width = scroller.clientWidth
+        if (width > 0) {
+          const targetLeft = target * width
+          if (Math.abs(scroller.scrollLeft - targetLeft) > 0.5) {
+            scroller.scrollTo({ left: targetLeft, behavior: 'auto' })
+          }
+        }
+        if (target !== activeScreenRef.current) {
+          prevPropDeckRef.current = target
+          activeScreenRef.current = target
+          setActiveScreen(target)
+          onDeckChange?.(target)
+        }
+
+        // Apply the step that was requested mid-flight, from a clean boundary.
+        const step = queuedStepRef.current
+        if (step !== 0) {
+          queuedStepRef.current = 0
+          scrollToScreenRef.current(target + step)
+        }
+      },
+      [clearSettleTimer, onDeckChange],
+    )
+
+    /**
+     * Safety net for a deck change that never settles on its own (an engine
+     * without `scrollend`, a throttled animation, a dropped frame): commit the
+     * target instead of stranding the scroller between two decks. Arrival is
+     * normally detected the frame it happens, so this only ever runs for a
+     * genuinely stuck scroll — it re-checks a few times first so a merely slow
+     * animation is not yanked to its end.
+     */
+    const armSettleSafety = useCallback(
+      () => {
+        clearSettleTimer()
+        const tick = () => {
+          settleTimerRef.current = null
+          const scroller = scrollerRef.current
+          // Follow the *live* target rather than `expected`: if a newer deck
+          // change replaced it, that one owns the scroller and still needs a
+          // settle. Bailing out here would leave it pending forever.
+          const pending = scrollTargetRef.current
+          if (pending == null || !scroller) return
+          const width = scroller.clientWidth
+          const arrived = width > 0 && Math.abs(scroller.scrollLeft - pending * width) <= 2
+          if (!arrived && settleRetryRef.current < 6) {
+            settleRetryRef.current += 1
+            settleTimerRef.current = window.setTimeout(tick, 250)
+            return
+          }
+          finishDeckScroll(pending)
+        }
+        settleTimerRef.current = window.setTimeout(tick, 700)
+      },
+      [clearSettleTimer, finishDeckScroll],
+    )
+
+
     // Smoothly scrolls to target deck (0: Focus Deck, 1: Tasks Deck, 2: Stats Deck)
     const scrollToScreen = useCallback(
       (index: number, subView?: 'overview' | 'log') => {
@@ -133,6 +247,7 @@ export const BentoCockpit = memo(
         if (!scroller) return
         const clampedIndex = Math.max(0, Math.min(2, index))
         prevPropDeckRef.current = clampedIndex
+        activeScreenRef.current = clampedIndex
         playMicroClick('toggle')
         setActiveScreen(clampedIndex)
         onDeckChange?.(clampedIndex)
@@ -141,61 +256,55 @@ export const BentoCockpit = memo(
         }
 
         const targetLeft = clampedIndex * scroller.clientWidth
-        // If already aligned to target position, exit cleanly
+        // Already aligned: retire any in-flight target (its late settle must not
+        // drag us back to the deck it was heading for) and just tidy the sliver.
         if (Math.abs(scroller.scrollLeft - targetLeft) < 2) {
-          isProgrammaticScrollRef.current = false
+          scrollTargetRef.current = null
+          finishDeckScroll(clampedIndex)
           return
         }
 
-        isProgrammaticScrollRef.current = true
+        scrollTargetRef.current = clampedIndex
         scroller.scrollTo({
           left: targetLeft,
           behavior: 'smooth',
         })
-
-        let settled = false
-        const onScrollEnd = () => {
-          if (settled) return
-          settled = true
-          isProgrammaticScrollRef.current = false
-        }
-
-        const timerId = window.setTimeout(onScrollEnd, 450)
-        if ('onscrollend' in window) {
-          scroller.addEventListener(
-            'scrollend',
-            () => {
-              window.clearTimeout(timerId)
-              onScrollEnd()
-            },
-            { once: true },
-          )
-        }
+        armSettleSafety()
       },
-      [onDeckChange],
+      [armSettleSafety, finishDeckScroll, onDeckChange],
     )
+    scrollToScreenRef.current = scrollToScreen
 
     // Trackpad swipe and mouse wheel horizontal navigation
     const handleWheel = useCallback(
       (e: React.WheelEvent<HTMLDivElement>) => {
         const scroller = scrollerRef.current
-        if (!scroller || isProgrammaticScrollRef.current) return
+        if (!scroller) return
 
         // If the gesture is horizontal (trackpad swipe or Shift+Wheel), let native overflow-x handle it
         if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 5) {
           return
         }
 
-        // If user rolls standard vertical mouse wheel over non-scrollable parts of the cockpit
-        const target = e.target as HTMLElement | null
-        const scrollableParent = target?.closest('.overflow-y-auto')
-        if (!scrollableParent && Math.abs(e.deltaY) > 25) {
-          if (e.deltaY > 0 && activeScreenRef.current < 2) {
-            scrollToScreen(activeScreenRef.current + 1)
-          } else if (e.deltaY < 0 && activeScreenRef.current > 0) {
-            scrollToScreen(activeScreenRef.current - 1)
-          }
+        // Ignore vertical wheel that belongs to a scrollable card in the deck
+        if ((e.target as HTMLElement | null)?.closest('.overflow-y-auto')) return
+        if (Math.abs(e.deltaY) <= 25) return
+
+        const step: 1 | -1 = e.deltaY > 0 ? 1 : -1
+        // `activeScreenRef` already holds the in-flight target, so this is the
+        // deck the gesture is heading towards either way.
+        const next = activeScreenRef.current + step
+        if (next < 0 || next > 2) return
+
+        if (scrollTargetRef.current != null) {
+          // Remember the intent instead of dropping it: `finishDeckScroll`
+          // drains it from a settled boundary, so a continuous wheel burst
+          // walks deck by deck without ever interrupting an animation.
+          queuedStepRef.current = step
+          return
         }
+
+        scrollToScreen(next)
       },
       [scrollToScreen],
     )
@@ -227,17 +336,28 @@ export const BentoCockpit = memo(
     // Sync activeScreen state on touch swipe / trackpad / snap settle
     const handleScroll = useCallback(() => {
       const scroller = scrollerRef.current
-      if (!scroller || isProgrammaticScrollRef.current) return
+      if (!scroller) return
       const width = scroller.clientWidth
-      if (width > 0) {
-        const pageIndex = Math.round(scroller.scrollLeft / width)
-        if (pageIndex !== activeScreenRef.current && pageIndex >= 0 && pageIndex <= 2) {
-          prevPropDeckRef.current = pageIndex
-          setActiveScreen(pageIndex)
-          onDeckChange?.(pageIndex)
-        }
+      if (width <= 0) return
+
+      // While a deck change animates, ignore intermediate positions: they sit
+      // between two decks, so rounding reports the neighbouring one and the
+      // indicator would jump ahead of (or behind) the content. Reconcile only
+      // once the animation has arrived.
+      const target = scrollTargetRef.current
+      if (target != null) {
+        if (Math.abs(scroller.scrollLeft - target * width) <= 2) finishDeckScroll(target)
+        return
       }
-    }, [onDeckChange])
+
+      const pageIndex = Math.round(scroller.scrollLeft / width)
+      if (pageIndex !== activeScreenRef.current && pageIndex >= 0 && pageIndex <= 2) {
+        prevPropDeckRef.current = pageIndex
+        activeScreenRef.current = pageIndex
+        setActiveScreen(pageIndex)
+        onDeckChange?.(pageIndex)
+      }
+    }, [finishDeckScroll, onDeckChange])
 
     // Keep scroll position aligned to activeScreen only when container actually resizes
     useEffect(() => {
@@ -250,6 +370,9 @@ export const BentoCockpit = memo(
           const newWidth = entry.contentRect.width
           if (newWidth > 0 && Math.abs(newWidth - prevWidthRef.current) > 2) {
             prevWidthRef.current = newWidth
+            // A resize invalidates any in-flight target: abort it and re-align
+            // to the deck we are on so the geometry stays consistent.
+            cancelPendingScroll()
             scroller.scrollTo({
               left: activeScreenRef.current * newWidth,
               behavior: 'auto',
@@ -259,7 +382,36 @@ export const BentoCockpit = memo(
       })
       observer.observe(scroller)
       return () => observer.disconnect()
-    }, [])
+    }, [cancelPendingScroll])
+
+    // Settle animated deck changes deterministically: `scrollend` fires when the
+    // scroller actually stops, which is the only reliable moment to snap onto a
+    // deck boundary. A pointer press hands control back to the user.
+    useEffect(() => {
+      const scroller = scrollerRef.current
+      if (!scroller) return
+      const onScrollEnd = () => {
+        const pending = scrollTargetRef.current
+        const el = scrollerRef.current
+        const width = el?.clientWidth ?? 0
+        // A `scrollend` belonging to an animation we already replaced arrives
+        // while the new target is still a deck (or more) away: settling there
+        // would snap the fresh animation to the wrong position. Only settle a
+        // stop that actually landed on the pending deck.
+        if (pending == null || !el || width <= 0) return
+        if (Math.abs(el.scrollLeft - pending * width) > 2) return
+        finishDeckScroll(pending)
+      }
+      scroller.addEventListener('scrollend', onScrollEnd)
+      scroller.addEventListener('pointerdown', cancelPendingScroll)
+      scroller.addEventListener('touchstart', cancelPendingScroll, { passive: true })
+      return () => {
+        scroller.removeEventListener('scrollend', onScrollEnd)
+        scroller.removeEventListener('pointerdown', cancelPendingScroll)
+        scroller.removeEventListener('touchstart', cancelPendingScroll)
+        clearSettleTimer()
+      }
+    }, [cancelPendingScroll, clearSettleTimer, finishDeckScroll])
 
     // Keyboard shortcuts:
     // '1' -> Focus Deck (0)
