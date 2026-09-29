@@ -141,12 +141,17 @@ export const GlyphTimeDisplay = memo(function GlyphTimeDisplay({
   const totalHeight = Math.max(0, 7 * STEP - DOT_GAP)
 
   return (
-    <div className={`relative flex items-center justify-center tabular-nums select-none ${className || 'w-full max-w-[340px] sm:max-w-[400px] lg:max-w-[430px] my-auto py-2'}`}>
+    <div
+      className={`relative flex min-h-0 w-full items-center justify-center tabular-nums select-none ${className}`}
+    >
       <span className="sr-only">{time}</span>
 
+      {/* preserveAspectRatio lets the glyph scale to whichever axis runs out
+          first, so the clock fills tall narrow panels and short wide ones. */}
       <svg
         viewBox={`0 0 ${totalWidth} ${totalHeight}`}
-        className="w-full h-auto shrink-0 overflow-visible"
+        preserveAspectRatio="xMidYMid meet"
+        className="h-full w-full overflow-visible"
         aria-hidden="true"
       >
         {/* Lit Matrix Digits */}

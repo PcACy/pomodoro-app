@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================================
+   NOTHING DESIGN SYSTEM — FOUNDATION
+   Flat surfaces. True blacks. Hairline borders. No blur, no shadow.
+   Geometry is expressed through 1px rules, dot matrices and typography.
+   ========================================================================= */
+
+/* --- Self-hosted display face (offline-first: ships with the app) -------- */
 @font-face {
   font-family: 'Doto';
   src: url('/fonts/Doto-Regular.ttf') format('truetype');
@@ -10,261 +17,167 @@
 }
 
 /* =========================================================================
-   1. NOTHING DESIGN SYSTEM TOKENS
-   ========================================================================= */
-:root,
-:root[data-theme='nothing'][data-mode='dark'],
-:root:not([data-mode='light']) {
-  /* Nothing Dark Mode (OLED Black #000000) */
-  color-scheme: dark;
-  --black: 0 0 0;
-  --surface: 17 17 17;
-  --surface-raised: 26 26 26;
-  --border: 34 34 34;
-  --border-visible: 51 51 51;
-  --text-disabled: 102 102 102;
-  --text-secondary: 153 153 153;
-  --text-primary: 232 232 232;
-  --text-display: 255 255 255;
-  --success: 74 158 92;
-  --warning: 212 168 67;
-  --interactive: 91 155 246;
-
-  /* Mapped Framework Tokens (Direct values to avoid browser IACVT nested-var issues) */
-  --c-canvas: 0 0 0;
-  --c-surface: 17 17 17;
-  --c-raised: 26 26 26;
-  --c-line: 51 51 51;
-  --c-fg: 232 232 232;
-  --c-muted: 153 153 153;
-  --c-accent: var(--accent);
-  --c-accent-strong: var(--accent-strong);
-  --c-on-accent: 255 255 255;
-  --c-on-primary: 0 0 0;
-  --c-on-surface: var(--text-primary);
-  --c-on-surface-variant: var(--text-secondary);
-  --c-surface-container-highest: var(--surface-raised);
-  --c-surface-container-lowest: var(--black);
-  --c-outline-variant: var(--border-visible);
-  --c-break: var(--success);
-  --c-long: var(--interactive);
-  --c-track: var(--surface-raised);
-  --primary-rgb: var(--c-accent);
-
-  /* Chart Colors (Monochrome high-contrast with red signal) */
-  --c-chart-1: 255 255 255;
-  --c-chart-2: 232 232 232;
-  --c-chart-3: 153 153 153;
-  --c-chart-4: 102 102 102;
-  --c-chart-5: 215 25 33;
-  --c-chart-6: 74 158 92;
-  --c-chart-7: 212 168 67;
-  --c-chart-8: 102 102 102;
-
-  /* Structural Geometry: Flat surfaces, 1px border separation, no shadows */
-  --radius-card: 16px;
-  --radius-btn: 999px;
-  --radius-sm: 8px;
-  --badge-radius: 999px;
-  --border-card-width: 1px;
-  --border-card-style: solid;
-  --font-display: 'Doto', 'Space Grotesk', monospace;
-  --font-body: 'Space Grotesk', system-ui, sans-serif;
-  --card-shadow: none;
-  --card-blur: 0px;
-  --card-bg-opacity: 1;
-
-  /* Semantic Tokens */
-  --color-tag-bg: rgba(255, 255, 255, 0.06);
-  --color-tag-text: rgb(var(--text-primary));
-  --color-tag-border: rgb(var(--border-visible));
-  --color-streak: #d4a843;
-  --color-success: #4a9e5c;
-  --heatmap-l0: rgba(255, 255, 255, 0.04);
-  --heatmap-l0-border: rgb(var(--border));
-}
-
-:root[data-theme='nothing'][data-mode='light'],
-:root[data-mode='light'] {
-  /* Nothing Light Mode (Warm Off-White Technical Paper #F5F5F5) */
-  color-scheme: light;
-  --black: 245 245 245;
-  --surface: 255 255 255;
-  --surface-raised: 240 240 240;
-  --border: 232 232 232;
-  --border-visible: 204 204 204;
-  --text-disabled: 153 153 153;
-  --text-secondary: 102 102 102;
-  --text-primary: 26 26 26;
-  --text-display: 0 0 0;
-  --success: 74 158 92;
-  --warning: 212 168 67;
-  --interactive: 0 122 255;
-
-  /* Mapped Framework Tokens (Direct values to avoid browser IACVT nested-var issues) */
-  --c-canvas: 245 245 245;
-  --c-surface: 255 255 255;
-  --c-raised: 240 240 240;
-  --c-line: 204 204 204;
-  --c-fg: 26 26 26;
-  --c-muted: 102 102 102;
-  --c-accent: var(--accent);
-  --c-accent-strong: var(--accent-strong);
-  --c-on-accent: 255 255 255;
-  --c-on-primary: 255 255 255;
-  --c-on-surface: var(--text-primary);
-  --c-on-surface-variant: var(--text-secondary);
-  --c-surface-container-highest: var(--surface-raised);
-  --c-surface-container-lowest: var(--black);
-  --c-outline-variant: var(--border-visible);
-  --c-break: var(--success);
-  --c-long: var(--interactive);
-  --c-track: var(--surface-raised);
-  --primary-rgb: var(--c-accent);
-
-  /* Chart Colors (Monochrome high-contrast with red signal) */
-  --c-chart-1: 0 0 0;
-  --c-chart-2: 51 51 51;
-  --c-chart-3: 102 102 102;
-  --c-chart-4: 153 153 153;
-  --c-chart-5: 215 25 33;
-  --c-chart-6: 74 158 92;
-  --c-chart-7: 212 168 67;
-  --c-chart-8: 102 102 102;
-
-  /* Structural Geometry */
-  --radius-card: 16px;
-  --radius-btn: 999px;
-  --radius-sm: 8px;
-  --badge-radius: 999px;
-  --border-card-width: 1px;
-  --border-card-style: solid;
-  --font-display: 'Doto', 'Space Grotesk', monospace;
-  --font-body: 'Space Grotesk', system-ui, sans-serif;
-  --card-shadow: none;
-  --card-blur: 0px;
-  --card-bg-opacity: 1;
-
-  /* Semantic Tokens */
-  --color-tag-bg: rgba(0, 0, 0, 0.05);
-  --color-tag-text: rgb(var(--text-primary));
-  --color-tag-border: rgb(var(--border-visible));
-  --color-streak: #d4a843;
-  --color-success: #4a9e5c;
-  --heatmap-l0: rgba(0, 0, 0, 0.04);
-  --heatmap-l0-border: rgb(var(--border));
-}
-
-/* =========================================================================
-   NOTHING OS 5.0 & CMF COLORWAYS THEME TOKENS
+   1. RADIUS SCALE — one card radius, one control radius. No more ad-hoc
+      rounded-[24px] / rounded-[28px] / rounded-card drift between components.
    ========================================================================= */
 :root {
-  --bg-canvas: #050505;
-  --bg-card: rgba(15, 15, 15, 0.7);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --accent: 229 30 43;
-  --accent-hex: #E51E2B;
-  --accent-strong: 229 30 43;
-  --accent-subtle: rgba(229, 30, 43, 0.125);
-  --text-primary: #E8E8E8;
-  --text-muted: #999999;
-}
+  --r-card: 20px;
+  --r-panel: 14px;
+  --r-control: 10px;
+  --r-sm: 7px;
+  --r-xs: 4px;
+  --r-pill: 999px;
 
-[data-theme-id='nothing-dark'] {
-  --bg-canvas: #050505;
-  --bg-card: rgba(15, 15, 15, 0.7);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --accent: 229 30 43;
-  --accent-hex: #E51E2B;
-  --accent-strong: 229 30 43;
-  --accent-subtle: rgba(229, 30, 43, 0.125);
-  --text-primary: #E8E8E8;
-  --text-muted: #999999;
-}
+  /* Type families. Space Grotesk carries the UI, Space Mono the technical
+     labels, Doto the display voice (see .readout / GlyphTimeDisplay). */
+  --font-display: 'Doto', 'Space Grotesk', monospace;
+  --font-body: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-[data-theme-id='nothing-light'] {
-  --bg-canvas: #EFEFEF;
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --card-border: rgba(0, 0, 0, 0.06);
-  --accent: 215 25 33;
-  --accent-hex: #D71921;
-  --accent-strong: 215 25 33;
-  --accent-subtle: rgba(215, 25, 33, 0.12);
-  --text-primary: #171717;
-  --text-muted: #737373;
-}
-
-[data-theme-id='cmf-orange'] {
-  --bg-canvas: #0B0B0C;
-  --bg-card: rgba(20, 20, 22, 0.8);
-  --card-border: rgba(255, 85, 0, 0.12);
-  --accent: 255 85 0;
-  --accent-hex: #FF5500;
-  --accent-strong: 255 85 0;
-  --accent-subtle: rgba(255, 85, 0, 0.15);
-  --text-primary: #EAEAEA;
-  --text-muted: #9E9EA4;
-}
-
-[data-theme-id='nothing-sage'] {
-  --bg-canvas: #121614;
-  --bg-card: rgba(26, 32, 28, 0.8);
-  --card-border: rgba(138, 155, 133, 0.15);
-  --accent: 138 155 133;
-  --accent-hex: #8A9B85;
-  --accent-strong: 138 155 133;
-  --accent-subtle: rgba(138, 155, 133, 0.2);
-  --text-primary: #E8EBE8;
-  --text-muted: #9BA49B;
-}
-
-[data-theme-id='nothing-cobalt'] {
-  --bg-canvas: #080A10;
-  --bg-card: rgba(16, 20, 32, 0.8);
-  --card-border: rgba(24, 72, 224, 0.15);
-  --accent: 43 92 255;
-  --accent-hex: #2B5CFF;
-  --accent-strong: 43 92 255;
-  --accent-subtle: rgba(43, 92, 255, 0.2);
-  --text-primary: #E8EAF6;
-  --text-muted: #9499B3;
+  --ease-mech: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-snap: cubic-bezier(0.2, 0.9, 0.3, 1);
 }
 
 /* =========================================================================
-   DOT-MATRIX MOTIF & BACKGROUNDS
+   2. COLORWAYS
+   Themes inject their own --bg-canvas / --bg-card / --card-border /
+   --accent / --text-* at runtime (see themes.ts + useTheme). These blocks
+   provide the pre-hydration defaults and the semantic surface ramp.
    ========================================================================= */
-.dot-grid-subtle {
-  background-image: radial-gradient(circle, rgb(var(--border-visible)) 0.75px, transparent 0.75px);
-  background-size: 14px 14px;
+:root,
+:root[data-mode='dark'] {
+  color-scheme: dark;
+
+  --bg-canvas: #000000;
+  --bg-card: #0b0b0c;
+  --card-border: rgba(255, 255, 255, 0.09);
+  --accent: 229 30 43;
+  --accent-strong: 229 30 43;
+  --accent-subtle: rgba(229, 30, 43, 0.14);
+  --text-primary: #ededed;
+
+  /* Semantic surface ramp (RGB triplets for Tailwind alpha support) */
+  --c-canvas: 0 0 0;
+  --c-surface: 11 11 12;
+  --c-raised: 22 22 24;
+  --c-line: 42 42 46;
+  --c-fg: 237 237 237;
+  --c-muted: 143 143 148;
+  --c-accent: var(--accent);
+  --c-on-accent: 255 255 255;
+  --c-break: 74 158 92;
+  --c-long: 91 155 246;
+  --c-track: 26 26 28;
+
+  --heatmap-l0: rgba(255, 255, 255, 0.045);
+  --heatmap-l0-border: rgba(255, 255, 255, 0.07);
 }
 
+:root[data-mode='light'] {
+  color-scheme: light;
+
+  --bg-canvas: #ededed;
+  --bg-card: #ffffff;
+  --card-border: rgba(0, 0, 0, 0.1);
+  --text-primary: #111113;
+
+  --c-canvas: 237 237 237;
+  --c-surface: 255 255 255;
+  --c-raised: 240 240 242;
+  --c-line: 214 214 218;
+  --c-fg: 17 17 19;
+  --c-muted: 108 108 114;
+  --c-accent: var(--accent);
+  --c-on-accent: 255 255 255;
+  --c-break: 45 138 66;
+  --c-long: 30 111 235;
+  --c-track: 232 232 235;
+
+  --heatmap-l0: rgba(0, 0, 0, 0.05);
+  --heatmap-l0-border: rgba(0, 0, 0, 0.08);
+}
+
+/* Light-mode surface must never inherit the dark translucency. */
+:root[data-mode='light'] {
+  --bg-card: #ffffff;
+  --card-border: rgba(0, 0, 0, 0.1);
+}
+
+/* Pre-hydration colorway hints so the first paint matches the stored theme. */
+[data-theme-id='nothing-light'] {
+  --bg-canvas: #ededed;
+  --bg-card: #ffffff;
+  --card-border: rgba(0, 0, 0, 0.1);
+  --accent: 215 25 33;
+  --accent-strong: 215 25 33;
+  --accent-subtle: rgba(215, 25, 33, 0.12);
+  --text-primary: #111113;
+}
+[data-theme-id='cmf-orange'] {
+  --bg-canvas: #08080a;
+  --bg-card: #121214;
+  --card-border: rgba(255, 85, 0, 0.16);
+  --accent: 255 85 0;
+  --accent-hex: #ff5500;
+  --accent-strong: 255 85 0;
+  --accent-subtle: rgba(255, 85, 0, 0.15);
+  --text-primary: #f0f0f2;
+  --text-muted: #8e8e95;
+}
+[data-theme-id='nothing-sage'] {
+  --bg-canvas: #0a0d0b;
+  --bg-card: #121815;
+  --card-border: rgba(138, 155, 133, 0.18);
+  --accent: 138 155 133;
+  --accent-hex: #8a9b85;
+  --accent-strong: 138 155 133;
+  --accent-subtle: rgba(138, 155, 133, 0.18);
+  --text-primary: #e9ede9;
+  --text-muted: #8b948b;
+}
+[data-theme-id='nothing-cobalt'] {
+  --bg-canvas: #05070c;
+  --bg-card: #0b0f1a;
+  --card-border: rgba(43, 92, 255, 0.2);
+  --accent: 43 92 255;
+  --accent-hex: #2b5cff;
+  --accent-strong: 43 92 255;
+  --accent-subtle: rgba(43, 92, 255, 0.18);
+  --text-primary: #e9ecf7;
+  --text-muted: #7f86a0;
+}
+
+/* =========================================================================
+   3. DOCUMENT CHROME
+   ========================================================================= */
 html {
   min-height: 100%;
-  scrollbar-gutter: stable;
   overflow-x: hidden;
   overflow-y: auto;
-  touch-action: pan-y;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   min-height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  touch-action: pan-y;
+  /* Vertical panning is handled by inner scroll regions; never by the document.
+     This stops iOS rubber-banding from fighting the deck snap scroller. */
+  overscroll-behavior-y: none;
   background-color: var(--bg-canvas);
   color: var(--text-primary);
-  @apply antialiased transition-colors duration-300;
-  font-family: var(--font-body, 'Space Grotesk', system-ui, sans-serif);
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
+  @apply antialiased;
+  font-family: var(--font-body);
+  /* Android/WebView renders the notch inset inconsistently — the app shell
+     handles safe areas, so the document itself must not double-pad. */
 }
 
 #root {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  isolation: isolate;
 }
 
 :focus {
@@ -274,6 +187,7 @@ body {
 :focus-visible {
   outline: 2px solid rgb(var(--c-accent));
   outline-offset: 2px;
+  border-radius: var(--r-xs);
 }
 
 button:focus:not(:focus-visible),
@@ -283,121 +197,402 @@ textarea:focus:not(:focus-visible) {
   outline: none;
 }
 
-@layer components {
-  .card {
-    position: relative;
-    border-radius: var(--radius-card, 16px);
-    border-width: 1px;
-    border-style: solid;
-    border-color: rgb(var(--c-line));
-    background-color: rgb(var(--c-surface));
-    box-shadow: none !important;
-    transition: background-color 200ms ease, border-color 200ms ease;
-  }
-
-  .btn {
-    border-radius: var(--radius-btn, 999px);
-    font-family: 'Space Mono', monospace;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 12px;
-    font-weight: 700;
-    transition: transform 120ms ease, background-color 150ms ease, opacity 150ms ease, border-color 150ms ease;
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
-  }
-
-  .btn-primary {
-    @apply btn bg-fg text-canvas hover:opacity-90;
-  }
-
-  .btn-secondary {
-    border: 1px solid rgb(var(--c-line));
-    @apply btn bg-transparent text-fg hover:border-fg;
-  }
-
-  .btn-ghost {
-    border: none;
-    @apply btn bg-transparent text-muted hover:text-fg;
-  }
-
-  .btn-destructive {
-    border: 1px solid rgb(var(--c-accent));
-    @apply btn bg-transparent text-accent hover:bg-accent/10;
-  }
-
-  .input {
-    border-radius: var(--radius-sm, 8px);
-    border-width: 1px;
-    border-style: solid;
-    border-color: rgb(var(--c-line));
-    background-color: rgb(var(--c-canvas));
-    font-family: 'Space Mono', monospace;
-    @apply w-full px-3.5 py-2 text-sm text-fg placeholder-muted transition-colors focus:border-fg focus:outline-none focus:ring-1 focus:ring-fg;
-  }
-
-  .kbd {
-    border-radius: 4px;
-    border: 1px solid rgb(var(--c-line));
-    @apply bg-raised px-1.5 py-0.5 font-mono text-[10px] text-muted;
-  }
-
-  /* Hide number spin buttons across all modern browsers */
-  input[type='number']::-webkit-outer-spin-button,
-  input[type='number']::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-    appearance: textfield;
-  }
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-raised;
-}
-::-webkit-scrollbar-track {
-  @apply bg-transparent;
+::selection {
+  background: rgb(var(--c-accent) / 0.28);
+  color: rgb(var(--c-fg));
 }
 
 /* =========================================================================
-   MOTION SYSTEM — Snappy mechanical Nothing motion
-   Only transform / opacity / filter are ever animated (no layout thrash).
+   4. COMPONENT LAYER
+   A small, closed set of primitives. Every surface in the app is one of
+   these, which is what keeps the system coherent.
    ========================================================================= */
+@layer components {
+  /* --- Surfaces ---------------------------------------------------------- */
+  .panel {
+    position: relative;
+    border-radius: var(--r-card);
+    border: 1px solid var(--card-border);
+    background-color: var(--bg-card);
+    box-shadow: none;
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease;
+  }
 
-/* --- Todo list choreography --------------------------------------------- */
+  /* Nested well inside a panel — the cassette window, steppers, list rows. */
+  .well {
+    border-radius: var(--r-panel);
+    border: 1px solid var(--c-line);
+    background-color: rgb(var(--c-track));
+  }
+
+  .hairline {
+    border-color: var(--card-border);
+  }
+
+  /* --- Typography -------------------------------------------------------- */
+  /* Every card header, section eyebrow and metadata key uses this one class. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.2;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(var(--c-muted));
+  }
+
+  .label-sm {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.2;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgb(var(--c-muted));
+  }
+
+  /* Big readouts (weekly %, streak, hours). Space Grotesk at display weight:
+     high-contrast, legible at small card sizes. The dot-matrix language is
+     carried by the glyph clock and the charts, not by the numerals. */
+  .readout {
+    font-family: var(--font-body);
+    font-weight: 600;
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+    font-variant-numeric: tabular-nums;
+    color: rgb(var(--c-fg));
+  }
+
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: rgb(var(--c-fg));
+  }
+
+  /* --- Controls ---------------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--r-pill);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      border-color 150ms ease,
+      opacity 150ms ease,
+      transform 120ms var(--ease-mech);
+    @apply disabled:pointer-events-none disabled:opacity-40;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .btn-primary {
+    @apply btn border border-fg bg-fg text-canvas;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    border-color: rgb(var(--c-accent));
+    background-color: rgb(var(--c-accent));
+    color: rgb(var(--c-on-accent));
+  }
+
+  .btn-secondary {
+    @apply btn border border-line bg-transparent text-fg;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    border-color: rgb(var(--c-fg) / 0.45);
+    background-color: rgb(var(--c-fg) / 0.05);
+  }
+
+  .btn-ghost {
+    @apply btn border border-transparent bg-transparent text-muted;
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    color: rgb(var(--c-fg));
+    background-color: rgb(var(--c-fg) / 0.06);
+  }
+
+  .btn-destructive {
+    @apply btn border border-accent bg-transparent text-accent;
+  }
+
+  .btn-destructive:hover:not(:disabled) {
+    background-color: rgb(var(--c-accent) / 0.12);
+  }
+
+  /* Square icon control — 44px touch target, hairline chassis. */
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--card-border);
+    background-color: rgb(var(--c-track));
+    color: rgb(var(--c-muted));
+    cursor: pointer;
+    user-select: none;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      border-color 150ms ease,
+      transform 120ms var(--ease-mech);
+    @apply disabled:pointer-events-none disabled:opacity-30;
+  }
+
+  .icon-btn:hover:not(:disabled) {
+    color: rgb(var(--c-fg));
+    border-color: rgb(var(--c-fg) / 0.35);
+  }
+
+  .icon-btn:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+
+  /* Compact inline chip used in card headers and toolbars. */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 26px;
+    padding: 0 0.625rem;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--card-border);
+    background-color: transparent;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(var(--c-muted));
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition:
+      color 150ms ease,
+      border-color 150ms ease,
+      background-color 150ms ease;
+  }
+
+  .chip:hover:not(:disabled) {
+    color: rgb(var(--c-fg));
+    border-color: rgb(var(--c-fg) / 0.4);
+  }
+
+  .chip[aria-pressed='true'],
+  .chip[aria-checked='true'],
+  .chip[data-active='true'] {
+    background-color: rgb(var(--c-fg));
+    border-color: rgb(var(--c-fg));
+    color: rgb(var(--c-canvas));
+  }
+
+  /* --- Inputs ------------------------------------------------------------ */
+  .input {
+    width: 100%;
+    border-radius: var(--r-control);
+    border: 1px solid var(--card-border);
+    background-color: rgb(var(--c-track));
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: rgb(var(--c-fg));
+    @apply px-3.5 py-2.5 placeholder:text-muted transition-colors;
+  }
+
+  .input:hover {
+    border-color: rgb(var(--c-fg) / 0.3);
+  }
+
+  .input:focus {
+    border-color: rgb(var(--c-fg) / 0.6);
+    outline: none;
+  }
+
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: var(--r-xs);
+    border: 1px solid var(--card-border);
+    background-color: rgb(var(--c-track));
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: rgb(var(--c-muted));
+  }
+
+  /* --- Feedback ---------------------------------------------------------- */
+  /* Shared empty state: no dashed box, no floating icon. Just a quiet
+     technical readout so panels never look broken when there is no data. */
+  .empty {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    user-select: none;
+  }
+
+  .empty-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(var(--c-muted) / 0.7);
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--r-pill);
+    flex: none;
+  }
+}
+
+/* =========================================================================
+   5. DECK GRIDS
+   The cockpit is a fixed 100dvh shell, so a deck whose cards only need ~70% of
+   the viewport leaves a dead band above the fold. These grids have to absorb
+   that space deliberately instead of defaulting to `align-content: normal`
+   (which pins every row to the top and dumps the remainder at the bottom).
+
+   `.deck-grid` is defined here rather than pulled from Tailwind because
+   `content-safe-center` is a Tailwind v4 utility — under v3.4 it is silently
+   a no-op, which is exactly the bug this replaces.
+   ========================================================================= */
+.deck-grid {
+  /* Rows start at their content height ... */
+  grid-auto-rows: minmax(min-content, auto);
+  /* ... and on narrow viewports stay that way: the decks are a single scrolling
+     column there, so there is no free space worth distributing. */
+  align-content: safe start;
+  max-height: none;
+}
+/* At `lg` and up the decks go multi-column and the cockpit is a fixed 100dvh
+   shell, so a payload that needs only ~70% of the viewport leaves a dead band.
+   Let the rows share the free space instead. */
+@media (min-width: 1024px) {
+  .deck-grid {
+    grid-auto-rows: minmax(min-content, 1fr);
+    align-content: safe center;
+    /* The cap lives on the grid block rather than on the row track on purpose:
+       a fixed `minmax(..., <length>)` max ignores free space and would force a
+       scroll on short-but-wide windows, whereas `1fr` resolved against a
+       capped container always lands on "fits, then centre". Past roughly two
+       rows of that height the cards start to tower, hence the ceiling. */
+    max-height: var(--deck-max, 56rem);
+  }
+}
+
+/* =========================================================================
+   6. SCROLLBARS
+   `no-scrollbar` is referenced across the deck scrollers — without this rule
+   the native scrollbar reappears and breaks the 100dvh cockpit layout.
+   ========================================================================= */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--c-line)) transparent;
+}
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--c-line));
+  border-radius: var(--r-pill);
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--c-muted) / 0.6);
+}
+
+/* =========================================================================
+   7. DOT-MATRIX MOTIF
+   ========================================================================= */
+.dot-grid-subtle {
+  background-image: radial-gradient(circle, rgb(var(--c-line)) 0.75px, transparent 0.75px);
+  background-size: 14px 14px;
+}
+
+/* Hide number spin buttons across all modern browsers */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* =========================================================================
+   8. MOTION — transform / opacity only, snappy and mechanical.
+   ========================================================================= */
 @keyframes todo-in {
-  0% {
+  from {
     opacity: 0;
     transform: translateY(-4px);
   }
-  100% {
+  to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 .animate-todo-in {
-  animation: todo-in 180ms cubic-bezier(0, 0, 0.2, 1);
+  animation: todo-in 180ms var(--ease-snap);
 }
 
 @keyframes todo-exit {
-  0% {
+  from {
     opacity: 1;
     transform: translateX(0);
   }
-  100% {
+  to {
     opacity: 0;
-    transform: translateX(8px);
+    transform: translateX(10px);
   }
 }
 .animate-todo-exit {
   animation: todo-exit 150ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
-
 
 /* Delayed horizontal strike-through expansion */
 .todo-strike {
@@ -416,34 +611,30 @@ textarea:focus:not(:focus-visible) {
   transform: scaleX(1);
 }
 
-/* Sibling rows glide into place after a delete (FLIP, transform-only). */
 .todo-flip {
   will-change: transform;
 }
 
-/* Settings tag chip entrance: clean slide-in */
 @keyframes chip-in {
-  0% {
+  from {
     opacity: 0;
     transform: translateY(-3px);
   }
-  100% {
+  to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 .animate-chip-in {
-  animation: chip-in 180ms cubic-bezier(0, 0, 0.2, 1);
+  animation: chip-in 180ms var(--ease-snap);
 }
 
-
-/* Add button icon: mechanical snap */
 @keyframes add-pop {
-  0% {
+  from {
     opacity: 0.4;
     transform: scale(0.8);
   }
-  100% {
+  to {
     opacity: 1;
     transform: scale(1);
   }
@@ -452,7 +643,7 @@ textarea:focus:not(:focus-visible) {
   animation: add-pop 150ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* --- Dialog entrance / exit (Mechanical) --------------------------------- */
+/* --- Dialog entrance / exit ---------------------------------------------- */
 @keyframes modal-backdrop-in {
   from {
     opacity: 0;
@@ -464,7 +655,7 @@ textarea:focus:not(:focus-visible) {
 @keyframes modal-panel-in {
   from {
     opacity: 0;
-    transform: translateY(6px) scale(0.98);
+    transform: translateY(8px) scale(0.985);
   }
   to {
     opacity: 1;
@@ -472,10 +663,10 @@ textarea:focus:not(:focus-visible) {
   }
 }
 .modal-backdrop {
-  animation: modal-backdrop-in 180ms cubic-bezier(0, 0, 0.2, 1);
+  animation: modal-backdrop-in 180ms var(--ease-snap);
 }
 .modal-panel {
-  animation: modal-panel-in 200ms cubic-bezier(0, 0, 0.2, 1);
+  animation: modal-panel-in 220ms var(--ease-mech);
 }
 @keyframes modal-backdrop-out {
   from {
@@ -492,7 +683,7 @@ textarea:focus:not(:focus-visible) {
   }
   to {
     opacity: 0;
-    transform: translateY(4px) scale(0.98);
+    transform: translateY(6px) scale(0.985);
   }
 }
 .modal-backdrop--closing {
@@ -502,8 +693,8 @@ textarea:focus:not(:focus-visible) {
   animation: modal-panel-out 140ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
-/* --- Mechanical Tape Reel Drop-in / Lift-out --------------------- */
-/* Only the tape reels and connecting ribbon drop down onto the stationary spindles */
+/* --- Cassette reel choreography ------------------------------------------ */
+/* Only the reels and the connecting ribbon move; the chassis stays still. */
 @keyframes reel-drop-in {
   0% {
     opacity: 0.15;
@@ -518,45 +709,38 @@ textarea:focus:not(:focus-visible) {
     transform: translateY(0);
   }
 }
-
-/* Smooth mechanical spring release on tape eject (rapid spring impulse, smooth deceleration out) */
 @keyframes reel-eject {
-  0% {
+  from {
     opacity: 1;
     transform: translateY(0);
   }
-  100% {
+  to {
     opacity: 0;
     transform: translateY(-22px);
   }
 }
-
-/* Track title cross-fade (completely stationary, pure smooth opacity) */
 @keyframes track-crossfade {
-  0% {
+  from {
     opacity: 0;
   }
-  100% {
+  to {
     opacity: 1;
   }
 }
-
 .animate-reel-in {
-  animation: reel-drop-in 280ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  animation: reel-drop-in 280ms var(--ease-snap) both;
 }
-
 .animate-reel-out {
   animation: reel-eject 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
 .animate-track-fade {
   animation: track-crossfade 200ms ease-out both;
 }
 
-/* --- Accessibility guardrail ---------------------------------------------
-   Kill all motion for users with vestibular sensitivity. Kept as the LAST
-   word so it overrides every animation/transition defined above and any
-   utility class. */
+/* =========================================================================
+   9. ACCESSIBILITY GUARDRAIL
+   Last word: overrides every animation/transition defined above.
+   ========================================================================= */
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

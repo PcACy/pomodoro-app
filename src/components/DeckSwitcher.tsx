@@ -16,42 +16,33 @@ export const DeckSwitcher = memo(function DeckSwitcher({
   onSelectDeck,
 }: DeckSwitcherProps) {
   return (
-    <nav
-      aria-label="Deck Switcher"
-      className="flex items-center gap-1 font-mono select-none shrink-0"
-    >
+    <nav aria-label="Deck Switcher" className="flex shrink-0 select-none items-center gap-1">
       {DECKS.map((deck) => {
         const isActive = activeDeck === deck.id
         return (
-          <div key={deck.id} className="flex items-center">
-            <button
-              type="button"
-              onClick={() => onSelectDeck(deck.id)}
-              className="relative flex items-center min-h-[40px] sm:min-h-[44px] cursor-pointer outline-none select-none rounded-full focus-visible:ring-1 focus-visible:ring-fg/50 touch-manipulation"
-              aria-pressed={isActive}
-              title={`${deck.label} Deck (${deck.num})`}
+          <button
+            key={deck.id}
+            type="button"
+            onClick={() => onSelectDeck(deck.id)}
+            className={`group flex min-h-[36px] cursor-pointer items-center rounded-full border px-2.5 font-mono text-[10px] uppercase tracking-[0.14em] transition-colors duration-200 sm:min-h-[40px] ${
+              isActive
+                ? 'border-fg bg-fg text-canvas'
+                : 'border-line text-muted hover:border-fg/30 hover:text-fg'
+            }`}
+            aria-pressed={isActive}
+            aria-label={`${deck.label} deck`}
+            title={`${deck.label} Deck (${deck.num})`}
+          >
+            <span className="tabular-nums">{deck.num}</span>
+            <span
+              className={`overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-200 motion-reduce:transition-none ${
+                isActive ? 'ml-1.5 max-w-[60px] opacity-100' : 'max-w-0 opacity-0'
+              }`}
+              aria-hidden={!isActive}
             >
-              <div
-                className={`flex items-center rounded-full font-mono font-semibold tracking-wider uppercase text-[10px] sm:text-[11px] px-2.5 py-1 transition-colors duration-200 ease-out ${
-                  isActive
-                    ? 'bg-fg text-canvas shadow-xs ring-1 ring-fg/10'
-                    : 'text-muted sm:hover:text-fg sm:hover:bg-fg/5'
-                }`}
-              >
-                <span className="tabular-nums opacity-90">{deck.num}</span>
-                <span
-                  className={`inline-block overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-200 ease-out motion-reduce:transition-none ${
-                    isActive
-                      ? 'max-w-[60px] opacity-100 pl-1.5'
-                      : 'max-w-0 opacity-0 pl-0 pointer-events-none'
-                  }`}
-                  aria-hidden={!isActive}
-                >
-                  {deck.label}
-                </span>
-              </div>
-            </button>
-          </div>
+              {deck.label}
+            </span>
+          </button>
         )
       })}
     </nav>

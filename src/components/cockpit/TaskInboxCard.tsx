@@ -19,7 +19,7 @@ interface TaskInboxCardProps {
 }
 
 function parseTaskInput(input: string, fallbackTag: string): { title: string; tag: string } {
-  const hashMatch = input.match(/#([\w\u00C0-\u017F-]+)/)
+  const hashMatch = input.match(/#([\wÀ-ſ-]+)/)
   if (hashMatch) {
     const tag = hashMatch[1]
     const title = input.replace(hashMatch[0], '').trim()
@@ -44,6 +44,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
   const [selectedTag, setSelectedTag] = useState('')
   const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false)
   const tagDropdownRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!isTagDropdownOpen) return
@@ -55,6 +56,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
     const handleEscape = (e: globalThis.KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsTagDropdownOpen(false)
+        inputRef.current?.focus()
       }
     }
     document.addEventListener('pointerdown', handleClickOutside)
@@ -91,6 +93,11 @@ export const TaskInboxCard = memo(function TaskInboxCard({
   return (
     <BentoCard
       label="Task Inbox"
+      indicator={
+        <span className="num shrink-0 text-[10px] text-muted">
+          {pendingTodos.length} open
+        </span>
+      }
       action={
         <button
           type="button"
@@ -98,46 +105,49 @@ export const TaskInboxCard = memo(function TaskInboxCard({
             playMicroClick('tap')
             onOpenTodoManager()
           }}
-          className="font-sans text-[11px] font-medium px-2.5 py-1 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg transition-colors flex items-center gap-1.5 cursor-pointer select-none active:scale-95"
+          className="chip"
         >
-          <Maximize2 size={12} />
+          <Maximize2 size={11} />
           Expand
         </button>
       }
       className={className}
-      contentClassName="justify-between h-full min-h-0"
+      contentClassName="min-h-0"
     >
       {/* Quick Add Bar */}
-      <div className="relative mb-3 flex items-center gap-2">
-        <div className="relative flex-1 flex items-center">
+      <div className="relative mb-3 flex shrink-0 items-center gap-2">
+        <div className="relative flex min-w-0 flex-1 items-center">
           <input
+            ref={inputRef}
             type="text"
             value={quickTitle}
             onChange={(e) => setQuickTitle(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="+ Add quick task (#tag or select)..."
-            className="w-full rounded-[8px] border border-line bg-surface/50 hover:bg-surface focus:bg-surface pl-3 pr-8 py-1.5 text-xs text-fg placeholder:text-muted/60 font-mono focus:outline-none focus:border-fg/50 transition-colors shadow-xs"
+            placeholder="Add task  #tag"
+            aria-label="Add quick task"
+            className="input h-10 py-0 pl-3.5 pr-10 font-mono text-xs placeholder:text-muted/70"
           />
-          {quickTitle.trim() && (
+          {quickTitle.trim() ? (
             <button
               type="button"
               onClick={submitTask}
-              className="absolute right-1.5 rounded p-1 text-muted hover:text-fg cursor-pointer"
+              className="absolute right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-muted transition-colors hover:text-fg"
               title="Add task"
+              aria-label="Add task"
             >
-              <Plus size={14} />
+              <Plus size={15} />
             </button>
-          )}
+          ) : null}
         </div>
 
-        {/* Quick Tag Selector Pill */}
-        {tags.length > 0 && (
-          <div className="relative shrink-0" ref={tagDropdownRef}>
+        {/* Quick Tag Selector */}
+        {tags.length > 0 ? (
+          <div ref={tagDropdownRef} className="relative shrink-0">
             <div
-              className={`h-8 px-2.5 rounded-lg border text-xs font-sans transition-colors flex items-center gap-1.5 select-none ${
+              className={`flex h-10 items-center rounded-control border transition-colors ${
                 selectedTag
-                  ? 'border-fg/40 bg-surface text-fg font-medium'
-                  : 'border-line bg-canvas text-muted hover:text-fg hover:border-fg/30'
+                  ? 'border-fg/40 bg-track text-fg'
+                  : 'border-line bg-transparent text-muted'
               }`}
             >
               <button
@@ -145,112 +155,98 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                 onClick={() => setIsTagDropdownOpen((prev) => !prev)}
                 aria-expanded={isTagDropdownOpen}
                 aria-haspopup="listbox"
-                className="flex min-w-0 flex-1 items-center gap-1.5 bg-transparent cursor-pointer"
+                className="flex h-full min-w-0 flex-1 cursor-pointer items-center gap-1.5 px-3"
                 title="Select tag for this task"
               >
                 {selectedTag ? (
                   <>
                     <span
-                      className="h-1.5 w-1.5 rounded-full shrink-0 -translate-y-px"
-                      style={{
-                        backgroundColor: getTagColor(selectedTag),
-                      }}
+                      aria-hidden="true"
+                      className="dot"
+                      style={{ backgroundColor: getTagColor(selectedTag) }}
                     />
-                    <span className="max-w-[70px] truncate">{selectedTag}</span>
+                    <span className="max-w-[70px] truncate font-mono text-xs">
+                      {selectedTag}
+                    </span>
                   </>
                 ) : (
-                  <>
-                    <span className="text-muted/70">#</span>
-                    <span>Tag</span>
-                  </>
+                  <span className="font-mono text-xs"># Tag</span>
                 )}
               </button>
-              {selectedTag && (
+              {selectedTag ? (
                 <button
                   type="button"
                   onClick={() => setSelectedTag('')}
-                  className="ml-0.5 shrink-0 cursor-pointer text-muted hover:text-fg"
+                  className="mr-1 flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center text-muted transition-colors hover:text-fg"
                   title="Remove tag"
                   aria-label="Remove tag"
                 >
                   ×
                 </button>
-              )}
+              ) : null}
             </div>
 
-            {isTagDropdownOpen && (
-              <div className="absolute right-0 top-full mt-1 z-30 min-w-[130px] rounded-lg border border-line bg-surface p-1 shadow-none flex flex-col gap-0.5 font-sans text-xs">
+            {isTagDropdownOpen ? (
+              <div
+                role="listbox"
+                className="panel absolute right-0 top-full z-30 mt-1.5 flex w-48 flex-col gap-0.5 p-1"
+              >
                 <button
                   type="button"
+                  role="option"
+                  aria-selected={!selectedTag}
                   onClick={() => {
                     setSelectedTag('')
                     setIsTagDropdownOpen(false)
                   }}
-                  className={`px-2 py-1 rounded text-left flex items-center justify-between hover:bg-canvas transition-colors cursor-pointer ${
-                    !selectedTag ? 'text-fg font-medium bg-canvas/60' : 'text-muted'
+                  className={`flex cursor-pointer items-center justify-between rounded-sm px-3 py-2 text-left font-mono text-xs transition-colors hover:bg-fg/[0.06] ${
+                    !selectedTag ? 'bg-fg/[0.06] text-fg' : 'text-muted'
                   }`}
                 >
                   <span>{tr.todo.noTag}</span>
-                  {!selectedTag && <span className="text-[10px]">✓</span>}
+                  {!selectedTag ? <Check size={12} className="text-accent" /> : null}
                 </button>
                 {tags.map((tag) => (
                   <button
                     key={tag}
                     type="button"
+                    role="option"
+                    aria-selected={selectedTag === tag}
                     onClick={() => {
                       setSelectedTag(tag)
                       setIsTagDropdownOpen(false)
                     }}
-                    className={`px-2 py-1 rounded text-left flex items-center gap-1.5 hover:bg-canvas transition-colors cursor-pointer ${
-                      selectedTag === tag ? 'text-fg font-medium bg-canvas/60' : 'text-muted'
+                    className={`flex cursor-pointer items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs transition-colors hover:bg-fg/[0.06] ${
+                      selectedTag === tag ? 'bg-fg/[0.06] text-fg' : 'text-muted'
                     }`}
                   >
                     <span
-                      className="h-1.5 w-1.5 rounded-full shrink-0 -translate-y-px"
-                      style={{
-                        backgroundColor: getTagColor(tag),
-                      }}
+                      aria-hidden="true"
+                      className="dot"
+                      style={{ backgroundColor: getTagColor(tag) }}
                     />
-                    <span className="truncate flex-1">{tag}</span>
-                    {selectedTag === tag && <span className="text-[10px]">✓</span>}
+                    <span className="min-w-0 flex-1 truncate">{tag}</span>
+                    {selectedTag === tag ? <Check size={12} className="text-accent" /> : null}
                   </button>
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Task List */}
-      <div className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-y-auto no-scrollbar pr-0.5">
+      <div className="no-scrollbar flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto">
         {pendingTodos.length === 0 ? (
-          <div className="flex-1 min-h-0 flex flex-col items-center justify-center py-6 px-4 my-auto border border-dashed border-line/60 rounded-2xl select-none">
-            {/* Technical Hardware Status */}
-            <div className="font-mono text-[11px] font-bold tracking-widest text-muted uppercase mb-1">
-              INBOX CLEAR
-            </div>
-
-            <p className="font-sans text-xs text-muted/70 text-center max-w-[240px] mb-4">
-              {tr.todo.empty || 'All tasks completed or none queued'}
+          <div className="empty">
+            <p className="label">
+              {todos.length > 0 ? 'All clear' : 'Inbox clear'}
             </p>
-
-            {/* Keyboard Shortcuts Hint Bar */}
-            <div className="flex flex-wrap items-center justify-center gap-2 font-mono text-[10px] text-muted">
-              <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 rounded border border-line bg-surface text-fg font-semibold shadow-xs">↵</kbd>
-                <span>Add Task</span>
-              </span>
-              <span className="text-muted/30">·</span>
-              <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 rounded border border-line bg-surface text-fg font-semibold shadow-xs">#</kbd>
-                <span>Tag</span>
-              </span>
-              <span className="text-muted/30">·</span>
-              <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 rounded border border-line bg-surface text-fg font-semibold shadow-xs">1</kbd>
-                <span>Focus</span>
-              </span>
-            </div>
+            <p className="max-w-[240px] text-xs text-muted">
+              {todos.length > 0
+                ? 'Every queued task is done.'
+                : (tr.todo.empty ?? 'No tasks queued yet.')}
+            </p>
           </div>
         ) : (
           pendingTodos.map((todo) => {
@@ -264,14 +260,13 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                   playMicroClick('tap')
                   onFocus(todo.id)
                 }}
-                className={`group flex min-h-[44px] items-center justify-between gap-2.5 px-3 py-1.5 rounded-xl border transition-colors cursor-pointer ${
+                className={`group flex min-h-[48px] cursor-pointer items-center justify-between gap-2 rounded-control border px-3 transition-colors ${
                   isActive
-                    ? 'border-fg bg-surface-raised text-fg'
-                    : 'border-line/60 bg-canvas/40 hover:border-line hover:bg-canvas text-fg/90'
+                    ? 'border-accent/35 bg-accent/[0.07]'
+                    : 'border-line bg-transparent hover:border-fg/25 hover:bg-fg/[0.03]'
                 }`}
               >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  {/* Mechanical Checkbox with Fitts's Law touch target */}
+                <div className="flex min-w-0 flex-1 items-center gap-2.5">
                   <button
                     type="button"
                     onClick={(e) => {
@@ -279,38 +274,40 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                       playMicroClick('tick')
                       onToggle(todo.id)
                     }}
-                    className="h-8 w-8 -ml-1.5 shrink-0 flex items-center justify-center cursor-pointer text-muted hover:text-fg"
+                    className="-ml-1 flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center text-muted transition-colors hover:text-fg"
                     aria-label={todo.done ? 'Mark as incomplete' : 'Mark as done'}
                   >
-                    <div
-                      className={`h-4 w-4 rounded-[4px] border flex items-center justify-center transition-colors ${
+                    <span
+                      className={`flex h-4 w-4 items-center justify-center rounded-xs border transition-colors ${
                         todo.done
-                          ? 'bg-fg border-fg text-canvas'
-                          : 'border-line bg-canvas hover:border-fg/40'
+                          ? 'border-fg bg-fg text-canvas'
+                          : 'border-line'
                       }`}
                     >
-                      {todo.done && <Check size={11} strokeWidth={3} />}
-                    </div>
+                      {todo.done ? <Check size={11} strokeWidth={3} /> : null}
+                    </span>
                   </button>
 
-                  <span className="font-sans text-xs truncate">{todo.title}</span>
+                  <span className="min-w-0 truncate text-[13px] text-fg">{todo.title}</span>
 
-                  {todo.tag && (
-                    <span className="inline-flex items-center gap-1.5 font-sans text-[11px] text-muted shrink-0">
+                  {todo.tag ? (
+                    <span className="hidden shrink-0 items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted sm:inline-flex">
                       <span
-                        className="h-1.5 w-1.5 rounded-full shrink-0 -translate-y-px"
-                        style={{
-                          backgroundColor: tagColor,
-                        }}
+                        aria-hidden="true"
+                        className="dot"
+                        style={{ backgroundColor: tagColor }}
                       />
-                      <span>{todo.tag}</span>
+                      {todo.tag}
                     </span>
-                  )}
+                  ) : null}
                 </div>
 
-                <div className="flex items-center gap-0.5 shrink-0">
+                <div className="flex shrink-0 items-center gap-0.5">
                   {isActive ? (
-                    <span className="h-2 w-2 rounded-full bg-accent animate-pulse mr-1" />
+                    <span
+                      aria-label="Currently focused"
+                      className="dot mr-1.5 bg-accent animate-pulse"
+                    />
                   ) : (
                     <button
                       type="button"
@@ -320,7 +317,8 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                         onFocus(todo.id)
                       }}
                       title="Set as active focus"
-                      className="opacity-0 group-hover:opacity-100 sm:opacity-0 max-sm:opacity-100 h-8 w-8 flex items-center justify-center text-muted hover:text-fg transition-opacity cursor-pointer active:scale-95"
+                      aria-label="Set as active focus"
+                      className="flex h-9 w-9 cursor-pointer items-center justify-center text-muted opacity-100 transition-colors hover:text-fg active:scale-95 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
                     >
                       <Target size={14} />
                     </button>
@@ -334,7 +332,7 @@ export const TaskInboxCard = memo(function TaskInboxCard({
                     }}
                     title={tr.todo.delete}
                     aria-label={tr.todo.delete}
-                    className="opacity-0 group-hover:opacity-100 sm:opacity-0 max-sm:opacity-100 h-8 w-8 flex items-center justify-center text-muted hover:text-accent transition-opacity cursor-pointer active:scale-95"
+                    className="flex h-9 w-9 cursor-pointer items-center justify-center text-muted transition-colors hover:text-accent active:scale-95 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
                   >
                     <Trash2 size={14} />
                   </button>

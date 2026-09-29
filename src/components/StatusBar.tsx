@@ -44,51 +44,61 @@ export const StatusBar = memo(function StatusBar({
     <footer
       role="contentinfo"
       aria-label="Nothing Instrument Panel"
-      className="sticky bottom-0 z-30 flex w-full items-center justify-between border-t border-line bg-canvas px-3 sm:px-4 py-2 font-mono text-[11px] text-muted select-none uppercase tracking-wider"
+      className="flex h-8 w-full shrink-0 items-center justify-between gap-3 border-t border-line/70 bg-canvas px-3 sm:px-4"
     >
-      {/* Left: Status Pill + Phase + Optional Task */}
-      <div className="flex items-center gap-2.5 sm:gap-3 overflow-hidden min-w-0">
-        <div className="inline-flex items-center justify-center rounded-full border border-line bg-surface px-2.5 py-0.5 text-[10px] font-bold leading-none text-fg tracking-wider shrink-0 shadow-2xs">
-          <span>{statusLabel}</span>
-        </div>
-
-        <span className="text-fg font-medium truncate hidden sm:inline text-[11px]">
-          {mode === 'flow' ? 'FLOW SESSION' : `POMODORO · ${t.phases[phase] || phase}`}
+      {/* Left: status readout + phase + optional task */}
+      <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+        <span
+          className={`inline-flex h-[18px] shrink-0 items-center rounded-full border px-2 font-mono text-[9px] font-bold uppercase leading-none tracking-[0.14em] transition-colors ${
+            isRunning
+              ? 'border-accent/35 bg-accent/[0.07] text-accent'
+              : 'border-line text-muted'
+          }`}
+        >
+          {statusLabel}
         </span>
 
-        {task && (
-          <span className="hidden md:inline text-muted truncate text-[11px]">
-            &quot;{task}&quot;
-          </span>
-        )}
+        <span className="label-sm hidden shrink-0 truncate sm:inline">
+          {mode === 'flow' ? 'Flow Session' : t.phases[phase] || phase}
+        </span>
 
-        {tag && (
-          <span className="hidden lg:inline rounded-full border border-line px-2 py-0.5 text-[10px] text-muted shrink-0">
+        {task ? (
+          <span className="min-w-0 truncate text-[11px] text-muted">
+            <span className="hidden md:inline">“</span>
+            {task}
+            <span className="hidden md:inline">”</span>
+          </span>
+        ) : null}
+
+        {tag ? (
+          <span className="num hidden shrink-0 text-[10px] text-muted/70 lg:inline">
             #{tag}
           </span>
-        )}
+        ) : null}
       </div>
 
-      {/* Right: Cloud Sync Micro-Icon */}
-      {syncStatus && (
-        <div className="flex items-center shrink-0 font-mono text-[11px]">
-          <div
-            className="flex items-center justify-center text-muted hover:text-fg transition-colors"
-            title={`Cloud Sync: ${syncStatus.toUpperCase()}`}
-            aria-label={`Cloud Sync: ${syncStatus}`}
-          >
-            {syncStatus === 'syncing' ? (
-              <RefreshCw size={12} className="animate-spin text-fg" />
-            ) : syncStatus === 'error' ? (
-              <CloudOff size={13} className="text-accent" />
-            ) : syncStatus === 'offline' ? (
-              <CloudOff size={13} className="text-muted/40" />
-            ) : (
-              <Cloud size={13} className="text-muted/70 hover:text-fg" />
-            )}
-          </div>
+      {/* Right: cloud sync micro-icon */}
+      {syncStatus ? (
+        <div className="flex shrink-0 items-center">
+          {syncStatus === 'syncing' ? (
+            <RefreshCw
+              size={12}
+              className="animate-spin text-fg"
+              aria-label="Cloud Sync: syncing"
+            />
+          ) : syncStatus === 'error' ? (
+            <CloudOff size={13} className="text-accent" aria-label="Cloud Sync: error" />
+          ) : syncStatus === 'offline' ? (
+            <CloudOff
+              size={13}
+              className="text-muted/40"
+              aria-label="Cloud Sync: offline"
+            />
+          ) : (
+            <Cloud size={13} className="text-muted/60" aria-label="Cloud Sync: synced" />
+          )}
         </div>
-      )}
+      ) : null}
     </footer>
   )
 })

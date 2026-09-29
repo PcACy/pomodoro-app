@@ -131,8 +131,8 @@ function StepperButton({
         }
       }}
       {...holdHandlers}
-      className={`w-9 h-full flex items-center justify-center text-muted hover:text-fg hover:bg-black/5 dark:hover:bg-white/10 disabled:pointer-events-none disabled:opacity-20 cursor-pointer transition-colors select-none ${
-        side === 'left' ? 'border-r border-line dark:border-white/10' : 'border-l border-line dark:border-white/10'
+      className={`flex h-full w-10 cursor-pointer select-none items-center justify-center text-muted transition-colors hover:bg-fg/[0.06] hover:text-fg disabled:pointer-events-none disabled:opacity-20 ${
+        side === 'left' ? 'border-r border-line' : 'border-l border-line'
       }`}
     >
       <Icon size={12} />
@@ -192,7 +192,7 @@ function NumberStepper({
 
   return (
     <div
-      className={`h-10 flex items-center justify-between rounded-lg border border-line dark:border-white/10 bg-canvas/30 dark:bg-white/[0.02] overflow-hidden transition-colors focus-within:border-fg ${className}`}
+      className={`flex h-11 items-center justify-between overflow-hidden rounded-control border border-line bg-track transition-colors focus-within:border-fg/60 ${className}`}
     >
       <StepperButton
         icon={Minus}
@@ -211,10 +211,10 @@ function NumberStepper({
           onChange={handleInputChange}
           onBlur={handleBlur}
           aria-label={ariaLabel}
-          className="w-12 bg-transparent text-center font-mono text-sm font-medium tabular-nums text-fg focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="num w-12 bg-transparent text-center text-sm font-medium text-fg focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />
         {suffix && (
-          <span className="select-none font-mono text-[10px] uppercase text-muted tracking-wider shrink-0">
+          <span className="label-sm shrink-0 select-none">
             {suffix}
           </span>
         )}
@@ -441,20 +441,16 @@ export const SettingsPanel = memo(function SettingsPanel({
   }
 
   return (
-    <div className="flex w-full flex-col gap-7 font-mono">
+    <div className="flex w-full flex-col gap-7">
       {/* 01 TIMER ENGINE */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-line pb-2">
-          <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
-            01 &nbsp;TIMER ENGINE
-          </span>
+          <span className="label text-fg/80">01 &nbsp;Timer Engine</span>
         </div>
 
         {/* Quick Presets */}
         <div className="flex flex-col gap-2">
-          <span className="text-[11px] uppercase tracking-wider text-muted">
-            {t.settings.presets}
-          </span>
+          <span className="label-sm">{t.settings.presets}</span>
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {PRESETS.map((p) => {
               const active =
@@ -478,23 +474,19 @@ export const SettingsPanel = memo(function SettingsPanel({
                       },
                     }))
                   }}
-                  className={`group relative flex flex-col items-center justify-center rounded-card border py-2 px-1.5 sm:px-2 font-mono transition-all duration-150 active:scale-[0.98] cursor-pointer ${
+                  className={`group relative flex min-h-[54px] cursor-pointer flex-col items-center justify-center rounded-control border px-2 py-2 transition-all duration-150 active:scale-[0.98] ${
                     active
                       ? 'border-fg bg-fg text-canvas'
-                      : 'border-line bg-canvas text-muted hover:border-fg/40 hover:text-fg'
+                      : 'border-line bg-track text-muted hover:border-fg/40 hover:text-fg'
                   }`}
                 >
-                  <div className="flex items-center justify-center gap-1.5 max-w-full">
-                    {active && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
-                    )}
-                    <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate">
-                      {presetName}
-                    </span>
+                  <div className="flex max-w-full items-center justify-center gap-1.5">
+                    {active ? <span aria-hidden="true" className="dot bg-accent shrink-0" /> : null}
+                    <span className="truncate text-xs font-semibold">{presetName}</span>
                   </div>
                   <span
-                    className={`mt-0.5 text-[9px] sm:text-[10px] tracking-wider tabular-nums font-mono ${
-                      active ? 'text-canvas/75' : 'text-muted/60 group-hover:text-muted'
+                    className={`num mt-0.5 text-[10px] ${
+                      active ? 'text-canvas/75' : 'text-muted/70'
                     }`}
                   >
                     {p.focus} / {p.shortBreak} {t.settings.minUnit}
@@ -508,7 +500,7 @@ export const SettingsPanel = memo(function SettingsPanel({
         {/* 3-Column Phases Grid */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="flex flex-col gap-1.5">
-            <span className="text-[11px] uppercase tracking-wider text-muted">{t.phases.focus}</span>
+            <span className="label-sm">{t.phases.focus}</span>
             <NumberStepper
               value={settings.phases.focus}
               min={1}
@@ -520,7 +512,7 @@ export const SettingsPanel = memo(function SettingsPanel({
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <span className="text-[11px] uppercase tracking-wider text-muted">{t.phases.shortBreak}</span>
+            <span className="label-sm">{t.phases.shortBreak}</span>
             <NumberStepper
               value={settings.phases.shortBreak}
               min={1}
@@ -532,7 +524,7 @@ export const SettingsPanel = memo(function SettingsPanel({
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <span className="text-[11px] uppercase tracking-wider text-muted">{t.phases.longBreak}</span>
+            <span className="label-sm">{t.phases.longBreak}</span>
             <NumberStepper
               value={settings.phases.longBreak}
               min={1}
@@ -551,7 +543,7 @@ export const SettingsPanel = memo(function SettingsPanel({
         {/* Cycle, Daily Goal & Weekly Goal in 3 Columns */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-fg">{t.settings.cycle}</span>
+            <span className="text-[13px] font-medium text-fg">{t.settings.cycle}</span>
             <NumberStepper
               value={settings.phases.roundsBeforeLongBreak}
               min={1}
@@ -569,8 +561,11 @@ export const SettingsPanel = memo(function SettingsPanel({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-fg">
-              {t.settings.dailyGoal} ({(settings.dailyGoalMinutes / 60).toFixed(1)} H)
+            <span className="text-[13px] font-medium text-fg">
+              {t.settings.dailyGoal}{' '}
+              <span className="num text-muted">
+                ({(settings.dailyGoalMinutes / 60).toFixed(1)} h)
+              </span>
             </span>
             <NumberStepper
               value={settings.dailyGoalMinutes}
@@ -589,8 +584,11 @@ export const SettingsPanel = memo(function SettingsPanel({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-fg">
-              {t.settings.weeklyGoal} ({(settings.weeklyGoalMinutes / 60).toFixed(1)} H)
+            <span className="text-[13px] font-medium text-fg">
+              {t.settings.weeklyGoal}{' '}
+              <span className="num text-muted">
+                ({(settings.weeklyGoalMinutes / 60).toFixed(1)} h)
+              </span>
             </span>
             <NumberStepper
               value={settings.weeklyGoalMinutes}
@@ -613,16 +611,14 @@ export const SettingsPanel = memo(function SettingsPanel({
       {/* 02 SYSTEM & AUDIO */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-line pb-2">
-          <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
-            02 &nbsp;SYSTEM & AUDIO
-          </span>
+          <span className="label text-fg/80">02 &nbsp;System &amp; Audio</span>
         </div>
 
         {/* Language Selection */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-muted">{t.settings.language}</h3>
-            <p className="text-[11px] text-muted">{t.settings.languageHint}</p>
+            <h3 className="text-[13px] font-medium text-fg">{t.settings.language}</h3>
+            <p className="mt-0.5 text-[11px] text-muted">{t.settings.languageHint}</p>
           </div>
           <SlidingSegmentedControl<'de' | 'en'>
             options={[
@@ -658,15 +654,15 @@ export const SettingsPanel = memo(function SettingsPanel({
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-widest text-muted">
-                  Colorway · Nothing OS & CMF
+                <h3 className="text-[13px] font-medium text-fg">
+                  Colorway · Nothing OS &amp; CMF
                 </h3>
-                <p className="text-[11px] text-muted">
+                <p className="mt-0.5 text-[11px] text-muted">
                   Curated industrial palettes with dynamic hardware accents.
                 </p>
               </div>
               {themeId && (
-                <span className="font-mono text-[9px] text-muted uppercase tracking-wider px-2 py-0.5 rounded-full border border-line bg-canvas">
+                <span className="chip pointer-events-none">
                   {THEMES[themeId]?.name || 'Theme'}
                 </span>
               )}
@@ -683,19 +679,20 @@ export const SettingsPanel = memo(function SettingsPanel({
                       playMicroClick('toggle')
                       onThemeChange(th.id)
                     }}
-                    className={`group relative flex items-center gap-2 px-3 py-2 rounded-xl border font-mono text-xs transition-all duration-200 cursor-pointer ${
+                    className={`group flex min-h-[40px] cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-xs transition-all duration-150 ${
                       isSelected
-                        ? 'border-fg bg-surface shadow-sm ring-1 ring-fg/20 font-bold text-fg'
-                        : 'border-line/70 bg-canvas hover:border-fg/40 text-muted hover:text-fg'
+                        ? 'border-fg bg-fg font-semibold text-canvas'
+                        : 'border-line bg-track text-muted hover:border-fg/40 hover:text-fg'
                     }`}
                     title={`${th.name} — ${th.subtitle}`}
                   >
                     <div
-                      className="relative h-4 w-4 rounded-full border border-white/20 shrink-0 shadow-inner flex items-center justify-center"
+                      aria-hidden="true"
+                      className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded-pill border border-line"
                       style={{ backgroundColor: th.canvas }}
                     >
                       <span
-                        className="h-1.5 w-1.5 rounded-full shadow-sm"
+                        className="h-1.5 w-1.5 rounded-pill"
                         style={{ backgroundColor: th.accent }}
                       />
                     </div>
@@ -715,14 +712,12 @@ export const SettingsPanel = memo(function SettingsPanel({
           {/* Sound FX Switch */}
           <div
             onClick={toggleSound}
-            className="flex items-center justify-between rounded-card border border-line bg-canvas p-3 cursor-pointer hover:border-fg/30 transition-colors group"
+            className="group flex min-h-[60px] cursor-pointer items-center justify-between rounded-control border border-line bg-track p-3 transition-colors hover:border-fg/30"
           >
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-bold uppercase tracking-wider text-fg group-hover:text-fg transition-colors">
-                Sound FX
-              </span>
-              <span className="text-[9px] text-muted uppercase tracking-wider">
-                {soundEnabled ? 'ACTIVE' : 'MUTED'}
+              <span className="text-[13px] font-medium text-fg">Sound FX</span>
+              <span className="label-sm">
+                {soundEnabled ? 'Active' : 'Muted'}
               </span>
             </div>
             <MechanicalSwitch
@@ -735,14 +730,12 @@ export const SettingsPanel = memo(function SettingsPanel({
           {/* Auto Breaks Switch */}
           <div
             onClick={toggleAutoBreaks}
-            className="flex items-center justify-between rounded-card border border-line bg-canvas p-3 cursor-pointer hover:border-fg/30 transition-colors group"
+            className="group flex min-h-[60px] cursor-pointer items-center justify-between rounded-control border border-line bg-track p-3 transition-colors hover:border-fg/30"
           >
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-bold uppercase tracking-wider text-fg group-hover:text-fg transition-colors">
-                Auto Breaks
-              </span>
-              <span className="text-[9px] text-muted uppercase tracking-wider">
-                {autoBreaks ? 'AUTOMATIC' : 'MANUAL'}
+              <span className="text-[13px] font-medium text-fg">Auto Breaks</span>
+              <span className="label-sm">
+                {autoBreaks ? 'Automatic' : 'Manual'}
               </span>
             </div>
             <MechanicalSwitch
@@ -755,14 +748,12 @@ export const SettingsPanel = memo(function SettingsPanel({
           {/* Desktop Alerts Switch */}
           <div
             onClick={toggleNotify}
-            className="flex items-center justify-between rounded-card border border-line bg-canvas p-3 cursor-pointer hover:border-fg/30 transition-colors group"
+            className="group flex min-h-[60px] cursor-pointer items-center justify-between rounded-control border border-line bg-track p-3 transition-colors hover:border-fg/30"
           >
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-bold uppercase tracking-wider text-fg group-hover:text-fg transition-colors">
-                Desktop Alerts
-              </span>
-              <span className="text-[9px] text-muted uppercase tracking-wider">
-                {notifyEnabled ? 'ENABLED' : 'DISABLED'}
+              <span className="text-[13px] font-medium text-fg">Desktop Alerts</span>
+              <span className="label-sm">
+                {notifyEnabled ? 'Enabled' : 'Disabled'}
               </span>
             </div>
             <MechanicalSwitch
@@ -777,15 +768,13 @@ export const SettingsPanel = memo(function SettingsPanel({
       {/* 03 PROJECT TAGS */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-line pb-2">
-          <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
-            03 &nbsp;PROJECT TAGS
-          </span>
-          <span className="rounded-full border border-line bg-canvas px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-muted">
-            {settings.tags.length} {settings.tags.length === 1 ? 'TAG' : 'TAGS'}
+          <span className="label text-fg/80">03 &nbsp;Project Tags</span>
+          <span className="chip pointer-events-none">
+            {settings.tags.length} {settings.tags.length === 1 ? 'tag' : 'tags'}
           </span>
         </div>
 
-        <p className="text-[11px] text-muted -mt-1">{t.settings.tagsHint}</p>
+        <p className="-mt-1 text-[11px] text-muted">{t.settings.tagsHint}</p>
 
         {/* Integrated Hardware Pill Input */}
         <div className="relative flex w-full max-w-md items-center">
@@ -807,15 +796,13 @@ export const SettingsPanel = memo(function SettingsPanel({
               if (e.animationName === 'shake') e.currentTarget.classList.remove('animate-shake')
             }}
             placeholder={t.settings.newTagPlaceholder}
-            className={`w-full rounded-full border bg-canvas pl-4 pr-16 py-2 text-xs text-fg placeholder:text-muted/60 transition-colors focus:outline-none ${
-              tagError ? 'border-accent ring-1 ring-accent/40' : 'border-line focus:border-fg'
+            className={`w-full rounded-pill border bg-track py-2 pl-4 pr-16 font-mono text-xs text-fg placeholder:text-muted/70 transition-colors focus:outline-none ${
+              tagError ? 'border-accent ring-1 ring-accent/40' : 'border-line focus:border-fg/60'
             }`}
             maxLength={30}
           />
           <div className="absolute right-1.5 flex items-center gap-1.5">
-            <kbd className="hidden select-none rounded border border-line bg-surface px-1.5 py-0.5 text-[9px] text-muted/60 sm:inline-block">
-              ⏎
-            </kbd>
+            <kbd className="kbd hidden sm:inline-flex">⏎</kbd>
             <button
               type="button"
               onClick={() => {
@@ -825,9 +812,9 @@ export const SettingsPanel = memo(function SettingsPanel({
               tabIndex={canAdd ? 0 : -1}
               title={t.settings.addTag}
               aria-label={t.settings.addTag}
-              className={`flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150 ${
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-pill transition-all duration-150 ${
                 canAdd
-                  ? 'cursor-pointer bg-fg text-canvas opacity-100 hover:bg-accent hover:text-white active:scale-95'
+                  ? 'cursor-pointer bg-fg text-canvas hover:bg-accent hover:text-white active:scale-95'
                   : 'pointer-events-none cursor-not-allowed bg-transparent text-muted opacity-30'
               }`}
             >
@@ -846,7 +833,7 @@ export const SettingsPanel = memo(function SettingsPanel({
 
         {/* Tag Chips Flex-Wrap List */}
         {settings.tags.length === 0 ? (
-          <p className="text-xs italic text-muted">{t.settings.noTagsYet}</p>
+          <p className="text-xs text-muted">{t.settings.noTagsYet}</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {settings.tags.map((tag) => {
@@ -854,19 +841,18 @@ export const SettingsPanel = memo(function SettingsPanel({
               return (
                 <span
                   key={tag}
-                  className="group inline-flex animate-chip-in items-center gap-2 rounded-full border border-line bg-canvas px-3 py-1.5 text-xs font-medium text-fg transition-colors hover:border-fg/40 select-none"
+                  className="group inline-flex h-9 animate-chip-in select-none items-center gap-2 rounded-pill border border-line bg-track pl-3 pr-1.5 text-xs font-medium text-fg transition-colors hover:border-fg/40"
                 >
                   <span
-                    className="h-2 w-2 shrink-0 rounded-full"
-                    style={{
-                      backgroundColor: tagColor,
-                    }}
+                    aria-hidden="true"
+                    className="dot"
+                    style={{ backgroundColor: tagColor }}
                   />
                   <span className="max-w-[160px] truncate">{tag}</span>
                   <button
                     type="button"
                     onClick={() => removeTag(tag)}
-                    className="flex h-4 w-4 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted transition-colors hover:bg-accent/15 hover:text-accent"
+                    className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-pill text-muted transition-colors hover:bg-accent/15 hover:text-accent"
                     title={t.settings.removeTag(tag)}
                     aria-label={t.settings.removeTag(tag)}
                   >
@@ -882,12 +868,10 @@ export const SettingsPanel = memo(function SettingsPanel({
       {/* 04 CLOUD SYNC */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-line pb-2">
-          <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
-            04 &nbsp;CLOUD SYNC
-          </span>
+          <span className="label text-fg/80">04 &nbsp;Cloud Sync</span>
         </div>
 
-        <p className="text-[11px] text-muted -mt-1">{t.sync.hint}</p>
+        <p className="-mt-1 text-[11px] text-muted">{t.sync.hint}</p>
 
         {!syncAvailable ? (
           <p className="text-xs text-muted">{t.sync.notConfigured}</p>
@@ -929,7 +913,7 @@ export const SettingsPanel = memo(function SettingsPanel({
               </button>
             </div>
             {syncError && (
-              <div className="rounded border border-accent/40 bg-accent/10 px-2.5 py-1.5 font-mono text-[10px] text-accent break-all select-all leading-relaxed">
+              <div className="rounded border border-accent/35 bg-accent/[0.07] px-2.5 py-1.5 font-mono text-[10px] text-accent break-all select-all leading-relaxed">
                 {syncError}
               </div>
             )}
@@ -1032,15 +1016,13 @@ export const SettingsPanel = memo(function SettingsPanel({
       {/* 05 DATA & MEMORY */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-line pb-2">
-          <span className="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-muted uppercase">
-            05 &nbsp;DATA & MEMORY
-          </span>
+          <span className="label text-fg/80">05 &nbsp;Data &amp; Memory</span>
         </div>
 
         <p className="text-[11px] text-muted -mt-1">{t.settings.dataHint}</p>
 
         {/* Export Matrix */}
-        <div className="flex flex-col divide-y divide-line border border-line rounded-lg bg-canvas/30 dark:bg-white/[0.02] overflow-hidden text-xs">
+        <div className="flex flex-col divide-y divide-line overflow-hidden rounded-control border border-line bg-track text-xs">
           {/* Row 1: Full Backup */}
           <div className="flex items-center justify-between px-3.5 py-2.5">
             <div className="flex items-center gap-2">
@@ -1050,7 +1032,7 @@ export const SettingsPanel = memo(function SettingsPanel({
             <button
               type="button"
               onClick={handleBackup}
-              className="font-mono text-[11px] font-bold tracking-wider px-3 py-1 rounded-[2px] bg-fg text-canvas hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-none"
+              className="btn-primary !h-8 !min-h-[32px] !px-3 !text-[10px]"
             >
               .JSON
             </button>
@@ -1067,7 +1049,7 @@ export const SettingsPanel = memo(function SettingsPanel({
                 type="button"
                 onClick={handleSessionsCsv}
                 title={t.dashboard.sessionsCsvTitle}
-                className="font-mono text-[11px] tracking-wider px-2.5 py-1 rounded-[2px] border border-line bg-canvas hover:border-fg/40 hover:text-fg text-muted transition-colors cursor-pointer active:scale-95"
+                className="btn-secondary !h-8 !min-h-[32px] !px-2.5 !text-[10px]"
               >
                 .CSV
               </button>
@@ -1075,7 +1057,7 @@ export const SettingsPanel = memo(function SettingsPanel({
                 type="button"
                 onClick={handleSessionsJson}
                 title={t.dashboard.sessionsJsonTitle}
-                className="font-mono text-[11px] tracking-wider px-2.5 py-1 rounded-[2px] border border-line bg-canvas hover:border-fg/40 hover:text-fg text-muted transition-colors cursor-pointer active:scale-95"
+                className="btn-secondary !h-8 !min-h-[32px] !px-2.5 !text-[10px]"
               >
                 .JSON
               </button>
@@ -1093,7 +1075,7 @@ export const SettingsPanel = memo(function SettingsPanel({
                 type="button"
                 onClick={handleTodosCsv}
                 title={t.dashboard.todosCsvTitle}
-                className="font-mono text-[11px] tracking-wider px-2.5 py-1 rounded-[2px] border border-line bg-canvas hover:border-fg/40 hover:text-fg text-muted transition-colors cursor-pointer active:scale-95"
+                className="btn-secondary !h-8 !min-h-[32px] !px-2.5 !text-[10px]"
               >
                 .CSV
               </button>
@@ -1101,7 +1083,7 @@ export const SettingsPanel = memo(function SettingsPanel({
                 type="button"
                 onClick={handleTodosJson}
                 title={t.dashboard.todosJsonTitle}
-                className="font-mono text-[11px] tracking-wider px-2.5 py-1 rounded-[2px] border border-line bg-canvas hover:border-fg/40 hover:text-fg text-muted transition-colors cursor-pointer active:scale-95"
+                className="btn-secondary !h-8 !min-h-[32px] !px-2.5 !text-[10px]"
               >
                 .JSON
               </button>
@@ -1118,7 +1100,7 @@ export const SettingsPanel = memo(function SettingsPanel({
                 playMicroClick('tap')
                 setConfirmClear(true)
               }}
-              className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs uppercase tracking-wider text-accent transition-colors hover:bg-accent/20 hover:border-accent cursor-pointer"
+              className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-accent/35 bg-accent/[0.07] px-4 py-2 text-xs uppercase tracking-wider text-accent transition-colors hover:bg-accent/20 hover:border-accent cursor-pointer"
             >
               <Trash2 size={13} />
               <span>{t.settings.clearSessions}</span>

@@ -13,12 +13,16 @@ const LEVELS = [0, 15, 45, 90, 150]
 const WEEKDAY_ROWS = [0, 1, 2, 3, 4, 5, 6]
 const DAY_LABELS = [0, 2, 4]
 
+// Five intensity steps built purely from the design tokens so the heatmap
+// follows the active colorway (cobalt, sage, orange) instead of hardcoding
+// white/black alphas that vanish in light mode.
 function cellClass(minutes: number): string {
-  if (minutes <= 0) return 'bg-black/[0.04] border border-black/5 dark:bg-white/[0.04] dark:border-white/5 hover:border-fg/40'
-  if (minutes < 30) return 'bg-fg/20 border border-fg/30 hover:border-fg/60'
-  if (minutes < 60) return 'bg-fg/50 border border-fg/60 hover:border-fg/80'
-  if (minutes < 120) return 'bg-fg/80 border border-fg/90 hover:border-fg'
-  return 'bg-fg border border-fg hover:border-fg'
+  if (minutes <= 0)
+    return 'border border-line/60 bg-fg/[0.05] hover:border-fg/40 hover:bg-fg/[0.09]'
+  if (minutes < 30) return 'border border-fg/25 bg-fg/20 hover:bg-fg/35'
+  if (minutes < 60) return 'border border-fg/40 bg-fg/45 hover:bg-fg/60'
+  if (minutes < 120) return 'border border-fg/60 bg-fg/70 hover:bg-fg/85'
+  return 'border border-fg bg-fg hover:bg-accent hover:border-accent'
 }
 
 interface Tip {
@@ -82,14 +86,14 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
 
   return (
     <>
-      <div className="overflow-x-auto pb-1 [scrollbar-width:thin]">
+      <div className="overflow-x-auto pb-1">
         <div className="relative w-fit min-w-full min-[900px]:min-w-0 min-[900px]:mx-auto">
-          {/* Month Labels Header: accurately aligned above each week column */}
-          <div className="relative mb-2 h-4 pointer-events-none">
+          {/* Month labels header, aligned above each week column */}
+          <div className="relative mb-2 h-3.5 pointer-events-none">
             {monthLabels.map(({ index, text }) => (
               <span
                 key={`${index}-${text}`}
-                className="absolute whitespace-nowrap font-mono text-[10px] font-medium text-muted"
+                className="label-sm absolute whitespace-nowrap"
                 style={{ left: `${31 + index * 15}px` }}
               >
                 {text}
@@ -99,15 +103,15 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
 
           <div className="flex gap-[3px]">
             {/* Weekday labels aligned pixel-perfect to 7 rows */}
-            <div className="flex w-7 shrink-0 flex-col gap-[3px] pr-1 text-right text-[10px] font-mono text-muted select-none">
+            <div className="flex w-7 shrink-0 flex-col gap-[3px] pr-1 text-right">
               {WEEKDAY_ROWS.map((i) => (
-                <span key={i} className="flex h-3 items-center justify-end leading-none">
+                <span key={i} className="label-sm flex h-3 items-center justify-end leading-none">
                   {DAY_LABELS.includes(i) ? dayLabel(i) : ''}
                 </span>
               ))}
             </div>
 
-            {/* 52-53 Week Grid Columns */}
+            {/* 52-53 week grid columns */}
             {weeks.map((week) => (
               <div key={week.start.getTime()} className="flex flex-col gap-[3px]">
                 {week.days.map((cell) => (
@@ -115,7 +119,7 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
                     key={cell.key}
                     role="img"
                     aria-label={t.heatmap.tooltip(cell.minutes, cell.count, getFormattedDate(cell))}
-                    className={`h-3 w-3 cursor-pointer rounded-[1px] transition-colors duration-100 hover:border hover:border-fg hover:z-20 ${cellClass(
+                    className={`h-3 w-3 cursor-pointer rounded-[1px] transition-colors duration-100 hover:z-20 ${cellClass(
                       cell.minutes,
                     )}`}
                     onMouseMove={(e) => handleMove(e, cell)}
@@ -126,13 +130,13 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
             ))}
           </div>
 
-          {/* Intensity Legend: flush with the right edge of the 52-week grid */}
-          <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-muted select-none">
-            <span>{t.heatmap.less}</span>
+          {/* Intensity legend, flush with the right edge of the grid */}
+          <div className="mt-3 flex items-center justify-end gap-1.5">
+            <span className="label-sm">{t.heatmap.less}</span>
             {LEVELS.map((m) => (
               <span key={m} className={`h-3 w-3 rounded-[1px] ${cellClass(m)}`} />
             ))}
-            <span>{t.heatmap.more}</span>
+            <span className="label-sm">{t.heatmap.more}</span>
           </div>
         </div>
       </div>
@@ -141,17 +145,18 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
         typeof document !== 'undefined' &&
         createPortal(
           <div
-            className="pointer-events-none fixed z-[9999] flex flex-col gap-1 rounded-sm border border-line bg-surface px-3 py-2 font-mono text-xs text-fg shadow-none transition-opacity duration-100"
+            role="tooltip"
+            className="panel pointer-events-none fixed z-[9999] flex flex-col gap-1 px-3 py-2"
             style={{
               left: Math.max(12, Math.min(tip.x - 100, window.innerWidth - 220)),
               top: Math.max(12, tip.y - 68),
             }}
           >
-            <span className="font-bold uppercase tracking-wider text-fg">{getFormattedDate(tip.cell)}</span>
-            <span className="text-[11px] tabular-nums text-muted">
+            <span className="label-sm text-fg">{getFormattedDate(tip.cell)}</span>
+            <span className="num text-[11px] text-muted">
               {tip.cell.minutes > 0 ? (
                 <>
-                  <span className="font-bold text-fg">
+                  <span className="text-fg">
                     {tip.cell.minutes} {lang === 'de' ? 'Min. Fokus' : 'min focus'}
                   </span>
                   <span> · </span>
@@ -167,7 +172,7 @@ export const Heatmap = memo(function Heatmap({ weeks }: Props) {
                   </span>
                 </>
               ) : (
-                <span>{lang === 'de' ? 'Keine Fokuszeit (0 Sessions)' : 'No focus time (0 sessions)'}</span>
+                <span>{lang === 'de' ? 'Keine Fokuszeit' : 'No focus time'}</span>
               )}
             </span>
           </div>,

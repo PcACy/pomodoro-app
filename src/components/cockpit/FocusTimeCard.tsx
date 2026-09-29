@@ -33,6 +33,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
   const targetHours = (targetMinutes / 60).toFixed(1)
   const ratio = Math.max(0, currentMinutes / targetMinutes)
   const clampedPct = Math.min(999, Math.round(ratio * 100))
+  const goalReached = ratio >= 1
 
   const streak = currentStreakDays(sessions)
   const todaySessions = sessions.filter((s) => sameDay(new Date(s.start), now))
@@ -46,73 +47,84 @@ export const FocusTimeCard = memo(function FocusTimeCard({
     minute: '2-digit',
   })
 
+  const sessionCount = todaySessions.length
+  const sessionWord =
+    sessionCount === 1
+      ? lang === 'de'
+        ? 'Session'
+        : 'session'
+      : lang === 'de'
+        ? 'Sessions'
+        : 'sessions'
+
   return (
     <BentoCard
       label={t.dashboard.focusTime || 'Daily Focus'}
+      indicator={
+        streak > 0 ? (
+          <span className="inline-flex h-6 shrink-0 items-center rounded-full border border-line px-2.5 font-mono text-[10px] uppercase tracking-wider text-muted">
+            {streak} {lang === 'de' ? 'Tage' : 'd'}
+          </span>
+        ) : null
+      }
       action={
-        <div className="flex items-center gap-1">
-          {streak > 0 && (
-            <span className="font-sans text-[10px] font-medium px-2 py-0.5 rounded-full border border-line bg-canvas text-fg">
-              {streak} {lang === 'de' ? 'Tage' : 'd'} streak
-            </span>
-          )}
-          {onOpenSettings && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                onOpenSettings()
-              }}
-              title={lang === 'de' ? 'Tagesziel anpassen' : 'Edit Daily Goal'}
-              className="min-w-[36px] min-h-[36px] flex items-center justify-center -mr-1 rounded-full hover:bg-neutral-500/10 active:scale-95 transition-all text-muted hover:text-fg cursor-pointer"
-            >
-              <SettingsIcon size={14} />
-            </button>
-          )}
-        </div>
+        onOpenSettings ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onOpenSettings()
+            }}
+            title={lang === 'de' ? 'Tagesziel anpassen' : 'Edit Daily Goal'}
+            aria-label={lang === 'de' ? 'Tagesziel anpassen' : 'Edit Daily Goal'}
+            className="icon-btn !h-9 !w-9"
+          >
+            <SettingsIcon size={14} />
+          </button>
+        ) : null
       }
       className={className}
-      contentClassName="justify-between"
+      contentClassName="justify-between gap-4"
     >
-      {/* Top Value & Percent Summary */}
-      <div className="my-auto flex items-baseline justify-between gap-2">
+      {/* Headline readout */}
+      <div className="flex items-end justify-between gap-3">
         <div>
           <div className="flex items-baseline gap-1.5">
-            <span className="font-sans text-3xl sm:text-4xl font-medium tracking-tight text-fg tabular-nums">
-              {hours}
-            </span>
-            <span className="font-sans text-xs text-muted font-normal">h</span>
+            <span className="readout text-[clamp(2.5rem,7cqw,3.5rem)]">{hours}</span>
+            <span className="num text-sm text-muted">h</span>
           </div>
-          <div className="font-sans text-[11px] text-muted font-normal mt-0.5">
-            / {targetHours} h {lang === 'de' ? 'Ziel' : 'target'}
+          <div className="num mt-1.5 text-xs text-muted">
+            {lang === 'de' ? 'Ziel' : 'target'} {targetHours} h
           </div>
         </div>
-        <div className="text-right">
-          <span className="font-mono text-sm sm:text-base font-bold text-fg tabular-nums">{clampedPct}%</span>
-          <div className="font-sans text-[10px] text-muted">
-            {todaySessions.length}{' '}
-            {todaySessions.length === 1
-              ? lang === 'de'
-                ? 'Session'
-                : 'session'
-              : lang === 'de'
-                ? 'Sessions'
-                : 'sessions'}
+        <div className="pb-1 text-right">
+          <span
+            className={`num text-base font-medium ${
+              goalReached ? 'text-accent' : 'text-fg'
+            }`}
+          >
+            {clampedPct}%
+          </span>
+          <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-muted">
+            {sessionCount} {sessionWord}
           </div>
         </div>
       </div>
 
-      {/* 24-Hour Timeline Bar with Red Needle */}
-      <div className="mt-2 sm:mt-3">
-        <div className="relative h-3 w-full rounded-md bg-canvas/60 border border-line/60 overflow-hidden">
-          {/* Hour tick marks */}
-          <div className="absolute inset-0 flex justify-between pointer-events-none opacity-30">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className="h-full w-[1px] bg-line" />
+      {/* 24-Hour timeline — the band grows to fill the panel */}
+      <div className="flex min-h-0 flex-1 flex-col gap-2">
+        <div className="relative min-h-[14px] flex-1 overflow-hidden rounded-control border border-line bg-canvas">
+          {/* Quarter-day separators */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 flex justify-between opacity-50"
+          >
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div key={i} className="h-full w-px bg-line" />
             ))}
           </div>
 
-          {/* Render today's session blocks */}
+          {/* Today's session blocks */}
           {todaySessions.map((session) => {
             const startDate = new Date(session.start)
             const startMin = startDate.getHours() * 60 + startDate.getMinutes()
@@ -124,7 +136,7 @@ export const FocusTimeCard = memo(function FocusTimeCard({
               <div
                 key={session.id}
                 title={`${session.task || 'Session'} (${durMin}m)`}
-                className="absolute top-0.5 bottom-0.5 rounded-sm bg-fg/80 hover:bg-fg transition-colors"
+                className="absolute bottom-0.5 top-0.5 rounded-[1px] bg-fg/85 transition-colors hover:bg-accent"
                 style={{
                   left: `${leftPct}%`,
                   width: `${Math.max(0.5, widthPct)}%`,
@@ -133,22 +145,22 @@ export const FocusTimeCard = memo(function FocusTimeCard({
             )
           })}
 
-          {/* Nothing Red Current Time Needle */}
+          {/* Nothing red current-time needle */}
           <div
-            className="absolute top-0 bottom-0 w-[2px] bg-accent z-10"
+            className="absolute bottom-0 top-0 z-10 w-[2px] bg-accent"
             style={{ left: `${nowFraction * 100}%` }}
-            title={lang === 'de' ? `Aktuelle Uhrzeit: ${timeStr}` : `Current Time: ${timeStr}`}
+            title={lang === 'de' ? `Aktuelle Uhrzeit: ${timeStr}` : `Current time: ${timeStr}`}
           />
         </div>
 
-        {/* Hour Axis Labels */}
-        <div className="mt-1 flex items-center justify-between font-sans text-[9px] text-muted tabular-nums">
-          <span>00:00</span>
-          <span>12:00</span>
-          <span className="text-fg/80 font-medium">
-            {lang === 'de' ? 'Jetzt' : 'Now'} {timeStr}
-          </span>
-          <span>24:00</span>
+        {/* Hour axis */}
+        <div className="flex shrink-0 items-center justify-between font-mono text-[9px] uppercase tracking-wider text-muted">
+          <span>00</span>
+          <span>06</span>
+          <span>12</span>
+          <span>18</span>
+          <span className="text-fg">now {timeStr}</span>
+          <span>24</span>
         </div>
       </div>
     </BentoCard>

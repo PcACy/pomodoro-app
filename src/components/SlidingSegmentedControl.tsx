@@ -74,22 +74,21 @@ export function SlidingSegmentedControl<T extends string>({
 
   const isSmall = size === 'sm'
   const containerPadding = isSmall ? 'p-0.5' : 'p-1'
-  const buttonPadding = isSmall
-    ? 'px-2.5 py-0.5 text-[10px]'
-    : 'px-4 py-1.5 text-xs'
+  const buttonPadding = isSmall ? 'h-7 px-2.5 text-[10px]' : 'h-9 px-4 text-xs'
+  // The sm variant is a header-scale control; keep it from overflowing narrow
+  // viewports by letting the track shrink and the labels truncate.
+  const widthClass = fullWidth ? 'flex w-full sm:w-auto' : 'inline-flex max-w-full shrink-0'
 
   return (
     <div
       ref={containerRef}
       role="radiogroup"
       aria-label={ariaLabel}
-      className={`relative inline-flex items-center rounded-full border border-line bg-canvas font-mono select-none ${containerPadding} ${
-        fullWidth ? 'w-full sm:w-auto flex' : ''
-      } ${className}`}
+      className={`relative items-center rounded-pill border border-line bg-canvas font-mono select-none ${containerPadding} ${widthClass} ${className}`}
     >
-      {/* Sliding Mechanical Pill Thumb */}
+      {/* Sliding mechanical pill thumb */}
       <div
-        className={`absolute top-0 left-0 rounded-full bg-fg pointer-events-none ${
+        className={`pointer-events-none absolute left-0 top-0 rounded-pill bg-fg ${
           indicator.ready
             ? 'transition-all duration-200 ease-out motion-reduce:transition-none'
             : 'opacity-0'
@@ -102,7 +101,7 @@ export function SlidingSegmentedControl<T extends string>({
         aria-hidden="true"
       />
 
-      {/* Segment Option Buttons */}
+      {/* Segment option buttons */}
       {options.map((opt) => {
         const isSelected = opt.value === value
         return (
@@ -122,7 +121,7 @@ export function SlidingSegmentedControl<T extends string>({
               playMicroClick('tab')
               onChange(opt.value)
             }}
-            className={`relative z-10 rounded-full flex items-center justify-center gap-1.5 font-bold uppercase tracking-wider transition-colors duration-150 cursor-pointer ${buttonPadding} ${
+            className={`relative z-10 flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-pill font-bold uppercase tracking-wider transition-colors duration-150 ${buttonPadding} ${
               fullWidth ? 'flex-1 sm:flex-initial' : ''
             } ${isSelected ? 'text-canvas' : 'text-muted hover:text-fg'}`}
           >

@@ -164,10 +164,10 @@ export const Timer = memo(function Timer({
         {/* Hero Time in Nothing Dot-Matrix Glyph SVG */}
         <GlyphTimeDisplay
           time={shownTime}
-          className={`w-full ${
+          className={`w-full shrink ${
             large || borderless
-              ? 'max-w-[520px] sm:max-w-[640px] md:max-w-[720px] my-5 sm:my-8'
-              : 'max-w-[380px] sm:max-w-[440px] my-3'
+              ? 'max-w-[560px] sm:max-w-[680px] md:max-w-[760px]'
+              : 'max-w-[400px] sm:max-w-[460px]'
           }`}
         />
 

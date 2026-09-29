@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState, type ReactNode } from 'react'
 import { BentoCard } from './BentoCard'
 import { playMicroClick } from '../../lib/sound'
 import { isNotifyEffective, writeNotifyFlag } from '../../lib/notify'
@@ -17,6 +17,36 @@ interface QuickSettingsCardProps {
   onToggleZen?: () => void
   onOpenSettingsModal: () => void
   className?: string
+}
+
+/** One settings row: label + state, with a 44px minimum touch target. */
+function SettingRow({
+  title,
+  state,
+  checked,
+  onToggle,
+  label,
+}: {
+  title: string
+  state: string
+  checked: boolean
+  onToggle: () => void
+  label: string
+}) {
+  return (
+    <div
+      onClick={onToggle}
+      className="flex min-h-[44px] cursor-pointer items-center justify-between gap-4 rounded-control px-2.5 py-1.5 transition-colors hover:bg-fg/[0.04] active:bg-fg/[0.07]"
+    >
+      <div className="flex min-w-0 flex-col">
+        <span className="truncate text-[13px] font-medium text-fg">{title}</span>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-muted">
+          {state}
+        </span>
+      </div>
+      <MechanicalSwitch checked={checked} onChange={onToggle} label={label} />
+    </div>
+  )
 }
 
 export const QuickSettingsCard = memo(function QuickSettingsCard({
@@ -83,117 +113,69 @@ export const QuickSettingsCard = memo(function QuickSettingsCard({
     })
   }, [])
 
+  const rows: { key: string; title: string; state: string; checked: boolean; onToggle: () => void }[] = [
+    {
+      key: 'zen',
+      title: 'Zen Mode',
+      state: isZenMode ? 'Immersive focus' : 'Standby',
+      checked: Boolean(isZenMode),
+      onToggle: handleToggleZen,
+    },
+    {
+      key: 'sound',
+      title: 'Sound Effects',
+      state: soundEnabled ? 'Active' : 'Muted',
+      checked: soundEnabled,
+      onToggle: toggleSound,
+    },
+    {
+      key: 'breaks',
+      title: 'Auto Breaks',
+      state: autoBreaks ? 'Automatic' : 'Manual',
+      checked: autoBreaks,
+      onToggle: toggleAutoBreaks,
+    },
+    {
+      key: 'notify',
+      title: 'Notifications',
+      state: notifyEnabled ? 'Active' : 'Muted',
+      checked: notifyEnabled,
+      onToggle: toggleNotify,
+    },
+  ]
+
+  const action: ReactNode = (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation()
+        playMicroClick('tap')
+        onOpenSettingsModal()
+      }}
+      className="chip"
+    >
+      More
+    </button>
+  )
+
   return (
     <BentoCard
       label="Quick Settings"
-      action={
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            playMicroClick('tap')
-            onOpenSettingsModal()
-          }}
-          className="font-sans text-xs text-muted/90 hover:text-fg font-medium transition-colors cursor-pointer py-1 px-1.5"
-        >
-          More ↗
-        </button>
-      }
-      className={`rounded-[28px] ${className}`}
-      contentClassName="justify-between"
+      action={action}
+      className={className}
+      contentClassName="min-h-0"
     >
-      <div className="flex flex-col gap-1 sm:gap-1.5 my-auto">
-        {/* Toggle 1: Zen Mode */}
-        <div
-          onClick={(e) => {
-            e.stopPropagation()
-            handleToggleZen()
-          }}
-          className="flex items-center justify-between gap-3 cursor-pointer group py-1 px-1.5 -mx-1.5 rounded-xl hover:bg-white/[0.04] active:bg-white/[0.08] transition-all min-h-[44px]"
-        >
-          <div className="flex flex-col min-w-0">
-            <span className="font-sans text-xs sm:text-[13px] font-medium text-fg truncate">
-              Zen Mode
-            </span>
-            <span className="font-sans text-[11px] text-muted/80">
-              {isZenMode ? 'Immersive focus' : 'Standby'}
-            </span>
-          </div>
-          <MechanicalSwitch
-            checked={Boolean(isZenMode)}
-            onChange={handleToggleZen}
-            label="Zen Mode"
+      <div className="no-scrollbar -mx-1 flex min-h-0 flex-1 flex-col justify-center overflow-y-auto">
+        {rows.map((row) => (
+          <SettingRow
+            key={row.key}
+            title={row.title}
+            state={row.state}
+            checked={row.checked}
+            onToggle={row.onToggle}
+            label={row.title}
           />
-        </div>
-
-        {/* Toggle 2: Sound FX */}
-        <div
-          onClick={(e) => {
-            e.stopPropagation()
-            toggleSound()
-          }}
-          className="flex items-center justify-between gap-3 cursor-pointer group py-1 px-1.5 -mx-1.5 rounded-xl hover:bg-white/[0.04] active:bg-white/[0.08] transition-all min-h-[44px]"
-        >
-          <div className="flex flex-col min-w-0">
-            <span className="font-sans text-xs sm:text-[13px] font-medium text-fg truncate">
-              Sound Effects
-            </span>
-            <span className="font-sans text-[11px] text-muted/80">
-              {soundEnabled ? 'Active' : 'Muted'}
-            </span>
-          </div>
-          <MechanicalSwitch
-            checked={soundEnabled}
-            onChange={toggleSound}
-            label="Sound Effects"
-          />
-        </div>
-
-        {/* Toggle 3: Auto-Start Breaks */}
-        <div
-          onClick={(e) => {
-            e.stopPropagation()
-            toggleAutoBreaks()
-          }}
-          className="flex items-center justify-between gap-3 cursor-pointer group py-1 px-1.5 -mx-1.5 rounded-xl hover:bg-white/[0.04] active:bg-white/[0.08] transition-all min-h-[44px]"
-        >
-          <div className="flex flex-col min-w-0">
-            <span className="font-sans text-xs sm:text-[13px] font-medium text-fg truncate">
-              Auto Breaks
-            </span>
-            <span className="font-sans text-[11px] text-muted/80">
-              {autoBreaks ? 'Automatic' : 'Manual'}
-            </span>
-          </div>
-          <MechanicalSwitch
-            checked={autoBreaks}
-            onChange={toggleAutoBreaks}
-            label="Auto Breaks"
-          />
-        </div>
-
-        {/* Toggle 4: Desktop Notifications */}
-        <div
-          onClick={(e) => {
-            e.stopPropagation()
-            toggleNotify()
-          }}
-          className="flex items-center justify-between gap-3 cursor-pointer group py-1 px-1.5 -mx-1.5 rounded-xl hover:bg-white/[0.04] active:bg-white/[0.08] transition-all min-h-[44px]"
-        >
-          <div className="flex flex-col min-w-0">
-            <span className="font-sans text-xs sm:text-[13px] font-medium text-fg truncate">
-              Notifications
-            </span>
-            <span className="font-sans text-[11px] text-muted/80">
-              {notifyEnabled ? 'Active' : 'Muted'}
-            </span>
-          </div>
-          <MechanicalSwitch
-            checked={notifyEnabled}
-            onChange={toggleNotify}
-            label="Notifications"
-          />
-        </div>
+        ))}
       </div>
     </BentoCard>
   )

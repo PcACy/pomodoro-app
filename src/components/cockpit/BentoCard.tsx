@@ -7,7 +7,8 @@ interface BentoCardProps {
   children: ReactNode
   className?: string
   contentClassName?: string
-  onClick?: () => void
+  /** Removes the header rule; used when the card body is a single visual. */
+  bare?: boolean
 }
 
 export const BentoCard = memo(function BentoCard({
@@ -17,27 +18,27 @@ export const BentoCard = memo(function BentoCard({
   children,
   className = '',
   contentClassName = '',
-  onClick,
+  bare = false,
 }: BentoCardProps) {
   return (
-    <div
-      onClick={onClick}
-      className={`relative overflow-hidden rounded-[24px] backdrop-blur-md bg-[var(--bg-card)] border border-[var(--card-border)] shadow-none dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_24px_-4px_rgba(0,0,0,0.3)] p-4 sm:p-5 flex flex-col justify-between select-none transition-colors duration-300 ${className}`}
+    <section
+      className={`panel flex min-h-0 flex-col overflow-hidden p-4 select-none sm:p-5 ${className}`}
     >
-      {/* Header with proportional Sans label (Sentence Case) and optional actions */}
-      <div className="relative z-10 flex items-center justify-between gap-2 mb-2 sm:mb-3 shrink-0">
-        <div className="flex items-center gap-2 min-w-0">
-          {indicator}
-          <span className="font-sans font-medium text-xs sm:text-[13px] text-muted/90 dark:text-neutral-300 tracking-normal truncate">
-            {label}
-          </span>
-        </div>
-        {action && <div className="relative z-10 shrink-0">{action}</div>}
+      {!bare && (
+        <header className="relative z-10 mb-3 flex shrink-0 items-center gap-2">
+          <span aria-hidden="true" className="dot bg-fg/25" />
+          <h2 className="label truncate text-fg/80">{label}</h2>
+          {indicator ? (
+            <div className="flex min-w-0 shrink items-center gap-2">{indicator}</div>
+          ) : null}
+          {action ? <div className="relative z-10 ml-auto shrink-0">{action}</div> : null}
+        </header>
+      )}
+      <div
+        className={`relative z-10 flex min-h-0 flex-1 flex-col ${contentClassName}`}
+      >
+        {children}
       </div>
-
-      {/* Content */}
-      <div className={`relative z-10 flex-1 min-h-0 flex flex-col ${contentClassName}`}>{children}</div>
-    </div>
+    </section>
   )
 })
-

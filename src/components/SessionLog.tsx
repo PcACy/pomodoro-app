@@ -23,61 +23,72 @@ const SessionRow = memo(function SessionRow({ s, locale }: { s: Session; locale:
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const hasNote = Boolean(s.notes?.trim())
+  const isFlow = s.mode === 'flow'
 
   return (
-    <li className="py-2 px-2 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors border-b border-line/30 font-mono">
-      <div className="flex items-center gap-2.5 text-xs min-w-0">
-        <span className="w-24 sm:w-28 shrink-0 text-[10px] text-muted tabular-nums truncate">
-          {fmtDateTime(new Date(s.start), locale)}
-        </span>
-        <span className="w-14 shrink-0 text-[11px] font-medium text-fg tabular-nums">
-          {fmtDuration(s.durationMs, locale === 'de-DE' ? 'de' : 'en')}
-        </span>
-        <span className="w-12 sm:w-14 shrink-0 text-[10px] text-muted/80 uppercase">
-          {s.mode === 'flow' ? 'FLOW' : 'POMO'}
-        </span>
-        <span className="w-16 sm:w-20 shrink-0 text-[10px] text-fg/80 truncate" title={s.tag || undefined}>
+    <li className="border-b border-line/40 py-2 transition-colors last:border-b-0 hover:bg-fg/[0.03]">
+      {/* Mobile: two stacked lines so nothing collides at narrow widths.
+          From `sm` up: a single aligned row. */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2.5">
+        <div className="flex min-w-0 items-center gap-2 sm:w-[190px] sm:shrink-0">
+          <span className="num shrink-0 text-[10px] text-muted">
+            {fmtDateTime(new Date(s.start), locale)}
+          </span>
+          <span className="num shrink-0 text-[11px] font-medium text-fg">
+            {fmtDuration(s.durationMs, locale === 'de-DE' ? 'de' : 'en')}
+          </span>
+          <span
+            className={`shrink-0 rounded-xs border px-1.5 py-0.5 font-mono text-[9px] uppercase leading-none tracking-wider ${
+              isFlow ? 'border-accent/40 text-accent' : 'border-line text-muted'
+            }`}
+          >
+            {isFlow ? 'Flow' : 'Pomo'}
+          </span>
+        </div>
+
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span
+            className="min-w-0 flex-1 truncate text-xs text-fg"
+            title={s.task || t.sessionLog.noTask}
+          >
+            {s.task || <span className="text-muted">{t.sessionLog.noTask}</span>}
+          </span>
           {s.tag ? (
-            <span className="flex items-center gap-1 truncate">
+            <span className="hidden min-w-0 shrink items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted md:flex">
               <span
-                className="h-1.5 w-1.5 rounded-full shrink-0"
+                aria-hidden="true"
+                className="dot"
                 style={{ backgroundColor: getTagColor(s.tag) }}
               />
               <span className="truncate">{s.tag}</span>
             </span>
-          ) : (
-            <span className="text-muted/40">—</span>
-          )}
-        </span>
-        <span className="flex-1 min-w-0 text-fg text-xs truncate" title={s.task || t.sessionLog.noTask}>
-          {s.task || <span className="text-muted/50 italic">{t.sessionLog.noTask}</span>}
-        </span>
-        <div className="w-16 shrink-0 flex items-center justify-end gap-1.5">
-          {hasNote && (
+          ) : null}
+          {hasNote ? (
             <button
               type="button"
               onClick={() => {
                 playMicroClick('tap')
                 setOpen((o) => !o)
               }}
-              title={open ? 'Notiz ausblenden' : 'Notiz anzeigen'}
-              className={`h-5 w-5 flex items-center justify-center rounded-[2px] border transition-colors cursor-pointer ${
+              title={open ? 'Hide note' : 'Show note'}
+              aria-label={open ? 'Hide note' : 'Show note'}
+              aria-expanded={open}
+              className={`flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xs border transition-colors ${
                 open
-                  ? 'border-accent bg-accent/15 text-accent'
-                  : 'border-line bg-canvas text-muted hover:border-fg/40 hover:text-fg'
+                  ? 'border-accent/35 bg-accent/[0.07] text-accent'
+                  : 'border-line text-muted hover:border-fg/40 hover:text-fg'
               }`}
             >
               <StickyNote size={11} />
             </button>
-          )}
-          <span className="text-[9px] font-mono text-muted/60 tracking-wider">LOGGED</span>
+          ) : null}
         </div>
       </div>
-      {open && s.notes && (
-        <p className="mt-2 whitespace-pre-wrap rounded-[2px] border border-line bg-canvas p-2.5 font-mono text-xs leading-relaxed text-fg">
+      {open && s.notes ? (
+        <p className="mt-2 whitespace-pre-wrap rounded-control border border-line bg-canvas p-2.5 font-mono text-xs leading-relaxed text-fg">
           {s.notes}
         </p>
-      )}
+      ) : null}
     </li>
   )
 })
@@ -195,21 +206,20 @@ export const SessionLog = memo(function SessionLog({
   }
 
   return (
-    <div className={`flex flex-col gap-2.5 sm:gap-3 font-mono select-none h-full min-h-0 ${className}`}>
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-1 border-b border-line/60 shrink-0">
+    <div className={`flex h-full min-h-0 flex-col gap-3 select-none ${className}`}>
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-line/60 pb-3">
         {title ? (
           <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
-            <h3 className="text-xs font-bold uppercase tracking-widest text-fg">{title}</h3>
-            <span className="text-[10px] text-muted tracking-wider">[{filtered.length} ENTRIES]</span>
+            <span aria-hidden="true" className="dot bg-accent" />
+            <h3 className="label text-fg">{title}</h3>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] text-muted tracking-wider uppercase">[{filtered.length} SESSIONS RECORDED]</span>
-          </div>
+          <span className="label">
+            {filtered.length} {t.dashboard.sessions}
+          </span>
         )}
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           <input
             ref={importRef}
             type="file"
@@ -227,9 +237,10 @@ export const SessionLog = memo(function SessionLog({
               playMicroClick('tap')
               importRef.current?.click()
             }}
-            className="flex h-8 items-center gap-1.5 rounded-[2px] border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] px-2.5 font-mono text-xs text-muted hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
+            className="chip"
           >
-            <Upload size={12} /> {t.sessionLog.import}
+            <Upload size={11} />
+            {t.sessionLog.import}
           </button>
 
           <div className="relative" ref={exportRef}>
@@ -239,16 +250,18 @@ export const SessionLog = memo(function SessionLog({
                 playMicroClick('tap')
                 setOpen((o) => !o)
               }}
-              className="flex h-8 items-center gap-1.5 rounded-[2px] border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] px-2.5 font-mono text-xs text-muted hover:border-fg/40 hover:text-fg transition-colors cursor-pointer"
+              className="chip"
               aria-haspopup="menu"
               aria-expanded={open}
             >
-              <Download size={12} /> {t.sessionLog.export} <ChevronDown size={11} />
+              <Download size={11} />
+              {t.sessionLog.export}
+              <ChevronDown size={10} />
             </button>
-            {open && (
+            {open ? (
               <div
                 role="menu"
-                className="absolute right-0 top-full z-20 mt-1 w-60 rounded-[2px] border border-line bg-surface p-1 shadow-none"
+                className="panel absolute right-0 top-full z-20 mt-1.5 flex w-56 flex-col gap-0.5 p-1"
               >
                 <button
                   type="button"
@@ -258,7 +271,7 @@ export const SessionLog = memo(function SessionLog({
                     handleMdDownload()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-left font-mono text-xs text-fg transition-colors hover:bg-fg/10 cursor-pointer"
+                  className="flex w-full cursor-pointer items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-fg/[0.06]"
                 >
                   <FileText size={13} className="text-muted" /> {t.sessionLog.mdDownload}
                 </button>
@@ -269,7 +282,7 @@ export const SessionLog = memo(function SessionLog({
                     playMicroClick('tap')
                     handleMdCopy()
                   }}
-                  className="flex w-full items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-left font-mono text-xs text-fg transition-colors hover:bg-fg/10 cursor-pointer"
+                  className="flex w-full cursor-pointer items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-fg/[0.06]"
                 >
                   {copied ? (
                     <Check size={13} className="text-accent" />
@@ -286,7 +299,7 @@ export const SessionLog = memo(function SessionLog({
                     handleSessionsCsv()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-left font-mono text-xs text-fg transition-colors hover:bg-fg/10 cursor-pointer"
+                  className="flex w-full cursor-pointer items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-fg/[0.06]"
                 >
                   <FileDown size={13} className="text-muted" /> {t.sessionLog.csv}
                 </button>
@@ -298,22 +311,26 @@ export const SessionLog = memo(function SessionLog({
                     handleSessionsJson()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-[2px] px-2.5 py-1.5 text-left font-mono text-xs text-fg transition-colors hover:bg-fg/10 cursor-pointer"
+                  className="flex w-full cursor-pointer items-center gap-2 rounded-sm px-3 py-2 text-left font-mono text-xs text-fg transition-colors hover:bg-fg/[0.06]"
                 >
                   <FileJson size={13} className="text-muted" /> {t.sessionLog.json}
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
 
           <div className="relative">
-            <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted/60" />
+            <Search
+              size={12}
+              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted"
+            />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.sessionLog.searchPlaceholder}
-              className="h-8 w-36 sm:w-48 rounded-[2px] border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] pl-7 pr-2.5 font-mono text-xs text-fg placeholder:text-muted/50 focus:border-fg focus:outline-none transition-colors"
+              aria-label={t.sessionLog.searchPlaceholder}
+              className="input h-8 w-36 py-0 pl-7 pr-2.5 font-mono text-xs placeholder:text-muted/70 sm:w-48"
             />
           </div>
 
@@ -324,45 +341,40 @@ export const SessionLog = memo(function SessionLog({
               onClear()
             }}
             disabled={sessions.length === 0}
-            className="flex h-8 w-8 items-center justify-center rounded-[2px] border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] text-muted hover:border-accent hover:text-accent disabled:pointer-events-none disabled:opacity-30 transition-colors cursor-pointer"
+            className="icon-btn !h-8 !w-8 hover:!border-accent/50 hover:!text-accent"
             title={t.sessionLog.clearAll}
+            aria-label={t.sessionLog.clearAll}
           >
             <Trash2 size={12} />
           </button>
         </div>
       </div>
 
-      {importError && (
-        <p role="status" className="font-mono text-[11px] uppercase tracking-wider text-accent">
-          [ERROR: {importError}]
+      {importError ? (
+        <p role="status" className="label shrink-0 text-accent">
+          [{importError}]
         </p>
-      )}
+      ) : null}
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-10 text-center font-mono">
-          <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-[2px] border border-line bg-canvas text-muted">
-            <History size={16} />
-          </div>
-          <p className="text-xs font-bold uppercase tracking-wider text-fg">
-            [ NO TELEMETRY DATA ]
-          </p>
-          <p className="mt-1 max-w-sm text-[11px] text-muted">
+        <div className="empty">
+          <span className="empty-mark">
+            <History size={15} />
+          </span>
+          <p className="label">No telemetry data</p>
+          <p className="max-w-xs text-xs text-muted">
             {sessions.length === 0 ? t.sessionLog.emptySub : t.sessionLog.searchPlaceholder}
           </p>
         </div>
       ) : (
-        <div className="flex-1 min-h-0 flex flex-col w-full overflow-x-auto [scrollbar-width:thin]">
-          {/* Telemetry Column Headers */}
-          <div className="flex items-center gap-2.5 px-2 py-1.5 border-b border-line/50 text-[9px] uppercase tracking-wider text-muted font-bold min-w-[540px] shrink-0">
-            <span className="w-24 sm:w-28 shrink-0">TIMESTAMP</span>
-            <span className="w-14 shrink-0">DURATION</span>
-            <span className="w-12 sm:w-14 shrink-0">MODE</span>
-            <span className="w-16 sm:w-20 shrink-0">TAG</span>
-            <span className="flex-1 min-w-0">TASK</span>
-            <span className="w-16 shrink-0 text-right">STATUS</span>
+        <div className="flex min-h-0 w-full flex-1 flex-col">
+          {/* Column headers only make sense once rows are single-line */}
+          <div className="label-sm hidden min-w-0 shrink-0 items-center gap-2.5 border-b border-line/50 py-2 sm:flex">
+            <span className="w-[190px] shrink-0">When</span>
+            <span className="min-w-0 flex-1">Task</span>
           </div>
 
-          <ul className="flex-1 min-h-0 divide-y divide-line/30 overflow-y-auto min-w-[540px] [scrollbar-width:thin]">
+          <ul className="no-scrollbar min-h-0 flex-1 divide-y divide-line/30 overflow-y-auto">
             {filtered.map((s) => (
               <SessionRow key={s.id} s={s} locale={locale} />
             ))}

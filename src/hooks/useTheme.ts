@@ -8,6 +8,17 @@ import {
 } from '../themes'
 import type { ColorMode, ThemeId } from '../themes'
 
+/** Card backgrounds are opaque hex values; derive an RGB triplet for Tailwind. */
+function surfaceRgb(cardBg: string, mode: ColorMode): string {
+  const hex = cardBg.trim()
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex)
+  if (m) {
+    const n = parseInt(m[1], 16)
+    return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`
+  }
+  return mode === 'dark' ? '11 11 12' : '255 255 255'
+}
+
 const applyTheme = (themeId: ThemeId): void => {
   if (typeof document === 'undefined') return
   const config = THEMES[themeId] || THEMES[DEFAULT_THEME]
@@ -23,29 +34,28 @@ const applyTheme = (themeId: ThemeId): void => {
   root.style.setProperty('--bg-card', config.cardBg)
   root.style.setProperty('--card-border', config.cardBorder)
   root.style.setProperty('--accent', config.accentRgb)
-  root.style.setProperty('--accent-hex', config.accent)
   root.style.setProperty('--accent-subtle', config.accentSubtle)
-  root.style.setProperty('--text-primary', config.textPrimary)
-  root.style.setProperty('--text-muted', config.textMuted)
 
-  // Framework mapped tokens for Tailwind classes
+  // Framework mapped tokens for Tailwind classes. These mirror the ramps
+  // declared in index.css — the inline values win so every colorway keeps the
+  // same surface elevation model instead of drifting per theme.
   root.style.setProperty('--c-canvas', config.canvasRgb)
-  root.style.setProperty(
-    '--c-surface',
-    config.colorMode === 'dark' ? '15 15 15' : '255 255 255',
-  )
+  root.style.setProperty('--c-surface', surfaceRgb(config.cardBg, config.colorMode))
   root.style.setProperty(
     '--c-raised',
-    config.colorMode === 'dark' ? '24 24 24' : '240 240 240',
+    config.colorMode === 'dark' ? '22 22 24' : '240 240 242',
   )
   root.style.setProperty(
     '--c-line',
-    config.colorMode === 'dark' ? '38 38 38' : '220 220 220',
+    config.colorMode === 'dark' ? '42 42 46' : '214 214 218',
+  )
+  root.style.setProperty(
+    '--c-track',
+    config.colorMode === 'dark' ? '26 26 28' : '232 232 235',
   )
   root.style.setProperty('--c-fg', config.textPrimaryRgb)
   root.style.setProperty('--c-muted', config.textMutedRgb)
-  root.style.setProperty('--c-accent', config.accentRgb)
-  root.style.setProperty('--c-accent-strong', config.accentRgb)
+  root.style.setProperty('--accent-strong', config.accentRgb)
 
   // Dynamically synchronize OS status bar & browser chrome theme-color
   let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')

@@ -62,13 +62,15 @@ export const CatLogo: FC<CatLogoProps> = ({
         <line x1="5.2" y1="14" x2="6.5" y2="14" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.35" />
         <line x1="17.5" y1="14" x2="18.8" y2="14" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.35" />
 
-        {/* Signature Nothing Red Signal LED Dot (#D71921) */}
+        {/* Signature Nothing signal LED — themed via the accent token so the
+            mark follows the active colorway (cobalt, sage, CMF orange). */}
         <circle
           cx="12"
           cy="15.5"
           r="1.3"
-          fill="#D71921"
-          className={`transition-all duration-300 ${isFocus ? 'animate-pulse' : 'opacity-90'}`}
+          className={`fill-accent transition-opacity duration-300 ${
+            isFocus ? 'animate-pulse' : 'opacity-90'
+          }`}
         />
       </svg>
     </div>

@@ -72,26 +72,21 @@ export const SettingsModal = memo(function SettingsModal({
       role="dialog"
       aria-modal="true"
       aria-label="Settings & Preferences"
-      className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-6 select-none"
+      className="modal-backdrop fixed inset-0 z-50 flex items-end justify-center bg-canvas/80 p-0 backdrop-blur-sm sm:items-center sm:p-6"
       onClick={() => {
         playMicroClick('tap')
         onClose()
       }}
     >
       <div
-        className="modal-panel relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-card bg-surface border border-line p-5 sm:p-7 flex flex-col gap-4 shadow-none"
+        className="modal-panel panel relative flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-b-none p-4 sm:rounded-card sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3.5 border-b border-line">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
-            <h2 className="font-mono text-xs sm:text-sm font-bold tracking-widest text-fg uppercase">
-              SETTINGS
-            </h2>
-            <span className="rounded-full border border-line bg-canvas px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted">
-              V1.0
-            </span>
+        <header className="flex shrink-0 items-center justify-between gap-3 border-b border-line/70 pb-4">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span aria-hidden="true" className="dot bg-accent" />
+            <h2 className="label truncate text-fg">Settings</h2>
           </div>
 
           <button
@@ -100,15 +95,16 @@ export const SettingsModal = memo(function SettingsModal({
               playMicroClick('tap')
               onClose()
             }}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-line bg-canvas hover:border-fg/40 text-muted hover:text-fg font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
+            className="chip"
+            aria-label="Close settings"
           >
-            <X size={13} />
-            <span>ESC</span>
+            <X size={12} />
+            Esc
           </button>
-        </div>
+        </header>
 
         {/* Embedded SettingsPanel */}
-        <div className="flex-1">
+        <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto pt-5">
           <SettingsPanel
             settings={settings}
             update={update}

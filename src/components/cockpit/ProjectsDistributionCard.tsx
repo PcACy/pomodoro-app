@@ -1,4 +1,5 @@
 import { memo, useMemo, useState, useCallback } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Session } from '../../types'
 import { minutesByTag } from '../../lib/stats'
 import { addDays, sameDay, startOfWeek } from '../../lib/time'
@@ -127,160 +128,125 @@ export const ProjectsDistributionCard = memo(function ProjectsDistributionCard({
     <BentoCard
       label={`Projects · ${totalWeekHours} h week`}
       action={
-        <button
-          type="button"
-          onClick={handleNextTrack}
-          disabled={tracks.length <= 1}
-          className={`font-sans text-[10px] font-medium px-2.5 py-1 rounded-full border border-line bg-canvas text-muted transition-colors select-none ${
-            tracks.length > 1
-              ? 'hover:text-fg hover:border-fg/40 cursor-pointer active:scale-95'
-              : 'cursor-default'
-          }`}
-          title={tracks.length > 1 ? 'Click to switch track' : undefined}
-        >
-          Track {currentTrackIndex + 1} of {tracks.length}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={handlePrevTrack}
+            disabled={tracks.length <= 1}
+            aria-label="Previous track"
+            className="icon-btn !h-8 !w-8"
+          >
+            <ChevronLeft size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={handleNextTrack}
+            disabled={tracks.length <= 1}
+            title={tracks.length > 1 ? 'Next track' : undefined}
+            className="chip"
+          >
+            <span className="truncate">{activeTrack}</span>
+            <span className="tabular-nums opacity-50">
+              {currentTrackIndex + 1}/{tracks.length}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={handleNextTrack}
+            disabled={tracks.length <= 1}
+            aria-label="Next track"
+            className="icon-btn !h-8 !w-8"
+          >
+            <ChevronRight size={14} />
+          </button>
+        </div>
       }
       className={className}
-      contentClassName="justify-between"
+      contentClassName="justify-between gap-3"
     >
-      <div className="flex-1 flex flex-col justify-between py-0.5 gap-1.5 sm:gap-2">
-        {/* Project Selection / Active Track Row with 44px Touch Targets */}
-        <div className="flex min-h-[38px] sm:min-h-[44px] items-center justify-between select-none">
-          <div className="flex items-center gap-1 min-w-0">
-            {/* Stepper controls with Fitts's Law 44px hitboxes */}
-            <div className="flex items-center -ml-2">
-              <button
-                type="button"
-                onClick={handlePrevTrack}
-                disabled={tracks.length <= 1}
-                className={`min-w-[40px] sm:min-w-[44px] min-h-[40px] sm:min-h-[44px] flex items-center justify-center rounded-full text-base transition-colors ${
-                  tracks.length > 1
-                    ? 'text-muted hover:text-fg hover:bg-neutral-500/10 active:scale-90 cursor-pointer'
-                    : 'text-muted/30 cursor-default'
-                }`}
-                title="Previous track (‹)"
-                aria-label="Previous track"
-              >
-                ‹
-              </button>
+      {/* Active track headline */}
+      <div className="flex shrink-0 items-baseline justify-between gap-3">
+        <span className="label truncate text-fg/80">{activeTrack}</span>
+        <span className="readout shrink-0 text-2xl">
+          {activeTrackHours}
+          <span className="num ml-1 text-xs font-normal text-muted">h</span>
+        </span>
+      </div>
 
-              <button
-                type="button"
-                onClick={handleNextTrack}
-                disabled={tracks.length <= 1}
-                className={`min-h-[38px] sm:min-h-[44px] px-2.5 sm:px-3 flex items-center rounded-lg font-sans font-medium text-xs sm:text-sm text-fg transition-colors ${
-                  tracks.length > 1
-                    ? 'hover:bg-neutral-500/10 active:scale-98 cursor-pointer'
-                    : 'cursor-default'
-                }`}
-                title="Click to switch track"
-              >
-                <span className="truncate max-w-[140px] sm:max-w-[200px]">
-                  {activeTrack}
-                </span>
-              </button>
+      {/* 7-Column VU-Meter LED grid — fills the remaining height */}
+      <div
+        className="grid min-h-0 flex-1 grid-cols-7 items-stretch gap-1.5 sm:gap-2"
+        role="img"
+        aria-label={`${activeTrack} minutes per day this week: ${dayMinutes
+          .map((m, i) => `${DAY_LABELS[i]} ${m}`)
+          .join(', ')}`}
+      >
+        {DAY_LABELS.map((label, dayIdx) => {
+          const dayMins = dayMinutes[dayIdx] ?? 0
+          const isToday = dayIdx === todayIdx
+          const activeCount =
+            dayMins > 0
+              ? Math.min(6, Math.max(1, Math.ceil(dayMins / MINUTES_PER_BLOCK)))
+              : 0
 
-              <button
-                type="button"
-                onClick={handleNextTrack}
-                disabled={tracks.length <= 1}
-                className={`min-w-[40px] sm:min-w-[44px] min-h-[40px] sm:min-h-[44px] flex items-center justify-center rounded-full text-base transition-colors ${
-                  tracks.length > 1
-                    ? 'text-muted hover:text-fg hover:bg-neutral-500/10 active:scale-90 cursor-pointer'
-                    : 'text-muted/30 cursor-default'
-                }`}
-                title="Next track (›)"
-                aria-label="Next track"
-              >
-                ›
-              </button>
-            </div>
-          </div>
-
-          <span className="text-fg/80 tabular-nums font-sans font-medium text-xs sm:text-sm shrink-0 ml-2">
-            {activeTrackHours} h
-          </span>
-        </div>
-
-        {/* 7-Column Full-Width VU-Meter LED Equalizer Grid */}
-        <div className="w-full grid grid-cols-7 gap-1.5 sm:gap-2.5 px-1 my-0.5 sm:my-1">
-          {DAY_LABELS.map((label, dayIdx) => {
-            const dayMins = dayMinutes[dayIdx] ?? 0
-            const isToday = dayIdx === todayIdx
-            const activeCount =
-              dayMins > 0 ? Math.min(6, Math.max(1, Math.ceil(dayMins / MINUTES_PER_BLOCK))) : 0
-
-            return (
+          return (
+            <div
+              key={dayIdx}
+              className="flex min-w-0 flex-col gap-1.5"
+              title={`${label}: ${dayMins} min`}
+            >
+              {/* Vertical LED column (6 flat slabs stacked bottom-up) */}
               <div
-                key={dayIdx}
-                className="flex flex-col items-center gap-1 sm:gap-1.5 w-full"
-                title={`${label}: ${dayMins} min`}
+                className="flex min-h-0 flex-1 flex-col justify-end gap-1"
+                aria-hidden="true"
               >
-                {/* Day header letter */}
-                <span
-                  className={`font-sans text-[10px] sm:text-[11px] select-none ${
-                    isToday ? 'text-fg dark:text-white font-bold' : 'text-muted/60 font-normal'
-                  }`}
-                >
-                  {label}
-                </span>
-
-                {/* Vertical LED Column (6 flat slabs stacked top to bottom) */}
-                <div
-                  className="w-full flex flex-col gap-1"
-                  role="img"
-                  aria-label={`${label}: ${dayMins} minutes (${activeCount}/6 segments)`}
-                >
-                  {LED_LEVELS.map((level) => {
-                    const isActive = activeCount >= level
-                    const isPeak = isActive && activeCount === level
-
-                    let segmentStyle = isToday
-                      ? 'bg-black/[0.04] border border-black/15 dark:bg-white/[0.04] dark:border-white/15'
-                      : 'bg-black/[0.04] border border-black/5 dark:bg-white/[0.04] dark:border-white/5'
-
-                    if (isActive) {
-                      if (isToday && isPeak) {
-                        segmentStyle = 'bg-accent border border-accent'
-                      } else {
-                        segmentStyle = 'bg-fg border border-fg'
-                      }
-                    }
-
-                    return (
-                      <div
-                        key={level}
-                        className={`w-full h-1.5 rounded-[1px] transition-colors duration-150 ${segmentStyle}`}
-                      />
-                    )
-                  })}
-                </div>
+                {LED_LEVELS.map((level) => {
+                  const isActive = activeCount >= level
+                  const isPeak = isActive && activeCount === level
+                  return (
+                    <div
+                      key={level}
+                      className={`min-h-[3px] w-full flex-1 rounded-[1px] transition-colors duration-200 ${
+                        !isActive
+                          ? 'bg-fg/[0.07]'
+                          : isToday && isPeak
+                            ? 'bg-accent'
+                            : isToday
+                              ? 'bg-fg/70'
+                              : 'bg-fg/85'
+                      }`}
+                    />
+                  )
+                })}
               </div>
-            )
-          })}
-        </div>
+              <span
+                className={`num shrink-0 text-center text-[10px] ${
+                  isToday ? 'text-fg' : 'text-muted'
+                }`}
+              >
+                {label}
+              </span>
+            </div>
+          )
+        })}
+      </div>
 
-        {/* Fixed Footer Status Line */}
-        <div className="pt-1.5 sm:pt-2 border-t border-line/40 flex min-h-[26px] sm:h-7 items-center justify-between font-sans text-[10px] sm:text-[11px] text-muted select-none">
-          <span className="flex items-center gap-2">
-            <span
-              className={`h-2 w-2 rounded-full ${
-                hasActivity ? 'bg-accent animate-pulse' : 'bg-muted/40'
-              }`}
-            />
-            <span>
-              {hasActivity
-                ? `${activeTrackHours} h logged this week`
-                : isAllTrack
-                  ? 'No activity this week'
-                  : `No activity on ${activeTrack}`}
-            </span>
+      {/* Fixed footer status line */}
+      <div className="flex min-h-[22px] shrink-0 items-center justify-between border-t border-line/60 pt-2.5 font-mono text-[10px] uppercase tracking-wider text-muted">
+        <span className="flex min-w-0 items-center gap-2">
+          <span
+            aria-hidden="true"
+            className={`dot ${hasActivity ? 'bg-accent animate-pulse' : 'bg-fg/20'}`}
+          />
+          <span className="truncate">
+            {hasActivity
+              ? `${activeTrackHours} h this week`
+              : isAllTrack
+                ? 'No activity this week'
+                : `No activity on ${activeTrack}`}
           </span>
-          <span className="text-muted/60 text-[10px]">
-            {hasActivity ? 'Active' : 'Standby'}
-          </span>
-        </div>
+        </span>
+        <span className="shrink-0 opacity-60">{hasActivity ? 'Active' : 'Standby'}</span>
       </div>
     </BentoCard>
   )

@@ -348,7 +348,7 @@ export default function App() {
   }
 
   return (
-    <div className="h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col justify-start px-3 sm:px-6 pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.5rem,env(safe-area-inset-bottom))] max-w-7xl 2xl:max-w-[1440px] mx-auto relative w-full">
+    <div className="relative mx-auto flex h-[100dvh] max-h-[100dvh] w-full max-w-7xl flex-col overflow-hidden px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-[max(0.5rem,env(safe-area-inset-top))] sm:px-5 2xl:max-w-[1440px]">
       {/* Dynamic Document Title & Favicon Manager (Isolated from App re-renders) */}
       <DocumentChrome phase={chromePhase} status={chromeStatus} mode={mode} />
 
@@ -357,29 +357,28 @@ export default function App() {
         {liveAnnouncement.message}
       </div>
 
-      <header className="flex w-full h-10 shrink-0 items-center justify-between gap-2 sm:gap-4 px-1 mb-1 sm:mb-2 select-none">
-        {/* Left: Logo + 3-Deck Switcher */}
-        <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-fg transition-colors shrink-0">
-              <CatLogo
-                className="text-fg"
-                size={18}
-                state={isRunning ? chromePhase : 'idle'}
-              />
-            </div>
-            <div className="hidden sm:flex items-center font-mono">
-              <h1 className="text-sm font-bold tracking-widest uppercase text-fg">Pomau</h1>
-            </div>
+      <header className="mb-2 flex h-9 w-full shrink-0 select-none items-center justify-between gap-2 sm:mb-3 sm:gap-4">
+        {/* Left: mark + deck switcher */}
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <div
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-surface"
+            aria-hidden="true"
+          >
+            <CatLogo
+              className="text-fg"
+              size={17}
+              state={isRunning ? chromePhase : 'idle'}
+            />
           </div>
+          <span className="hidden select-none font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-fg lg:inline">
+            Pomau
+          </span>
 
-          {/* High-Performance 3-Deck Pill Switcher */}
           <DeckSwitcher activeDeck={activeDeck} onSelectDeck={handleSelectDeck} />
         </div>
 
-        {/* Right: Exclusively Global Utilities and System Controls */}
-        <div className="flex items-center gap-1.5 sm:gap-2 font-mono text-xs shrink-0">
-          {/* 1. Dark / Light Mode Toggle */}
+        {/* Right: global utilities */}
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <button
             type="button"
             onClick={() => {
@@ -389,12 +388,11 @@ export default function App() {
             title={colorMode === 'dark' ? 'Light mode' : 'Dark mode'}
             aria-label={colorMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             aria-pressed={colorMode === 'light'}
-            className="flex items-center justify-center h-8 w-8 rounded-full border border-line bg-surface hover:border-fg/40 text-muted hover:text-fg transition-colors cursor-pointer"
+            className="icon-btn !h-8 !w-8"
           >
             {colorMode === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
           </button>
 
-          {/* 3. Settings Modal Trigger */}
           <button
             type="button"
             onClick={() => {
@@ -403,7 +401,7 @@ export default function App() {
             }}
             title={t.nav.settings}
             aria-label={t.nav.settings}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full border border-line bg-surface hover:border-fg/40 text-muted hover:text-fg uppercase tracking-wider transition-colors cursor-pointer text-[11px]"
+            className="btn-secondary !h-8 !min-h-[32px] !px-2.5 !text-[10px] sm:!px-3"
           >
             <SettingsIcon size={13} />
             <span className="hidden md:inline">{t.nav.settings}</span>
@@ -411,7 +409,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex w-full flex-1 min-h-0 flex-col items-stretch overflow-hidden">
+      <main className="flex min-h-0 w-full flex-1 flex-col items-stretch overflow-hidden">
         {!isZenMode && (
           <BentoCockpit
             ref={cockpitRef}
@@ -455,13 +453,13 @@ export default function App() {
 
       {/* Immersive Borderless Zen Mode Overlay */}
       {isZenMode && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-canvas select-none overflow-hidden animate-fade-in">
-          {/* Floating Minimalist Top Exit Badge (auto-fades on idle during focus) */}
+        <div className="fixed inset-0 z-50 flex select-none items-center justify-center overflow-hidden bg-canvas animate-fade-in">
+          {/* Floating exit badge (auto-fades on idle during focus) */}
           <div
-            className={`fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-all duration-200 ${
+            className={`fixed left-1/2 top-8 z-50 -translate-x-1/2 transition-all duration-200 ${
               !isRunning || isMouseActive
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 -translate-y-2 pointer-events-none'
+                ? 'translate-y-0 opacity-100'
+                : 'pointer-events-none -translate-y-2 opacity-0'
             }`}
           >
             <button
@@ -469,16 +467,16 @@ export default function App() {
               onClick={handleExitZen}
               title={t.zen.exitHint}
               aria-label={t.zen.exitHint}
-              className="group flex items-center gap-2.5 rounded-full border border-line bg-surface px-4 py-1.5 font-mono text-xs font-medium text-muted transition-colors hover:border-fg hover:text-fg active:scale-95"
+              className="btn-secondary !h-9 !min-h-[36px] !px-3.5 !text-[10px]"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-              <span className="uppercase tracking-wider">{t.zen.exitHint}</span>
-              <kbd className="kbd text-[10px]">ESC</kbd>
+              <span aria-hidden="true" className="dot bg-accent animate-pulse" />
+              {t.zen.exitHint}
+              <kbd className="kbd">ESC</kbd>
             </button>
           </div>
 
           {/* Heroic Borderless Timer */}
-          <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-4xl p-4 sm:p-6">
+          <div className="relative z-10 flex w-full max-w-4xl flex-col items-center justify-center p-4 sm:p-6">
             <Timer
               large
               borderless
@@ -506,9 +504,13 @@ export default function App() {
       )}
 
       {updateAvailable && (
-        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-card border border-line bg-surface px-4 py-3 font-mono text-xs">
-          <span className="text-fg uppercase">{t.update.available}</span>
-          <button type="button" className="btn-primary px-3 py-1 text-xs" onClick={reload}>
+        <div className="panel fixed bottom-12 right-3 z-50 flex items-center gap-3 px-4 py-2.5 sm:bottom-4 sm:right-4">
+          <span className="label text-fg">{t.update.available}</span>
+          <button
+            type="button"
+            className="btn-primary !h-8 !min-h-[32px] !px-3 !text-[10px]"
+            onClick={reload}
+          >
             {t.update.reload}
           </button>
         </div>
@@ -518,7 +520,7 @@ export default function App() {
         <div
           key={toast.id}
           role="status"
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 font-mono text-[11px] uppercase tracking-widest text-muted select-none pointer-events-none"
+          className="pointer-events-none fixed bottom-12 left-1/2 z-50 -translate-x-1/2 select-none font-mono text-[10px] uppercase tracking-[0.18em] text-muted sm:bottom-16"
         >
           [{toast.message}]
         </div>

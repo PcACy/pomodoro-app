@@ -1,4 +1,5 @@
 import { forwardRef, memo, useState, useRef, useCallback, useEffect, useImperativeHandle, useMemo } from 'react'
+import type { CSSProperties } from 'react'
 import type { PhaseId, Session, Settings, TimerMode, TimerStatus, TodoItem } from '../../types'
 import { HeroTimerCard } from './HeroTimerCard'
 import { GoalLoadCard } from './GoalLoadCard'
@@ -317,13 +318,13 @@ export const BentoCockpit = memo(
     }, [activeScreen, scrollToScreen])
 
     return (
-      <div className="w-full h-full min-h-0 flex-1 flex flex-col justify-between select-none overflow-hidden">
+      <div className="flex h-full w-full min-h-0 flex-1 flex-col overflow-hidden">
         {/* Horizontal 3-Screen Scroll-Snap Viewport (100dvh Zero-Scroll) */}
         <div
           ref={scrollerRef}
           onScroll={handleScroll}
           onWheel={handleWheel}
-          className="w-full flex-1 min-h-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar overscroll-x-contain touch-pan-x"
+          className="no-scrollbar flex w-full min-h-0 flex-1 snap-x snap-mandatory touch-pan-x overflow-x-auto overscroll-x-contain"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -333,12 +334,11 @@ export const BentoCockpit = memo(
           {/* SCREEN 01: FOCUS DECK (Operative Ebene) */}
           <section
             aria-label="Screen 1: Focus Deck"
-            className="w-full min-w-full shrink-0 snap-start snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
+            className="h-full min-h-0 w-full min-w-full shrink-0 snap-start snap-always"
           >
-            {/* Landscape 2-Column: Dominant Hero Timer (~67%) + Right Companion Column (~33%) */}
-            <div className="hidden lg:grid lg:grid-cols-12 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch">
-              {/* Left: Hero Timer Card */}
-              <div className="lg:col-span-8 h-full min-h-0 flex flex-col">
+            {/* Landscape 2-Column: Hero Timer (~67%) + Right Companion Column (~33%) */}
+            <div className="hidden h-full min-h-0 grid-cols-12 gap-3 lg:grid xl:gap-3.5">
+              <div className="flex h-full min-h-0 flex-col lg:col-span-8">
                 <HeroTimerCard
                   phase={phase}
                   phaseLabel={phaseLabel}
@@ -360,8 +360,7 @@ export const BentoCockpit = memo(
                 />
               </div>
 
-              {/* Right Column: Active Task (Tape Deck) + Quick Settings */}
-              <div className="lg:col-span-4 h-full min-h-0 flex flex-col gap-2.5 sm:gap-3 justify-between">
+              <div className="flex h-full min-h-0 flex-col gap-3 [justify-content:safe_center] lg:col-span-4">
                 <ActiveTaskCard
                   activeTodo={activeTodo}
                   todos={todos}
@@ -375,7 +374,7 @@ export const BentoCockpit = memo(
                   onOpenTodoDeck={() => scrollToScreen(1)}
                   onToggleDone={onTodoToggle}
                   onFocus={onTodoFocus}
-                  className="flex-1 min-h-0"
+                  className="max-h-full shrink-0"
                 />
 
                 <QuickSettingsCard
@@ -388,9 +387,8 @@ export const BentoCockpit = memo(
             </div>
 
             {/* Portrait Layout (Tablets & Mobile Portrait) */}
-            <div className="flex lg:hidden flex-col h-full min-h-0 gap-2.5 sm:gap-3 overflow-y-auto no-scrollbar">
-              {/* Hero Timer */}
-              <div className="w-full shrink-0 min-h-[360px] sm:min-h-0 sm:flex-1">
+            <div className="no-scrollbar flex h-full min-h-0 flex-col gap-3 overflow-y-auto lg:hidden">
+              <div className="w-full shrink-0 sm:min-h-0 sm:flex-1">
                 <HeroTimerCard
                   phase={phase}
                   phaseLabel={phaseLabel}
@@ -408,12 +406,11 @@ export const BentoCockpit = memo(
                   onSkip={onSkip}
                   onReset={onReset}
                   onAddTime={onAddTime}
-                  className="h-full min-h-[360px] sm:min-h-0"
+                  className="h-full min-h-[330px] sm:min-h-[300px] lg:min-h-0"
                 />
               </div>
 
-              {/* Bottom Row Companion */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 shrink-0 pb-2">
+              <div className="grid shrink-0 grid-cols-1 gap-3 pb-3 lg:grid-cols-2">
                 <ActiveTaskCard
                   activeTodo={activeTodo}
                   todos={todos}
@@ -441,10 +438,17 @@ export const BentoCockpit = memo(
           {/* SCREEN 02: TASKS DECK (Workspace & Log - 2-Column Split) */}
           <section
             aria-label="Screen 2: Tasks Deck"
-            className="w-full min-w-full shrink-0 snap-start snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
+            className="flex h-full min-h-0 w-full min-w-full shrink-0 snap-start snap-always flex-col justify-center"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch overflow-y-auto md:overflow-hidden no-scrollbar">
-              {/* Left: Task Inbox with Quick Add & Interactive Task List */}
+            {/* Two columns only when there is room for them; below `lg` the
+                cards stay content-sized and stacked, which avoids stretched
+                panels with empty chart space on tablets. */}
+            {/* Deck 02 is a single row on `lg`, so it gets a tighter ceiling
+                than the two-row telemetry grid below. */}
+            <div
+              className="deck-grid no-scrollbar grid h-full min-h-0 grid-cols-1 gap-3 overflow-y-auto pb-3 lg:grid-cols-2 lg:pb-0 xl:gap-3.5"
+              style={{ '--deck-max': '38rem' } as CSSProperties}
+            >
               <TaskInboxCard
                 todos={todos}
                 tags={settings.tags}
@@ -458,10 +462,9 @@ export const BentoCockpit = memo(
                 onAdd={onTodoAdd}
                 onRemove={onTodoRemove}
                 onOpenTodoManager={onOpenTodoManager}
-                className="h-full min-h-[260px] md:min-h-0"
+                className="h-full min-h-[300px] lg:max-h-full lg:min-h-0"
               />
 
-              {/* Right: Today's Focus Session Log with Deep Link to Deck 03 Activity Log */}
               <SessionLogCard
                 sessions={sessions}
                 onOpenActivityLog={() => {
@@ -470,7 +473,7 @@ export const BentoCockpit = memo(
                 onJumpToFocus={() => {
                   scrollToScreen(0)
                 }}
-                className="h-full min-h-[260px] md:min-h-0"
+                className="h-full min-h-[300px] lg:max-h-full lg:min-h-0"
               />
             </div>
           </section>
@@ -478,108 +481,107 @@ export const BentoCockpit = memo(
           {/* SCREEN 03: STATS DECK (Unified Insights Hub) */}
           <section
             aria-label="Screen 3: Stats Deck"
-            className="w-full min-w-full shrink-0 snap-start snap-always h-full min-h-0 flex flex-col justify-between px-0.5"
+            className="flex h-full min-h-0 w-full min-w-full shrink-0 snap-start snap-always flex-col"
           >
-            {/* Deck 03 Sub-Navigation Pill Toggle */}
-            <div className="h-7 shrink-0 flex items-center justify-between px-1 mb-1 sm:mb-1.5 select-none">
-              <div className="flex items-center gap-1 font-mono text-[10px] sm:text-[11px] tracking-wider uppercase">
+            {/* Deck 03 Sub-Navigation */}
+            <div className="mb-3 flex h-8 shrink-0 items-center justify-between gap-3">
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => {
                     playMicroClick('toggle')
                     setStatsSubView('overview')
                   }}
-                  className={`px-2.5 py-0.5 rounded-full font-semibold transition-[background-color,color] duration-150 ease-out cursor-pointer flex items-center gap-1.5 ${
-                    statsSubView === 'overview'
-                      ? 'bg-fg text-canvas shadow-sm'
-                      : 'text-muted hover:text-fg hover:bg-fg/5'
-                  }`}
+                  className="chip"
                   aria-pressed={statsSubView === 'overview'}
                   title="Telemetry Overview"
                 >
-                  <span className="text-[9px] opacity-70">01</span>
-                  <span>Overview</span>
+                  <span className="opacity-50">01</span>
+                  Overview
                 </button>
-                <span className="text-muted/30 select-none">·</span>
                 <button
                   type="button"
                   onClick={() => {
                     playMicroClick('toggle')
                     setStatsSubView('log')
                   }}
-                  className={`px-2.5 py-0.5 rounded-full font-semibold transition-[background-color,color] duration-150 ease-out cursor-pointer flex items-center gap-1.5 ${
-                    statsSubView === 'log'
-                      ? 'bg-fg text-canvas shadow-sm'
-                      : 'text-muted hover:text-fg hover:bg-fg/5'
-                  }`}
+                  className="chip"
                   aria-pressed={statsSubView === 'log'}
                   title="Activity Log & Heatmap"
                 >
-                  <span className="text-[9px] opacity-70">02</span>
-                  <span>Activity Log</span>
+                  <span className="opacity-50">02</span>
+                  Activity Log
                 </button>
               </div>
 
-              <div className="flex items-center gap-2 font-mono text-[10px] text-muted tracking-wider uppercase">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                <span>{statsSubView === 'overview' ? 'Telemetry Bento' : `${sessions.length} Sessions Logged`}</span>
-              </div>
+              <span className="label hidden shrink-0 items-center gap-2 sm:flex">
+                <span
+                  aria-hidden="true"
+                  className="dot bg-accent"
+                />
+                {statsSubView === 'overview'
+                  ? 'Telemetry Bento'
+                  : `${sessions.length} Sessions Logged`}
+              </span>
             </div>
 
-            {/* Sub-Deck View Container with Smooth Fade Transition */}
-            <div className="flex-1 min-h-0 w-full relative overflow-hidden">
+            {/* Sub-Deck View Container. Centred so that a grid capped by
+                `--deck-max` reads as a deliberate, optically balanced block
+                rather than a top-pinned cluster with a dead band beneath it.
+                Both variants below are `h-full` + internally scrollable, so
+                the container itself never overflows and centring is safe. */}
+            <div className="relative flex min-h-0 w-full flex-1 flex-col justify-center">
               {statsSubView === 'overview' ? (
                 <div
                   key="stats-overview"
-                  className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 gap-2.5 sm:gap-3 lg:gap-3.5 h-full min-h-0 items-stretch overflow-y-auto md:overflow-hidden no-scrollbar pb-3 md:pb-0 animate-fade-in"
+                  className="deck-grid no-scrollbar grid h-full min-h-0 animate-fade-in grid-cols-1 gap-3 overflow-y-auto pb-3 lg:grid-cols-2 lg:pb-0 xl:gap-3.5"
                 >
-                  {/* 1. Weekly Goal Load */}
                   <GoalLoadCard
                     sessions={sessions}
                     settings={settings}
                     onOpenSettings={onOpenSettingsModal}
-                    className="min-h-[195px] md:h-full md:min-h-0"
+                    className="h-full min-h-[250px] lg:min-h-0"
                   />
 
-                  {/* 2. Daily Focus Time */}
                   <FocusTimeCard
                     sessions={sessions}
                     settings={settings}
                     onOpenSettings={onOpenSettingsModal}
-                    className="min-h-[185px] md:h-full md:min-h-0"
+                    className="h-full min-h-[250px] lg:min-h-0"
                   />
 
-                  {/* 3. Projects Distribution Overview */}
                   <ProjectsDistributionCard
                     sessions={sessions}
                     tags={settings.tags}
-                    className="min-h-[235px] md:h-full md:min-h-0"
+                    className="h-full min-h-[270px] lg:min-h-0"
                   />
 
-                  {/* 4. Daily Streak & System Status */}
                   <SystemStatusCard
                     sessions={sessions}
                     onOpenActivityLog={() => {
                       setStatsSubView('log')
                     }}
-                    className="min-h-[205px] md:h-full md:min-h-0"
+                    className="h-full min-h-[240px] lg:min-h-0"
                   />
                 </div>
               ) : (
                 <div
                   key="stats-log"
-                  className="flex flex-col gap-2.5 sm:gap-3 h-full min-h-0 overflow-y-auto md:overflow-hidden no-scrollbar pb-3 md:pb-0 animate-fade-in"
+                  className="no-scrollbar flex h-full min-h-0 animate-fade-in flex-col gap-3 overflow-y-auto pb-3 lg:pb-0"
                 >
                   {/* View B Top: 52-Week Activity Heatmap */}
                   <BentoCard
-                    label="Annual Activity Heatmap"
-                    indicator={<span className="h-1.5 w-1.5 rounded-full bg-accent" />}
-                    action={
-                      <span className="font-mono text-[10px] text-muted tracking-wider uppercase">
-                        52 WEEKS · INTENSITY
-                      </span>
+                    label="Activity Heatmap"
+                    indicator={
+                      <span
+                        aria-hidden="true"
+                        className="dot bg-accent"
+                      />
                     }
-                    className="shrink-0 p-3.5 sm:p-4 rounded-[24px]"
+                    action={
+                      <span className="label-sm">52 weeks</span>
+                    }
+                    className="shrink-0"
                     contentClassName="min-h-0"
                   >
                     <Heatmap weeks={heat} />
@@ -587,14 +589,15 @@ export const BentoCockpit = memo(
 
                   {/* View B Bottom: Session Telemetry & Logs */}
                   <BentoCard
-                    label="Session Telemetry & History"
-                    indicator={<span className="h-1.5 w-1.5 rounded-full bg-fg" />}
-                    action={
-                      <span className="font-mono text-[10px] text-muted tracking-wider uppercase">
-                        TELEMETRY FEED
-                      </span>
+                    label="Session Telemetry"
+                    indicator={
+                      <span
+                        aria-hidden="true"
+                        className="dot bg-fg/25"
+                      />
                     }
-                    className="flex-1 min-h-[300px] md:min-h-0 p-3.5 sm:p-4 rounded-[24px]"
+                    action={<span className="label-sm">Feed</span>}
+                    className="min-h-[320px] flex-1 md:min-h-0"
                     contentClassName="h-full min-h-0 overflow-hidden"
                   >
                     <SessionLog
@@ -605,7 +608,7 @@ export const BentoCockpit = memo(
                       }}
                       onImportSettings={onImportSettings}
                       onImportTodos={onImportTodos}
-                      className="flex-1 min-h-0"
+                      className="min-h-0 flex-1"
                     />
                   </BentoCard>
                 </div>
