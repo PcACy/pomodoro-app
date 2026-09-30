@@ -158,6 +158,20 @@ describe('useSync tag synchronization helpers', () => {
       expect(isTableMissingError({ code: '23505', message: 'duplicate key value violates unique constraint' })).toBe(false)
       expect(isTableMissingError({ status: 500, message: 'Internal Server Error' })).toBe(false)
     })
+
+    // pushQueue() only commits (drops) a queued op when this predicate is true.
+    // Transient and permission failures must stay false, otherwise the op is
+    // silently discarded while the UI reports "Synced" — the change is then lost
+    // and never retried.
+    it('classifies transient and permission failures as retryable, not table-missing', () => {
+      expect(isTableMissingError({ status: 503, message: 'Service Unavailable' })).toBe(false)
+      expect(isTableMissingError({ message: 'Failed to fetch' })).toBe(false)
+      expect(isTableMissingError({ message: 'NetworkError when attempting to fetch resource' })).toBe(false)
+      expect(isTableMissingError({ code: '42501', message: 'new row violates row-level security policy' })).toBe(false)
+      expect(isTableMissingError({ status: 401, message: 'JWT expired' })).toBe(false)
+      // A malformed payload is a real push failure, not a missing table.
+      expect(isTableMissingError({ code: '22P02', message: 'invalid input syntax for type uuid' })).toBe(false)
+    })
   })
 
   describe('mergeRemoteTodosList & preferNewerTodo', () => {

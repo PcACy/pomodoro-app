@@ -30,7 +30,6 @@ interface BentoCockpitProps {
   phaseLabel: string
   status: TimerStatus
   time?: string
-  progress?: number
   remainingMs: number
   totalMs: number
   mode: TimerMode
@@ -79,7 +78,6 @@ export const BentoCockpit = memo(
       phaseLabel,
       status,
       time,
-      progress,
       remainingMs,
       totalMs,
       mode,
@@ -539,7 +537,6 @@ export const BentoCockpit = memo(
                   phaseLabel={phaseLabel}
                   status={status}
                   time={time}
-                  progress={progress}
                   mode={mode}
                   flowStatus={flowStatus}
                   flowTime={flowTime}
@@ -589,7 +586,6 @@ export const BentoCockpit = memo(
                   phaseLabel={phaseLabel}
                   status={status}
                   time={time}
-                  progress={progress}
                   mode={mode}
                   flowStatus={flowStatus}
                   flowTime={flowTime}

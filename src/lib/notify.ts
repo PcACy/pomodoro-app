@@ -1,4 +1,4 @@
-import { writeFlag } from './flagsStore'
+import { NOTIFY_KEY, readFlag, writeFlag } from './flagsStore'
 
 interface NotificationActionConfig {
   action: string
@@ -9,16 +9,9 @@ function notificationsSupported(): boolean {
   return typeof window !== 'undefined' && 'Notification' in window
 }
 
-const NOTIFY_KEY = 'pomodoro.notifications'
-
 /** Stored opt-out flag. Defaults to ON (notifications sent unless disabled). */
 function readNotifyFlag(): boolean {
-  try {
-    if (typeof localStorage === 'undefined') return true
-    return localStorage.getItem(NOTIFY_KEY) !== 'false'
-  } catch {
-    return true
-  }
+  return readFlag(NOTIFY_KEY, false)
 }
 
 export function writeNotifyFlag(value: boolean): void {

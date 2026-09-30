@@ -9,7 +9,6 @@ const MIN_FLOW_SESSION_MS = 60_000
 
 interface FlowTimerApi {
   status: TimerStatus
-  elapsedMs: number
   time: string
   toggle: () => void
   finishSession: () => void
@@ -215,7 +214,6 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
 
   return {
     status: flowState.status,
-    elapsedMs: flowState.elapsedMs,
     time: fmtFlowTime(flowState.elapsedMs),
     toggle,
     finishSession,

@@ -28,7 +28,9 @@ export const FocusTimeCard = memo(function FocusTimeCard({
   }, [])
 
   const currentMinutes = todayMinutes(sessions)
-  const targetMinutes = Math.max(15, settings.dailyGoalMinutes || 120)
+  // `??` not `||`: mergeWithDefaults accepts 0 as a valid goal, so `||` mapped it
+  // to the default and made the Math.max(15, …) floor dead.
+  const targetMinutes = Math.max(15, settings.dailyGoalMinutes ?? 120)
   const hours = (currentMinutes / 60).toFixed(1)
   const targetHours = (targetMinutes / 60).toFixed(1)
   const ratio = Math.max(0, currentMinutes / targetMinutes)

@@ -13,7 +13,6 @@ interface HeroTimerCardProps {
   phaseLabel: string
   status: TimerStatus
   time?: string
-  progress?: number
   mode: TimerMode
   flowStatus: TimerStatus
   flowTime?: string
@@ -42,7 +41,6 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   phaseLabel,
   status,
   time,
-  progress,
   mode,
   flowStatus,
   flowTime,
@@ -76,12 +74,14 @@ export const HeroTimerCard = memo(function HeroTimerCard({
   }, [])
 
   const isFlow = mode === 'flow'
-  // Always use reactive timer tick so countdown runs smoothly without being frozen by stale props
-  const activeTime = isFlow ? (flowTime ?? flowTick.time) : (timerTick.time || time || '25:00')
-  const activeProgress = isFlow ? 0 : (timerTick.progress ?? progress ?? 1)
-  const activeFlowTime = flowTime ?? flowTick.time
-
   const running = isFlow ? flowStatus === 'running' : status === 'running'
+  // Always use the reactive tick while running so the display is not frozen by
+  // the stale props: `flow.time` derives from the coarse flow state, which is
+  // only published on start/pause/finish/reset and never on ticks, so preferring
+  // it pinned the flow clock at its start value for the whole session.
+  const activeTime = running ? timerTick.time : time || '25:00'
+  const activeFlowTime = running ? flowTick.time : flowTime || '00:00'
+  const activeProgress = isFlow ? 0 : timerTick.progress
   const shownLabel = isFlow ? t.timer.flow : phaseLabel
   const shownTime = isFlow ? activeFlowTime : activeTime
   const safeRounds =

@@ -67,17 +67,14 @@ const applyTheme = (themeId: ThemeId): void => {
   meta.setAttribute('content', config.canvas)
 }
 
+// Positional tuple only: the single consumer destructures it positionally, so
+// the named-property half this type used to carry was written but never read.
 export type ThemeHookTuple = [
   ColorMode,
   (mode: ColorMode) => void,
   ThemeId,
   (theme: ThemeId) => void,
-] & {
-  colorMode: ColorMode
-  setColorMode: (mode: ColorMode) => void
-  themeId: ThemeId
-  setThemeId: (theme: ThemeId) => void
-}
+]
 
 export function useTheme(): ThemeHookTuple {
   const [themeId, setThemeIdState] = useState<ThemeId>(() => {
@@ -126,14 +123,10 @@ export function useTheme(): ThemeHookTuple {
     [themeId, setThemeId],
   )
 
-  const result = useMemo(() => {
-    const tuple = [colorMode, setColorMode, themeId, setThemeId] as ThemeHookTuple
-    tuple.colorMode = colorMode
-    tuple.setColorMode = setColorMode
-    tuple.themeId = themeId
-    tuple.setThemeId = setThemeId
-    return tuple
-  }, [colorMode, setColorMode, themeId, setThemeId])
+  const result = useMemo(
+    () => [colorMode, setColorMode, themeId, setThemeId] as ThemeHookTuple,
+    [colorMode, setColorMode, themeId, setThemeId],
+  )
 
   return result
 }

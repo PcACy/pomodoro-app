@@ -1,6 +1,9 @@
 import type { FC, SVGProps } from 'react'
 
-type CatMascotState = 'idle' | 'focus' | 'break' | 'shortBreak' | 'longBreak' | 'complete' | 'running'
+// 'complete' was never produced nor checked: the only caller passes
+// `isRunning ? chromePhase : 'idle'`. 'flow'/'running' are kept because
+// isFocus still tests for them.
+type CatMascotState = 'idle' | 'focus' | 'break' | 'shortBreak' | 'longBreak' | 'flow' | 'running'
 
 interface CatLogoProps extends SVGProps<SVGSVGElement> {
   className?: string

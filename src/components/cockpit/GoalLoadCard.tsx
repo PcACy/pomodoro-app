@@ -22,7 +22,10 @@ export const GoalLoadCard = memo(function GoalLoadCard({
   const { t } = useTranslation()
   const dayLabels = useMemo(() => t.weekdays.map((w) => w.charAt(0)), [t.weekdays])
   const currentWeekMinutes = weekMinutes(sessions)
-  const targetWeekMinutes = Math.max(60, settings.weeklyGoalMinutes || 300)
+  // `??` not `||`: mergeWithDefaults accepts 0 as a valid goal, so `||` mapped it
+  // to the default and made the Math.max(60, …) floor dead — a 0 goal rendered a
+  // 300-minute target instead of the 60-minute minimum.
+  const targetWeekMinutes = Math.max(60, settings.weeklyGoalMinutes ?? 300)
   const ratio = Math.max(0, currentWeekMinutes / targetWeekMinutes)
   const percentage = Math.min(999, Math.round(ratio * 100))
 

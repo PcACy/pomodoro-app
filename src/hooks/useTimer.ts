@@ -94,11 +94,16 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     if (m.phase === 'focus') {
       if (!skipped) {
         nextCycle = cycle + 1
-        const durationMs = Math.max(phases.focus * MS_PER_MINUTE, m.totalMs)
+        // Log the length the phase was actually scheduled for. `m.totalMs` is
+        // seeded from the settings at phase start and grown by addTime(); the
+        // "apply when idle" effect below ignores duration changes while running,
+        // so reading the live `phases.focus` here inflated every session whose
+        // focus length was edited mid-run (today/week totals, streaks, exports).
+        const durationMs = m.totalMs
         // When completing naturally, anchor the end to the scheduled target end
         // timestamp so device sleep or background throttling does not shift the
         // logged session into the future.
-        const effectiveEnd = skipped ? now : (endRef.current ?? now)
+        const effectiveEnd = endRef.current ?? now
         const sessionStart = Math.max(0, effectiveEnd - durationMs)
         onFocusCompleteRef.current({
           start: sessionStart,
@@ -505,20 +510,26 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
   }, [handleTick])
 
   // When phase durations change and the timer is idle, apply the new duration.
+  // The duration is resolved *outside* the updater: a setState updater must stay
+  // pure, and React may run it during the render phase, twice under StrictMode,
+  // or discard its result entirely on an interrupted render. Mutating the refs
+  // and publishing to timerStore from inside it let the digits disagree with
+  // machine.totalMs whenever the result was thrown away.
   useEffect(() => {
-    setMachine((prev) => {
-      if (prev.status !== 'idle') return prev
-      const d = phaseDuration(settings, prev.phase)
-      if (d === prev.totalMs) return prev
-      totalMsRef.current = d
-      remainingMsRef.current = d
-      setTimerTickSnapshot({
-        remainingMs: d,
-        time: fmtTime(d),
-        progress: 1,
-      })
-      return { ...prev, totalMs: d, remainingMs: d }
+    if (machineRef.current.status !== 'idle') return
+    const d = phaseDuration(settings, machineRef.current.phase)
+    const m = machineRef.current
+    if (d === m.totalMs) return
+    totalMsRef.current = d
+    remainingMsRef.current = d
+    setTimerTickSnapshot({
+      remainingMs: d,
+      time: fmtTime(d),
+      progress: 1,
     })
+    const nextMachine = { ...m, totalMs: d, remainingMs: d }
+    machineRef.current = nextMachine
+    setMachine(nextMachine)
   }, [settings])
 
   const roundsBeforeLongBreak = settings.phases.roundsBeforeLongBreak
@@ -536,7 +547,6 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
     totalMs: curTot,
     completedFocusInCycle: machine.completedFocusInCycle,
     roundsBeforeLongBreak,
-    progress: curTot > 0 ? Math.max(0, Math.min(1, curRem / curTot)) : 0,
     phaseLabel: t.phases[machine.phase],
     time: fmtTime(curRem),
     start,
