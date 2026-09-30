@@ -535,7 +535,6 @@ export function useSync({
         const tOps = ops.filter((o) => o.table === table)
         if (tOps.length === 0) continue
         const replace = tOps.some((o) => o.kind === 'replace')
-        const isOptionalTable = table === 'tags' || table === 'settings'
         const upserts: unknown[] = []
         const deletes: string[] = []
 
@@ -595,8 +594,8 @@ export function useSync({
         if (replace) {
           const resDel = await supabase.from(dbTable).delete().eq('user_id', userId)
           if (resDel.error) {
-            if (isTableMissingError(resDel.error) || isOptionalTable) {
-              console.warn(`[sync] Table ${dbTable} not found or error. Skipping ${table} replace:`, resDel.error)
+            if (isTableMissingError(resDel.error)) {
+              console.warn(`[sync] Table ${dbTable} not found. Skipping ${table} replace:`, resDel.error)
               pushedTables.add(table)
               commitQueue(tOps)
               continue
@@ -634,7 +633,7 @@ export function useSync({
               const deduplicatedRows = deduplicateByConflict(rows, 'id')
               const resUpsert = await supabase.from(dbTable).upsert(deduplicatedRows, { onConflict: 'id' })
               if (resUpsert.error) {
-                if (isTableMissingError(resUpsert.error) || isOptionalTable) {
+                if (isTableMissingError(resUpsert.error)) {
                   console.warn(`[sync] Table ${dbTable} replace skipped:`, resUpsert.error)
                 } else {
                   throw resUpsert.error
@@ -653,7 +652,7 @@ export function useSync({
             const deduplicatedUpserts = deduplicateByConflict(typedUpserts, onConflict)
             const resUpsert = await supabase.from(dbTable).upsert(deduplicatedUpserts, { onConflict })
             if (resUpsert.error) {
-              if (isTableMissingError(resUpsert.error) || isOptionalTable) {
+              if (isTableMissingError(resUpsert.error)) {
                 console.warn(`[sync] Table ${dbTable} push skipped:`, resUpsert.error)
                 pushedTables.add(table)
                 commitQueue(tOps)
@@ -673,7 +672,7 @@ export function useSync({
             if (uniqueDeletes.length > 0) {
               const resDel = await supabase.from(dbTable).delete().in('id', uniqueDeletes).eq('user_id', userId)
               if (resDel.error) {
-                if (isTableMissingError(resDel.error) || isOptionalTable) {
+                if (isTableMissingError(resDel.error)) {
                   console.warn(`[sync] Table ${dbTable} delete skipped:`, resDel.error)
                   pushedTables.add(table)
                   commitQueue(tOps)
@@ -868,17 +867,22 @@ export function useSync({
         syncAgainRef.current = true
         return
       }
-      const supabase = await getSupabase()
-      if (!supabase || !userRef.current) {
-        setStatus(isSupabaseConfigured ? 'signed-out' : 'unsupported')
-        return
-      }
-      if (retryTimeoutRef.current != null) {
-        window.clearTimeout(retryTimeoutRef.current)
-        retryTimeoutRef.current = null
-      }
+      // Claim the guard synchronously, before the first await. Assigning it after
+      // getSupabase() left a window in which two callers issued in the same tick
+      // ('online' + 'visibilitychange', or the interval coinciding with 'focus')
+      // both passed the check and ran pushQueue/pullAndMerge concurrently, so the
+      // syncAgainRef coalescing they relied on never engaged.
       busyRef.current = true
       try {
+        const supabase = await getSupabase()
+        if (!supabase || !userRef.current) {
+          setStatus(isSupabaseConfigured ? 'signed-out' : 'unsupported')
+          return
+        }
+        if (retryTimeoutRef.current != null) {
+          window.clearTimeout(retryTimeoutRef.current)
+          retryTimeoutRef.current = null
+        }
         if (showSyncing) setStatus('syncing')
 
         // Pre-refresh auth token if expired or expiring within 60 seconds
@@ -921,8 +925,13 @@ export function useSync({
         busyRef.current = false
         if (syncAgainRef.current) {
           syncAgainRef.current = false
-          // Tracked in retryTimeoutRef so unmount clears it (no post-unmount
-          // setStatus / sync under a stale user).
+          // Drop any pending backoff first: overwriting the handle without
+          // clearing it orphaned the timer, so unmount could no longer cancel it
+          // and it fired sync() after teardown. Tracked in retryTimeoutRef so
+          // unmount clears it (no post-unmount setStatus / sync under a stale user).
+          if (retryTimeoutRef.current != null) {
+            window.clearTimeout(retryTimeoutRef.current)
+          }
           retryTimeoutRef.current = window.setTimeout(() => {
             void sync(false)
           }, 50)

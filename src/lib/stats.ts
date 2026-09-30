@@ -11,7 +11,7 @@ interface HourStat {
   count: number
 }
 
-export type TimeRange = 'week' | 'month' | 'all'
+type TimeRange = 'week' | 'month' | 'all'
 
 interface BarTagBreakdown {
   tag: string
@@ -32,19 +32,6 @@ export interface RangeBarStat {
 const minutesOf = (s: Session): number => {
   const d = s.durationMs
   return typeof d === 'number' && Number.isFinite(d) && d > 0 ? Math.round(d / 60_000) : 0
-}
-
-export function filterSessionsByRange(sessions: Session[], range: TimeRange): Session[] {
-  const now = new Date()
-  if (range === 'week') {
-    const start = startOfWeek(now)
-    return sessions.filter((s) => s.start >= start.getTime())
-  }
-  if (range === 'month') {
-    const start = addDays(startOfDay(now), -29)
-    return sessions.filter((s) => s.start >= start.getTime())
-  }
-  return sessions
 }
 
 export function todayMinutes(sessions: Session[]): number {
@@ -73,15 +60,6 @@ export function averageDailyFocusMinutes(sessions: Session[]): { avgMinutes: num
   return {
     avgMinutes: Math.round(totalMinutes / activeDays),
     activeDays,
-  }
-}
-
-export function totalFocusStats(sessions: Session[]): { totalMinutes: number; totalHours: number; sessionCount: number } {
-  const totalMinutes = sessions.reduce((sum, s) => sum + minutesOf(s), 0)
-  return {
-    totalMinutes,
-    totalHours: Number((totalMinutes / 60).toFixed(1)),
-    sessionCount: sessions.length,
   }
 }
 

@@ -13,7 +13,7 @@ vi.stubGlobal('localStorage', {
   },
 })
 
-import { commitQueue, drainQueue, enqueue, hasPendingOps, markFailed, peekQueue, requeue } from './syncQueue'
+import { commitQueue, drainQueue, enqueue, hasPendingOps, markFailed, peekQueue } from './syncQueue'
 import type { SyncOp } from './syncQueue'
 
 const upsert = (table: 'sessions' | 'todos' | 'tags' | 'settings', id: string): SyncOp => ({ kind: 'upsert', table, id })
@@ -48,47 +48,6 @@ describe('syncQueue', () => {
     enqueue({ kind: 'replace', table: 'todos' })
     const ops = drainQueue()
     expect(ops).toEqual([upsert('sessions', 's1'), { kind: 'replace', table: 'todos' }])
-  })
-
-  it('requeue keeps newer ops recorded while a sync was in flight (no resurrection)', () => {
-    // Sync drains the queue…
-    const inFlight: SyncOp[] = drainQueue()
-    enqueue(upsert('todos', 'x'))
-    expect(inFlight).toEqual([])
-    enqueue(upsert('todos', 'x'))
-    const batch = drainQueue()
-    expect(batch).toEqual([upsert('todos', 'x')])
-    // …then the user deletes the todo while the network request hangs.
-    enqueue(del('todos', 'x'))
-    // The push fails and the stale batch is re-queued.
-    requeue(batch)
-    // The stale upsert must NOT clobber the newer delete.
-    expect(drainQueue()).toEqual([del('todos', 'x')])
-  })
-
-  it('requeue restores failed ops in original order before unrelated newer ops', () => {
-    const batch = [upsert('todos', 'a'), upsert('todos', 'b')]
-    drainQueue()
-    enqueue(upsert('sessions', 's1'))
-    requeue(batch)
-    // Requeued ops carry an attempt counter for poison-op protection.
-    expect(drainQueue()).toEqual([
-      { ...upsert('todos', 'a'), attempts: 1 },
-      { ...upsert('todos', 'b'), attempts: 1 },
-      upsert('sessions', 's1'),
-    ])
-  })
-
-  it('requeue drops ops that fail persistently instead of retrying forever', () => {
-    enqueue(upsert('todos', 'a'))
-    for (let i = 0; i < 6; i++) {
-      const batch = drainQueue()
-      if (batch.length === 0) break
-      requeue(batch)
-    }
-    // After 5 failed attempts the op is dropped from the queue.
-    expect(drainQueue()).toEqual([])
-    expect(hasPendingOps()).toBe(false)
   })
 
   it('drainQueue empties the queue and hasPendingOps reflects it', () => {

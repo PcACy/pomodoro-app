@@ -81,12 +81,9 @@ export function subscribeBroadcast(callback: (msg: BroadcastMessage) => void): (
   const handler = (e: MessageEvent<BroadcastMessage>) => {
     if (!isTimerState(e.data)) return
     const data = e.data
-    const sender =
-      'payload' in data && data.payload && typeof data.payload === 'object'
-        ? (data.payload as { senderId?: string }).senderId
-        : 'senderId' in data
-          ? (data as { senderId?: string }).senderId
-          : null
+    // isTimerState() already guarantees a non-null object payload, so the
+    // former top-level `senderId` and null branches were unreachable.
+    const sender = (data.payload as { senderId?: string }).senderId
 
     if (sender === TAB_INSTANCE_ID) {
       return // Ignore own messages

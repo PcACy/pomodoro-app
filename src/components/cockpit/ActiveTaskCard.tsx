@@ -151,7 +151,9 @@ export const ActiveTaskCard = memo(function ActiveTaskCard({
   const isFlowMode = mode === 'flow'
   const tagColor = activeTodo?.tag ? getTagColor(activeTodo.tag) : undefined
 
-  const liveRemaining = isRunning ? timerTick.remainingMs : (remainingMs ?? timerTick.remainingMs)
+  // `remainingMs` is a required prop, so the previous `?? timerTick.remainingMs`
+  // fallback was unreachable.
+  const liveRemaining = isRunning ? timerTick.remainingMs : remainingMs
 
   // Tape position: elapsed / total. Flow has no fixed length — packs rest
   // centered while the counter runs up.

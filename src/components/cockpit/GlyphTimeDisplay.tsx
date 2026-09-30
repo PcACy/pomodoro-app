@@ -126,7 +126,7 @@ export const GlyphTimeDisplay = memo(function GlyphTimeDisplay({
   // Fixed slot per character: digit matrices fill the slot, the narrow colon
   // matrix is centered inside it — total width and every glyph position stay
   // absolutely static no matter which digits are shown.
-  const charPositions: { char: string; x: number; dx: number; matrix: number[][] }[] = []
+  const charPositions: { x: number; dx: number; matrix: number[][] }[] = []
 
   for (let i = 0; i < chars.length; i++) {
     const char = chars[i]
@@ -134,7 +134,7 @@ export const GlyphTimeDisplay = memo(function GlyphTimeDisplay({
     const glyphWidth = matrix[0].length * STEP - DOT_GAP
     const x = i * (SLOT_WIDTH + DIGIT_GAP)
     const dx = (SLOT_WIDTH - glyphWidth) / 2
-    charPositions.push({ char, x, dx, matrix })
+    charPositions.push({ x, dx, matrix })
   }
 
   const totalWidth = Math.max(0, chars.length * SLOT_WIDTH + Math.max(0, chars.length - 1) * DIGIT_GAP)

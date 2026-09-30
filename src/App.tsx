@@ -439,7 +439,6 @@ export default function App() {
             phaseLabel={timer.phaseLabel}
             status={timer.status}
             time={timer.time}
-            progress={timer.progress}
             remainingMs={timer.remainingMs}
             totalMs={timer.totalMs}
             mode={mode}
@@ -506,7 +505,6 @@ export default function App() {
               phaseLabel={timer.phaseLabel}
               status={timer.status}
               time={timer.time}
-              progress={timer.progress}
               completedFocusInCycle={timer.completedFocusInCycle}
               roundsBeforeLongBreak={timer.roundsBeforeLongBreak}
               mode={mode}

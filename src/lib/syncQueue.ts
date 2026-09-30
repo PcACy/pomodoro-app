@@ -89,33 +89,6 @@ export function enqueue(op: SyncOp): void {
 const opKey = (op: SyncOp): string =>
   op.kind === 'replace' ? `${op.table}:*` : `${op.table}:${op.id}`
 
-/**
- * Re-enqueue ops that failed to push, without clobbering newer ops that were
- * enqueued while the failed sync was in flight. Existing queue entries win:
- * e.g. a `delete` recorded mid-sync must not be resurrected by re-adding the
- * stale `upsert` from the drained batch. Each requeue counts an attempt; ops
- * past MAX_ATTEMPTS are dropped with a warning instead of retried forever.
- */
-export function requeue(ops: SyncOp[]): void {
-  if (ops.length === 0) return
-  const current = read()
-  const keys = new Set(current.map(opKey))
-  const merged = [...current]
-  for (let i = ops.length - 1; i >= 0; i--) {
-    const key = opKey(ops[i])
-    if (!keys.has(key)) {
-      const attempts = (ops[i].attempts ?? 0) + 1
-      if (attempts > MAX_ATTEMPTS) {
-        console.warn('[sync] dropping persistently failing op:', ops[i])
-        continue
-      }
-      merged.unshift({ ...ops[i], attempts })
-      keys.add(key)
-    }
-  }
-  write(merged)
-}
-
 /** Inspect current pending queue items without removing them from storage. */
 export function peekQueue(): SyncOp[] {
   return read()

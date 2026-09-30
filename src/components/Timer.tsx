@@ -11,7 +11,6 @@ interface Props {
   phaseLabel: string
   status: TimerStatus
   time?: string
-  progress?: number
   large?: boolean
   completedFocusInCycle: number
   roundsBeforeLongBreak: number
@@ -40,7 +39,6 @@ export const Timer = memo(function Timer({
   phaseLabel,
   status,
   time,
-  progress,
   large = false,
   completedFocusInCycle,
   roundsBeforeLongBreak,
@@ -71,7 +69,7 @@ export const Timer = memo(function Timer({
     ? timerTick.time
     : time || '25:00'
 
-  const currentProgress = isFlow ? 0 : (timerTick.progress ?? progress ?? 1)
+  const currentProgress = isFlow ? 0 : timerTick.progress
   // Mechanical Segmented Progress (20 discrete blocks, 2px gap)
   // Fills additively from left to right (0% -> 100%)
   const elapsedRatio = 1 - Math.min(1, Math.max(0, currentProgress))
