@@ -7,6 +7,7 @@ import {
   subscribeFlowTick,
   subscribeTimerTick,
 } from './timerStore'
+import { fmtFlowTime, fmtTime } from './time'
 
 describe('timerStore', () => {
   it('updates timer tick snapshot and notifies subscribers', () => {
@@ -45,6 +46,87 @@ describe('timerStore', () => {
       progress: 0.997,
     })
     expect(listener).toHaveBeenCalledTimes(2)
+  })
+
+  it('publishes a second-resolution pomodoro snapshot for a given target end', () => {
+    // The ticker wakes 4x/second; useTimer snaps the published value to the
+    // second boundary so identical pictures do not re-render subscribers.
+    // This locks that contract at the source of the rounding.
+    const total = 1_500_000
+    // Wall-clock offset into the current displayed second. The countdown is
+    // anchored to a fixed target end, so `offset` advances the way the 250ms
+    // ticker does.
+    const remainingAt = (offset: number) => {
+      const remaining = 1_204_000 - offset
+      const published = Math.ceil(remaining / 1000) * 1000
+      return {
+        remainingMs: published,
+        time: fmtTime(published),
+        progress: total > 0 ? published / total : 0,
+      }
+    }
+
+    const listener = vi.fn()
+    const unsubscribe = subscribeTimerTick(listener)
+
+    // Four wakeups inside the same displayed second collapse to one distinct
+    // picture, so the store notifies exactly once.
+    const first = remainingAt(500)
+    setTimerTickSnapshot(first)
+    expect(first.time).toBe('20:04')
+    expect(listener).toHaveBeenCalledTimes(1)
+
+    for (const offset of [750, 900, 999]) {
+      setTimerTickSnapshot(remainingAt(offset))
+    }
+    expect(listener).toHaveBeenCalledTimes(1)
+
+    // Crossing the second boundary does produce a new picture.
+    const next = remainingAt(1000)
+    expect(next.time).toBe('20:03')
+    setTimerTickSnapshot(next)
+    expect(listener).toHaveBeenCalledTimes(2)
+
+    // Snapping up never exceeds the true remaining time, so a paused timer
+    // cannot display more time than it actually has.
+    expect(first.remainingMs).toBeLessThanOrEqual(1_204_000)
+    expect(first.progress).toBeCloseTo(first.remainingMs / total, 10)
+
+    unsubscribe()
+  })
+
+  it('publishes a second-resolution flow snapshot for a given elapsed time', () => {
+    // useFlowTimer counts up and floors to whole seconds for the same reason.
+    const publish = (elapsed: number) => {
+      const published = Math.floor(elapsed / 1000) * 1000
+      return { elapsedMs: published, time: fmtFlowTime(published) }
+    }
+
+    const listener = vi.fn()
+    const unsubscribe = subscribeFlowTick(listener)
+
+    // 2_061_000..2_061_999 all display as "34:21", so these four wakeups are
+    // one picture.
+    const first = publish(2_061_400)
+    setFlowTickSnapshot(first)
+    expect(first.time).toBe('34:21')
+    expect(listener).toHaveBeenCalledTimes(1)
+
+    for (const ms of [2_061_150, 2_061_000, 2_060_999 + 1]) {
+      setFlowTickSnapshot(publish(ms))
+    }
+    expect(listener).toHaveBeenCalledTimes(1)
+
+    const next = publish(2_060_900)
+    expect(next.time).toBe('34:20')
+    setFlowTickSnapshot(next)
+    expect(listener).toHaveBeenCalledTimes(2)
+
+    // Flooring is what keeps the count-up honest: it never runs ahead of the
+    // true elapsed time.
+    expect(first.elapsedMs).toBeLessThanOrEqual(2_061_400)
+
+    unsubscribe()
   })
 
   it('updates flow tick snapshot and notifies subscribers', () => {

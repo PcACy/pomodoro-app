@@ -1,4 +1,5 @@
 import {
+  memo,
   type ReactNode,
   useCallback,
   useLayoutEffect,
@@ -23,7 +24,7 @@ export interface SlidingSegmentedControlProps<T extends string> {
   fullWidth?: boolean
 }
 
-export function SlidingSegmentedControl<T extends string>({
+export const SlidingSegmentedControl = memo(function SlidingSegmentedControl<T extends string>({
   options,
   value,
   onChange,
@@ -132,5 +133,5 @@ export function SlidingSegmentedControl<T extends string>({
       })}
     </div>
   )
-}
+}) as <T extends string>(props: SlidingSegmentedControlProps<T>) => ReactNode
 

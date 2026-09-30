@@ -221,11 +221,23 @@ export function useTimer({ settings, task, tag, onFocusComplete }: Options) {
       } else {
         remainingMsRef.current = remaining
         const total = totalMsRef.current
-        const timeStr = fmtTime(remaining)
+        // The ticker worker wakes 4x/second, but every consumer of this
+        // snapshot is second-resolution: fmtTime() renders MM:SS, the
+        // mechanical bars quantise to 20/28 discrete segments, and the favicon
+        // buckets progress into 60 steps. Publishing the raw millisecond value
+        // therefore re-rendered all four subscribers (HeroTimerCard,
+        // ActiveTaskCard, Timer, DocumentChrome) four times per second while
+        // three of those renders produced a pixel-identical result.
+        //
+        // Snap to the second boundary — the same ceil() fmtTime() applies — so
+        // the store's equality guard suppresses the redundant publishes. The
+        // full-precision value stays in remainingMsRef above, which is what
+        // pause()/addTime() resume from, so the countdown never drifts.
+        const published = Math.ceil(remaining / 1000) * 1000
         setTimerTickSnapshot({
-          remainingMs: remaining,
-          time: timeStr,
-          progress: total > 0 ? remaining / total : 0,
+          remainingMs: published,
+          time: fmtTime(published),
+          progress: total > 0 ? published / total : 0,
         })
       }
     },

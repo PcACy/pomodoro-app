@@ -189,6 +189,19 @@ export default function App() {
     else timerReset()
   }, [mode, timerReset, handleFlowDiscard])
 
+  // Stable identities for the callbacks handed to BentoCockpit: inline arrows
+  // would be a fresh reference on every App render, defeating the memo()
+  // around BentoCockpit and each card it renders.
+  const addTime = timer.addTime
+  const handleAddTime = useCallback(
+    (mins: number) => {
+      addTime(mins * 60_000)
+    },
+    [addTime],
+  )
+  const handleOpenTodoManager = useCallback(() => setIsTodoModalOpen(true), [])
+  const handleOpenSettingsModal = useCallback(() => setIsSettingsModalOpen(true), [])
+
   const handleModeChange = useCallback(
     (m: TimerMode) => {
       if (m === mode) return
@@ -438,7 +451,7 @@ export default function App() {
             onToggle={handleToggle}
             onSkip={handleSkip}
             onReset={handleReset}
-            onAddTime={(mins) => timer.addTime(mins * 60_000)}
+            onAddTime={handleAddTime}
             todos={todosApi.todos}
             activeTodoId={activeTodoId}
             activeTodo={activeTodo}
@@ -446,12 +459,12 @@ export default function App() {
             onTodoFocus={handleFocusTodo}
             onTodoAdd={todosApi.add}
             onTodoRemove={handleTodoRemove}
-            onOpenTodoManager={() => setIsTodoModalOpen(true)}
+            onOpenTodoManager={handleOpenTodoManager}
             sessions={sessions}
             onImportSettings={handleImportSettings}
             onImportTodos={handleImportTodos}
             settings={settings}
-            onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+            onOpenSettingsModal={handleOpenSettingsModal}
             activeDeck={activeDeck}
             onDeckChange={setActiveDeck}
             isZenMode={isZenMode}

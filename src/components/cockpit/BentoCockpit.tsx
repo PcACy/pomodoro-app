@@ -345,6 +345,37 @@ export const BentoCockpit = memo(
       }
     }, [activeDeck, scrollToScreen])
 
+    // Handlers passed down to the memo()'d cards. Inline arrows would be a new
+    // reference on every cockpit render and re-render each card (and its
+    // stat memo) for nothing.
+    const openTasksDeck = useCallback(() => scrollToScreen(1), [scrollToScreen])
+    const openFocusDeck = useCallback(() => scrollToScreen(0), [scrollToScreen])
+    const openActivityLog = useCallback(() => scrollToScreen(2, 'log'), [scrollToScreen])
+    // The sub-nav chips own their click sound. SystemStatusCard already plays
+    // its own, so it gets the sound-free variant to avoid doubling up.
+    const showStatsLog = useCallback(() => {
+      playMicroClick('toggle')
+      setStatsSubView('log')
+    }, [])
+    const showStatsLogQuiet = useCallback(() => {
+      setStatsSubView('log')
+    }, [])
+    const showStatsOverview = useCallback(() => {
+      playMicroClick('toggle')
+      setStatsSubView('overview')
+    }, [])
+    const focusTodoAndReturn = useCallback(
+      (id: string) => {
+        onTodoFocus(id)
+        // Auto-return: Load cassette and smoothly slide back to Focus Deck!
+        scrollToScreen(0)
+      },
+      [onTodoFocus, scrollToScreen],
+    )
+    const clearAllSessions = useCallback(() => {
+      if (window.confirm(t.settings.confirmClear)) void clearSessions()
+    }, [t])
+
     // Sync activeScreen state on touch swipe / trackpad / snap settle
     const handleScroll = useCallback(() => {
       const scroller = scrollerRef.current
@@ -535,7 +566,7 @@ export const BentoCockpit = memo(
                   sessions={sessions}
                   focusMinutes={settings.phases.focus}
                   onOpenTodoManager={onOpenTodoManager}
-                  onOpenTodoDeck={() => scrollToScreen(1)}
+                  onOpenTodoDeck={openTasksDeck}
                   onToggleDone={onTodoToggle}
                   onFocus={onTodoFocus}
                   className="max-h-full shrink-0"
@@ -585,7 +616,7 @@ export const BentoCockpit = memo(
                   sessions={sessions}
                   focusMinutes={settings.phases.focus}
                   onOpenTodoManager={onOpenTodoManager}
-                  onOpenTodoDeck={() => scrollToScreen(1)}
+                  onOpenTodoDeck={openTasksDeck}
                   onToggleDone={onTodoToggle}
                   onFocus={onTodoFocus}
                 />
@@ -618,11 +649,7 @@ export const BentoCockpit = memo(
                 tags={settings.tags}
                 activeTodoId={activeTodoId}
                 onToggle={onTodoToggle}
-                onFocus={(id) => {
-                  onTodoFocus(id)
-                  // Auto-return: Load cassette and smoothly slide back to Focus Deck!
-                  scrollToScreen(0)
-                }}
+                onFocus={focusTodoAndReturn}
                 onAdd={onTodoAdd}
                 onRemove={onTodoRemove}
                 onOpenTodoManager={onOpenTodoManager}
@@ -631,12 +658,8 @@ export const BentoCockpit = memo(
 
               <SessionLogCard
                 sessions={sessions}
-                onOpenActivityLog={() => {
-                  scrollToScreen(2, 'log')
-                }}
-                onJumpToFocus={() => {
-                  scrollToScreen(0)
-                }}
+                onOpenActivityLog={openActivityLog}
+                onJumpToFocus={openFocusDeck}
                 className="h-full min-h-[300px] lg:max-h-full lg:min-h-0"
               />
             </div>
@@ -652,10 +675,7 @@ export const BentoCockpit = memo(
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
-                  onClick={() => {
-                    playMicroClick('toggle')
-                    setStatsSubView('overview')
-                  }}
+                  onClick={showStatsOverview}
                   className="chip"
                   aria-pressed={statsSubView === 'overview'}
                   title="Telemetry Overview"
@@ -665,10 +685,7 @@ export const BentoCockpit = memo(
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    playMicroClick('toggle')
-                    setStatsSubView('log')
-                  }}
+                  onClick={showStatsLog}
                   className="chip"
                   aria-pressed={statsSubView === 'log'}
                   title="Activity Log & Heatmap"
@@ -722,9 +739,7 @@ export const BentoCockpit = memo(
 
                   <SystemStatusCard
                     sessions={sessions}
-                    onOpenActivityLog={() => {
-                      setStatsSubView('log')
-                    }}
+                    onOpenActivityLog={showStatsLogQuiet}
                     className="h-full min-h-[240px] lg:min-h-0"
                   />
                 </div>
@@ -767,9 +782,7 @@ export const BentoCockpit = memo(
                     <SessionLog
                       sessions={sessions}
                       todos={todos}
-                      onClear={() => {
-                        if (window.confirm(t.settings.confirmClear)) void clearSessions()
-                      }}
+                      onClear={clearAllSessions}
                       onImportSettings={onImportSettings}
                       onImportTodos={onImportTodos}
                       className="min-h-0 flex-1"

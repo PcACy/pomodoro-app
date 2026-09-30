@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { RotateCcw, SkipForward, Plus } from 'lucide-react'
 import type { PhaseId, TimerMode, TimerStatus, TodoItem } from '../../types'
 import { useTranslation } from '../../hooks/useTranslation'
@@ -6,7 +6,7 @@ import { useFlowTimerTick, useTimerTick } from '../../hooks/useTimerTick'
 import { playMicroClick } from '../../lib/sound'
 import { GlyphTimeDisplay } from './GlyphTimeDisplay'
 import { HeroDotGridCanvas } from './HeroDotGridCanvas'
-import { SlidingSegmentedControl } from '../SlidingSegmentedControl'
+import { SlidingSegmentedControl, type SlidingSegmentOption } from '../SlidingSegmentedControl'
 
 interface HeroTimerCardProps {
   phase?: PhaseId
@@ -29,6 +29,13 @@ interface HeroTimerCardProps {
 }
 
 const TOTAL_SEGMENTS = 28
+
+// Module-level so the reference is stable across renders — an inline literal
+// here would defeat the memo() on SlidingSegmentedControl.
+const MODE_OPTIONS: readonly SlidingSegmentOption<'pomodoro' | 'flow'>[] = [
+  { value: 'pomodoro', label: 'Pomo' },
+  { value: 'flow', label: 'Flow' },
+]
 
 export const HeroTimerCard = memo(function HeroTimerCard({
   phase,
@@ -128,6 +135,13 @@ export const HeroTimerCard = memo(function HeroTimerCard({
     onAddTime?.(5)
   }
 
+  const handleModeSelect = useCallback(
+    (m: 'pomodoro' | 'flow') => {
+      onModeChange(m)
+    },
+    [onModeChange],
+  )
+
   const locale = lang === 'de' ? 'de-DE' : 'en-US'
   const { dayName, dateFormatted } = useMemo(
     () => ({
@@ -180,12 +194,9 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         </div>
 
         <SlidingSegmentedControl<'pomodoro' | 'flow'>
-          options={[
-            { value: 'pomodoro', label: 'Pomo' },
-            { value: 'flow', label: 'Flow' },
-          ]}
+          options={MODE_OPTIONS}
           value={mode === 'flow' ? 'flow' : 'pomodoro'}
-          onChange={(newMode) => onModeChange(newMode)}
+          onChange={handleModeSelect}
           size="sm"
           ariaLabel="Timer Mode"
         />

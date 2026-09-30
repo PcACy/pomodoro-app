@@ -195,9 +195,15 @@ export function useFlowTimer({ task, tag, onFinish }: FlowTimerOptions): FlowTim
           const delta = Math.max(0, now - segStartRef.current)
           const total = baseRef.current + delta
           elapsedRef.current = total
-          const timeStr = fmtFlowTime(total)
+          // Second-resolution, like the pomodoro ticker: fmtFlowTime() floors
+          // to whole seconds, so publishing the raw millisecond value made the
+          // store re-render every subscriber four times per second for a
+          // picture that only changes once. elapsedRef keeps full precision
+          // for pause()/finishSession().
+          const published = Math.floor(total / 1000) * 1000
+          const timeStr = fmtFlowTime(published)
           setFlowTickSnapshot({
-            elapsedMs: total,
+            elapsedMs: published,
             time: timeStr,
           })
         }
