@@ -14,6 +14,7 @@ import { BentoCard } from './BentoCard'
 import { Heatmap } from '../Heatmap'
 import { SessionLog } from '../SessionLog'
 import { heatmapData } from '../../lib/stats'
+import { findScrollerWithTravel } from '../../lib/scroll'
 import { clearSessions } from '../../lib/db'
 import { useTranslation } from '../../hooks/useTranslation'
 import { playMicroClick } from '../../lib/sound'
@@ -286,8 +287,19 @@ export const BentoCockpit = memo(
           return
         }
 
-        // Ignore vertical wheel that belongs to a scrollable card in the deck
-        if ((e.target as HTMLElement | null)?.closest('.overflow-y-auto')) return
+        // Vertical wheel belongs to a card only while that card can still travel
+        // this way. Bailing out on every `.overflow-y-auto` ancestor instead
+        // swallowed the gesture over lists that fit their box (the Quick
+        // Settings card on the first page), so scrolling down there did nothing.
+        const from = e.target instanceof HTMLElement ? e.target : null
+        const innerScroller = findScrollerWithTravel(from, scroller, e.deltaY, (el) => {
+          const maxScroll = el.scrollHeight - el.clientHeight
+          if (maxScroll <= 1) return null
+          const overflowY = window.getComputedStyle(el).overflowY
+          if (overflowY !== 'auto' && overflowY !== 'scroll') return null
+          return { maxScroll, scrollTop: el.scrollTop }
+        })
+        if (innerScroller) return
         if (Math.abs(e.deltaY) <= 25) return
 
         const step: 1 | -1 = e.deltaY > 0 ? 1 : -1
