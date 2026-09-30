@@ -301,10 +301,8 @@ export const HeroTimerCard = memo(function HeroTimerCard({
         <button
           type="button"
           onClick={handleToggleClick}
-          className={`btn h-12 min-h-[48px] flex-1 px-6 sm:flex-none sm:w-[220px] ${
-            running
-              ? 'border border-line bg-transparent text-fg'
-              : 'btn-primary'
+          className={`h-12 min-h-[48px] flex-1 px-6 sm:flex-none sm:w-[220px] ${
+            running ? 'btn-secondary' : 'btn-primary'
           }`}
         >
           {running ? t.timer.pause : t.timer.start}
