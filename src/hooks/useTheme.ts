@@ -16,7 +16,7 @@ function surfaceRgb(cardBg: string, mode: ColorMode): string {
     const n = parseInt(m[1], 16)
     return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`
   }
-  return mode === 'dark' ? '11 11 12' : '255 255 255'
+  return mode === 'dark' ? '17 17 17' : '255 255 255'
 }
 
 const applyTheme = (themeId: ThemeId): void => {
@@ -43,18 +43,22 @@ const applyTheme = (themeId: ThemeId): void => {
   root.style.setProperty('--c-surface', surfaceRgb(config.cardBg, config.colorMode))
   root.style.setProperty(
     '--c-raised',
-    config.colorMode === 'dark' ? '22 22 24' : '240 240 242',
+    config.colorMode === 'dark' ? '26 26 26' : '240 240 240',
   )
   root.style.setProperty(
     '--c-line',
-    config.colorMode === 'dark' ? '42 42 46' : '214 214 218',
+    config.colorMode === 'dark' ? '51 51 51' : '204 204 204',
   )
   root.style.setProperty(
     '--c-track',
-    config.colorMode === 'dark' ? '26 26 28' : '232 232 235',
+    config.colorMode === 'dark' ? '26 26 26' : '240 240 240',
   )
   root.style.setProperty('--c-fg', config.textPrimaryRgb)
   root.style.setProperty('--c-muted', config.textMutedRgb)
+  root.style.setProperty(
+    '--c-disabled',
+    config.colorMode === 'dark' ? '102 102 102' : '153 153 153',
+  )
   root.style.setProperty('--accent-strong', config.accentRgb)
 
   // Dynamically synchronize OS status bar & browser chrome theme-color
